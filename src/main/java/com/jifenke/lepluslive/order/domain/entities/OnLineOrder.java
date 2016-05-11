@@ -1,5 +1,6 @@
 package com.jifenke.lepluslive.order.domain.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.Address.domain.entities.Address;
@@ -35,17 +36,18 @@ public class OnLineOrder {
   private List<OrderDetail> orderDetails = new ArrayList<OrderDetail>();
 
 
-  private Long totalPrice;  //包括邮费
+  private Long totalPrice = 0L;  //包括邮费
 
-  private Long totalScore;
+  private Long totalScore = 0L;
 
-  private Long truePrice;  //不包括积分抵扣
+  private Long truePrice = 0L;  //不包括积分抵扣
 
-  private Long trueScore;
+  private Long trueScore = 0L;
 
-  private Long freightPrice;     //运费
+  private Long freightPrice = 0L;     //运费
 
   @ManyToOne
+  @JsonIgnore
   private LeJiaUser leJiaUser;
 
   private Date createDate = new Date();
