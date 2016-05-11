@@ -37,7 +37,7 @@ public class Address {
 
   private String county;
 
-  private Integer state = 0;  //1=默认地址  0=非默认
+  private Integer state = 0;  //1=默认地址  0=非默认  2=已失效，前端不展示
 
   public Integer getState() {
     return state;

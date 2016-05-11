@@ -193,7 +193,7 @@ public class WeixinOrderController {
   LejiaResult getCurrentUserAllOrder(HttpServletRequest request) {
     List<OnLineOrder>
         onLineOrders =
-        orderService.getCurrentUserOrders(weiXinService.getCurrentWeiXinUser(request));
+        orderService.getCurrentUserOrders(weiXinService.getCurrentWeiXinUser(request).getLeJiaUser());
     return LejiaResult.ok(onLineOrders);
   }
 

@@ -123,6 +123,20 @@ public class SwaggerConfig {
         .apiInfo(orderApiInfo());
   }
 
+  @Bean
+  public Docket scoreApi() {
+    return new Docket(DocumentationType.SWAGGER_2)
+        .groupName("积分和红包")
+        .genericModelSubstitutes(DeferredResult.class)
+        .useDefaultResponseMessages(false)
+        .forCodeGeneration(true)
+        .pathMapping("/")
+        .select()
+        .paths(or(regex("/score/.*")))
+        .build()
+        .apiInfo(scoreApiInfo());
+  }
+
 
     private ApiInfo userApiInfo() {
         ApiInfo apiInfo = new ApiInfo("用户相关操作",//大标题
@@ -201,6 +215,18 @@ public class SwaggerConfig {
   }
   private ApiInfo orderApiInfo() {
     ApiInfo apiInfo = new ApiInfo("订单管理",//大标题
+                                  "EHR Platform's REST API, all the applications could access the Object model data via JSON.",//小标题
+                                  "0.1",//版本
+                                  "NO terms of service",
+                                  "zhangwenit@126.com",//作者
+                                  "The Apache License, Version 2.0",//链接显示文字
+                                  "http://www.apache.org/licenses/LICENSE-2.0.html"//网站链接
+    );
+
+    return apiInfo;
+  }
+  private ApiInfo scoreApiInfo() {
+    ApiInfo apiInfo = new ApiInfo("积分和红包管理",//大标题
                                   "EHR Platform's REST API, all the applications could access the Object model data via JSON.",//小标题
                                   "0.1",//版本
                                   "NO terms of service",

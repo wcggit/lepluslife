@@ -1,5 +1,7 @@
 package com.jifenke.lepluslive.score.domain.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.Date;
 
 import javax.persistence.Entity;
@@ -22,6 +24,7 @@ public class ScoreADetail {
   private Long id;
 
   @ManyToOne
+  @JsonIgnore
   private ScoreA scoreA;
 
   private Long number;

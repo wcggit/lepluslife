@@ -64,7 +64,7 @@ public class AddressService {
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public List<Address> findAllAddressByLeJiaUser(LeJiaUser leJiaUser) {
-    return addressRepository.findAllAddressByLeJiaUser(leJiaUser);
+    return addressRepository.findAllAddressByLeJiaUserAndStateNot(leJiaUser,2);
   }
 
   /**
@@ -117,4 +117,24 @@ public class AddressService {
     addressRepository.save(newAddress);
     return LejiaResult.build(200, "ok");
   }
+
+  /**
+   * 删除收货地址
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  public LejiaResult deleteAddress(Long id) {
+    Address address = null;
+    if (id != null) {
+      address = addressRepository.findOne(id);
+      if (address == null) {
+        return LejiaResult.build(301, "未找到收货地址记录");
+      }
+      address.setState(2);
+      addressRepository.save(address);
+      return LejiaResult.build(200, "ok");
+    } else {
+      return LejiaResult.build(301, "未找到收货地址记录");
+    }
+  }
+
 }

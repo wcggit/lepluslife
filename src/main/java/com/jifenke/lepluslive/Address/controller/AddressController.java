@@ -82,4 +82,14 @@ public class AddressController {
 
     return addressService.changeState(oldId, newId);
   }
+
+  @ApiOperation(value = "删除收货地址")
+  @RequestMapping(value = "/delAddress", method = RequestMethod.POST)
+  public
+  @ResponseBody
+  LejiaResult delAddress(
+      @ApiParam(value = "收货地址id") @RequestParam(required = false) Long id) {
+    //在订单表有外键，不能删除可以隐藏
+    return addressService.deleteAddress(id);
+  }
 }

@@ -17,5 +17,5 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
 
   Address findByLeJiaUserAndState(LeJiaUser leJiaUser, Integer state);
 
-  List<Address> findAllAddressByLeJiaUser(LeJiaUser leJiaUser);
+  List<Address> findAllAddressByLeJiaUserAndStateNot(LeJiaUser leJiaUser,Integer state);
 }

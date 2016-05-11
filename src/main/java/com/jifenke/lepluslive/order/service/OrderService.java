@@ -155,12 +155,14 @@ public class OrderService {
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public void paySuccess(String orderSid) {
     OnLineOrder onLineOrder = orderRepository.findByOrderSid(orderSid);
+    System.out.println(onLineOrder.getState() + "之前");
     if (onLineOrder.getState() == 0) {
+      onLineOrder.setState(1);
       scoreAService.paySuccess(onLineOrder.getLeJiaUser()
           , onLineOrder.getTruePrice(), onLineOrder.getOrderSid());
       scoreBService.paySuccess(onLineOrder.getLeJiaUser(), onLineOrder.getTrueScore(),
                                onLineOrder.getOrderSid());
-      onLineOrder.setState(1);
+      System.out.println(onLineOrder.getState() + "之后");
       orderRepository.save(onLineOrder);
     }
 
@@ -168,11 +170,11 @@ public class OrderService {
   }
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
-  public List<OnLineOrder> getCurrentUserOrders(WeiXinUser weiXinUser) {
+  public List<OnLineOrder> getCurrentUserOrders(LeJiaUser leJiaUser) {
     List<Integer> states = new ArrayList<>();
     states.add(4);
     return orderRepository
-        .findAllByLeJiaUserAndStateNotInOrderByCreateDateDesc(weiXinUser.getLeJiaUser(), states);
+        .findAllByLeJiaUserAndStateNotInOrderByCreateDateDesc(leJiaUser, states);
   }
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)

@@ -64,6 +64,21 @@ public class OrderController {
   @Inject
   private ExpressInfoService expressInfoService;
 
+  @ApiOperation("获取用户所有的订单")
+  @RequestMapping(value = "/orderList", method = RequestMethod.POST)
+  public
+  @ResponseBody
+  LejiaResult orderList(@RequestParam(required = false) String token) {
+    LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);
+    if (leJiaUser == null) {
+      return LejiaResult.build(206, "未找到用户");
+    }
+    List<OnLineOrder>
+        onLineOrders =
+        orderService.getCurrentUserOrders(leJiaUser);
+    return LejiaResult.build(200, "ok", onLineOrders);
+  }
+
   @ApiOperation("购物车生成订单信息")
   @RequestMapping(value = "/createCartOrder", method = RequestMethod.POST)
   public
