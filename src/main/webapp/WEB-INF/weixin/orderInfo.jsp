@@ -174,9 +174,16 @@
     <ul class="mui-table-view list list-detail">
         <li class="mui-table-view-cell">
             <span class="trade-font-grey">消费返利：</span>
-            <span class="mui-pull-right">获得乐+生活 ￥<font><fmt:formatNumber type="number"
-                                                                         value="${payBackScoreA/100}"
-                                                                         maxFractionDigits="2"/></font>红包</span>
+            <span class="mui-pull-right">获得乐+生活 ￥<font>
+                <c:if test="${payBackScoreA == null}">
+                    0
+                </c:if>
+                <c:if test="${payBackScoreA != null}">
+                    <fmt:formatNumber type="number"
+                                      value="${payBackScoreA/100}"
+                                      maxFractionDigits="2"/>
+                </c:if>
+            </font>红包</span>
         </li>
     </ul>
     <!--订单明细-->
@@ -205,7 +212,8 @@
             <span class="mui-tab-label" onclick="goPayPage()">重新支付</span>
         </c:if>
         <c:if test="${order.state == 3}">
-                <span style="width: 100vw;height: 100%;text-align: center;color: #D62C2C;background-color: #efeff4;" onclick="goDeliveryPage()">查看物流</span>
+            <span style="width: 100vw;height: 100%;text-align: center;color: #D62C2C;background-color: #efeff4;"
+                  onclick="goDeliveryPage()">查看物流</span>
         </c:if>
         <c:if test="${order.state == 1}">
         </c:if>
@@ -228,7 +236,7 @@
                    url: "/weixin/order/orderCancle",
                    data: {orderId:${order.id}},
                    success: function (data) {
-                    //   location.reload(true);
+                       //   location.reload(true);
                        location.href = "/weixin/orderDetail";
                    }
                });
