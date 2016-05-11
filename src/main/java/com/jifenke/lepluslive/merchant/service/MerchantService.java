@@ -86,7 +86,7 @@ public class MerchantService {
       merchantDto.setRebate(Integer.parseInt(o[7].toString()));
       merchantDto.setLng(Double.parseDouble(o[8].toString()));
       merchantDto.setLat(Double.parseDouble(o[9].toString()));
-      merchantDto.setDistance(o[10].toString());
+      merchantDto.setDistance(Double.valueOf(o[10].toString()));
       dtoList.add(merchantDto);
     }
     return dtoList;
@@ -140,7 +140,7 @@ public class MerchantService {
       merchantDto.setRebate(Integer.parseInt(o[7].toString()));
       merchantDto.setLng(Double.parseDouble(o[8].toString()));
       merchantDto.setLat(Double.parseDouble(o[9].toString()));
-      merchantDto.setDistance(o[10] != null ? o[10].toString() : null);
+      merchantDto.setDistance(o[10] != null ? Double.valueOf(o[10].toString()) : null);
       dtoList.add(merchantDto);
     }
     return dtoList;

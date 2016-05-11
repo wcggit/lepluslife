@@ -21,7 +21,8 @@
     <!--标准mui.css-->
     <link rel="stylesheet" href="${resourceUrl}/css/mui.min.css">
     <!--App自定义的css-->
-    <link rel="stylesheet" type="text/css" href="${resourceUrl}/css/orderInfo.css"/>
+    <%--<link rel="stylesheet" type="text/css" href="${resourceUrl}/css/orderInfo.css"/>--%>
+    <link rel="stylesheet" type="text/css" href="${resourceUrl}/css/orderDetail.css"/>
     <script src="${resourceUrl}/js/jquery-2.0.3.min.js"></script>
 </head>
 
@@ -100,7 +101,7 @@
     $('.mui-content .mui-bar-tab .mui-tab-item').each(function (i) {
         $('.mui-content .mui-bar-tab .mui-tab-item').eq(i).bind('tap', function () {
             var index = $('.mui-content .mui-bar-tab .mui-tab-item').index(this);
-            $("#tabbar-with-detail1").css({'display': 'none'});
+            $("#tabbar-with-detail1").css({'display': 'block'});
             $("#tabbar-with-detail2").find(".empty").css({'display': 'none'});
             $("#tabbar-with-detail3").find(".empty").css({'display': 'none'});
             $("#tabbar-with-detail4").find(".empty").css({'display': 'none'});
@@ -113,7 +114,7 @@
                     $("#tabbar-with-detail4").css({'display': 'none'});
                     $("#tabbar-with-detail5").css({'display': 'none'});
                 } else {
-                    $("#tabbar-with-detail1").css({'display': 'none'});
+                    $("#tabbar-with-detail1").css({'display': 'block'});
                     $("#tabbar-with-detail2").find(".empty").css({'display': 'none'});
                     $("#tabbar-with-detail3").find(".empty").css({'display': 'none'});
                     $("#tabbar-with-detail4").find(".empty").css({'display': 'none'});
@@ -181,6 +182,7 @@
                     $("#tabbar-with-detail2").css({'display': 'none'});
                 } else {
                     $("#tabbar-with-detail1").css({'display': 'none'});
+                    $("#tabbar-with-detail5").css({'display': 'block'});
                     $("#tabbar-with-detail5").find(".empty").css({'display': 'block'});
                     $("#tabbar-with-detail3").css({'display': 'none'});
                     $("#tabbar-with-detail4").css({'display': 'none'});
@@ -290,7 +292,9 @@
                        ;
                        //判断是否为空,空的话让空页面显示
                    } else {
-                       console.log('数据为空！')
+                       $("#tabbar-with-detail1").css({'display': 'block'});
+                       $("#tabbar-with-detail1").find(".empty").css({'display': 'block'});
+                       //console.log('数据为空！')
                    }
                }
            });
