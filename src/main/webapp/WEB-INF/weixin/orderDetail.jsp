@@ -222,7 +222,7 @@
                                '<p class="trade-font-black total-money"><span class="list-ttl">合计：￥<font>'
                                + orders[i].totalPrice/100 + '</font></span></p>';
                                divStr +=
-                               '<p class="mui-text-right"><button type="button" class="mui-btn mui-btn-outlined" onclick="orderCancle('+orders[i].id+')">取消订单</button><button type="button" class="mui-btn mui-btn-danger mui-btn-outlined" onclick="goPayPage('+orders[i].id+')">立即支付</button></p></div>';
+                               '<p class="mui-text-right"><button type="button" class="mui-btn mui-btn-outlined" onclick="orderCancle('+orders[i].id+',event)">取消订单</button><button type="button" class="mui-btn mui-btn-danger mui-btn-outlined" onclick="goPayPage('+orders[i].id+',event)">立即支付</button></p></div>';
                                div1.innerHTML += divStr;
                            } else if (orders[i].state == 1) {
                                flag2 = true;
@@ -260,7 +260,7 @@
                                    + orders[i].truePrice/100 + '</font></font>积分抵扣：￥<font>0</font></span></p>'
                                }
                                divStr +=
-                               '<p class="mui-text-right"><button type="button" class="mui-btn mui-btn-outlined" onclick="goDeliveryPage('+orders[i].id+')">查看物流</button><button type="button" class="mui-btn mui-btn-danger mui-btn-outlined" onclick="orderConfirm('+orders[i].id+')">确认收货</button></p></div>';
+                               '<p class="mui-text-right"><button type="button" class="mui-btn mui-btn-outlined" onclick="goDeliveryPage('+orders[i].id+',event)">查看物流</button><button type="button" class="mui-btn mui-btn-danger mui-btn-outlined" onclick="orderConfirm('+orders[i].id+',event)">确认收货</button></p></div>';
                                div3.innerHTML += divStr;
 
                            } else if (orders[i].state == 3) {
@@ -317,8 +317,14 @@
         return divStr;
     }
 
-    function orderCancle(id){
-        event.stopPropagation();
+    function orderCancle(id,e){
+        var ev = e || window.event;
+        if(ev.stopPropagation){
+            ev.stopPropagation();
+        }
+        else if(window.event) {
+            window.event.cancelBubble = true;//兼容IE
+        }
         $.ajax({
                    type: "post",
                    url: "/weixin/order/orderCancle",
@@ -328,12 +334,25 @@
                    }});
     }
 
-    function goPayPage(id){
+    function goPayPage(id,e){
+        var ev = e || window.event;
+        if(ev.stopPropagation){
+            ev.stopPropagation();
+        }
+        else if(window.event) {
+            window.event.cancelBubble = true;//兼容IE
+        }
         location.href='/weixin/order/'+id;
     }
 
-    function goDeliveryPage(id){//查看物流信息
-        event.stopPropagation();
+    function goDeliveryPage(id,e){//查看物流信息
+        var ev = e || window.event;
+        if(ev.stopPropagation){
+            ev.stopPropagation();
+        }
+        else if(window.event) {
+            window.event.cancelBubble = true;//兼容IE
+        }
         if(id != null){
             location.href = "/order/showExpress/" + id;
         }
@@ -345,8 +364,14 @@
         }
     }
 
-    function orderConfirm(id){
-        event.stopPropagation();
+    function orderConfirm(id,e){
+        var ev = e || window.event;
+        if(ev.stopPropagation){
+            ev.stopPropagation();
+        }
+        else if(window.event) {
+            window.event.cancelBubble = true;//兼容IE
+        }
         $.ajax({
                    type: "post",
                    url: "/weixin/order/orderConfirm",

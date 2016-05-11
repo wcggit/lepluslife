@@ -41,18 +41,28 @@ public class ScoreBService {
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public void paySuccess(LeJiaUser leJiaUser, Long totalScore,String orderSid) {
     ScoreB scoreB = findScoreBByWeiXinUser(leJiaUser);
-    if (scoreB.getScore() - totalScore > 0) {
-      scoreB.setScore(scoreB.getScore() - totalScore);
-      ScoreBDetail scoreBDetail = new ScoreBDetail();
-      scoreBDetail.setOperate("乐+商城消费");
-      scoreBDetail.setOrigin(1);
-      scoreBDetail.setOrderSid(orderSid);
-      scoreBDetail.setScoreB(scoreB);
-      scoreBDetail.setNumber(-totalScore);
-      scoreBDetailRepository.save(scoreBDetail);
-      scoreBRepository.save(scoreB);
-    }else{
-      throw new RuntimeException("积分不足");
+    if(totalScore != 0){
+      if (scoreB.getScore() - totalScore > 0) {
+        scoreB.setScore(scoreB.getScore() - totalScore);
+        ScoreBDetail scoreBDetail = new ScoreBDetail();
+        scoreBDetail.setOperate("乐+商城消费");
+        scoreBDetail.setOrigin(1);
+        scoreBDetail.setOrderSid(orderSid);
+        scoreBDetail.setScoreB(scoreB);
+        scoreBDetail.setNumber(-totalScore);
+        scoreBDetailRepository.save(scoreBDetail);
+        scoreBRepository.save(scoreB);
+      }else{
+        throw new RuntimeException("积分不足");
+      }
     }
+  }
+
+  /**
+   *根据scoreB查询积分明细列表
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+  public List<ScoreBDetail> findAllScoreBDetailByScoreB(ScoreB scoreB) {
+    return scoreBDetailRepository.findAllByScoreB(scoreB);
   }
 }

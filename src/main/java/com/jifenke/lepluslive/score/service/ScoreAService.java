@@ -58,4 +58,12 @@ public class ScoreAService {
   public ScoreADetail findScoreADetailByOrderSid(String orderSid) {
     return scoreADetailRepository.findOneByOrderSid(orderSid);
   }
+
+  /**
+   *根据scoreA查询红包明细列表
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+  public List<ScoreADetail> findAllScoreADetailByScoreA(ScoreA scoreA) {
+    return scoreADetailRepository.findAllByScoreA(scoreA);
+  }
 }

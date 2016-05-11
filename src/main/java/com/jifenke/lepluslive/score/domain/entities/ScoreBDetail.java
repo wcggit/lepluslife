@@ -1,5 +1,7 @@
 package com.jifenke.lepluslive.score.domain.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.Date;
 
 import javax.persistence.Entity;
@@ -27,6 +29,7 @@ public class ScoreBDetail {
   private Date dateCreated = new Date();
 
   @ManyToOne
+  @JsonIgnore
   private ScoreB scoreB;
 
 
