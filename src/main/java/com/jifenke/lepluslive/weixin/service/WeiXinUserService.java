@@ -130,16 +130,20 @@ public class WeiXinUserService {
   }
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public void openHongBao(WeiXinUser weiXinUser) {
-    ScoreA scoreA = scoreARepository.findByLeJiaUser(weiXinUser.getLeJiaUser());
-    ScoreB scoreB = scoreBRepository.findByLeJiaUser(weiXinUser.getLeJiaUser());
-    scoreA.setScore(1000L);
-    scoreA.setTotalScore(1000L);
+  public void openHongBao(WeiXinUser weiXinUser,String phoneNumber) {
+    LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
+    leJiaUser.setPhoneNumber(phoneNumber);
+    leJiaUserRepository.save(leJiaUser);
+
+    ScoreA scoreA = scoreARepository.findByLeJiaUser(leJiaUser);
+    ScoreB scoreB = scoreBRepository.findByLeJiaUser(leJiaUser);
+    scoreA.setScore(scoreA.getScore() + 1000);
+    scoreA.setTotalScore(scoreA.getTotalScore() + 1000);
     Date date = new Date();
     scoreA.setLastUpdateDate(date);
     scoreB.setLastUpdateDate(date);
-    scoreB.setScore(100L);
-    scoreB.setTotalScore(100L);
+    scoreB.setScore(scoreB.getScore() + 100);
+    scoreB.setTotalScore(scoreB.getTotalScore() + 100);
     scoreBRepository.save(scoreB);
     scoreARepository.save(scoreA);
 

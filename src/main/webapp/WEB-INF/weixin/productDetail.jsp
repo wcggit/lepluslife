@@ -247,12 +247,13 @@
             $(".num1").val(50);
             return;
         }
-        $("#buy").unbind("tap");
         var focusClass = $(".focusClass");
         if(focusClass.find(".id-hidden").val() == null){
             alert("请先选择规格数量");
             return;
         }
+
+        $("#buy").unbind("tap");
         var totalPrice = $("#price-hidden").val() * $(".num1").val();
         $("#totalPrice").val(parseInt(totalPrice * 100));
         var totalScore = $("#score-hidden").val() * $(".num1").val();
@@ -298,7 +299,6 @@
                        }
                    }
                });
-
     });
 
     function goCartPage() {

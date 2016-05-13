@@ -96,7 +96,7 @@ public class LeJiaUserService {
 
     return new LeJiaUserDto(scoreA.getScore(), scoreB.getScore(),
                             leJiaUser.getOneBarCodeUrl(), leJiaUser.getUserSid(),
-                            leJiaUser.getHeadImageUrl());
+                            leJiaUser.getHeadImageUrl(),leJiaUser.getPhoneNumber());
   }
 
   /**

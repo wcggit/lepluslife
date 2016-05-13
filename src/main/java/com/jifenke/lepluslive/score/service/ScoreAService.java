@@ -30,17 +30,17 @@ public class ScoreAService {
 
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
-  public ScoreA findScoreAByWeiXinUser(LeJiaUser leJiaUser) {
+  public ScoreA findScoreAByLeJiaUser(LeJiaUser leJiaUser) {
     return scoreARepository.findByLeJiaUser(leJiaUser);
   }
 
-  public List<ScoreADetail> findAllScoreADetail(WeiXinUser weiXinUser) {
-    return scoreADetailRepository.findAllByScoreA(findScoreAByWeiXinUser(weiXinUser.getLeJiaUser()));
+  public List<ScoreADetail> findAllScoreADetail(ScoreA scoreA) {
+    return scoreADetailRepository.findAllByScoreAOrderByDateCreatedDesc(scoreA);
   }
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public void paySuccess(LeJiaUser leJiaUser, Long totalPrice,String orderSid) {
-    ScoreA scoreA = findScoreAByWeiXinUser(leJiaUser);
+    ScoreA scoreA = findScoreAByLeJiaUser(leJiaUser);
     Long payBackScore = (long) Math.ceil((double) (totalPrice * 12) / 100);
     scoreA.setScore(scoreA.getScore() + payBackScore);
     scoreA.setTotalScore(scoreA.getTotalScore() + payBackScore);
@@ -64,6 +64,6 @@ public class ScoreAService {
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public List<ScoreADetail> findAllScoreADetailByScoreA(ScoreA scoreA) {
-    return scoreADetailRepository.findAllByScoreA(scoreA);
+    return scoreADetailRepository.findAllByScoreAOrderByDateCreatedDesc(scoreA);
   }
 }

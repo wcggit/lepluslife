@@ -21,32 +21,29 @@
     <!--不显示拨号链接-->
     <title>page1</title>
     <link rel="stylesheet" type="text/css" href="${resourceUrl}/css/hongbao_open.css"/>
-    <script type="text/javascript">
-        function goIndex() {
-            location.href = "${wxRootUrl}/weixin/shop";
-        }
-        function goUser() {
-            location.href = "${wxRootUrl}/weixin/user";
-        }
-    </script>
 </head>
 <body>
-<div id="page">
-    <div class="page_bg"></div>
-    <div class="page_content">
-        <div class="content_topPic"></div>
-        <p class="content_ttl">乐+生活的利是</p>
 
-        <p class="content_from">恭喜发财，大吉大利</p>
-
-        <div class="content_top"></div>
-        <div class="content_center">
-            <p class="center_money">红包：<font>10</font>元</p>
-
-            <p class="center_jf">乐+积分：<font>100</font></p>
+<div class="content">
+    <div class="topbg"></div>
+    <div class="middlediv">
+        <div class="redpacket">
+            <div class="lefticon"></div>
+            <div class="redright">
+                <p class="num"><span>￥</span>10</p>
+                <p class="word">红包</p>
+            </div>
         </div>
-        <div class="content_bottom"></div>
-        <p class="content_buy" onclick="goIndex();">立即消费</p>
+        <div class="goldbox">
+            <div class="lefticon"></div>
+            <div class="goldright">
+                <p class="num"><span>￥</span>100</p>
+                <p class="word">乐+积分</p>
+            </div>
+        </div>
+        <div class="atonce">
+            <a href="${wxRootUrl}/weixin/shop">立即消费</a>
+        </div>
     </div>
 </div>
 </body>

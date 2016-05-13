@@ -130,7 +130,7 @@ public class WeixinPayController {
   @RequestMapping(value = "/paySuccess/{truePrice}")
   public ModelAndView goPaySuccessPage(@PathVariable Long truePrice, Model model,HttpServletRequest request) {
     WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
-    model.addAttribute("totalScore", scoreAService.findScoreAByWeiXinUser(weiXinUser.getLeJiaUser()).getTotalScore());
+    model.addAttribute("totalScore", scoreAService.findScoreAByLeJiaUser(weiXinUser.getLeJiaUser()).getTotalScore());
     model.addAttribute("payBackScore", (long) Math.ceil((double) (truePrice * 12) / 100));
     model.addAttribute("productTypes",productService.findAllProductType());
     model.addAttribute("truePrice",truePrice);

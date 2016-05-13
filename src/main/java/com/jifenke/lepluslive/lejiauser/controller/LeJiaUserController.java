@@ -9,7 +9,6 @@ import com.jifenke.lepluslive.lejiauser.service.LeJiaUserService;
 import com.jifenke.lepluslive.lejiauser.service.SmsService;
 import com.jifenke.lepluslive.lejiauser.service.ValidateCodeService;
 import com.jifenke.lepluslive.merchant.controller.dto.MerchantDto;
-import com.jifenke.lepluslive.merchant.domain.entities.Merchant;
 import com.jifenke.lepluslive.merchant.service.MerchantService;
 
 import com.jifenke.lepluslive.score.domain.entities.ScoreA;
@@ -72,7 +71,7 @@ public class LeJiaUserController {
   @ResponseBody
   LeJiaUserDto getLeJiaUser(@RequestParam(required = false) String token) {
     LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);
-    ScoreA scoreA = scoreAService.findScoreAByWeiXinUser(leJiaUser);
+    ScoreA scoreA = scoreAService.findScoreAByLeJiaUser(leJiaUser);
     ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(leJiaUser);
 
     return new LeJiaUserDto(scoreA.getScore(), scoreB.getScore(), leJiaUser.getOneBarCodeUrl());
@@ -90,7 +89,7 @@ public class LeJiaUserController {
     LeJiaUser leJiaUser = leJiaUserService.findUserByPhoneNumber(phoneNumber);  //是否已注册
     if (type == 1) {
       if (leJiaUser != null) {
-        return LejiaResult.build(201, "该手机号已注册");
+        return LejiaResult.build(201, "该手机号已注册,请直接登录");
       }
     } else {
       if (leJiaUser == null) {
@@ -142,16 +141,20 @@ public class LeJiaUserController {
                      @RequestParam(required = false) String pwd,
                      @ApiParam(value = "1=注册和发送验证码   2=验证旧密码") @RequestParam(required = false) Integer type) {
     LeJiaUser leJiaUser = leJiaUserService.findUserByPhoneNumber(phoneNumber);
-    if (type == 1) {
-      leJiaUserService.setPwd(leJiaUser, pwd);
-    } else {
-      if (!leJiaUser.getPwd().equals(MD5Util.MD5Encode(oldPwd, null))) {
-        return LejiaResult.build(204, "密码错误");
+    if (leJiaUser != null) {
+      if (type == 1) {
+        leJiaUserService.setPwd(leJiaUser, pwd);
+      } else {
+        if (!leJiaUser.getPwd().equals(MD5Util.MD5Encode(oldPwd, null))) {
+          return LejiaResult.build(204, "密码错误");
+        }
+        leJiaUserService.setPwd(leJiaUser, pwd);
       }
-      leJiaUserService.setPwd(leJiaUser, pwd);
+      return LejiaResult.build(200, "设置密码成功");
+    } else {
+      return LejiaResult.build(206, "未找到用户");
     }
 
-    return LejiaResult.build(200, "设置密码成功");
   }
 
   /**
@@ -172,12 +175,12 @@ public class LeJiaUserController {
     if (leJiaUser == null) {
       return LejiaResult.build(204, "密码错误");
     }
-    ScoreA scoreA = scoreAService.findScoreAByWeiXinUser(leJiaUser);
+    ScoreA scoreA = scoreAService.findScoreAByLeJiaUser(leJiaUser);
     ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(leJiaUser);
     return LejiaResult.build(200, "登录成功", new LeJiaUserDto(scoreA.getScore(), scoreB.getScore(),
                                                            leJiaUser.getOneBarCodeUrl(),
                                                            leJiaUser.getUserSid(),
-                                                           leJiaUser.getHeadImageUrl()));
+                                                           leJiaUser.getHeadImageUrl(),leJiaUser.getPhoneNumber()));
   }
 
   @ApiOperation(value = "发送验证码重置密码时验证验证码")
@@ -225,12 +228,12 @@ public class LeJiaUserController {
     if (token != null) {
       LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);
       if (leJiaUser != null) {
-        ScoreA scoreA = scoreAService.findScoreAByWeiXinUser(leJiaUser);
+        ScoreA scoreA = scoreAService.findScoreAByLeJiaUser(leJiaUser);
         ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(leJiaUser);
         LeJiaUserDto leJiaUserDto = new LeJiaUserDto(scoreA.getScore(), scoreB.getScore(),
                                                      leJiaUser.getOneBarCodeUrl(),
                                                      leJiaUser.getUserSid(),
-                                                     leJiaUser.getHeadImageUrl());
+                                                     leJiaUser.getHeadImageUrl(),leJiaUser.getPhoneNumber());
         list.add(leJiaUserDto);
       }
     }

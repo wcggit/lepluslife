@@ -5,6 +5,7 @@ import com.jifenke.lepluslive.global.util.CookieUtils;
 import com.jifenke.lepluslive.global.util.JsonUtils;
 import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
+import com.jifenke.lepluslive.lejiauser.service.LeJiaUserService;
 import com.jifenke.lepluslive.product.controller.dto.ProductDto;
 import com.jifenke.lepluslive.product.domain.entities.Product;
 import com.jifenke.lepluslive.product.domain.entities.ProductDetail;
@@ -72,6 +73,9 @@ public class WeixinController {
 
   @Inject
   private ScrollPictureService scrollPictureService;
+
+  @Inject
+  private LeJiaUserService leJiaUserService;
 
 
   @RequestMapping("/shop")
@@ -170,11 +174,13 @@ public class WeixinController {
   }
 
   @RequestMapping("/hongbao/open")
-  public ModelAndView goHongbaoOpenPage(HttpServletRequest request, HttpServletResponse response,
+  public ModelAndView goHongbaoOpenPage(@RequestParam String phoneNumber,
+                                        HttpServletRequest request, HttpServletResponse response,
                                         Model model) {
     WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
-    if (weiXinUser.getHongBaoState() == 0) {
-      weiXinUserService.openHongBao(weiXinUser);
+    LeJiaUser leJiaUser = leJiaUserService.findUserByPhoneNumber(phoneNumber);  //是否已注册
+    if (leJiaUser == null && weiXinUser.getHongBaoState() == 0) {
+      weiXinUserService.openHongBao(weiXinUser,phoneNumber);
     }
 
     return MvUtil.go("/weixin/hongbaoOpen");
@@ -189,7 +195,7 @@ public class WeixinController {
     if (weiXinUser.getLeJiaUser().getOneBarCodeUrl() == null) {
       weiXinUser = weiXinUserService.saveBarCodeForUser(weiXinUser);
     }
-    model.addAttribute("scoreA", scoreAService.findScoreAByWeiXinUser(weiXinUser.getLeJiaUser()));
+    model.addAttribute("scoreA", scoreAService.findScoreAByLeJiaUser(weiXinUser.getLeJiaUser()));
     model.addAttribute("user", weiXinUser);
     model.addAttribute("scoreB", scoreBService.findScoreBByWeiXinUser(weiXinUser.getLeJiaUser()));
     return MvUtil.go("/weixin/user");
