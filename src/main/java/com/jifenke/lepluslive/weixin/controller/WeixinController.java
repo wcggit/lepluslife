@@ -138,7 +138,7 @@ public class WeixinController {
       WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByOpenId(openid);
       String accessToken = map.get("access_token").toString();
       //2种情况 当用户不存在时,当上次登录距离此次已经经过了3天
-      if (weiXinUser == null || new Date(
+      if (weiXinUser == null || weiXinUser.getState() == 0 || new Date(
           weiXinUser.getLastUserInfoDate().getTime() + 3 * 24 * 60 * 60 * 1000)
           .before(new Date())) {
         Map<String, Object> userDetail = weiXinService.getDetailWeiXinUser(accessToken, openid);
@@ -180,7 +180,7 @@ public class WeixinController {
     WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
     LeJiaUser leJiaUser = leJiaUserService.findUserByPhoneNumber(phoneNumber);  //是否已注册
     if (leJiaUser == null && weiXinUser.getHongBaoState() == 0) {
-      weiXinUserService.openHongBao(weiXinUser,phoneNumber);
+      weiXinUserService.openHongBao(weiXinUser, phoneNumber);
     }
 
     return MvUtil.go("/weixin/hongbaoOpen");

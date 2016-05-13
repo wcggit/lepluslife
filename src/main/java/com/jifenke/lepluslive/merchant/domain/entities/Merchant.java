@@ -1,24 +1,40 @@
 package com.jifenke.lepluslive.merchant.domain.entities;
 
+import com.jifenke.lepluslive.global.util.MvUtil;
+
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
-import javax.persistence.*;
 import java.util.List;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 
 /**
  * Created by wcg on 16/3/17.
  */
 @Entity
 @Table(name = "MERCHANT")
-@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Merchant {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private int sid;
+    private Integer sid;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    private MerchantBank merchantBank;
+
+    private String merchantSid = MvUtil.getMerchantSid();
 
     @ManyToOne
     private City city;
@@ -34,7 +50,9 @@ public class Merchant {
 
     private String picture;
 
-    private String phoneNumber;
+    private String phoneNumber; //商户电话
+
+    private Integer partnership; //合作关系
 
     private Integer discount; //折扣
 
@@ -44,18 +62,81 @@ public class Merchant {
 
     private Double lat;
 
+    private String payee;
+
+    private Integer ljCommission;//佣金点 如果为0代表普通商户
+
+    private String merchantPhone; //绑定手机号
+
+    private Integer state = 1;
+
+    private String qrCodePicture; //商户收款码
+
     @ManyToOne
     private Area area;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<MerchantDetail> merchantDetails;
-
-    public List<MerchantDetail> getMerchantDetails() {
-        return merchantDetails;
+    public String getQrCodePicture() {
+        return qrCodePicture;
     }
 
-    public void setMerchantDetails(List<MerchantDetail> merchantDetails) {
-        this.merchantDetails = merchantDetails;
+    public void setQrCodePicture(String qrCodePicture) {
+        this.qrCodePicture = qrCodePicture;
+    }
+
+    public Integer getState() {
+        return state;
+    }
+
+    public void setState(Integer state) {
+        this.state = state;
+    }
+
+    public String getMerchantPhone() {
+        return merchantPhone;
+    }
+
+    public void setMerchantPhone(String merchantPhone) {
+        this.merchantPhone = merchantPhone;
+    }
+
+    public Integer getPartnership() {
+        return partnership;
+    }
+
+    public void setPartnership(Integer partnership) {
+        this.partnership = partnership;
+    }
+
+    public Integer getLjCommission() {
+        return ljCommission;
+    }
+
+    public void setLjCommission(Integer ljCommission) {
+        this.ljCommission = ljCommission;
+    }
+
+    public String getPayee() {
+        return payee;
+    }
+
+    public void setPayee(String payee) {
+        this.payee = payee;
+    }
+
+    public MerchantBank getMerchantBank() {
+        return merchantBank;
+    }
+
+    public void setMerchantBank(MerchantBank merchantBank) {
+        this.merchantBank = merchantBank;
+    }
+
+    public String getMerchantSid() {
+        return merchantSid;
+    }
+
+    public void setMerchantSid(String merchantSid) {
+        this.merchantSid = merchantSid;
     }
 
     public String getThumb() {
@@ -72,6 +153,14 @@ public class Merchant {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public Integer getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(Integer discount) {
+        this.discount = discount;
     }
 
     public Integer getRebate() {
@@ -122,11 +211,11 @@ public class Merchant {
         this.id = id;
     }
 
-    public int getSid() {
+    public Integer getSid() {
         return sid;
     }
 
-    public void setSid(int sid) {
+    public void setSid(Integer sid) {
         this.sid = sid;
     }
 
@@ -162,11 +251,4 @@ public class Merchant {
         this.picture = picture;
     }
 
-    public Integer getDiscount() {
-        return discount;
-    }
-
-    public void setDiscount(Integer discount) {
-        this.discount = discount;
-    }
 }

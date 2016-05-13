@@ -123,14 +123,14 @@ public class WeiXinUserService {
     weiXinUser.setAccessToken(map.get("access_token").toString());
     weiXinUser.setRefreshToken(map.get("refresh_token").toString());
     weiXinUser.setLastUserInfoDate(new Date());
-
+    weiXinUser.setState(1);
     weiXinUserRepository.save(weiXinUser);
 
 
   }
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public void openHongBao(WeiXinUser weiXinUser,String phoneNumber) {
+  public void openHongBao(WeiXinUser weiXinUser, String phoneNumber) {
     LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
     leJiaUser.setPhoneNumber(phoneNumber);
     leJiaUserRepository.save(leJiaUser);

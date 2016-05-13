@@ -66,4 +66,8 @@ public class MvUtil {
         return RandomStringUtils.random(13, "1234567890");
     }
 
+    //生成商户随即号
+    public static String getMerchantSid() {
+        return RandomStringUtils.random(7, "1234567890");
+    }
 }

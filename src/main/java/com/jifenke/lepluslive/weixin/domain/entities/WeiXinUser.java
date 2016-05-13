@@ -51,6 +51,8 @@ public class WeiXinUser {
   Date lastUpdated;
   Date lastUserInfoDate;   //上次从微信服务器抓取用户信息的时间
 
+  private Integer state;
+
   public Integer getHongBaoState() {
     return hongBaoState;
   }
@@ -178,5 +180,13 @@ public class WeiXinUser {
 
   public void setRefreshToken(String refreshToken) {
     this.refreshToken = refreshToken;
+  }
+
+  public Integer getState() {
+    return state;
+  }
+
+  public void setState(Integer state) {
+    this.state = state;
   }
 }
