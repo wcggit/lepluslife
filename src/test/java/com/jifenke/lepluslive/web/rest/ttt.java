@@ -43,8 +43,8 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 
 /**
-* Created by wcg on 16/4/15.
-*/
+ * Created by wcg on 16/4/15.
+ */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = Application.class)
 @WebAppConfiguration
@@ -74,19 +74,13 @@ public class ttt {
   private OrderRepository orderRepository;
 
 
-
   @Test
-  public void tttt(){
-//    List<OrderDetail> all = orderDetailRepository.findAll();
-//    for(OrderDetail orderDetail : all){
-//      OnLineOrder order = orderRepository.findOne(orderDetail.getOrderId());
-//      if(order!=null){
-//        orderDetail.setOnLineOrder(order);
-//        orderDetailRepository.save(orderDetail);
-//      }else {
-//        orderDetailRepository.delete(orderDetail);
-//      }
-//    }
+  public void tttt() {
+    List<WeiXinUser> all = weiXinUserRepository.findAll();
+    for (WeiXinUser weiXinUser : all) {
+      weiXinUser.setState(1);
+      weiXinUserRepository.save(weiXinUser);
+    }
   }
 
 ////  public static void main(String[] args) {
@@ -115,8 +109,6 @@ public class ttt {
 //
 //
 //  }
-
-
 
 
 }

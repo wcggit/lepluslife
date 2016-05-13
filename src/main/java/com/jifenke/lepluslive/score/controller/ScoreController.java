@@ -162,7 +162,7 @@ public class ScoreController {
 
   private List<ScoreDto> formatBDetail(List<ScoreBDetail> bDetails) {
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-    HashMap<String, ArrayList<Object>> map = new HashMap<>();
+    LinkedHashMap<String, ArrayList<Object>> map = new LinkedHashMap<>();
     List<ScoreDto> result = new ArrayList<>();
     for (int i = 0; i < bDetails.size(); i++) {
 

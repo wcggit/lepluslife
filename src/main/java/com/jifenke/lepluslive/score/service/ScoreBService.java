@@ -35,7 +35,7 @@ public class ScoreBService {
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public List<ScoreBDetail> findAllScoreBDetail(ScoreB scoreB) {
-    return scoreBDetailRepository.findAllByScoreB(scoreB);
+    return scoreBDetailRepository.findAllByScoreBOrderByDateCreatedDesc(scoreB);
   }
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
@@ -63,6 +63,6 @@ public class ScoreBService {
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public List<ScoreBDetail> findAllScoreBDetailByScoreB(ScoreB scoreB) {
-    return scoreBDetailRepository.findAllByScoreB(scoreB);
+    return scoreBDetailRepository.findAllByScoreBOrderByDateCreatedDesc(scoreB);
   }
 }

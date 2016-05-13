@@ -14,6 +14,6 @@ import java.util.List;
  */
 public interface ScoreBDetailRepository extends JpaRepository<ScoreBDetail,Long>{
 
-  List<ScoreBDetail> findAllByScoreB(ScoreB scoreB);
+  List<ScoreBDetail> findAllByScoreBOrderByDateCreatedDesc(ScoreB scoreB);
 
 }

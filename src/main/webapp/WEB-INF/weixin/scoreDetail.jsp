@@ -52,6 +52,7 @@
             type: 0,
             openId: '${openId}'
         },
+        async: false,
         dataType: 'json',//服务器返回json格式数据
         type: 'post',//HTTP请求类型
         timeout: 10000,//超时时间设置为10秒；
@@ -97,6 +98,7 @@
                         type: index,
                         openId: '${openId}'
                     },
+                    async: false,
                     dataType: 'json',//服务器返回json格式数据
                     type: 'post',//HTTP请求类型
                     timeout: 10000,//超时时间设置为10秒；
@@ -107,6 +109,7 @@
                         count = 0;
                         shangshu = Math.floor(dataLength / 5);
                         yushu = dataLength % 5;
+
                     },
                     error: function (xhr, type, errorThrown) {
                         //异常处理；
@@ -127,14 +130,14 @@
 
     //下拉刷新
     mui.init({
-        pullRefresh: {
-            container: '#pullrefresh',
-            up: {
-                contentrefresh: '正在加载...',
-                callback: pullupRefresh
-            }
-        }
-    });
+                 pullRefresh: {
+                     container: '#pullrefresh',
+                     up: {
+                         contentrefresh: '正在加载...',
+                         callback: pullupRefresh
+                     }
+                 }
+             });
 
     /**
      * 上拉加载具体业务实现
@@ -144,7 +147,7 @@
             mui('#pullrefresh').pullRefresh().endPullupToRefresh((++count > shangshu)); //参数为true代表没有更多数据了。
 
             var cells = document.body.querySelectorAll('.list');
-            if (count < shangshu) {
+            if (count <= shangshu) {
 
                 for (var i = cells.length, len = i + 5; i < len; i++) {
                     list(table, i);
