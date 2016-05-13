@@ -26,30 +26,43 @@
     <script src="${resourceUrl}/js/jquery-2.0.3.min.js"></script>
 </head>
 <script>
+    jQuery(document).ready(function () {
+                               var state = "${order.state}";
+                               var now = new Date();
+                               if (state == 0) {
+                                   var point = 1;
+                                   var create = "${order.createDate}";
+                                   create =
+                                   eval('new Date(' + create.replace(/\d+(?=-[^-]+$)/,
+                                                                     function (a) {
+                                                                         return parseInt(a, 10) - 1
+                                                                     }).match(/\d+/g) + ')');
+                                   point = 15 - ( now.getTime() - create.getTime()) / 1000 / 60;
+                                   point = Math.ceil(point);
+                                   $("#point").html(point);
+                               }
+                               else if (state == 2) {
+                                   var day = 0;
+                                   var hour = 1;
+                                   var delivery = "${order.deliveryDate}";
+                                   delivery =
+                                   eval('new Date(' + delivery.replace(/\d+(?=-[^-]+$)/,
+                                                                       function (a) {
+                                                                           return parseInt(a, 10)
+                                                                                  - 1;
+                                                                       }).match(/\d+/g) + ')');
+                                   day =
+                                   10 - ( now.getTime() - delivery.getTime()) / 1000 / 3600 / 24;
 
-    window.onload = function () {
-        var state = "${order.state}";
-        var now = new Date();
-        if (state == 0) {
-            var point = 1;
-            var create = "${order.createDate}";
-            create = new Date(create.replace(/-/g, "/"));
-            point = 15 - ( now.getTime() - create.getTime()) / 1000 / 60;
-            point = Math.ceil(point);
-            $("#point").html(point);
-        } else if (state == 2) {
-            var day = 0;
-            var hour = 1;
-            var delivery = "${order.deliveryDate}";
-            delivery = new Date(delivery.replace(/-/g, "/"));
-            day = 10 - ( now.getTime() - delivery.getTime()) / 1000 / 3600 / 24;
-            day = Math.floor(day);
-            hour = 24 - ( now.getTime() - delivery.getTime()) / 1000 / 3600 % 24;
-            hour = Math.floor(hour);
-            $("#day").html(day);
-            $("#hour").html(hour);
-        }
-    }
+                                   day = Math.floor(day);
+                                   hour =
+                                   24 - ( now.getTime() - delivery.getTime()) / 1000 / 3600 % 24;
+                                   hour = Math.floor(hour);
+                                   $("#day").html(day);
+                                   $("#hour").html(hour);
+                               }
+                           }
+    )
 </script>
 <!--头部-->
 
@@ -78,7 +91,7 @@
     <!--已发货-->
     <div class="order-top order-top-shipped">
         <span>卖家已发货</span>
-        <span><font id="day">8</font>天<font id="hour">2</font>小时后自动确认收货</span>
+        <span><font id="day"></font>天<font id="hour"></font>小时后自动确认收货</span>
     </div>
 </c:if>
 

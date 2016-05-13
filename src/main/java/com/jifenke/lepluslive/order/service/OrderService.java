@@ -172,6 +172,7 @@ public class OrderService {
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public List<OnLineOrder> getCurrentUserOrders(LeJiaUser leJiaUser) {
     List<Integer> states = new ArrayList<>();
+    states.add(-1);
     states.add(4);
     return orderRepository
         .findAllByLeJiaUserAndStateNotInOrderByCreateDateDesc(leJiaUser, states);

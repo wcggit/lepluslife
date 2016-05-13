@@ -12,7 +12,7 @@ import java.util.List;
  */
 public interface ScoreADetailRepository extends JpaRepository<ScoreADetail,Long>{
 
-  List<ScoreADetail> findAllByScoreA(ScoreA scoreA);
+  List<ScoreADetail> findAllByScoreAOrderByDateCreatedDesc(ScoreA scoreA);
 
   ScoreADetail findOneByOrderSid(String orderSid);
 

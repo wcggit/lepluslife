@@ -2,7 +2,10 @@ package com.jifenke.lepluslive.weixin.controller;
 
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
+import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
+import com.jifenke.lepluslive.lejiauser.service.LeJiaUserService;
 import com.jifenke.lepluslive.order.domain.entities.OnLineOrder;
+import com.jifenke.lepluslive.score.domain.entities.ScoreA;
 import com.jifenke.lepluslive.score.domain.entities.ScoreB;
 import com.jifenke.lepluslive.weixin.controller.dto.OrderDto;
 import com.jifenke.lepluslive.Address.domain.entities.Address;
@@ -97,8 +100,11 @@ public class WeixinOrderController {
   public ModelAndView goScoreDetailPage(HttpServletRequest request, Model model) {
 
     WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
-    model.addAttribute("scoreADetails", scoreAService.findAllScoreADetail(weiXinUser));
-    model.addAttribute("scoreBDetails", scoreBService.findAllScoreBDetail(weiXinUser));
+    ScoreA scoreA = scoreAService.findScoreAByLeJiaUser(weiXinUser.getLeJiaUser());
+    ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(weiXinUser.getLeJiaUser());
+    model.addAttribute("scoreADetails", scoreAService.findAllScoreADetail(scoreA));
+    model.addAttribute("scoreBDetails", scoreBService.findAllScoreBDetail(scoreB));
+    model.addAttribute("openId", weiXinUser.getOpenId());
     return MvUtil.go("/weixin/scoreDetail");
 
   }
@@ -193,7 +199,8 @@ public class WeixinOrderController {
   LejiaResult getCurrentUserAllOrder(HttpServletRequest request) {
     List<OnLineOrder>
         onLineOrders =
-        orderService.getCurrentUserOrders(weiXinService.getCurrentWeiXinUser(request).getLeJiaUser());
+        orderService
+            .getCurrentUserOrders(weiXinService.getCurrentWeiXinUser(request).getLeJiaUser());
     return LejiaResult.ok(onLineOrders);
   }
 

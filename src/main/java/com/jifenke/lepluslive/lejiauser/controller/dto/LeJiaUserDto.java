@@ -5,72 +5,84 @@ package com.jifenke.lepluslive.lejiauser.controller.dto;
  */
 public class LeJiaUserDto {
 
-    private Long scoreA;
+  private Long scoreA;
 
-    private Long scoreB;
+  private Long scoreB;
 
-    private String userOneBarCode;
+  private String userOneBarCode;
 
-    public LeJiaUserDto(Long scoreA, Long scoreB, String userOneBarCode, String token, String headImageUrl) {
-        this.scoreA = scoreA;
-        this.scoreB = scoreB;
-        this.userOneBarCode = userOneBarCode;
-        this.token = token;
-        this.headImageUrl = headImageUrl;
-    }
+  private String token;   //sid
 
-    public String getToken() {
+  private String headImageUrl;
 
-        return token;
-    }
+  private String userName; //用户名 暂用手机号码
 
-    public void setToken(String token) {
-        this.token = token;
-    }
+  public LeJiaUserDto(Long scoreA, Long scoreB, String userOneBarCode, String token,
+                      String headImageUrl, String userName) {
+    this.scoreA = scoreA;
+    this.scoreB = scoreB;
+    this.userOneBarCode = userOneBarCode;
+    this.token = token;
+    this.headImageUrl = headImageUrl;
+    this.userName = userName;
+  }
 
-    public String getHeadImageUrl() {
-        return headImageUrl;
-    }
+  public String getToken() {
 
-    public void setHeadImageUrl(String headImageUrl) {
-        this.headImageUrl = headImageUrl;
-    }
+    return token;
+  }
 
-    private String token;   //sid
+  public String getUserName() {
+    return userName;
+  }
 
-    private String headImageUrl;
+  public void setUserName(String userName) {
+    this.userName = userName;
+  }
+
+  public void setToken(String token) {
+    this.token = token;
+  }
+
+  public String getHeadImageUrl() {
+    return headImageUrl;
+  }
+
+  public void setHeadImageUrl(String headImageUrl) {
+    this.headImageUrl = headImageUrl;
+  }
 
 
-    public LeJiaUserDto(Long scoreA, Long scoreB, String userOneBarCode) {
-        this.scoreA = scoreA;
-        this.scoreB = scoreB;
-        this.userOneBarCode = userOneBarCode;
-    }
+  public LeJiaUserDto(Long scoreA, Long scoreB, String userOneBarCode) {
+    this.scoreA = scoreA;
+    this.scoreB = scoreB;
+    this.userOneBarCode = userOneBarCode;
+  }
 
-    public LeJiaUserDto() {
-    }
+  public LeJiaUserDto() {
+  }
 
-    public Long getScoreA() {
-        return scoreA;
-    }
+  public Long getScoreA() {
+    return scoreA;
+  }
 
-    public void setScoreA(Long scoreA) {
-        this.scoreA = scoreA;
-    }
+  public void setScoreA(Long scoreA) {
+    this.scoreA = scoreA;
+  }
 
-    public Long getScoreB() {
-        return scoreB;
-    }
+  public Long getScoreB() {
+    return scoreB;
+  }
 
-    public void setScoreB(Long scoreB) {
-        this.scoreB = scoreB;
-    }
+  public void setScoreB(Long scoreB) {
+    this.scoreB = scoreB;
+  }
 
-    public String getUserOneBarCode() {
-        return userOneBarCode;
-    }
+  public String getUserOneBarCode() {
+    return userOneBarCode;
+  }
 
-    public void setUserOneBarCode(String userOneBarCode) {
-        this.userOneBarCode = userOneBarCode;
-    }
+  public void setUserOneBarCode(String userOneBarCode) {
+    this.userOneBarCode = userOneBarCode;
+  }
 }

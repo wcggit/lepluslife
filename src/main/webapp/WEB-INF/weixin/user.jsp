@@ -18,47 +18,64 @@
           content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <!--标准mui.css-->
-    <link rel="stylesheet" href="${resourceUrl}/css/mui.min.css">
     <!--App自定义的css-->
-    <link rel="stylesheet" type="text/css" href="${resourceUrl}/css/personal.css"/>
+    <link rel="stylesheet" type="text/css" href="${resourceUrl}/css/newPersonal.css"/>
 </head>
 <script type="application/javascript">
     document.title = "我的钱包";
     function goPage(page) {
         location.href = "${wxRootUrl}/weixin/" + page;
-}
+    }
 
 </script>
 <script src="${resourceUrl}/js/jquery-2.0.3.min.js"></script>
 
 <body>
 
-<div id="tabbar-with-person" class="mui-control-content mui-active" style="padding-bottom: 75px;">
-    <div class="page_top"
-         style="background: url('${resourceUrl}/images/personal/bg.png') no-repeat;background-size: 100%;">
-        <div class="top_face"
-             style="background: url('${user.headImageUrl}') no-repeat;background-size: 100%;"></div>
-        <p class="top_ttl">ID：<font>${user.nickname}</font></p>
+<div class="content">
+    <div class="personal">
+        <div class="person">
+            <div class="pic">
+                <img src="${user.headImageUrl}" alt="">
+            </div>
+            <p>${user.nickname}</p>
+        </div>
     </div>
-    <div class="page_code"><img src="${user.leJiaUser.oneBarCodeUrl}" alt=""/></div>
-    <ul class="page_bottom">
-        <li class="bottom_jf">
-            <p>${scoreB.score}</p>
+    <div class="redpacket">
+        <p>￥${scoreA.score/100}</p>
+    </div>
+    <div class="point">
+        <p>￥${scoreB.score}</p>
+    </div>
+    <div class="bill" onclick="goPage('scoreDetail')">
+        <img src="${resourceUrl}/images/newPersonal/bill.png" alt="">
 
-            <p>乐+积分</p>
-        </li>
-        <li style="height: 12vw;overflow: hidden;margin: 4vw 0 0;">
-            <img src="${resourceUrl}/images/personal/line.png" alt=""/>
-        </li>
-        <li class="bottom_money">
-            <p>${scoreA.score/100}</p>
+        <p>积分明细</p>
+    </div>
+    <c:if test="${user.leJiaUser.phoneNumber == null || user.leJiaUser.phoneNumber == ''}">
+        <div class="phonenum">
+            <img src="${resourceUrl}/images/newPersonal/phone.png" alt="">
 
-            <p>红包余额</p>
-        </li>
-    </ul>
-    <a class="page_btn" onclick="goPage('scoreDetail')">交易明细</a>
+            <p>绑定手机号</p>
+            <a href="${wxRootUrl}/weixin/hongbao">绑定就送￥100元大礼包</a>
+            <span>&gt;</span>
+        </div>
+    </c:if>
+    <c:if test="${user.leJiaUser.phoneNumber != null && user.leJiaUser.phoneNumber != ''}">
+        <div class="phonenum">
+            <img src="${resourceUrl}/images/newPersonal/phone.png" alt="">
+
+            <p>${user.leJiaUser.phoneNumber}</p>
+        </div>
+    </c:if>
+
+    <div class="que">
+        <a href="${resourceUrl}/scoreExplain.html">
+            积分和红包怎么用？
+        </a>
+    </div>
 </div>
+
 </body>
 
 </html>

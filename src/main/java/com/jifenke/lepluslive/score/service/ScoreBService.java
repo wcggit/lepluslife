@@ -34,8 +34,8 @@ public class ScoreBService {
   }
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
-  public List<ScoreBDetail> findAllScoreBDetail(WeiXinUser weiXinUser) {
-    return scoreBDetailRepository.findAllByScoreB(findScoreBByWeiXinUser(weiXinUser.getLeJiaUser()));
+  public List<ScoreBDetail> findAllScoreBDetail(ScoreB scoreB) {
+    return scoreBDetailRepository.findAllByScoreB(scoreB);
   }
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)

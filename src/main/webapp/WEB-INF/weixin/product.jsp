@@ -94,6 +94,8 @@
     function click(s) {
         s.each(function (i) {
             s.eq(i).bind('tap', function () {
+                //重置下拉刷新
+                mui('#pullrefresh').pullRefresh().refresh(true);
                 var table = document.body.querySelector('.mui-table-view');
                 table.innerHTML = "";
                 var index = $(this).index() + 1;
@@ -136,25 +138,25 @@
     document.title = "分类";
 
     mui.init({
-                 pullRefresh: {
-                     container: '#pullrefresh',
-                     up: {
-                         contentrefresh: '正在加载...',
-                         callback: pullupRefresh
-                     }
-                 }
-             });
+         pullRefresh: {
+             container: '#pullrefresh',
+             up: {
+                 contentrefresh: '正在加载...',
+                 callback: pullupRefresh
+             }
+         }
+     });
 
     function initPage() {
         mui.init({
-                     pullRefresh: {
-                         container: '#pullrefresh',
-                         up: {
-                             contentrefresh: '正在加载...',
-                             callback: pullupRefresh
-                         }
-                     }
-                 });
+             pullRefresh: {
+                 container: '#pullrefresh',
+                 up: {
+                     contentrefresh: '正在加载...',
+                     callback: pullupRefresh
+                 }
+             }
+         });
     }
     //下拉刷新
     function pullupRefresh() {

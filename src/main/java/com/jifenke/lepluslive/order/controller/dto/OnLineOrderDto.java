@@ -15,8 +15,6 @@ public class OnLineOrderDto {
 
   private Long id; //订单id
 
-  private List<OrderDetail> orderDetails;
-
   private Long scoreB;  //用户可用积分
 
   private Long totalPrice;  //包括邮费
@@ -32,6 +30,8 @@ public class OnLineOrderDto {
   private String orderSid; //订单编号
 
   private Address address; //默认收货地址
+
+  private List<OrderDetail> orderDetails;
 
   public Long getId() {
     return id;

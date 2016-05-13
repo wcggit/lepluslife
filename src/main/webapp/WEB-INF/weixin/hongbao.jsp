@@ -20,30 +20,105 @@
     <!--不显示拨号链接-->
     <title></title>
     <link rel="stylesheet" type="text/css" href="${resourceUrl}/css/hongbao_close.css"/>
-    <script type="text/javascript">
-        function openHongbao() {
-            location.href = "${wxRootUrl}/weixin/hongbao/open";
-        }
-        function goUser() {
-            location.href = "${wxRootUrl}/weixin/user";
-        }
-    </script>
 </head>
 <body>
-<div id="page">
-    <div class="page_bg"></div>
 
-    <div class="page_content">
-        <div class="content_topPic"></div>
-        <p class="content_ttl">乐+生活</p>
+<div class="content">
+    <div class="topbg"></div>
+    <div class="middleform">
 
-        <p class="content_from">给你发了一个利是</p>
+        <input type="tel" placeholder="请输入手机号" name="phoneNumber" class="phonenum"/>
+        <input type="text" placeholder="请输入验证码" class="yanzhengma" name="verifyCode">
+        <button class="yzmbtn" onclick="getVerify()" id="sendCode">获取验证码</button>
+        <button class="atonce" onclick="openHongbao()">马上领取</button>
 
-        <p class="content_practice">恭喜发财，大吉大利</p>
-
-        <div class="content_open" onclick="openHongbao()"></div>
     </div>
-
 </div>
+
 </body>
+<script src="${resourceUrl}/js/jquery-1.11.3.min.js"></script>
+<script type="text/javascript">
+    //发送验证码
+    function getVerify() {
+
+        var phoneNumber = $("input[name='phoneNumber']").val();
+
+        // if (!phoneNumber.match(/1\d{10}/g)) {
+        if (!/^(13[0-9]|14[0-9]|15[0-9]|18[0-9])\d{8}$/i.test(phoneNumber)) {
+            alert('请输入正确的手机号！');
+            return true;
+        }
+
+        $.post("${wxRootUrl}/user/sendCode", {
+            phoneNumber: phoneNumber,
+            type: 1
+        }, function (res) {
+            if (res.status == 200) {
+                f_timeout();
+                return;
+            }
+            if (res.status == 201) {
+                alert(res.msg);
+            } else {
+                alert("获取验证码失败！");
+            }
+        });
+    }
+
+    function f_timeout() {
+
+        $('#sendCode').html('<span id="timeb2">60</span>秒后重新获取');
+        $('#sendCode').attr({disabled: 'true'});
+        timer = self.setInterval(addsec, 1000);
+    }
+
+    function addsec() {
+
+        var t = $('#timeb2').html();
+        if (t > 0) {
+            $('#timeb2').html(t - 1);
+        } else {
+            window.clearInterval(timer);
+            $('#sendCode').html('<span id="timeb2"></span>重获验证码');
+            $('#sendCode').attr({disabled: false});
+        }
+    }
+
+    function openHongbao() {
+        var phoneNumber = $("input[name='phoneNumber']").val(),
+                validateCode = $("input[name='verifyCode']").val();
+
+        if (!phoneNumber.match(/1\d{10}/g)) {
+            alert("请输入正确的手机号");
+            return false;
+        }
+        if (!validateCode || validateCode.length < 1) {
+            alert("请输入验证码");
+            return false;
+        }
+
+        $.ajax({
+                   type: "post",
+                   url: "${wxRootUrl}/user/validate",
+                   data: {
+                       phoneNumber: phoneNumber,
+                       code: validateCode
+                   },
+                   success: function (data) {
+                       if (data.status == 200) {
+                           location.href =
+                           "${wxRootUrl}/weixin/hongbao/open?phoneNumber=" + phoneNumber;
+                       } else if (data.status == 202) {
+                           alert("验证码不正确!");
+                           return false;
+                       } else {
+                           alert("注册失败!");
+                       }
+                   },
+                   error: function () {
+                       alert("注册失败！");
+                   }
+               })
+    }
+</script>
 </html>
