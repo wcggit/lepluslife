@@ -1,8 +1,6 @@
 package com.jifenke.lepluslive.lejiauser.service;
 
 import com.jifenke.lepluslive.global.config.Constants;
-import com.jifenke.lepluslive.global.util.SmsClientSend;
-import com.jifenke.lepluslive.job.OrderJob;
 import com.jifenke.lepluslive.job.ValidateCodeJob;
 import com.jifenke.lepluslive.lejiauser.domain.entities.ValidateCode;
 import com.jifenke.lepluslive.lejiauser.repository.ValidateCodeRepository;

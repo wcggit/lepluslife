@@ -137,6 +137,15 @@
     <orderEntry type="library" name="Maven: com.google.zxing:core:3.1.0" level="project" />
     <orderEntry type="library" name="Maven: net.glxn.qrgen:core:2.0" level="project" />
     <orderEntry type="library" name="Maven: org.jfree:jfreesvg:2.1" level="project" />
+    <orderEntry type="module-library">
+      <library name="Maven: com.taobao:sms:0.0.1">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/src/main/lib/taobao-sdk-java-auto_1455552377940-20160515.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
     <orderEntry type="library" name="Maven: net.sf.barcode4j:barcode4j:2.1" level="project" />
     <orderEntry type="library" name="Maven: avalon-framework:avalon-framework-impl:4.2.0" level="project" />
     <orderEntry type="library" name="Maven: commons-cli:commons-cli:1.0" level="project" />

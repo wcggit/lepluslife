@@ -30,12 +30,9 @@ public final class Constants {
     public static final String WEI_XIN_ROOT_URL = "http://www.lepluslife.com";
 
     public static final Integer COOKIE_DISABLE_TIME = 604800;
-    public static final Integer EXPRESS_COOKIE_DISABLE_TIME = 7200;
 
-    public static final String SMS_SEND_URL = "http://xtx.telhk.cn:8080/sms.aspx";
-    public static final String SMS_USER_ID = "5405";
-    public static final String SMS_USER_ACCOUNT = "a10163";
-    public static final String SMS_USER_PASSWORD = "514984";
+    public static final String SMS_SEND_URL = "https://eco.taobao.com/router/rest";
+    public static final String SMS_TEMPLATE_CODE = "SMS_8275442";  //注册模板id
 
     public static final Integer FREIGHT_PRICE = 1000;  //运费
     public static final Integer FREIGHT_FREE_PRICE = 12800;  //免运费最低价格

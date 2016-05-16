@@ -82,7 +82,7 @@ public class ProductController {
   public
   @ResponseBody
   LejiaResult getProductCookie(HttpServletRequest request) {
-    return LejiaResult.build(20,CookieUtils.getCookieValue(request,  "currentType"));
+    return LejiaResult.build(20, CookieUtils.getCookieValue(request, "currentType"));
   }
 
   @ApiOperation(value = "查看商品详情")
@@ -93,11 +93,13 @@ public class ProductController {
     Product product = productService.findOneProduct(id);
     if (product != null) {
       List<ScrollPicture> scrollPictureList = scrollPictureService.findAllScorllPicture(product);
+      ProductType productType = productService.findOneProductType(product.getProductType().getId());
       ProductDto productDto = new ProductDto();
       productDto.setProductSpecs(productService.findAllProductSpec(product));
       productDto.setFreePrice(Constants.FREIGHT_FREE_PRICE);
       try {
         BeanUtils.copyProperties(productDto, product);
+        productDto.setProductType(productType);
         productDto.setScrollPictures(scrollPictureList.stream().map(scrollPicture -> {
           scrollPicture.setProduct(null);
           return scrollPicture;
