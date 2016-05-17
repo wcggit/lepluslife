@@ -38,16 +38,16 @@ public class AddressService {
     return addressRepository.findOne(id);
   }
 
-  public Address findAddressByWeiXinUser(WeiXinUser weiXinUser) {
-    return addressRepository.findByLeJiaUser(weiXinUser.getLeJiaUser());
-  }
+//  public Address findAddressByWeiXinUser(WeiXinUser weiXinUser) {
+//    return addressRepository.findByLeJiaUser(weiXinUser.getLeJiaUser());
+//  }
 
   public Address findAddressByLeJiaUserAndState(LeJiaUser leJiaUser) {
     Address address = addressRepository.findByLeJiaUserAndState(leJiaUser, 1);
     if (address != null) {
       return address;
     } else {
-      address = addressRepository.findByLeJiaUser(leJiaUser);
+      address = addressRepository.findOneByLeJiaUserAndStateNot(leJiaUser, 2);
       return address;
     }
   }
@@ -64,7 +64,7 @@ public class AddressService {
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public List<Address> findAllAddressByLeJiaUser(LeJiaUser leJiaUser) {
-    return addressRepository.findAllAddressByLeJiaUserAndStateNot(leJiaUser,2);
+    return addressRepository.findAllAddressByLeJiaUserAndStateNot(leJiaUser, 2);
   }
 
   /**

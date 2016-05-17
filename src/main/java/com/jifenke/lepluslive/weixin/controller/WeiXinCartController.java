@@ -222,7 +222,7 @@ public class WeiXinCartController {
     if(count>=4){
       return  LejiaResult.build(500,"未支付订单过多,请支付后再下单");
     }
-    Address address = addressService.findAddressByWeiXinUser(weiXinUser);
+    Address address = addressService.findAddressByLeJiaUserAndState(weiXinUser.getLeJiaUser());
     String cart = CookieUtils.getCookieValue(request, openId + "-cart");
     List<CartDetailDto> cartDetailDtoOrigin = null;
     OnLineOrder onLineOrder = null;
