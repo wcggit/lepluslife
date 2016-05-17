@@ -68,7 +68,7 @@ public class WeixinOrderController {
   @RequestMapping(value = "/order/confirm", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
   public ModelAndView orderCreate(OrderDto orderDto, HttpServletRequest request, Model model) {
     WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
-    Address address = addressService.findAddressByWeiXinUser(weiXinUser);
+    Address address = addressService.findAddressByLeJiaUserAndState(weiXinUser.getLeJiaUser());
     model.addAttribute("order", orderService.createOrder(orderDto, weiXinUser, address));
     ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(weiXinUser.getLeJiaUser());
     model.addAttribute("address", address);
@@ -140,7 +140,7 @@ public class WeixinOrderController {
     model.addAttribute("scoreB",
                        scoreBService.findScoreBByWeiXinUser(weiXinUser.getLeJiaUser()).getScore());
     model.addAttribute("order", orderService.findOrderById(orderId, flag));
-    model.addAttribute("address", addressService.findAddressByWeiXinUser(weiXinUser));
+    model.addAttribute("address", addressService.findAddressByLeJiaUserAndState(weiXinUser.getLeJiaUser()));
     model.addAttribute("wxConfig", getWeiXinPayConfig(request));
     return MvUtil.go("/weixin/confirmOrder");
   }
@@ -153,7 +153,8 @@ public class WeixinOrderController {
                                         HttpServletRequest request) {
     Address
         address =
-        addressService.findAddressByWeiXinUser(weiXinService.getCurrentWeiXinUser(request));
+        addressService.findAddressByLeJiaUserAndState(
+            weiXinService.getCurrentWeiXinUser(request).getLeJiaUser());
     model.addAttribute("address", address);
     model.addAttribute("orderId", orderId);
     return MvUtil.go("/weixin/address");

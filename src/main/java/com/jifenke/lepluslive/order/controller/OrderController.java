@@ -82,7 +82,7 @@ public class OrderController {
   @ApiOperation("购物车生成订单信息")
   @RequestMapping(value = "/createCartOrder", method = RequestMethod.POST)
   public
-  @ResponseBody()
+  @ResponseBody
   LejiaResult createCartOrder(
       @ApiParam(value = "用户身份标识token") @RequestParam(required = false) String token,
       HttpServletResponse response,
