@@ -88,7 +88,8 @@ public class OrderService {
     }
 
     onLineOrder.setTruePrice(orderDto.getTotalPrice());
-    onLineOrder.setTotalScore(orderDto.getTotalScore());
+    onLineOrder.setTotalScore(
+        (long) Math.floor(Double.parseDouble(orderDto.getTotalScore().toString()) / 100));
     onLineOrder.setLeJiaUser(weiXinUser.getLeJiaUser());
     onLineOrder.setState(-1);
     onLineOrder.setAddress(address);
@@ -301,7 +302,8 @@ public class OrderService {
     onLineOrder.setOrderDetails(orderDetails);
     onLineOrder.setState(0);
     onLineOrder.setTruePrice(totalPrice);
-    onLineOrder.setTotalScore(totalScore);
+
+    onLineOrder.setTotalScore((long) Math.floor(Double.parseDouble(totalScore.toString()) / 100));
     orderRepository.save(onLineOrder);
     JobThread jobThread = new JobThread(onLineOrder.getId(), scheduler);
     jobThread.start();

@@ -62,8 +62,8 @@ public class MerchantService {
   }
 
   /**
-   * 按照距离远近对商家排序  以后可以被findMerchantListByCustomCondition取代
-   * open app 暂时使用
+   * 按照距离远近对商家排序  以后可以被findMerchantListByCustomCondition取代 open app 暂时使用
+   *
    * @param latitude  经度
    * @param longitude 纬度
    */
@@ -82,11 +82,11 @@ public class MerchantService {
       merchantDto.setPhoneNumber(o[3].toString());
       merchantDto.setName(o[4].toString());
       merchantDto.setPicture(o[5].toString());
-      merchantDto.setDiscount(Integer.parseInt(o[6].toString()));
-      merchantDto.setRebate(Integer.parseInt(o[7].toString()));
+      merchantDto.setDiscount(o[6] != null ? Integer.parseInt(o[6].toString()) : 10);
+      merchantDto.setRebate(o[7] != null ? Integer.parseInt(o[7].toString()) : 0);
       merchantDto.setLng(Double.parseDouble(o[8].toString()));
       merchantDto.setLat(Double.parseDouble(o[9].toString()));
-      merchantDto.setDistance(Double.valueOf(o[10].toString()));
+      merchantDto.setDistance(o[10] != null ? Double.valueOf(o[10].toString()) : null);
       dtoList.add(merchantDto);
     }
     return dtoList;
@@ -136,8 +136,8 @@ public class MerchantService {
       merchantDto.setPhoneNumber(o[3].toString());
       merchantDto.setName(o[4].toString());
       merchantDto.setPicture(o[5].toString());
-      merchantDto.setDiscount(Integer.parseInt(o[6].toString()));
-      merchantDto.setRebate(Integer.parseInt(o[7].toString()));
+      merchantDto.setDiscount(o[6] != null ? Integer.parseInt(o[6].toString()) : 10);
+      merchantDto.setRebate(o[7] != null ? Integer.parseInt(o[7].toString()) : 0);
       merchantDto.setLng(Double.parseDouble(o[8].toString()));
       merchantDto.setLat(Double.parseDouble(o[9].toString()));
       merchantDto.setDistance(o[10] != null ? Double.valueOf(o[10].toString()) : null);

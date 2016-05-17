@@ -152,7 +152,7 @@
                 </div>
                 <div class="mui-table-cell mui-col-xs-5 mui-text-left">
                     <span style="color: #D62C2C;font-size: 12px;">该订单最多可使用<font
-                            class="max-jf">${order.totalScore/100}</font>积分</span>
+                            class="max-jf">${order.totalScore}</font>积分</span>
                 </div>
             </div>
         </li>

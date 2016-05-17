@@ -32,7 +32,9 @@ public final class Constants {
     public static final Integer COOKIE_DISABLE_TIME = 604800;
 
     public static final String SMS_SEND_URL = "https://eco.taobao.com/router/rest";
-    public static final String SMS_TEMPLATE_CODE = "SMS_8275442";  //注册模板id
+    public static final String SMS_REGISTER_CODE = "SMS_9605067";  //注册模板id
+    public static final String SMS_CHANGE_PWD_CODE = "SMS_8275440";  //修改密码模板id
+    public static final String SMS_BANGDING_CODE = "SMS_8275446";  //绑定手机号码模板id
 
     public static final Integer FREIGHT_PRICE = 1000;  //运费
     public static final Integer FREIGHT_FREE_PRICE = 12800;  //免运费最低价格

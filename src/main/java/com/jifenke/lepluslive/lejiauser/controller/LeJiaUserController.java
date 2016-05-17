@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -78,27 +79,36 @@ public class LeJiaUserController {
   }
 
   /**
-   * @param type 1=注册  2=找回
+   * @param type 1=注册  2=找回 3=绑定手机
    */
   @ApiOperation(value = "注册和找回密码时发送验证码")
   @RequestMapping(value = "/sendCode", method = RequestMethod.POST)
   public
   @ResponseBody
   LejiaResult sendCode(@RequestParam(required = false) String phoneNumber,
-                       @ApiParam(value = "1=注册  2=找回") @RequestParam(required = false) Integer type) {
+                       @ApiParam(value = "1=注册  2=找回") @RequestParam(required = false) Integer type,
+                       HttpServletRequest request) {
     LeJiaUser leJiaUser = leJiaUserService.findUserByPhoneNumber(phoneNumber);  //是否已注册
     if (type == 1) {
       if (leJiaUser != null) {
         return LejiaResult.build(201, "该手机号已注册,请直接登录");
       }
-    } else {
+    } else if (type == 2) {
       if (leJiaUser == null) {
         return LejiaResult.build(205, "该手机号未注册");
       }
+    } else if (type == 3) {
+      if (leJiaUser != null) {
+        return LejiaResult.build(206, "该手机号已注册");
+      }
     }
 
-    smsService.saveValidateCode(phoneNumber);
-    return LejiaResult.build(200, "发送成功");
+    Integer boo = smsService.saveValidateCode(phoneNumber, request, type);
+    if (boo == 1) {
+      return LejiaResult.build(200, "发送成功");
+    } else {
+      return LejiaResult.build(208, "发送过于频繁，请稍后再试");
+    }
   }
 
   /**
@@ -180,7 +190,8 @@ public class LeJiaUserController {
     return LejiaResult.build(200, "登录成功", new LeJiaUserDto(scoreA.getScore(), scoreB.getScore(),
                                                            leJiaUser.getOneBarCodeUrl(),
                                                            leJiaUser.getUserSid(),
-                                                           leJiaUser.getHeadImageUrl(),leJiaUser.getPhoneNumber()));
+                                                           leJiaUser.getHeadImageUrl(),
+                                                           leJiaUser.getPhoneNumber()));
   }
 
   @ApiOperation(value = "发送验证码重置密码时验证验证码")
@@ -233,7 +244,8 @@ public class LeJiaUserController {
         LeJiaUserDto leJiaUserDto = new LeJiaUserDto(scoreA.getScore(), scoreB.getScore(),
                                                      leJiaUser.getOneBarCodeUrl(),
                                                      leJiaUser.getUserSid(),
-                                                     leJiaUser.getHeadImageUrl(),leJiaUser.getPhoneNumber());
+                                                     leJiaUser.getHeadImageUrl(),
+                                                     leJiaUser.getPhoneNumber());
         list.add(leJiaUserDto);
       }
     }

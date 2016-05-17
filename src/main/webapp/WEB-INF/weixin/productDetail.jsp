@@ -65,9 +65,13 @@
                 <p class="ttl_name">${product.name}</p>
 
                 <p class="ttl_practice">${product.description}</p>
-
-                <p class="ttl_price">￥<font id="ttl_price">${product.price/100}</font></p>
-
+                <c:if test="${product.minPrice != product.price}">
+                    <p class="ttl_price">￥<font id="min_price">${product.minPrice/100}</font> ~ ￥<font
+                            class="total_price">${product.price/100}</font></p>
+                </c:if>
+                <c:if test="${product.minPrice == product.price}">
+                    <p class="ttl_price">￥<font class="total_price">${product.price/100}</font></p>
+                </c:if>
                 <p class="ttl_main">
                     <span>满<font>${product.freePrice/100}</font>包邮</span>
                 </p>
@@ -85,14 +89,17 @@
                         <div class="top_right">
                             <p class="right_name">${product.name}</p>
 
-                            <p class="right_price">￥<font
-                                    class="moneyNum">${product.minPrice/100} ~ ￥${product.price/100}</font>
+                            <p class="right_price"><font id="moneyNum1">￥<font
+                                    class="moneyNum1">${product.minPrice/100}</font> ~
+                            </font>￥<font class="moneyNum2">${product.price/100}</font>
                                 <input type="hidden" value="${product.productSpecs[0].price/100}"
                                        id="price-hidden"/>
                                 <input type="hidden"
-                                       value="${product.productSpecs[0].price/100-product.productSpecs[0].minPrice/100}"
+                                       value="${product.productSpecs[0].price-product.productSpecs[0].minPrice}"
                                        id="score-hidden"/>
                             </p>
+
+                            <p class="right_ttl" id="availablePoint">请选择规格数量</p>
                         </div>
                     </div>
                     <ul class="main_chose">
@@ -155,8 +162,10 @@
 <script type="text/javascript" src="${resourceUrl}/js/prodect_detail.js"></script>
 <script>
     $(function () {
-        $("#ttl_price").text(toDecimal(eval($("#ttl_price").text())));
-        $(".moneyNum").text(toDecimal(eval($(".moneyNum").text())));
+        $(".total_price").text(toDecimal($(".total_price").text()));
+        $("#min_price").text(toDecimal($("#min_price").text()));
+        $(".moneyNum1").text(toDecimal($(".moneyNum1").text()));
+        $(".moneyNum2").text(toDecimal($(".moneyNum2").text()));
     });
 
     $.ajax({
@@ -232,10 +241,10 @@
 
     $("#buy").bind("tap", function () {
 
-        $("#productNum").val($(".num1").val())
+        $("#productNum").val($(".num1").val());
         var productNum = $("#productNum").val();
         if (productNum == 0) {
-            alert("选择商品后才可以购买")
+            alert("选择商品后才可以购买");
             return;
         }
         if ($(".maxNum").text() <= 0) {
@@ -248,8 +257,8 @@
             return;
         }
         var focusClass = $(".focusClass");
-        if(focusClass.find(".id-hidden").val() == null){
-            alert("请先选择规格数量");
+        if (focusClass.find(".id-hidden").val() == null) {
+            xuanzheguige();
             return;
         }
 
@@ -277,8 +286,9 @@
         var productSpec = {};
         var product = {};
         var focusClass = $(".focusClass");
-        if(focusClass.find(".id-hidden").val() == null){
-            alert("请先选择规格数量");
+        if (focusClass.find(".id-hidden").val() == null) {
+
+            xuanzheguige();
             return;
         }
         productSpec.id = $(".focusClass").find(".id-hidden").val();
@@ -305,22 +315,16 @@
         location.href = "/weixin/cart"
     }
 
-    function toDecimal(x) {
-        var f = parseFloat(x);
-        if (isNaN(f)) {
-            return false;
-        }
-        var f = Math.round(x * 100) / 100;
-        var s = f.toString();
-        var rs = s.indexOf('.');
-        if (rs < 0) {
-            rs = s.length;
-            s += '.';
-        }
-        while (s.length <= rs + 2) {
-            s += '0';
-        }
-        return s;
+    function xuanzheguige() {
+        //先出现
+        $('.mui-content .page_more').eq(0).fadeIn();
+        $('.mui-table-view').eq(0).css('display', 'none');
+        $('.mui-pull').eq(0).css('display', 'none');
+        //再设置高度
+        var elementTop = $('.mui-bar-tab').offset().top,
+                elementTop2 = elementTop - eval($('.more_main').height());
+        $('.more_main').css('bottom', '0px');
+        $('.mui-scroll').css('transform', 'translate3d(0px, 0px, 0px)');
     }
 
 </script>
