@@ -51,16 +51,13 @@
 
         $.post("${wxRootUrl}/user/sendCode", {
             phoneNumber: phoneNumber,
-            type: 1
+            type: 3
         }, function (res) {
             if (res.status == 200) {
                 f_timeout();
                 return;
-            }
-            if (res.status == 201) {
-                alert(res.msg);
             } else {
-                alert("获取验证码失败！");
+                alert(res.msg);
             }
         });
     }

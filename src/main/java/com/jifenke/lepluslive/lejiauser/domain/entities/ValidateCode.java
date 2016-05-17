@@ -20,55 +20,65 @@ import javax.persistence.Table;
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class ValidateCode {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  private Long id;
 
-    private String phoneNumber;
+  private String phoneNumber;
 
-    private String code;
+  private String code;
 
-    private Integer status = 0;  //0表示有效，1表示失效
+  private Integer status = 0;  //0表示有效，1表示失效
 
-    private Date createDate = new Date();
+  private String ipAddr;
 
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
+  private Date createDate = new Date();
 
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
+  public String getIpAddr() {
+    return ipAddr;
+  }
 
-    public String getCode() {
-        return code;
-    }
+  public void setIpAddr(String ipAddr) {
+    this.ipAddr = ipAddr;
+  }
 
-    public void setCode(String code) {
-        this.code = code;
-    }
+  public String getPhoneNumber() {
+    return phoneNumber;
+  }
 
-    public Integer getStatus() {
-        return status;
-    }
+  public void setPhoneNumber(String phoneNumber) {
+    this.phoneNumber = phoneNumber;
+  }
 
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
+  public String getCode() {
+    return code;
+  }
 
-    public Date getCreateDate() {
-        return createDate;
-    }
+  public void setCode(String code) {
+    this.code = code;
+  }
 
-    public void setCreateDate(Date createDate) {
-        this.createDate = createDate;
-    }
+  public Integer getStatus() {
+    return status;
+  }
 
-    public Long getId() {
-        return id;
-    }
+  public void setStatus(Integer status) {
+    this.status = status;
+  }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+  public Date getCreateDate() {
+    return createDate;
+  }
+
+  public void setCreateDate(Date createDate) {
+    this.createDate = createDate;
+  }
+
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
 }
