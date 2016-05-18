@@ -116,6 +116,22 @@ public class OrderController {
     return LejiaResult.build(200, "ok", orderDto);
   }
 
+  @ApiOperation("修改订单的收货地址")
+  @RequestMapping(value = "/editOrderAddr", method = RequestMethod.POST)
+  public
+  @ResponseBody
+  LejiaResult editAddress(@RequestParam(required = false) Long orderId,
+                          @RequestParam(required = false) Long addrId) {
+    OnLineOrder onLineOrder = orderService.findOrderById(orderId, false);
+    Address address = addressService.findOneAddress(addrId);
+    if(onLineOrder != null && address != null){
+      addressService.editOrderAddress(address, onLineOrder);
+      return LejiaResult.build(200, "ok");
+    } else {
+      return LejiaResult.build(402, "未找到订单或地址数据");
+    }
+  }
+
   /**
    * 查看物流信息
    */

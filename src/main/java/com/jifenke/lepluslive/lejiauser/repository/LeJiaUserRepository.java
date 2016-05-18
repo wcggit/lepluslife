@@ -10,5 +10,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface LeJiaUserRepository extends JpaRepository<LeJiaUser, Long> {
     LeJiaUser findByUserSid(String userSid);
 
-    LeJiaUser findByPhoneNumber(String phoneNumber);
+    LeJiaUser findOneByPhoneNumber(String phoneNumber);
 }
