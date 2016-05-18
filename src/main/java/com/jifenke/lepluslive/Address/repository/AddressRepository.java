@@ -13,7 +13,7 @@ import java.util.List;
  */
 public interface AddressRepository extends JpaRepository<Address, Long> {
 
-  Address findOneByLeJiaUserAndStateNot(LeJiaUser leJiaUser,Integer state);
+  List<Address> findByLeJiaUserAndStateNot(LeJiaUser leJiaUser,Integer state);
 
   Address findByLeJiaUserAndState(LeJiaUser leJiaUser, Integer state);
 

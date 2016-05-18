@@ -26,43 +26,96 @@
     <script src="${resourceUrl}/js/jquery-2.0.3.min.js"></script>
 </head>
 <script>
+
+    var time_end;
     jQuery(document).ready(function () {
                                var state = "${order.state}";
-                               var now = new Date();
                                if (state == 0) {
-                                   var point = 1;
-                                   var create = "${order.createDate}";
-                                   create =
-                                   eval('new Date(' + create.replace(/\d+(?=-[^-]+$)/,
-                                                                     function (a) {
-                                                                         return parseInt(a, 10) - 1
-                                                                     }).match(/\d+/g) + ')');
-                                   point = 15 - ( now.getTime() - create.getTime()) / 1000 / 60;
-                                   point = Math.ceil(point);
-                                   $("#point").html(point);
-                               }
-                               else if (state == 2) {
-                                   var day = 0;
-                                   var hour = 1;
-                                   var delivery = "${order.deliveryDate}";
-                                   delivery =
-                                   eval('new Date(' + delivery.replace(/\d+(?=-[^-]+$)/,
-                                                                       function (a) {
-                                                                           return parseInt(a, 10)
-                                                                                  - 1;
-                                                                       }).match(/\d+/g) + ')');
-                                   day =
-                                   10 - ( now.getTime() - delivery.getTime()) / 1000 / 3600 / 24;
-
-                                   day = Math.floor(day);
-                                   hour =
-                                   24 - ( now.getTime() - delivery.getTime()) / 1000 / 3600 % 24;
-                                   hour = Math.floor(hour);
-                                   $("#day").html(day);
-                                   $("#hour").html(hour);
+                                   time_end = ${order.createDate.getTime()}+900000; // 设定结束时间
+                                   count_down0();
+                               } else if (state == 2) {
+                                   time_end = ${order.createDate.getTime()}+864000000; // 设定结束时间
+                                   count_down2();
                                }
                            }
-    )
+    );
+    //定义倒计时函数
+    function count_down0() {
+        var time_now = new Date(); // 获取当前时间
+        time_now = time_now.getTime();
+        var time_distance = time_end - time_now; // 时间差：活动结束时间减去当前时间
+        var int_day, int_hour, int_minute, int_second;
+        if (time_distance >= 0) {
+            // 相减的差数换算成天数
+            int_day = Math.floor(time_distance / 86400000);
+            time_distance -= int_day * 86400000;
+
+            // 相减的差数换算成小时
+            int_hour = Math.floor(time_distance / 3600000);
+            time_distance -= int_hour * 3600000;
+
+            // 相减的差数换算成分钟
+            int_minute = Math.floor(time_distance / 60000);
+            time_distance -= int_minute * 60000;
+
+            // 相减的差数换算成秒数
+            int_second = Math.floor(time_distance / 1000);
+
+            // 判断分钟小于10时，前面加0进行占位
+            if (int_minute < 10)
+                int_minute = "0" + int_minute;
+
+            // 判断秒数小于10时，前面加0进行占位
+            if (int_second < 10)
+                int_second = "0" + int_second;
+
+            // 显示倒计时效果
+            $("#times_minute").html(int_minute);
+            $("#times_second").html(int_second);
+            setTimeout(count_down0, 1000);
+        }
+    }
+    function count_down2() {
+        var time_now = new Date(); // 获取当前时间
+        time_now = time_now.getTime();
+        var time_distance = time_end - time_now; // 时间差：活动结束时间减去当前时间
+        var int_day, int_hour, int_minute, int_second;
+        if (time_distance >= 0) {
+            // 相减的差数换算成天数
+            int_day = Math.floor(time_distance / 86400000);
+            time_distance -= int_day * 86400000;
+
+            // 相减的差数换算成小时
+            int_hour = Math.floor(time_distance / 3600000);
+            time_distance -= int_hour * 3600000;
+
+            // 相减的差数换算成分钟
+            int_minute = Math.floor(time_distance / 60000);
+            time_distance -= int_minute * 60000;
+
+            // 相减的差数换算成秒数
+            int_second = Math.floor(time_distance / 1000);
+
+            // 判断小时小于10时，前面加0进行占位
+            if (int_hour < 10)
+                int_hour = "0" + int_hour;
+
+            // 判断分钟小于10时，前面加0进行占位
+            if (int_minute < 10)
+                int_minute = "0" + int_minute;
+
+            // 判断秒数小于10时，前面加0进行占位
+            if (int_second < 10)
+                int_second = "0" + int_second;
+
+            // 显示倒计时效果
+            $("#times_day").html(int_day);
+            $("#times_hour").html(int_hour);
+            $("#times_minute2").html(int_minute);
+            $("#times_second2").html(int_second);
+            setTimeout(count_down2, 1000);
+        }
+    }
 </script>
 <!--头部-->
 
@@ -71,7 +124,8 @@
     <!--待付款-->
     <div class="order-top order-top-obligation">
         <span>待付款</span>
-        <span><font id="point"></font>分钟后自动取消</span>
+            <%-- <span><font id="point"></font>分钟后自动取消</span>--%>
+        <span><font id="times_minute"></font>:<font id="times_second"></font> 后自动取消</span>
     </div>
 </c:if>
 <c:if test="${order.state == 3}">
@@ -91,7 +145,8 @@
     <!--已发货-->
     <div class="order-top order-top-shipped">
         <span>卖家已发货</span>
-        <span><font id="day"></font>天<font id="hour"></font>小时后自动确认收货</span>
+        <span><font id="times_day"></font>天<font id="times_hour"></font>时<font
+                id="times_minute2"></font>分<font id="times_second2"></font>秒后自动确认收货</span>
     </div>
 </c:if>
 
@@ -203,7 +258,7 @@
         </li>
         <li class="mui-table-view-cell trade-font-red"><span
                 class="mui-pull-right">实付金额：<font>￥<fmt:formatNumber type="number"
-                                                                     value="${order.truePrice/100}"
+                                                                     value="${order.totalPrice/100}"
                                                                      maxFractionDigits="2"/></font></span>
         </li>
     </ul>

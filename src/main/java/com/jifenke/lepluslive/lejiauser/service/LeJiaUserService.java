@@ -60,7 +60,7 @@ public class LeJiaUserService {
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public LeJiaUser findUserByPhoneNumber(String phoneNumber) {
-    return leJiaUserRepository.findByPhoneNumber(phoneNumber);
+    return leJiaUserRepository.findOneByPhoneNumber(phoneNumber);
   }
 
   /**

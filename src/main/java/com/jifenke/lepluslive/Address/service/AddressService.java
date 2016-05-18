@@ -38,17 +38,16 @@ public class AddressService {
     return addressRepository.findOne(id);
   }
 
-//  public Address findAddressByWeiXinUser(WeiXinUser weiXinUser) {
-//    return addressRepository.findByLeJiaUser(weiXinUser.getLeJiaUser());
-//  }
-
   public Address findAddressByLeJiaUserAndState(LeJiaUser leJiaUser) {
     Address address = addressRepository.findByLeJiaUserAndState(leJiaUser, 1);
     if (address != null) {
       return address;
     } else {
-      address = addressRepository.findOneByLeJiaUserAndStateNot(leJiaUser, 2);
-      return address;
+      List<Address> addressList = addressRepository.findByLeJiaUserAndStateNot(leJiaUser, 2);
+      if(addressList.size()>0){
+        return addressList.get(0);
+      }
+      return null;
     }
   }
 
@@ -135,6 +134,12 @@ public class AddressService {
     } else {
       return LejiaResult.build(301, "未找到收货地址记录");
     }
+  }
+
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  public void editOrderAddress(Address address,OnLineOrder onLineOrder) {
+    onLineOrder.setAddress(address);
+    orderService.editAddress(onLineOrder);
   }
 
 }
