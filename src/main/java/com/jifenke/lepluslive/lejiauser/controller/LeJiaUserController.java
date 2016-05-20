@@ -191,6 +191,7 @@ public class LeJiaUserController {
                                                            leJiaUser.getOneBarCodeUrl(),
                                                            leJiaUser.getUserSid(),
                                                            leJiaUser.getHeadImageUrl(),
+                                                           leJiaUser.getPhoneNumber(),
                                                            leJiaUser.getPhoneNumber()));
   }
 
@@ -245,6 +246,7 @@ public class LeJiaUserController {
                                                      leJiaUser.getOneBarCodeUrl(),
                                                      leJiaUser.getUserSid(),
                                                      leJiaUser.getHeadImageUrl(),
+                                                     leJiaUser.getPhoneNumber(),
                                                      leJiaUser.getPhoneNumber());
         list.add(leJiaUserDto);
       }

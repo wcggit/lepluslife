@@ -127,6 +127,8 @@ public class MerchantService {
 
     List<Object[]> list = query.getResultList();
 
+    em.close();
+
     List<MerchantDto> dtoList = new ArrayList<>();
     for (Object[] o : list) {
       MerchantDto merchantDto = new MerchantDto();

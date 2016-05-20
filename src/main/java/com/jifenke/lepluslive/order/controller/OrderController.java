@@ -20,6 +20,7 @@ import com.jifenke.lepluslive.weixin.controller.dto.CartDetailDto;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.springframework.http.MediaType;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -130,6 +131,24 @@ public class OrderController {
     } else {
       return LejiaResult.build(402, "未找到订单或地址数据");
     }
+  }
+
+  @ApiOperation("取消订单")
+  @RequestMapping(value = "/orderCancle", method = RequestMethod.POST)
+  public
+  @ResponseBody
+  LejiaResult orderCancle(@RequestParam(required = true) Long orderId) {
+    orderService.orderCancle(orderId);
+    return LejiaResult.ok();
+  }
+
+  @ApiOperation("确认收货")
+  @RequestMapping(value = "/orderConfirm", method = RequestMethod.POST)
+  public
+  @ResponseBody
+  LejiaResult orderConfim(@RequestParam(required = true) Long orderId) {
+    orderService.confrimOrder(orderId);
+    return LejiaResult.ok();
   }
 
   /**

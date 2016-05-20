@@ -71,7 +71,7 @@ public class MerchantController {
   @RequestMapping(value = "/detail", method = RequestMethod.POST)
   public
   @ResponseBody
-  LejiaResult detail(@ApiParam(value = "商家Id") @RequestParam(required = false) Long id) {
+  LejiaResult detail(@ApiParam(value = "商家Id") @RequestParam(required = true) Long id) {
     MerchantDto merchantDto = new MerchantDto();
     Merchant merchant = merchantService.findMerchantById(id);
     List<MerchantDetail> detailList = merchantService.findAllMerchantDetailByMerchant(merchant);
