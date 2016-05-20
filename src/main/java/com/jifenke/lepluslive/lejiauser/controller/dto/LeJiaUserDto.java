@@ -17,14 +17,25 @@ public class LeJiaUserDto {
 
   private String userName; //用户名 暂用手机号码
 
+  private String phoneNumber;
+
   public LeJiaUserDto(Long scoreA, Long scoreB, String userOneBarCode, String token,
-                      String headImageUrl, String userName) {
+                      String headImageUrl, String userName, String phoneNumber) {
     this.scoreA = scoreA;
     this.scoreB = scoreB;
     this.userOneBarCode = userOneBarCode;
     this.token = token;
     this.headImageUrl = headImageUrl;
     this.userName = userName;
+    this.phoneNumber = phoneNumber;
+  }
+
+  public String getPhoneNumber() {
+    return phoneNumber;
+  }
+
+  public void setPhoneNumber(String phoneNumber) {
+    this.phoneNumber = phoneNumber;
   }
 
   public String getToken() {

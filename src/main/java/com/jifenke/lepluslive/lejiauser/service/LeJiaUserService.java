@@ -96,7 +96,8 @@ public class LeJiaUserService {
 
     return new LeJiaUserDto(scoreA.getScore(), scoreB.getScore(),
                             leJiaUser.getOneBarCodeUrl(), leJiaUser.getUserSid(),
-                            leJiaUser.getHeadImageUrl(),leJiaUser.getPhoneNumber());
+                            leJiaUser.getHeadImageUrl(), leJiaUser.getPhoneNumber(),
+                            leJiaUser.getPhoneNumber());
   }
 
   /**
@@ -118,7 +119,7 @@ public class LeJiaUserService {
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public LeJiaUser login(LeJiaUser leJiaUser, String pwd, String token) {
 
-    if(pwd != null){
+    if (pwd != null) {
       if (!MD5Util.MD5Encode(pwd, null).equals(leJiaUser.getPwd())) {
         return null;
       }
