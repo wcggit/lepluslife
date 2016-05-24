@@ -119,9 +119,9 @@
                     <h5><font>${order.freightPrice/100}</font>元</h5>
                 </div>
                 <c:if test="${order.freightPrice == 0}">
-                <div class="mui-table-cell mui-col-xs-3 mui-text-right">
-                    <h5>包邮</h5>
-                </div>
+                    <div class="mui-table-cell mui-col-xs-3 mui-text-right">
+                        <h5>包邮</h5>
+                    </div>
                 </c:if>
             </div>
         </li>
@@ -244,39 +244,41 @@
 
 </script>
 <script type="text/javascript">
-    $('#btn-wxpay').on('click', function () {
-        if (${address!=null}) {
-            var truePrice = $("#turePay").html();
-            if (truePrice <= 0) {
-                alert("选择商品后才能付款~");
-                location.href = "/weixin/shop";
-                return;
-            }
-            var trueScore = document.getElementsByClassName('btn-entry')[0].value;
-            if ($(this).hasClass('btn-disabled')) {
-                return false;
-            }
-            $(this).addClass('btn-disabled');
-//            首先提交请求，生成预支付订单
-            $.post('${wxRootUrl}/weixin/pay/weixinpay', {
-                orderId: '${order.id}',
-                truePrice: truePrice,
-                trueScore: trueScore
-            }, function (res) {
-                $(this).removeClass('btn-disabled');
-//            调用微信支付js-api接口
-                if (res['err_msg'] != null && res['err_msg'] != "") {
-                    alert(res['err_msg']);
-                    return;
-                } else {
-                    weixinPay(res);
+    setTimeout(function () {
+        $('#btn-wxpay').on('click', function () {
+            if (${address!=null}) {
+                var truePrice = $("#turePay").html();
+                if (truePrice <= 0) {
+                    alert("选择商品后才能付款~");
+                    location.href = "/weixin/shop";
                     return;
                 }
-            });
-        } else {
-            location.href = "${wxRootUrl}/weixin/order/addressEdit/${order.id}";
-        }
-    });
+                var trueScore = document.getElementsByClassName('btn-entry')[0].value;
+                if ($(this).hasClass('btn-disabled')) {
+                    return false;
+                }
+                $(this).addClass('btn-disabled');
+//            首先提交请求，生成预支付订单
+                $.post('${wxRootUrl}/weixin/pay/weixinpay', {
+                    orderId: '${order.id}',
+                    truePrice: truePrice,
+                    trueScore: trueScore
+                }, function (res) {
+                    $(this).removeClass('btn-disabled');
+//            调用微信支付js-api接口
+                    if (res['err_msg'] != null && res['err_msg'] != "") {
+                        alert(res['err_msg']);
+                        return;
+                    } else {
+                        weixinPay(res);
+                        return;
+                    }
+                });
+            } else {
+                location.href = "${wxRootUrl}/weixin/order/addressEdit/${order.id}";
+            }
+        });
+    }, 200);
 
     function weixinPay(res) {
         wx.chooseWXPay({

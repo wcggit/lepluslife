@@ -13,11 +13,14 @@ import com.jifenke.lepluslive.order.domain.entities.ExpressInfo;
 import com.jifenke.lepluslive.order.domain.entities.OnLineOrder;
 import com.jifenke.lepluslive.order.service.ExpressInfoService;
 import com.jifenke.lepluslive.order.service.OrderService;
+import com.jifenke.lepluslive.score.domain.entities.ScoreA;
+import com.jifenke.lepluslive.score.domain.entities.ScoreADetail;
 import com.jifenke.lepluslive.score.domain.entities.ScoreB;
 import com.jifenke.lepluslive.score.service.ScoreAService;
 import com.jifenke.lepluslive.score.service.ScoreBService;
 import com.jifenke.lepluslive.weixin.controller.dto.CartDetailDto;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
+import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.http.MediaType;
@@ -32,9 +35,13 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import io.swagger.annotations.ApiOperation;
@@ -64,6 +71,9 @@ public class OrderController {
 
   @Inject
   private ExpressInfoService expressInfoService;
+
+  @Inject
+  private WeiXinPayService weiXinPayService;
 
   @ApiOperation("获取用户所有的订单")
   @RequestMapping(value = "/orderList", method = RequestMethod.POST)
@@ -117,6 +127,52 @@ public class OrderController {
     return LejiaResult.build(200, "ok", orderDto);
   }
 
+  @ApiOperation("APP微信支付接口")
+  @RequestMapping(value = "/weixinpay", method = RequestMethod.POST)
+  public
+  @ResponseBody
+  LejiaResult weixinPay(@RequestParam Long orderId, @RequestParam Long truePrice,
+                        @RequestParam Long trueScore, HttpServletRequest request) {
+    OnLineOrder onLineOrder = orderService.setPriceScoreForOrder(orderId, truePrice, trueScore);
+    if (onLineOrder == null) {
+      return LejiaResult.build(403, "库存不足");
+    }
+
+    //封装订单参数
+    SortedMap<Object, Object> map = weiXinPayService._buildOrderParams(request, onLineOrder);
+    //获取预支付id
+    Map unifiedOrder = weiXinPayService.createUnifiedOrder(map);
+    if (unifiedOrder.get("prepay_id") != null) {
+      SortedMap sortedMap = weiXinPayService.buildAppParams(
+          unifiedOrder.get("prepay_id").toString());
+      return LejiaResult.build(200, "ok", sortedMap);
+    } else {
+      return LejiaResult.build(404, "支付异常");
+    }
+  }
+
+  @ApiOperation("支付成功后请求数据")
+  @RequestMapping(value = "/paySuccess", method = RequestMethod.POST)
+  @ResponseBody
+  public LejiaResult paySuccess(@RequestParam Long orderId) {
+
+    OnLineOrder order = orderService.findOnLineOrderById(orderId);
+
+    if (order != null) {
+      ScoreADetail aDetail = scoreAService.findScoreADetailByOrderSid(order.getOrderSid());
+      if (aDetail != null) {
+        ScoreA scoreA = aDetail.getScoreA();
+        if (scoreA != null) {
+          HashMap<String, Object> map = new HashMap<>();
+          map.put("payBackScore", aDetail.getNumber());
+          map.put("totalScore", scoreA.getTotalScore());
+          return LejiaResult.build(200, "ok", map);
+        }
+      }
+    }
+    return LejiaResult.build(405, "未找到订单信息");
+  }
+
   @ApiOperation("修改订单的收货地址")
   @RequestMapping(value = "/editOrderAddr", method = RequestMethod.POST)
   public
@@ -125,7 +181,7 @@ public class OrderController {
                           @RequestParam(required = false) Long addrId) {
     OnLineOrder onLineOrder = orderService.findOrderById(orderId, false);
     Address address = addressService.findOneAddress(addrId);
-    if(onLineOrder != null && address != null){
+    if (onLineOrder != null && address != null) {
       addressService.editOrderAddress(address, onLineOrder);
       return LejiaResult.build(200, "ok");
     } else {

@@ -241,10 +241,10 @@ public class OrderService {
   }
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public OnLineOrder setPriceScoreForOrder(Long orderId, String truePrice, Long trueScore) {
+  public OnLineOrder setPriceScoreForOrder(Long orderId, Long truePrice, Long trueScore) {
     OnLineOrder onLineOrder = orderRepository.findOne(orderId);
     onLineOrder.setOrderSid(MvUtil.getOrderNumber());
-    onLineOrder.setTruePrice((long) (Float.parseFloat(truePrice) * 100));
+    onLineOrder.setTruePrice(truePrice);
     onLineOrder.setTrueScore(trueScore);
     if (onLineOrder.getState() == -1) {
       List<OrderDetail> orderDetails = onLineOrder.getOrderDetails();

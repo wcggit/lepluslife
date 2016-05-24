@@ -63,7 +63,8 @@ public class WeixinPayController {
   @ResponseBody
   Map<Object, Object> weixinPay(@RequestParam Long  orderId, @RequestParam String truePrice,
                                 @RequestParam Long trueScore, HttpServletRequest request) {
-    OnLineOrder onLineOrder = orderService.setPriceScoreForOrder(orderId,truePrice,trueScore);
+    Long newTruePrice = (long) (Float.parseFloat(truePrice) * 100);
+    OnLineOrder onLineOrder = orderService.setPriceScoreForOrder(orderId,newTruePrice,trueScore);
     if(onLineOrder ==null){
       HashMap<Object, Object> map = new HashMap<>();
       map.put("err_msg","库存不足~");

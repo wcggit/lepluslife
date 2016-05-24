@@ -9,13 +9,13 @@
 <script src="${resourceUrl}/js/jquery-2.0.3.min.js"></script>
 <!--底部菜单-->
 <nav class="mui-bar mui-bar-tab">
-    <a class="mui-tab-item"  id="topic">
-        <span class="mui-icon iconfont">&#xe604;</span>
-        <span class="mui-tab-label">乐选</span>
-    </a>
     <a class="mui-tab-item"  id="product">
         <span class="mui-icon mui-icon-list"></span>
         <span class="mui-tab-label">分类</span>
+    </a>
+    <a class="mui-tab-item"  id="topic">
+        <span class="mui-icon iconfont">&#xe604;</span>
+        <span class="mui-tab-label">乐选</span>
     </a>
     <a class="mui-tab-item"  id="cart">
         <span class="mui-icon iconfont">&#xe607;<span class="mui-badge cartNum" style="display: none"  id="cart-number"></span></span>

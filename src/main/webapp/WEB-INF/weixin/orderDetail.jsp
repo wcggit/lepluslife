@@ -305,7 +305,7 @@
         for (var i = 0; i < orderDetails.length; i++) {
             divStr += ' <div class="list-top"><div class="top-left">';
             divStr +=
-            '<span style="background: url(' + orderDetails[i].product.picture
+            '<span style="background: url(' + orderDetails[i].productSpec.picture
             + ') no-repeat;background-size: 100%;"></span></div>';
             divStr +=
             '<div class="top-right"><p class="right-ttl"><span class="trade-font-black mui-ellipsis">'
@@ -315,7 +315,7 @@
             + '</font></p>';
             divStr +=
             '<p class="right-pra">数量：<font>' + orderDetails[i].productNumber
-            + '</font>件<span class="mui-pull-right trade-font-red">￥<font>'+orderDetails[i].product.price/100+'</font></span> </div>';
+            + '</font>件<span class="mui-pull-right trade-font-red">￥<font>'+orderDetails[i].productSpec.price/100+'</font></span> </div>';
         }
         divStr += '</div>';
         return divStr;
