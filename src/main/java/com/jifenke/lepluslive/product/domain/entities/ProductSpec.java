@@ -41,7 +41,7 @@ public class ProductSpec {
   private Integer repository = 0;
 
   @Version
-  private Long version;
+  private Long version=0L;
 
   private String specDetail;
 

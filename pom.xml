@@ -113,6 +113,12 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
+        <dependency>
+            <groupId>com.taobao</groupId>
+            <artifactId>sms</artifactId>
+            <version>0.0.1</version>
+        </dependency>
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
@@ -241,14 +247,6 @@
             <groupId>net.glxn.qrgen</groupId>
             <artifactId>javase</artifactId>
             <version>2.0</version>
-        </dependency>
-
-        <dependency>
-        <groupId>com.taobao</groupId>
-        <artifactId>sms</artifactId>
-        <version>0.0.1</version>
-        <scope>system</scope>
-        <systemPath>${project.basedir}/src/main/lib/taobao-sdk-java-auto_1455552377940-20160515.jar</systemPath>
         </dependency>
 
         <!--<dependency>-->

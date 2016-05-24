@@ -146,7 +146,7 @@
                 </div>
             </div>
         </div>
-        <ul class="mui-table-view mui-table-view-chevron detail-hid" style="margin-top: 80px;"></ul>
+        <ul class="mui-table-view mui-table-view-chevron detail-hid"></ul>
     </div>
     <form action="/weixin/order/confirm" method="post" id="form">
         <input type="hidden" id="productId" name="productId" value="${product.id}">

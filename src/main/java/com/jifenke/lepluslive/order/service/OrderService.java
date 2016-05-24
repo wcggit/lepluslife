@@ -298,7 +298,9 @@ public class OrderService {
       onLineOrder.setTotalPrice(totalPrice + Constants.FREIGHT_PRICE.longValue());
     }
     onLineOrder.setLeJiaUser(weiXinUser.getLeJiaUser());
-    onLineOrder.setAddress(address);
+    if(address!=null){
+      onLineOrder.setAddress(address);
+    }
     onLineOrder.setOrderDetails(orderDetails);
     onLineOrder.setState(0);
     onLineOrder.setTruePrice(totalPrice);
@@ -311,6 +313,7 @@ public class OrderService {
   }
 
   public Long getCurrentUserObligationOrdersCount(LeJiaUser leJiaUser) {
+    Long id = leJiaUser.getId();
     return orderRepository.
         getCurrentUserObligationOrdersCount(leJiaUser.getId());
   }

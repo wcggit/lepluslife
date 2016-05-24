@@ -58,7 +58,7 @@ public class OnLineOrder {
 
   private String orderSid = MvUtil.getOrderNumber();
 
-  @ManyToOne
+  @ManyToOne(cascade = CascadeType.DETACH)
   private Address address;
 
   private Integer state;//0 未支付 1 已支付 2 已发货 3已收获 4 订单取消
