@@ -50,7 +50,7 @@
     <div class="bill" onclick="goPage('scoreDetail')">
         <img src="${resourceUrl}/images/newPersonal/bill.png" alt="">
 
-        <p>积分明细</p>
+        <p>明细记录</p>
     </div>
     <c:if test="${user.leJiaUser.phoneNumber == null || user.leJiaUser.phoneNumber == ''}">
         <div class="phonenum">
@@ -64,8 +64,9 @@
     <c:if test="${user.leJiaUser.phoneNumber != null && user.leJiaUser.phoneNumber != ''}">
         <div class="phonenum">
             <img src="${resourceUrl}/images/newPersonal/phone.png" alt="">
+            <p>已绑定手机号</p>
+            <a>${user.leJiaUser.phoneNumber}</a>
 
-            <p>${user.leJiaUser.phoneNumber}</p>
         </div>
     </c:if>
 

@@ -215,8 +215,14 @@ public class OrderController {
 
     OnLineOrder order = orderService.findOnLineOrderById(id);
 
+    if (order.getExpressNumber() == null) {
+      return MvUtil.go("/weixin/expressDetail");
+    }
     //调接口获取物流信息，存入数据库
     ExpressInfo expressInfo = expressInfoService.findExpressAndSave(order);
+    if (expressInfo == null) {
+      return MvUtil.go("/weixin/expressDetail");
+    }
 
     List<ExpressDto>
         expressDtoList =

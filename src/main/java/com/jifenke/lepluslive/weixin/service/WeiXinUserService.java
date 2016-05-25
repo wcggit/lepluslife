@@ -104,10 +104,12 @@ public class WeiXinUserService {
       weiXinUser.setLeJiaUser(leJiaUser);
       scoreA = new ScoreA();
       scoreA.setScore(0L);
+      scoreA.setTotalScore(0L);
       scoreA.setLeJiaUser(leJiaUser);
       scoreARepository.save(scoreA);
       scoreB = new ScoreB();
       scoreB.setScore(0L);
+      scoreB.setTotalScore(0L);
       scoreB.setLeJiaUser(leJiaUser);
       scoreBRepository.save(scoreB);
     }
