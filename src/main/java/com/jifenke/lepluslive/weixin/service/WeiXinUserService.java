@@ -137,23 +137,23 @@ public class WeiXinUserService {
     leJiaUser.setPhoneNumber(phoneNumber);
     leJiaUserRepository.save(leJiaUser);
 
-    ScoreA scoreA = scoreARepository.findByLeJiaUser(leJiaUser);
+//    ScoreA scoreA = scoreARepository.findByLeJiaUser(leJiaUser);
     ScoreB scoreB = scoreBRepository.findByLeJiaUser(leJiaUser);
-    scoreA.setScore(scoreA.getScore() + 1000);
-    scoreA.setTotalScore(scoreA.getTotalScore() + 1000);
+//    scoreA.setScore(scoreA.getScore() + 1000);
+//    scoreA.setTotalScore(scoreA.getTotalScore() + 1000);
     Date date = new Date();
-    scoreA.setLastUpdateDate(date);
+//    scoreA.setLastUpdateDate(date);
     scoreB.setLastUpdateDate(date);
     scoreB.setScore(scoreB.getScore() + 100);
     scoreB.setTotalScore(scoreB.getTotalScore() + 100);
     scoreBRepository.save(scoreB);
-    scoreARepository.save(scoreA);
+//    scoreARepository.save(scoreA);
 
-    ScoreADetail scoreADetail = new ScoreADetail();
-    scoreADetail.setNumber(1000L);
-    scoreADetail.setScoreA(scoreA);
-    scoreADetail.setOperate("关注送红包");
-    scoreADetailRepository.save(scoreADetail);
+//    ScoreADetail scoreADetail = new ScoreADetail();
+//    scoreADetail.setNumber(1000L);
+//    scoreADetail.setScoreA(scoreA);
+//    scoreADetail.setOperate("关注送红包");
+//    scoreADetailRepository.save(scoreADetail);
 
     ScoreBDetail scoreBDetail = new ScoreBDetail();
     scoreBDetail.setNumber(100L);
