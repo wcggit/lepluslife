@@ -158,6 +158,7 @@ public class OrderController {
     ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(leJiaUser);
     OnLineOrderDto onLineOrderDto = new OnLineOrderDto();
     try {
+      BeanUtils.copyProperties(onLineOrderDto, onLineOrder);
     } catch (IllegalAccessException e) {
       e.printStackTrace();
     } catch (InvocationTargetException e) {
