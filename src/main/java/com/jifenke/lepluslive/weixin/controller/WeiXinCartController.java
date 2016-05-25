@@ -229,7 +229,7 @@ public class WeiXinCartController {
     if (cart != null) {
       cartDetailDtoOrigin = JsonUtils.jsonToList(cart, CartDetailDto.class);
       cartDetailDtoOrigin.removeAll(cartDetailDtos);
-      onLineOrder = orderService.createCartOrder(cartDetailDtos, weiXinUser, address);
+      onLineOrder = orderService.createCartOrder(cartDetailDtos, weiXinUser.getLeJiaUser(), address);
     }
 
     CookieUtils

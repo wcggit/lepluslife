@@ -17,6 +17,7 @@ import com.jifenke.lepluslive.order.repository.OrderRepository;
 import com.jifenke.lepluslive.Address.service.AddressService;
 import com.jifenke.lepluslive.score.service.ScoreAService;
 import com.jifenke.lepluslive.score.service.ScoreBService;
+import com.jifenke.lepluslive.weixin.repository.DictionaryRepository;
 import com.jifenke.lepluslive.weixin.service.JobThread;
 import com.jifenke.lepluslive.weixin.service.WeiXinService;
 import com.jifenke.lepluslive.weixin.service.WeiXinUserService;
@@ -66,6 +67,9 @@ public class OrderService {
   private Scheduler scheduler;
 
   @Inject
+  private DictionaryRepository dictionaryRepository;
+
+  @Inject
   private OrderDetailRepository orderDetailRepository;
 
   private static String jobGroupName = "ORDER_JOBGROUP_NAME";
@@ -73,24 +77,29 @@ public class OrderService {
 
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public OnLineOrder createOrder(OrderDto orderDto, WeiXinUser weiXinUser, Address address) {
+  public OnLineOrder createOrder(OrderDto orderDto, LeJiaUser leJiaUser, Address address) {
     Product product = productService.findOneProduct(orderDto.getProductId());
 //    productService.editProductSpecRepository(orderDto.getProductSpec(), orderDto.getProductNum());
     OnLineOrder onLineOrder = new OnLineOrder();
     ProductSpec productSpec = productService.findOneProductSpec(orderDto.getProductSpec());
+    Long totalPrice = productSpec.getPrice() * orderDto.getProductNum();
+    Long totalMinPrice = productSpec.getMinPrice() * orderDto.getProductNum();
+    Long totalScore = totalPrice - totalMinPrice;
+    Integer FREIGHT_FREE_PRICE = Integer.parseInt(dictionaryRepository.findOne(1L).getValue());
     //判断是否包邮
-    if (orderDto.getTotalPrice().intValue() >= Constants.FREIGHT_FREE_PRICE) {
+    if (totalPrice.intValue() >= FREIGHT_FREE_PRICE) {
       onLineOrder.setFreightPrice(0L);
-      onLineOrder.setTotalPrice(orderDto.getTotalPrice());
+      onLineOrder.setTotalPrice(totalPrice);
     } else {
-      onLineOrder.setFreightPrice(Constants.FREIGHT_PRICE.longValue());
-      onLineOrder.setTotalPrice(orderDto.getTotalPrice() + Constants.FREIGHT_PRICE.longValue());
+      Long FREIGHT_PRICE = Long.parseLong(dictionaryRepository.findOne(2L).getValue());
+      onLineOrder.setFreightPrice(FREIGHT_PRICE);
+      onLineOrder.setTotalPrice(totalPrice + FREIGHT_PRICE);
     }
 
-    onLineOrder.setTruePrice(orderDto.getTotalPrice());
+    onLineOrder.setTruePrice(totalPrice);
     onLineOrder.setTotalScore(
-        (long) Math.floor(Double.parseDouble(orderDto.getTotalScore().toString()) / 100));
-    onLineOrder.setLeJiaUser(weiXinUser.getLeJiaUser());
+        (long) Math.floor(Double.parseDouble(totalScore.toString()) / 100));
+    onLineOrder.setLeJiaUser(leJiaUser);
     onLineOrder.setState(-1);
     onLineOrder.setAddress(address);
     List<OrderDetail> orderDetails = onLineOrder.getOrderDetails();
@@ -263,7 +272,7 @@ public class OrderService {
    * 购物车生成订单基本信息
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public OnLineOrder createCartOrder(List<CartDetailDto> cartDetailDtos, WeiXinUser weiXinUser,
+  public OnLineOrder createCartOrder(List<CartDetailDto> cartDetailDtos, LeJiaUser leJiaUser,
                                      Address address) {
     OnLineOrder onLineOrder = new OnLineOrder();
     List<OrderDetail> orderDetails = onLineOrder.getOrderDetails();
@@ -290,15 +299,17 @@ public class OrderService {
       orderDetails.add(orderDetail);
     }
     //判断是否包邮
-    if (totalPrice.intValue() >= Constants.FREIGHT_FREE_PRICE) {
+    Integer FREIGHT_FREE_PRICE = Integer.parseInt(dictionaryRepository.findOne(1L).getValue());
+    if (totalPrice.intValue() >= FREIGHT_FREE_PRICE) {
       onLineOrder.setFreightPrice(0L);
       onLineOrder.setTotalPrice(totalPrice);
     } else {
-      onLineOrder.setFreightPrice(Constants.FREIGHT_PRICE.longValue());
-      onLineOrder.setTotalPrice(totalPrice + Constants.FREIGHT_PRICE.longValue());
+      Long FREIGHT_PRICE = Long.parseLong(dictionaryRepository.findOne(2L).getValue());
+      onLineOrder.setFreightPrice(FREIGHT_PRICE);
+      onLineOrder.setTotalPrice(totalPrice + FREIGHT_PRICE);
     }
-    onLineOrder.setLeJiaUser(weiXinUser.getLeJiaUser());
-    if(address!=null){
+    onLineOrder.setLeJiaUser(leJiaUser);
+    if (address != null) {
       onLineOrder.setAddress(address);
     }
     onLineOrder.setOrderDetails(orderDetails);

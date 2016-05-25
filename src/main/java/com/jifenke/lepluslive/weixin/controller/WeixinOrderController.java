@@ -69,7 +69,7 @@ public class WeixinOrderController {
   public ModelAndView orderCreate(OrderDto orderDto, HttpServletRequest request, Model model) {
     WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
     Address address = addressService.findAddressByLeJiaUserAndState(weiXinUser.getLeJiaUser());
-    model.addAttribute("order", orderService.createOrder(orderDto, weiXinUser, address));
+    model.addAttribute("order", orderService.createOrder(orderDto, weiXinUser.getLeJiaUser(), address));
     ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(weiXinUser.getLeJiaUser());
     model.addAttribute("address", address);
     model.addAttribute("wxConfig", getWeiXinPayConfig(request));

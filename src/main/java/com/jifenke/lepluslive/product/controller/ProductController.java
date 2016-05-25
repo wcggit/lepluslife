@@ -1,16 +1,18 @@
 package com.jifenke.lepluslive.product.controller;
 
-import com.jifenke.lepluslive.global.config.Constants;
+
 import com.jifenke.lepluslive.global.util.CookieUtils;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.product.controller.dto.ProductDto;
 import com.jifenke.lepluslive.product.domain.entities.Product;
-import com.jifenke.lepluslive.product.domain.entities.ProductDetail;
+
 import com.jifenke.lepluslive.product.domain.entities.ProductType;
 import com.jifenke.lepluslive.product.domain.entities.ScrollPicture;
 import com.jifenke.lepluslive.product.service.ProductService;
-import com.jifenke.lepluslive.global.util.PaginationUtil;
+
 import com.jifenke.lepluslive.product.service.ScrollPictureService;
+
+import com.jifenke.lepluslive.weixin.service.DictionaryService;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.http.MediaType;
@@ -20,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -44,6 +46,8 @@ public class ProductController {
   @Inject
   private ScrollPictureService scrollPictureService;
 
+  @Inject
+  private DictionaryService dictionaryService;
 
   //分页
   @ApiOperation(value = "查看商品列表")
@@ -96,7 +100,10 @@ public class ProductController {
       ProductType productType = productService.findOneProductType(product.getProductType().getId());
       ProductDto productDto = new ProductDto();
       productDto.setProductSpecs(productService.findAllProductSpec(product));
-      productDto.setFreePrice(Constants.FREIGHT_FREE_PRICE);
+      Integer
+          FREIGHT_FREE_PRICE =
+          Integer.parseInt(dictionaryService.findDictionaryById(1L).getValue());
+      productDto.setFreePrice(FREIGHT_FREE_PRICE);
       try {
         BeanUtils.copyProperties(productDto, product);
         productDto.setProductType(productType);
