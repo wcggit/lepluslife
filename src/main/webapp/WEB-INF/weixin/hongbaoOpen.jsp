@@ -27,13 +27,13 @@
 <div class="content">
     <div class="topbg"></div>
     <div class="middlediv">
-        <div class="redpacket">
-            <div class="lefticon"></div>
-            <div class="redright">
-                <p class="num"><span>￥</span>10</p>
-                <p class="word">红包</p>
-            </div>
-        </div>
+        <%--<div class="redpacket">--%>
+            <%--<div class="lefticon"></div>--%>
+            <%--<div class="redright">--%>
+                <%--<p class="num"><span>￥</span>10</p>--%>
+                <%--<p class="word">红包</p>--%>
+            <%--</div>--%>
+        <%--</div>--%>
         <div class="goldbox">
             <div class="lefticon"></div>
             <div class="goldright">
