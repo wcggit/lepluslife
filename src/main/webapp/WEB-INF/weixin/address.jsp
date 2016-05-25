@@ -136,6 +136,7 @@
 <script src="${resourceUrl}/js/city.data.js" type="text/javascript" charset="utf-8"></script>
 <script src="${resourceUrl}/js/city.data-3.js" type="text/javascript" charset="utf-8"></script>
 <script>
+    document.title="收货地址";
     if (${address!=null}) {
         var province = "${address.province}" + " " + "${address.city}" + " " + "${address.county}";
         $("#cityResult3").text(province);

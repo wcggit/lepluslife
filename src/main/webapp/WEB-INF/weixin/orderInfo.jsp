@@ -272,7 +272,7 @@
                 </c:if>
                 <c:if test="${payBackScoreA != null}">
                     <fmt:formatNumber type="number"
-                                      value="${payBackScoreA/100}"
+                                      value="${payBackScoreA.number/100}"
                                       maxFractionDigits="2"/>
                 </c:if>
             </font>红包</span>

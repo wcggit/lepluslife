@@ -55,6 +55,11 @@ public class ExpressInfoService {
     }
 
     Map<String, Object> map = getExpressInfo(order.getExpressNumber());
+    Integer expressStatus = Integer.valueOf(map.get("status").toString());
+    if (expressStatus == null || expressStatus != 0) {
+      return null;
+    }
+
     JSONObject jasonObject = JSONObject.fromObject(map.get("result"));
     Map mapList = (Map) jasonObject;
     if (expressInfo == null) {

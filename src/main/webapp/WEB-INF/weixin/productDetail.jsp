@@ -156,11 +156,23 @@
         <input type="hidden" id="productSpec" name="productSpec">
     </form>
 </div>
+
+<!--提示-->
+<div class="xzgg">
+    <div>
+        <p>请选择规格</p>
+        <p>知道了</p>
+    </div>
+
+</div>
+
 </body>
 <script type="text/javascript" src="${resourceUrl}/js/mui.min.js"></script>
 <script type="text/javascript" src="${resourceUrl}/js/dropload.min.js"></script>
 <script type="text/javascript" src="${resourceUrl}/js/prodect_detail.js"></script>
 <script>
+
+    var tanState = 0;
     $(function () {
         $(".total_price").text(toDecimal($(".total_price").text()));
         $("#min_price").text(toDecimal($("#min_price").text()));
@@ -316,7 +328,12 @@
     }
 
     function xuanzheguige() {
+        if(tanState == 1){
+            tanchaung();
+            return ;
+        }
         //先出现
+        tanState = 1;
         $('.mui-content .page_more').eq(0).fadeIn();
         $('.mui-table-view').eq(0).css('display', 'none');
         $('.mui-pull').eq(0).css('display', 'none');
@@ -325,6 +342,13 @@
                 elementTop2 = elementTop - eval($('.more_main').height());
         $('.more_main').css('bottom', '0px');
         $('.mui-scroll').css('transform', 'translate3d(0px, 0px, 0px)');
+    }
+
+    function tanchaung(){
+        //  提示框
+        $('.xzgg').css({'display':'block'});
+        $('.xzgg div').animate({'top':'80vw'});
+        $('.xzgg div p:last-child').on('click',function(){$('.xzgg').css({'display':'none'});})
     }
 
 </script>

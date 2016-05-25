@@ -21,12 +21,12 @@
 
 <body>
 <!--头部-->
-<header class="mui-bar mui-bar-nav" style="background: #fff;">
-    <a style="color: #D62D2B;" class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"
-       onclick="history.go(-1)"></a>
+<%--<header class="mui-bar mui-bar-nav" style="background: #fff;">--%>
+<%--<a style="color: #D62D2B;" class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"--%>
+<%--onclick="history.go(-1)"></a>--%>
 
-    <h1 class="mui-title" style="color: #D62D2B;font-weight: bold;">订单确定</h1>
-</header>
+<%--<h1 class="mui-title" style="color: #D62D2B;font-weight: bold;">订单确定</h1>--%>
+<%--</header>--%>
 <!--底部菜单-->
 <nav class="mui-bar mui-bar-tab">
     <a class="mui-tab-item mui-active">
@@ -103,26 +103,26 @@
         <li class="mui-table-view-cell">
             <div class="mui-table">
                 <div class="mui-table-cell mui-col-xs-3">
-                    <h5>总价</h5>
-                </div>
-                <div class="mui-table-cell mui-col-xs-5 mui-text-left">
-                    <h5>${order.totalPrice/100}元</h5>
-                </div>
-            </div>
-        </li>
-        <li class="mui-table-view-cell">
-            <div class="mui-table">
-                <div class="mui-table-cell mui-col-xs-3">
                     <h5>邮费</h5>
                 </div>
                 <div class="mui-table-cell mui-col-xs-5 mui-text-left">
                     <h5><font>${order.freightPrice/100}</font>元</h5>
                 </div>
-                <c:if test="${order.freightPrice == 0}">
-                    <div class="mui-table-cell mui-col-xs-3 mui-text-right">
-                        <h5>包邮</h5>
-                    </div>
-                </c:if>
+                <%--<c:if test="${order.freightPrice == 0}">--%>
+                    <%--<div class="mui-table-cell mui-col-xs-3 mui-text-right">--%>
+                        <%--<h5>包邮</h5>--%>
+                    <%--</div>--%>
+                <%--</c:if>--%>
+            </div>
+        </li>
+        <li class="mui-table-view-cell">
+            <div class="mui-table">
+                <div class="mui-table-cell mui-col-xs-3">
+                    <h5>总价</h5>
+                </div>
+                <div class="mui-table-cell mui-col-xs-5 mui-text-left">
+                    <h5>${order.totalPrice/100}元</h5>
+                </div>
             </div>
         </li>
         <li class="mui-table-view-cell">
@@ -160,6 +160,7 @@
 </div>
 </body>
 <script type="text/javascript">
+    document.title = "订单确定";
     //		手机号中间四位变*
     if (${address!=null}) {
         var value = document.getElementsByClassName('order-tel')[0].innerHTML;
@@ -171,14 +172,23 @@
     var btn_entry = document.getElementsByClassName('btn-entry')[0];
     var max_jf = document.getElementsByClassName('max-jf')[0];
     btn_entry.oninput = function () {
+        this.value = this.value.replace(/[^\d]/g, '');
         var score = this.value;
+        var scoreB = $("#score-hidden").val();
         if (score > eval(max_jf.innerHTML)) {
-            alert('您最多可以使用' + eval(max_jf.innerHTML) + '积分');
-            this.value = eval(max_jf.innerHTML);
+            if (scoreB >= eval(max_jf.innerHTML)) {
+                alert('您最多可以使用' + eval(max_jf.innerHTML) + '积分');
+                this.value = eval(max_jf.innerHTML);
+                entry_change.innerHTML = this.value;
+            } else {
+                alert('您最多可以使用' + scoreB + '积分');
+                this.value = scoreB;
+                entry_change.innerHTML = this.value;
+            }
             return;
         }
         score = this.value;
-        var scoreB = $("#score-hidden").val();
+
         if (score > eval(scoreB)) {
             alert('您的积分不足');
             this.value = $("#score-hidden").val();
@@ -186,7 +196,7 @@
         entry_change.innerHTML = btn_entry.value;
 
         $("#turePay").html(numSub(${order.totalPrice/100}, btn_entry.value));
-    }
+    };
     function numSub(num1, num2) {
         var baseNum, baseNum1, baseNum2;
         var precision;// 精度
@@ -204,7 +214,6 @@
         precision = (baseNum1 >= baseNum2) ? baseNum1 : baseNum2;
         return ((num1 * baseNum - num2 * baseNum) / baseNum).toFixed(precision);
     }
-    ;
 
     function goAddressEdit() {
         var truePrice = $("#turePay").html();
@@ -214,7 +223,6 @@
             return;
         }
         location.href = "${wxRootUrl}/weixin/order/addressEdit/${order.id}";
-        return;
 
     }
 

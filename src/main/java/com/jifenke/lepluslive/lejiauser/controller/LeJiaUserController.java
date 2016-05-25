@@ -174,8 +174,8 @@ public class LeJiaUserController {
   @RequestMapping(value = "/login", method = RequestMethod.POST)
   public
   @ResponseBody
-  LejiaResult login(@RequestParam(required = false) String phoneNumber,
-                    @RequestParam(required = false) String pwd,
+  LejiaResult login(@RequestParam(required = true) String phoneNumber,
+                    @RequestParam(required = true) String pwd,
                     @ApiParam(value = "推送token") @RequestParam(required = false) String token) {
     LeJiaUser leJiaUser = leJiaUserService.findUserByPhoneNumber(phoneNumber);
     if (leJiaUser == null) {

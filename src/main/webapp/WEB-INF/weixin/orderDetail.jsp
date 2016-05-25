@@ -86,6 +86,7 @@
 <script type="text/javascript" src="${resourceUrl}/js/mui.min.js"></script>
 
 <script type="text/javascript" charset="utf-8">
+    document.title="订单";
     var div1 = document.body.querySelector('#tabbar-with-detail2');
     var div2 = document.body.querySelector('#tabbar-with-detail3');
     var div3 = document.body.querySelector('#tabbar-with-detail4');
