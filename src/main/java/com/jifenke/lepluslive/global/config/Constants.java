@@ -36,8 +36,8 @@ public final class Constants {
     public static final String SMS_CHANGE_PWD_CODE = "SMS_8275440";  //修改密码模板id
     public static final String SMS_BANGDING_CODE = "SMS_8275446";  //绑定手机号码模板id
 
-    public static final Integer FREIGHT_PRICE = 1000;  //运费
-    public static final Integer FREIGHT_FREE_PRICE = 12800;  //免运费最低价格
+//    public static final Integer FREIGHT_PRICE = 1000;  //运费
+//    public static final Integer FREIGHT_FREE_PRICE = 4800;  //免运费最低价格
 
     private Constants() {
     }

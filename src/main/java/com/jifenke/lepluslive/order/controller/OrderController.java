@@ -13,14 +13,18 @@ import com.jifenke.lepluslive.order.domain.entities.ExpressInfo;
 import com.jifenke.lepluslive.order.domain.entities.OnLineOrder;
 import com.jifenke.lepluslive.order.service.ExpressInfoService;
 import com.jifenke.lepluslive.order.service.OrderService;
+import com.jifenke.lepluslive.product.domain.entities.Product;
+import com.jifenke.lepluslive.product.domain.entities.ProductSpec;
 import com.jifenke.lepluslive.score.domain.entities.ScoreA;
 import com.jifenke.lepluslive.score.domain.entities.ScoreADetail;
 import com.jifenke.lepluslive.score.domain.entities.ScoreB;
 import com.jifenke.lepluslive.score.service.ScoreAService;
 import com.jifenke.lepluslive.score.service.ScoreBService;
 import com.jifenke.lepluslive.weixin.controller.dto.CartDetailDto;
+import com.jifenke.lepluslive.weixin.controller.dto.OrderDto;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
+import com.jifenke.lepluslive.weixin.service.WeiXinService;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.http.MediaType;
@@ -35,6 +39,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.lang.reflect.InvocationTargetException;
+import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,6 +81,9 @@ public class OrderController {
   @Inject
   private WeiXinPayService weiXinPayService;
 
+  @Inject
+  private WeiXinService weiXinService;
+
   @ApiOperation("获取用户所有的订单")
   @RequestMapping(value = "/orderList", method = RequestMethod.POST)
   public
@@ -96,8 +105,7 @@ public class OrderController {
   @ResponseBody
   LejiaResult createCartOrder(
       @ApiParam(value = "用户身份标识token") @RequestParam(required = false) String token,
-      HttpServletResponse response,
-      @ApiParam(value = "商品id,商品规格id和数量") @RequestBody(required = false) List<CartDetailDto> cartDetailDtos) {
+      @ApiParam(value = "商品id_商品规格id_数量,") @RequestParam(required = false) String cartDetailDtos) {
     if (token == null) {
       return LejiaResult.build(207, "请先登录");
     }
@@ -109,11 +117,10 @@ public class OrderController {
     if (count >= 4) {
       return LejiaResult.build(401, "未支付订单过多,请支付后再下单");
     }
+    List<CartDetailDto> cartDetailDtoList = stringToList(cartDetailDtos);
     Address address = addressService.findAddressByLeJiaUserAndState(leJiaUser);
-    WeiXinUser weiXinUser = new WeiXinUser();
-    weiXinUser.setLeJiaUser(leJiaUser);
-    ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(weiXinUser.getLeJiaUser());
-    OnLineOrder onLineOrder = orderService.createCartOrder(cartDetailDtos, weiXinUser, address);
+    ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(leJiaUser);
+    OnLineOrder onLineOrder = orderService.createCartOrder(cartDetailDtoList, leJiaUser, address);
     OnLineOrderDto orderDto = new OnLineOrderDto();
     try {
       BeanUtils.copyProperties(orderDto, onLineOrder);
@@ -125,6 +132,39 @@ public class OrderController {
     orderDto.setScoreB(scoreB.getScore());
 
     return LejiaResult.build(200, "ok", orderDto);
+  }
+
+  @ApiOperation("商品详情页立即购买")
+  @RequestMapping(value = "/confirm", method = RequestMethod.POST)
+  @ResponseBody
+  public LejiaResult orderCreate(
+      @ApiParam(value = "用户身份标识token") @RequestParam(required = true) String token,
+      @RequestParam(required = true) Long productId,
+      @RequestParam(required = true) Integer productNum,
+      @RequestParam(required = true) Long productSpecId) {
+    if (token == null) {
+      return LejiaResult.build(207, "请先登录");
+    }
+    LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);
+    if (leJiaUser == null) {
+      return LejiaResult.build(206, "未找到用户");
+    }
+    OrderDto orderDto = new OrderDto();
+    orderDto.setProductId(productId);
+    orderDto.setProductNum(productNum);
+    orderDto.setProductSpec(productSpecId);
+    Address address = addressService.findAddressByLeJiaUserAndState(leJiaUser);
+    OnLineOrder onLineOrder = orderService.createOrder(orderDto, leJiaUser, address);
+    ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(leJiaUser);
+    OnLineOrderDto onLineOrderDto = new OnLineOrderDto();
+    try {
+    } catch (IllegalAccessException e) {
+      e.printStackTrace();
+    } catch (InvocationTargetException e) {
+      e.printStackTrace();
+    }
+    onLineOrderDto.setScoreB(scoreB.getScore());
+    return LejiaResult.build(200, "ok", onLineOrderDto);
   }
 
   @ApiOperation("APP微信支付接口")
@@ -250,5 +290,28 @@ public class OrderController {
                        scoreAService.findScoreADetailByOrderSid(order.getOrderSid()));
 
     return MvUtil.go("/weixin/orderInfo");
+  }
+
+  private List<CartDetailDto> stringToList(String cartDetails) {
+    try {
+      cartDetails = URLDecoder.decode(cartDetails, "utf8");
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    List<CartDetailDto> detailDtoList = new ArrayList<>();
+    String[] details = cartDetails.split(",");
+    for (String detail : details) {
+      String[] s = detail.split("_");
+      CartDetailDto cartDetailDto = new CartDetailDto();
+      Product product = new Product();
+      ProductSpec productSpec = new ProductSpec();
+      product.setId(Long.parseLong(s[0]));
+      productSpec.setId(Long.parseLong(s[1]));
+      cartDetailDto.setProduct(product);
+      cartDetailDto.setProductSpec(productSpec);
+      cartDetailDto.setProductNumber(Integer.parseInt(s[2]));
+      detailDtoList.add(cartDetailDto);
+    }
+    return detailDtoList;
   }
 }

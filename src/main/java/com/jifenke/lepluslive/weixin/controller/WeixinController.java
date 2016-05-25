@@ -17,6 +17,8 @@ import com.jifenke.lepluslive.score.domain.entities.ScoreB;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.score.service.ScoreAService;
 import com.jifenke.lepluslive.score.service.ScoreBService;
+import com.jifenke.lepluslive.weixin.repository.DictionaryRepository;
+import com.jifenke.lepluslive.weixin.service.DictionaryService;
 import com.jifenke.lepluslive.weixin.service.WeiXinService;
 import com.jifenke.lepluslive.weixin.service.WeiXinUserService;
 
@@ -77,6 +79,9 @@ public class WeixinController {
   @Inject
   private LeJiaUserService leJiaUserService;
 
+  @Inject
+  private DictionaryService dictionaryService;
+
 
   @RequestMapping("/shop")
   public ModelAndView goProductPage(HttpServletRequest request, HttpServletResponse response,
@@ -97,7 +102,8 @@ public class WeixinController {
         productService.findAllProductDetailsByProduct(product);
     ProductDto productDto = new ProductDto();
     productDto.setProductSpecs(productService.findAllProductSpec(product));
-    productDto.setFreePrice(Constants.FREIGHT_FREE_PRICE);
+    Integer FREIGHT_FREE_PRICE = Integer.parseInt(dictionaryService.findDictionaryById(1L).getValue());
+    productDto.setFreePrice(FREIGHT_FREE_PRICE);
     try {
       BeanUtils.copyProperties(productDto, product);
       productDto.setScrollPictures(scrollPictureList.stream().map(scrollPicture -> {
