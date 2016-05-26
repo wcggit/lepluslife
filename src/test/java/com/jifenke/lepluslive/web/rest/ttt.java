@@ -11,12 +11,14 @@ import com.jifenke.lepluslive.order.domain.entities.OnLineOrder;
 import com.jifenke.lepluslive.order.domain.entities.OrderDetail;
 import com.jifenke.lepluslive.order.repository.OrderDetailRepository;
 import com.jifenke.lepluslive.order.repository.OrderRepository;
+import com.jifenke.lepluslive.order.service.OrderService;
 import com.jifenke.lepluslive.score.repository.ScoreARepository;
 import com.jifenke.lepluslive.score.repository.ScoreBRepository;
 import com.jifenke.lepluslive.topic.domain.entities.Topic;
 import com.jifenke.lepluslive.topic.service.TopicService;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.repository.WeiXinUserRepository;
+import com.jifenke.lepluslive.weixin.service.WeixinPayLogService;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -73,15 +75,15 @@ public class ttt {
   @Inject
   private OrderRepository orderRepository;
 
+  @Inject
+  private WeixinPayLogService weixinPayLogService;
+
 
   @Test
   public void tttt() {
-    List<WeiXinUser> all = weiXinUserRepository.findAll();
-    for (WeiXinUser weiXinUser : all) {
-      weiXinUser.setState(1);
-      weiXinUserRepository.save(weiXinUser);
-    }
+    weixinPayLogService.savePayLog("ceshi", "nihao", "dindan问题");
   }
+}
 
 ////  public static void main(String[] args) {
 ////    int x[][] = new int[9][9];
@@ -111,4 +113,3 @@ public class ttt {
 //  }
 
 
-}

@@ -3,6 +3,8 @@ package com.jifenke.lepluslive.order.service;
 import com.jifenke.lepluslive.Address.domain.entities.Address;
 import com.jifenke.lepluslive.global.config.Constants;
 import com.jifenke.lepluslive.global.util.MvUtil;
+import com.jifenke.lepluslive.job.OrderStatusQueryJob;
+import com.jifenke.lepluslive.job.ValidateCodeJob;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.order.repository.OrderDetailRepository;
 import com.jifenke.lepluslive.product.domain.entities.Product;
@@ -19,17 +21,26 @@ import com.jifenke.lepluslive.score.service.ScoreAService;
 import com.jifenke.lepluslive.score.service.ScoreBService;
 import com.jifenke.lepluslive.weixin.repository.DictionaryRepository;
 import com.jifenke.lepluslive.weixin.service.JobThread;
+import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
 import com.jifenke.lepluslive.weixin.service.WeiXinService;
 import com.jifenke.lepluslive.weixin.service.WeiXinUserService;
 
+import org.quartz.JobBuilder;
+import org.quartz.JobDetail;
 import org.quartz.Scheduler;
+import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
+import org.quartz.TriggerKey;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -53,6 +64,9 @@ public class OrderService {
 
   @Inject
   private WeiXinUserService weiXinUserService;
+
+  @Inject
+  private WeiXinPayService weiXinPayService;
 
   @Inject
   private OrderRepository orderRepository;
@@ -173,6 +187,24 @@ public class OrderService {
       scoreBService.paySuccess(onLineOrder.getLeJiaUser(), onLineOrder.getTrueScore(),
                                onLineOrder.getOrderSid());
       System.out.println(onLineOrder.getState() + "之后");
+      orderRepository.save(onLineOrder);
+    }
+
+
+  }
+
+  /**
+   * @param onLineOrder 支付成功后,a积分加,b积分减,修改订单状态为已支付
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  public void paySuccessQuery(OnLineOrder onLineOrder) {
+    if (onLineOrder.getState() == 0 || onLineOrder.getState() == 4) {
+      onLineOrder.setState(1);
+      scoreAService.paySuccess(onLineOrder.getLeJiaUser()
+          , onLineOrder.getTruePrice(), onLineOrder.getOrderSid());
+      scoreBService.paySuccess(onLineOrder.getLeJiaUser(), onLineOrder.getTrueScore(),
+                               onLineOrder.getOrderSid());
+
       orderRepository.save(onLineOrder);
     }
 
@@ -335,6 +367,58 @@ public class OrderService {
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public OnLineOrder findOnLineOrderById(Long id) {
     return orderRepository.findOne(id);
+  }
+
+  /**
+   * 5分钟后查询订单是否支付完成防止掉单
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  public void startOrderStatusQueryJob(Long orderId) {
+    new Thread(new Runnable() {
+      @Override
+      public void run() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        try {
+          Date time = sdf.parse(sdf.format(new Date().getTime() + Constants.ORDER_QUERY));
+          JobDetail orderStatusQuery = JobBuilder.newJob(OrderStatusQueryJob.class)
+              .withIdentity("orderStatusQuery" + orderId, jobGroupName)
+              .usingJobData("orderId", orderId)
+              .build();
+          Trigger orderStatusQueryTrigger = TriggerBuilder.newTrigger()
+              .withIdentity(
+                  TriggerKey.triggerKey("orderStatusQueryJobTrigger"
+                                        + orderId, triggerGroupName))
+              .startAt(time)
+              .build();
+          scheduler.scheduleJob(orderStatusQuery, orderStatusQueryTrigger);
+          scheduler.start();
+
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    }).start();
+  }
+
+  /**
+   * 5分钟后查询订单是否支付完成防止掉单
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  public void orderStatusQuery(Long id) {
+    OnLineOrder onLineOrder = orderRepository.findOne(id);
+    if (onLineOrder != null) {
+      if (onLineOrder.getState() == 4 || onLineOrder.getState() == 0) {
+        //调接口查询订单是否支付完成
+        SortedMap<Object, Object> map = weiXinPayService.buildOrderQueryParams(onLineOrder);
+        Map orderMap = weiXinPayService.orderStatusQuery(map);
+        String returnCode = (String) orderMap.get("return_code");
+        String resultCode = (String) orderMap.get("result_code");
+        if ("SUCCESS".equals(returnCode) && "SUCCESS".equals(resultCode)) {
+          //对订单进行处理
+          paySuccessQuery(onLineOrder);
+        }
+      }
+    }
   }
 
 //  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
