@@ -6,6 +6,7 @@ import com.jifenke.lepluslive.score.domain.entities.ScoreADetail;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.score.repository.ScoreADetailRepository;
 import com.jifenke.lepluslive.score.repository.ScoreARepository;
+import com.jifenke.lepluslive.weixin.repository.DictionaryRepository;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -28,6 +29,9 @@ public class ScoreAService {
   @Inject
   private ScoreADetailRepository scoreADetailRepository;
 
+  @Inject
+  private DictionaryRepository dictionaryRepository;
+
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public ScoreA findScoreAByLeJiaUser(LeJiaUser leJiaUser) {
@@ -41,7 +45,8 @@ public class ScoreAService {
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public void paySuccess(LeJiaUser leJiaUser, Long totalPrice,String orderSid) {
     ScoreA scoreA = findScoreAByLeJiaUser(leJiaUser);
-    Long payBackScore = (long) Math.ceil((double) (totalPrice * 12) / 100);
+    Integer PAY_BACK_SCALE = Integer.parseInt(dictionaryRepository.findOne(3L).getValue());
+    Long payBackScore = (long) Math.ceil((double) (totalPrice * PAY_BACK_SCALE) / 100);
     scoreA.setScore(scoreA.getScore() + payBackScore);
     scoreA.setTotalScore(scoreA.getTotalScore() + payBackScore);
     ScoreADetail scoreADetail = new ScoreADetail();
