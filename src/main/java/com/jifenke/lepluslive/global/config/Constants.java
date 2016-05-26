@@ -21,6 +21,7 @@ public final class Constants {
     public static final String BAR_CODE_EXT = "png";
 
     public static final Long ORDER_EXPIRED = 900000L;
+    public static final Long ORDER_QUERY = 300000L;
     //public static final Long ORDER_EXPIRED = 90000L;
 
     public static final Long VALIDATECODE_EXPIRED = 300000L;  //验证码过期时间

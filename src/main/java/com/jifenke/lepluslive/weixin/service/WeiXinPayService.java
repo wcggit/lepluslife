@@ -101,13 +101,28 @@ public class WeiXinPayService {
     orderParams.put("body", "乐加商城消费");
     orderParams.put("out_trade_no", onLineOrder.getOrderSid());
     orderParams.put("fee_type", "CNY");
-   // orderParams.put("total_fee", String.valueOf(onLineOrder.getTruePrice()));
+    // orderParams.put("total_fee", String.valueOf(onLineOrder.getTruePrice()));
     orderParams.put("total_fee", "1");
     orderParams.put("spbill_create_ip", getIpAddr(request));
     orderParams.put("notify_url", weixinRootUrl + "/weixin/pay/afterPay");
     orderParams.put("trade_type", "APP");
     orderParams.put("input_charset", "UTF-8");
     String sign = createSign("UTF-8", orderParams, _mchKey);
+    orderParams.put("sign", sign);
+    return orderParams;
+  }
+
+  /**
+   * 封装订单查询参数
+   */
+  @Transactional(readOnly = true)
+  public SortedMap<Object, Object> buildOrderQueryParams(OnLineOrder onLineOrder) {
+    SortedMap<Object, Object> orderParams = new TreeMap<Object, Object>();
+    orderParams.put("appid", appId);
+    orderParams.put("mch_id", mchId);
+    orderParams.put("out_trade_no", onLineOrder.getOrderSid());
+    orderParams.put("nonce_str", MvUtil.getRandomStr());
+    String sign = createSign("UTF-8", orderParams, mchKey);
     orderParams.put("sign", sign);
     return orderParams;
   }
@@ -162,6 +177,15 @@ public class WeiXinPayService {
   public Map<Object, Object> createUnifiedOrder(SortedMap orderParams) {
     return WeixinPayUtil
         .createUnifiedOrder("https://api.mch.weixin.qq.com/pay/unifiedorder", "POST",
+                            getRequestXml(orderParams));
+  }
+
+  /**
+   * 查询订单状态
+   */
+  public Map<Object, Object> orderStatusQuery(SortedMap orderParams) {
+    return WeixinPayUtil
+        .createUnifiedOrder("https://api.mch.weixin.qq.com/pay/orderquery", "POST",
                             getRequestXml(orderParams));
   }
 
