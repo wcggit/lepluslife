@@ -194,6 +194,7 @@ public class OrderService {
   }
 
   /**
+   * @param onLineOrder 支付成功后,a积分加,b积分减,修改订单状态为已支付
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public void paySuccessQuery(OnLineOrder onLineOrder) {
