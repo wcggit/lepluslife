@@ -253,7 +253,7 @@
         <li class="mui-table-view-cell" style="border-top: solid 1px #E8E8E8">
             <span class="trade-font-grey">积分支付：</span>
             <span class="mui-pull-right">-￥<fmt:formatNumber type="number"
-                                                             value="${order.trueScore/100}"
+                                                             value="${order.trueScore}"
                                                              maxFractionDigits="2"/></span>
         </li>
         <li class="mui-table-view-cell trade-font-red"><span
