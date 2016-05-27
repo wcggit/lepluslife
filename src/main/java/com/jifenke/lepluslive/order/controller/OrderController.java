@@ -134,6 +134,34 @@ public class OrderController {
     return LejiaResult.build(200, "ok", orderDto);
   }
 
+  @ApiOperation("订单列表去支付按钮")
+  @RequestMapping(value = "/orderDetail", method = RequestMethod.POST)
+  public
+  @ResponseBody
+  LejiaResult orderDetail(
+      @ApiParam(value = "用户身份标识token") @RequestParam(required = false) String token,
+      @ApiParam(value = "订单id") @RequestParam(required = false) Long orderId) {
+    if (token == null) {
+      return LejiaResult.build(207, "请先登录");
+    }
+    LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);
+    if (leJiaUser == null) {
+      return LejiaResult.build(206, "未找到用户");
+    }
+    ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(leJiaUser);
+    OnLineOrder onLineOrder = orderService.findOnLineOrderById(orderId);
+    OnLineOrderDto orderDto = new OnLineOrderDto();
+    try {
+      BeanUtils.copyProperties(orderDto, onLineOrder);
+    } catch (IllegalAccessException e) {
+      e.printStackTrace();
+    } catch (InvocationTargetException e) {
+      e.printStackTrace();
+    }
+    orderDto.setScoreB(scoreB.getScore());
+    return LejiaResult.build(200, "ok", orderDto);
+  }
+
   @ApiOperation("商品详情页立即购买")
   @RequestMapping(value = "/confirm", method = RequestMethod.POST)
   @ResponseBody
