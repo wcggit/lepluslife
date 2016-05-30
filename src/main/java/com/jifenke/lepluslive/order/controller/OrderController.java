@@ -23,6 +23,7 @@ import com.jifenke.lepluslive.score.service.ScoreBService;
 import com.jifenke.lepluslive.weixin.controller.dto.CartDetailDto;
 import com.jifenke.lepluslive.weixin.controller.dto.OrderDto;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
+import com.jifenke.lepluslive.weixin.service.DictionaryService;
 import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
 import com.jifenke.lepluslive.weixin.service.WeiXinService;
 
@@ -83,6 +84,9 @@ public class OrderController {
 
   @Inject
   private WeiXinService weiXinService;
+
+  @Inject
+  private DictionaryService dictionaryService;
 
   @ApiOperation("获取用户所有的订单")
   @RequestMapping(value = "/orderList", method = RequestMethod.POST)
@@ -226,18 +230,22 @@ public class OrderController {
   public LejiaResult paySuccess(@RequestParam Long orderId) {
 
     OnLineOrder order = orderService.findOnLineOrderById(orderId);
-
+      HashMap<String, Object> map = new HashMap<>();
     if (order != null) {
       ScoreADetail aDetail = scoreAService.findScoreADetailByOrderSid(order.getOrderSid());
       if (aDetail != null) {
         ScoreA scoreA = aDetail.getScoreA();
         if (scoreA != null) {
-          HashMap<String, Object> map = new HashMap<>();
           map.put("payBackScore", aDetail.getNumber());
           map.put("totalScore", scoreA.getTotalScore());
           return LejiaResult.build(200, "ok", map);
         }
       }
+        //为了防止微信处理失败或者慢导致未找到信息，使用计算数据
+        Integer PAY_BACK_SCALE = Integer.parseInt(dictionaryService.findDictionaryById(3L).getValue());
+        map.put("payBackScore", (long) Math.ceil((double) (order.getTruePrice() * PAY_BACK_SCALE) / 100));
+        map.put("totalScore", scoreAService.findScoreAByLeJiaUser(order.getLeJiaUser()).getTotalScore());
+        return LejiaResult.build(200, "ok", map);
     }
     return LejiaResult.build(405, "未找到订单信息");
   }

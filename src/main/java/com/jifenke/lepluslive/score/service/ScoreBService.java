@@ -42,7 +42,7 @@ public class ScoreBService {
   public void paySuccess(LeJiaUser leJiaUser, Long totalScore,String orderSid) {
     ScoreB scoreB = findScoreBByWeiXinUser(leJiaUser);
     if(totalScore != 0){
-      if (scoreB.getScore() - totalScore > 0) {
+      if (scoreB.getScore() - totalScore >= 0) {
         scoreB.setScore(scoreB.getScore() - totalScore);
         ScoreBDetail scoreBDetail = new ScoreBDetail();
         scoreBDetail.setOperate("乐+商城消费");
