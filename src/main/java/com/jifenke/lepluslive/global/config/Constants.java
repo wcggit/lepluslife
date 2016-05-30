@@ -16,7 +16,7 @@ public final class Constants {
 
     public static final String SYSTEM_ACCOUNT = "system";
 
-    public static final String WEI_XIN_TOKEN = "sdjbtq1457162257";
+    public static final String WEI_XIN_TOKEN = "88zctest";
 
     public static final String BAR_CODE_EXT = "png";
 
