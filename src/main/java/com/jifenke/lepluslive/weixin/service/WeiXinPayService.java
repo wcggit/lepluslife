@@ -101,10 +101,11 @@ public class WeiXinPayService {
     orderParams.put("body", "乐加商城消费");
     orderParams.put("out_trade_no", onLineOrder.getOrderSid());
     orderParams.put("fee_type", "CNY");
-    // orderParams.put("total_fee", String.valueOf(onLineOrder.getTruePrice()));
-    orderParams.put("total_fee", "1");
+    orderParams.put("total_fee", String.valueOf(onLineOrder.getTruePrice()));
+//    orderParams.put("total_fee", "1");
     orderParams.put("spbill_create_ip", getIpAddr(request));
-    orderParams.put("notify_url", weixinRootUrl + "/weixin/pay/afterPay");
+   orderParams.put("notify_url", weixinRootUrl + "/weixin/pay/afterPay");
+//    orderParams.put("notify_url", weixinRootUrl + "/wxTest/weixin/pay/afterPay");
     orderParams.put("trade_type", "APP");
     orderParams.put("input_charset", "UTF-8");
     String sign = createSign("UTF-8", orderParams, _mchKey);
