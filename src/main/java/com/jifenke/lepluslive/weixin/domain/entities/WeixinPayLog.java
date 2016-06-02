@@ -1,5 +1,7 @@
 package com.jifenke.lepluslive.weixin.domain.entities;
 
+import java.util.Date;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -20,12 +22,22 @@ public class WeixinPayLog {
   private String outTradeNo;
   private String returnCode;
   private String resultCode;
+  private String tradeState;
 
+  private Date createDate = new Date();
 
   public WeixinPayLog(String outTradeNo, String returnCode, String resultCode) {
     this.outTradeNo = outTradeNo;
     this.returnCode = returnCode;
     this.resultCode = resultCode;
+  }
+
+  public WeixinPayLog(String outTradeNo, String returnCode, String resultCode,
+                      String tradeState) {
+    this.outTradeNo = outTradeNo;
+    this.returnCode = returnCode;
+    this.resultCode = resultCode;
+    this.tradeState = tradeState;
   }
 
   public Long getId() {
@@ -60,4 +72,19 @@ public class WeixinPayLog {
     this.resultCode = resultCode;
   }
 
+  public String getTradeState() {
+    return tradeState;
+  }
+
+  public void setTradeState(String tradeState) {
+    this.tradeState = tradeState;
+  }
+
+  public Date getCreateDate() {
+    return createDate;
+  }
+
+  public void setCreateDate(Date createDate) {
+    this.createDate = createDate;
+  }
 }
