@@ -24,6 +24,7 @@ import com.jifenke.lepluslive.weixin.service.JobThread;
 import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
 import com.jifenke.lepluslive.weixin.service.WeiXinService;
 import com.jifenke.lepluslive.weixin.service.WeiXinUserService;
+import com.jifenke.lepluslive.weixin.service.WeixinPayLogService;
 
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
@@ -85,6 +86,9 @@ public class OrderService {
 
   @Inject
   private OrderDetailRepository orderDetailRepository;
+
+  @Inject
+  private WeixinPayLogService weixinPayLogService;
 
   private static String jobGroupName = "ORDER_JOBGROUP_NAME";
   private static String triggerGroupName = "ORDER_TRIGGERGROUP_NAME";
@@ -413,8 +417,10 @@ public class OrderService {
         Map orderMap = weiXinPayService.orderStatusQuery(map);
         String returnCode = (String) orderMap.get("return_code");
         String resultCode = (String) orderMap.get("result_code");
-        if ("SUCCESS".equals(returnCode) && "SUCCESS".equals(resultCode)) {
+        String tradeState = (String) orderMap.get("trade_state");
+        if ("SUCCESS".equals(returnCode) && "SUCCESS".equals(resultCode) && "SUCCESS".equals(tradeState)) {
           //对订单进行处理
+          weixinPayLogService.savePayLog(onLineOrder.getOrderSid(),returnCode,resultCode,tradeState);
           paySuccessQuery(onLineOrder);
         }
       }

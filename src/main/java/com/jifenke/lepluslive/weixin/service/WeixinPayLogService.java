@@ -20,6 +20,15 @@ public class WeixinPayLogService {
   private WeixinPayLogRepository weixinPayLogRepository;
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  public void savePayLog(String outTradeNo, String returnCode, String resultCode,
+                         String tradeState) {
+
+    WeixinPayLog weixinPayLog = new WeixinPayLog(outTradeNo, returnCode, resultCode, tradeState);
+
+    weixinPayLogRepository.save(weixinPayLog);
+  }
+
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public void savePayLog(String outTradeNo, String returnCode, String resultCode) {
 
     WeixinPayLog weixinPayLog = new WeixinPayLog(outTradeNo, returnCode, resultCode);
