@@ -18,6 +18,8 @@ import com.jifenke.lepluslive.score.service.ScoreBService;
 
 import com.jifenke.lepluslive.topic.domain.entities.Topic;
 import com.jifenke.lepluslive.topic.service.TopicService;
+import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
+import com.jifenke.lepluslive.weixin.service.WeiXinUserService;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -66,6 +68,9 @@ public class LeJiaUserController {
 
   @Inject
   private TopicService topicService;
+
+  @Inject
+  private WeiXinUserService weiXinUserService;
 
   @RequestMapping(value = "/detail", method = RequestMethod.GET)
   public
@@ -168,7 +173,7 @@ public class LeJiaUserController {
   }
 
   /**
-   * app登录
+   * app登录1.0
    */
   @ApiOperation(value = "点击登录按钮")
   @RequestMapping(value = "/login", method = RequestMethod.POST)
@@ -252,6 +257,44 @@ public class LeJiaUserController {
       }
     }
     return LejiaResult.build(200, "ok", list);
+  }
+
+  /**
+   * app微信登录1.1
+   */
+  @ApiOperation(value = "微信登录")
+  @RequestMapping(value = "/wxLogin", method = RequestMethod.POST)
+  public
+  @ResponseBody
+  LejiaResult wxLogin(@RequestParam(required = true) String unionid,
+                      @RequestParam(required = true) String openid,
+                      @RequestParam(required = false) String country,
+                      @RequestParam(required = false) String nickname,
+                      @RequestParam(required = false) String city,
+                      @RequestParam(required = false) String province,
+                      @RequestParam(required = false) String language,
+                      @RequestParam(required = false) String headimgurl,
+                      @RequestParam(required = false) Long sex,
+                      @ApiParam(value = "推送token") @RequestParam(required = false) String token) {
+    WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByUnionId(unionid);  //是否已注册
+    LeJiaUser leJiaUser = null;
+    try {
+      leJiaUser =
+          weiXinUserService
+              .saveWeiXinUserByApp(weiXinUser, unionid, openid, country, city, nickname,
+                                   province, language, headimgurl, sex, token);
+    } catch (Exception e) {
+      e.printStackTrace();
+      return LejiaResult.build(500, "服务器异常");
+    }
+    ScoreA scoreA = scoreAService.findScoreAByLeJiaUser(leJiaUser);
+    ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(leJiaUser);
+    return LejiaResult.build(200, "登录成功", new LeJiaUserDto(scoreA.getScore(), scoreB.getScore(),
+                                                           null,
+                                                           leJiaUser.getUserSid(),
+                                                           headimgurl,
+                                                           nickname,
+                                                           leJiaUser.getPhoneNumber()));
   }
 
 

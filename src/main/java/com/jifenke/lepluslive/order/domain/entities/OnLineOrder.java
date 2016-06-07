@@ -5,8 +5,6 @@ import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.Address.domain.entities.Address;
 
-import org.hibernate.annotations.Cascade;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -63,7 +61,8 @@ public class OnLineOrder {
 
   private Integer state;//0 未支付 1 已支付 2 已发货 3已收获 4 订单取消
 
-  private String payWay;
+  @ManyToOne
+  private PayOrigin payOrigin;    //支付方式及订单来源
 
   private String expressNumber;  //快递单号
 
@@ -133,12 +132,12 @@ public class OnLineOrder {
     this.state = state;
   }
 
-  public String getPayWay() {
-    return payWay;
+  public PayOrigin getPayOrigin() {
+    return payOrigin;
   }
 
-  public void setPayWay(String payWay) {
-    this.payWay = payWay;
+  public void setPayOrigin(PayOrigin payOrigin) {
+    this.payOrigin = payOrigin;
   }
 
   public Long getId() {

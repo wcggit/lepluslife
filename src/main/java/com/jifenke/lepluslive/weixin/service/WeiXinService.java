@@ -1,15 +1,12 @@
 package com.jifenke.lepluslive.weixin.service;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jifenke.lepluslive.global.config.Constants;
 import com.jifenke.lepluslive.global.util.CookieUtils;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.http.Header;
 import org.apache.http.HttpEntity;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -62,7 +59,10 @@ public class WeiXinService {
       response = httpclient.execute(httpGet);
       HttpEntity entity = response.getEntity();
       ObjectMapper mapper = new ObjectMapper();
-      Map<String, Object> map = mapper.readValue(new BufferedReader(new InputStreamReader(entity.getContent(),"utf-8")), Map.class);
+      Map<String, Object>
+          map =
+          mapper.readValue(new BufferedReader(new InputStreamReader(entity.getContent(), "utf-8")),
+                           Map.class);
       EntityUtils.consume(entity);
       response.close();
       return map;
@@ -72,10 +72,10 @@ public class WeiXinService {
     return null;
   }
 
-  public Map<String, Object> getDetailWeiXinUser(String accessToken,String openid) {
+  public Map<String, Object> getDetailWeiXinUser(String accessToken, String openid) {
     String
         getUrl =
-        "https://api.weixin.qq.com/sns/userinfo?access_token=" + accessToken+"&openid="+openid;
+        "https://api.weixin.qq.com/sns/userinfo?access_token=" + accessToken + "&openid=" + openid;
     CloseableHttpClient httpclient = HttpClients.createDefault();
     HttpGet httpGet = new HttpGet(getUrl);
     httpGet.addHeader("Content-Type", "application/json;charset=utf8mb4");
@@ -84,7 +84,37 @@ public class WeiXinService {
       response = httpclient.execute(httpGet);
       HttpEntity entity = response.getEntity();
       ObjectMapper mapper = new ObjectMapper();
-      Map<String, Object> userDetail = mapper.readValue(new BufferedReader(new InputStreamReader(entity.getContent(),"utf-8")), Map.class);
+      Map<String, Object>
+          userDetail =
+          mapper.readValue(new BufferedReader(new InputStreamReader(entity.getContent(), "utf-8")),
+                           Map.class);
+      EntityUtils.consume(entity);
+      response.close();
+      return userDetail;
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+  //主动获取微信用户信息
+  public Map<String, Object> getWeiXinUserInfo(String accessToken, String openid) {
+    String
+        getUrl =
+        "https://api.weixin.qq.com/cgi-bin/user/info?access_token=" + accessToken + "&openid="
+        + openid;
+    CloseableHttpClient httpclient = HttpClients.createDefault();
+    HttpGet httpGet = new HttpGet(getUrl);
+    httpGet.addHeader("Content-Type", "application/json;charset=utf8mb4");
+    CloseableHttpResponse response = null;
+    try {
+      response = httpclient.execute(httpGet);
+      HttpEntity entity = response.getEntity();
+      ObjectMapper mapper = new ObjectMapper();
+      Map<String, Object>
+          userDetail =
+          mapper.readValue(new BufferedReader(new InputStreamReader(entity.getContent(), "utf-8")),
+                           Map.class);
       EntityUtils.consume(entity);
       response.close();
       return userDetail;
@@ -95,16 +125,16 @@ public class WeiXinService {
   }
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
-  public WeiXinUser getCurrentWeiXinUser(HttpServletRequest request){
+  public WeiXinUser getCurrentWeiXinUser(HttpServletRequest request) {
     String openId = CookieUtils.getCookieValue(request, appid + "-user-open-id");
-  return  weiXinUserService.findWeiXinUserByOpenId(openId);
+    return weiXinUserService.findWeiXinUserByOpenId(openId);
   }
 
   @Transactional(readOnly = true)
   public boolean checkWeiXinRequest(String signature, String timestamp, String nonce) {
-    String[] strs = new String[]{Constants.WEI_XIN_TOKEN,timestamp,nonce};
+    String[] strs = new String[]{Constants.WEI_XIN_TOKEN, timestamp, nonce};
     Arrays.sort(strs);
-    String sign = strs[0]+strs[1]+strs[2];
+    String sign = strs[0] + strs[1] + strs[2];
     return DigestUtils.sha1Hex(sign).equals(signature);
   }
 }

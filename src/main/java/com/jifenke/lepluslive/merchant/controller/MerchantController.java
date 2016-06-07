@@ -49,7 +49,7 @@ public class MerchantController {
     return merchantService.findMerchantsByPage(offset);
   }
 
-  @ApiOperation(value = "首页加载商家列表及周边")
+  @ApiOperation(value = "首页加载商家列表及周边1.0")
   @RequestMapping(value = "/reload", method = RequestMethod.POST)
   public
   @ResponseBody

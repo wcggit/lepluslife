@@ -69,6 +69,11 @@ public class WeiXinUserService {
     return weiXinUserRepository.findByOpenId(openId);
   }
 
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+  public WeiXinUser findWeiXinUserByUnionId(String unionId) {
+    return weiXinUserRepository.findByUnionId(unionId);
+  }
+
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public WeiXinUser saveBarCodeForUser(WeiXinUser weiXinUser) throws IOException {
     LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
@@ -88,6 +93,9 @@ public class WeiXinUserService {
   public void saveWeiXinUser(Map<String, Object> userDetail, Map<String, Object> map)
       throws IOException {
     String openid = userDetail.get("openid").toString();
+    String
+        unionId =
+        userDetail.get("unionid") != null ? userDetail.get("unionid").toString() : null;
     WeiXinUser weiXinUser = weiXinUserRepository.findByOpenId(openid);
     ScoreA scoreA = null;
     ScoreB scoreB = null;
@@ -115,6 +123,7 @@ public class WeiXinUserService {
     }
 
     weiXinUser.setOpenId(openid);
+    weiXinUser.setUnionId(unionId);
     weiXinUser.setCity(userDetail.get("city").toString());
     weiXinUser.setCountry(userDetail.get("country").toString());
     weiXinUser.setSex(Long.parseLong(userDetail.get("sex").toString()));
@@ -127,8 +136,59 @@ public class WeiXinUserService {
     weiXinUser.setLastUserInfoDate(new Date());
     weiXinUser.setState(1);
     weiXinUserRepository.save(weiXinUser);
+  }
 
+  /**
+   * app的微信登录
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  public LeJiaUser saveWeiXinUserByApp(WeiXinUser weiXinUser, String unionId, String openid,
+                                       String country, String city, String nickname,
+                                       String province,
+                                       String language, String headImgUrl, Long sex, String token)
+      throws IOException {
+    ScoreA scoreA = null;
+    ScoreB scoreB = null;
+    LeJiaUser leJiaUser = null;
+    Date date = new Date();
+    if (weiXinUser == null) {
+      weiXinUser = new WeiXinUser();
+      weiXinUser.setLastUpdated(date);
+      leJiaUser = new LeJiaUser();
+      leJiaUser.setHeadImageUrl(headImgUrl);
+      leJiaUser.setToken(token);
+      leJiaUser.setWeiXinUser(weiXinUser);
+      RegisterOrigin registerOrigin = new RegisterOrigin();
+      registerOrigin.setId(2L);
+      leJiaUser.setRegisterOrigin(registerOrigin);
+      leJiaUserRepository.save(leJiaUser);
+      weiXinUser.setLeJiaUser(leJiaUser);
+      scoreA = new ScoreA();
+      scoreA.setScore(0L);
+      scoreA.setTotalScore(0L);
+      scoreA.setLeJiaUser(leJiaUser);
+      scoreARepository.save(scoreA);
+      scoreB = new ScoreB();
+      scoreB.setScore(0L);
+      scoreB.setTotalScore(0L);
+      scoreB.setLeJiaUser(leJiaUser);
+      scoreBRepository.save(scoreB);
+    }
 
+    weiXinUser.setAppOpenId(openid);
+    weiXinUser.setUnionId(unionId);
+    weiXinUser.setCity(city);
+    weiXinUser.setCountry(country);
+    weiXinUser.setSex(sex);
+    weiXinUser.setNickname(nickname);
+    weiXinUser.setLanguage(language);
+    weiXinUser.setHeadImageUrl(headImgUrl);
+    weiXinUser.setProvince(province);
+    weiXinUser.setLastUserInfoDate(date);
+    weiXinUser.setState(1);
+    weiXinUserRepository.save(weiXinUser);
+
+    return leJiaUser;
   }
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)

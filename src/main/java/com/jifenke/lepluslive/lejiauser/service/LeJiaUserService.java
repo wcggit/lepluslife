@@ -74,12 +74,12 @@ public class LeJiaUserService {
     leJiaUser.setToken(token);
     leJiaUser.setPhoneNumber(phoneNumber);
     //设置条形码
-    byte[]
-        bytes =
-        barcodeService.barcode(leJiaUser.getUserSid(), BarcodeConfig.Barcode.defaultConfig());
-    String filePath = MvUtil.getFilePath(Constants.BAR_CODE_EXT);
-    fileImageService.SaveUserBarCode(bytes, filePath);
-    leJiaUser.setOneBarCodeUrl(barCodeRootUrl + "/" + filePath);
+//    byte[]
+//        bytes =
+//        barcodeService.barcode(leJiaUser.getUserSid(), BarcodeConfig.Barcode.defaultConfig());
+//    String filePath = MvUtil.getFilePath(Constants.BAR_CODE_EXT);
+//    fileImageService.SaveUserBarCode(bytes, filePath);
+//    leJiaUser.setOneBarCodeUrl(barCodeRootUrl + "/" + filePath);
 
     RegisterOrigin registerOrigin = new RegisterOrigin();
     registerOrigin.setId(2L);
