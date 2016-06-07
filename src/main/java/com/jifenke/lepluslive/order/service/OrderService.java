@@ -6,6 +6,7 @@ import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.job.OrderStatusQueryJob;
 import com.jifenke.lepluslive.job.ValidateCodeJob;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
+import com.jifenke.lepluslive.order.domain.entities.PayOrigin;
 import com.jifenke.lepluslive.order.repository.OrderDetailRepository;
 import com.jifenke.lepluslive.product.domain.entities.Product;
 import com.jifenke.lepluslive.product.domain.entities.ProductSpec;
@@ -95,7 +96,8 @@ public class OrderService {
 
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public OnLineOrder createOrder(OrderDto orderDto, LeJiaUser leJiaUser, Address address) {
+  public OnLineOrder createOrder(OrderDto orderDto, LeJiaUser leJiaUser, Address address,
+                                 Long payWayId) {
     Product product = productService.findOneProduct(orderDto.getProductId());
 //    productService.editProductSpecRepository(orderDto.getProductSpec(), orderDto.getProductNum());
     OnLineOrder onLineOrder = new OnLineOrder();
@@ -120,6 +122,8 @@ public class OrderService {
     onLineOrder.setLeJiaUser(leJiaUser);
     onLineOrder.setState(-1);
     onLineOrder.setAddress(address);
+    PayOrigin payOrigin = new PayOrigin(payWayId);  //设置支付来源
+    onLineOrder.setPayOrigin(payOrigin);
     List<OrderDetail> orderDetails = onLineOrder.getOrderDetails();
     OrderDetail orderDetail = new OrderDetail();
 
@@ -183,13 +187,29 @@ public class OrderService {
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public void paySuccess(String orderSid) {
     OnLineOrder onLineOrder = orderRepository.findByOrderSid(orderSid);
+    PayOrigin payOrigin = onLineOrder.getPayOrigin();
+    PayOrigin payWay = new PayOrigin();
     System.out.println(onLineOrder.getState() + "之前");
     if (onLineOrder.getState() == 0) {
       onLineOrder.setState(1);
       scoreAService.paySuccess(onLineOrder.getLeJiaUser()
           , onLineOrder.getTruePrice(), onLineOrder.getOrderSid());
-      scoreBService.paySuccess(onLineOrder.getLeJiaUser(), onLineOrder.getTrueScore(),
-                               onLineOrder.getOrderSid());
+      if (onLineOrder.getTrueScore() != 0) {
+        if (payOrigin.getId() == 1) {
+          payWay.setId(4L);
+        } else {
+          payWay.setId(8L);
+        }
+        scoreBService.paySuccess(onLineOrder.getLeJiaUser(), onLineOrder.getTrueScore(),
+                                 onLineOrder.getOrderSid());
+      } else {
+        if (payOrigin.getId() == 1) {
+          payWay.setId(2L);
+        } else {
+          payWay.setId(6L);
+        }
+      }
+      onLineOrder.setPayOrigin(payWay);
       System.out.println(onLineOrder.getState() + "之后");
       orderRepository.save(onLineOrder);
     }
@@ -203,16 +223,29 @@ public class OrderService {
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public void paySuccessQuery(OnLineOrder onLineOrder) {
     if (onLineOrder.getState() == 0 || onLineOrder.getState() == 4) {
+      PayOrigin payOrigin = onLineOrder.getPayOrigin();
+      PayOrigin payWay = new PayOrigin();
       onLineOrder.setState(1);
       scoreAService.paySuccess(onLineOrder.getLeJiaUser()
           , onLineOrder.getTruePrice(), onLineOrder.getOrderSid());
-      scoreBService.paySuccess(onLineOrder.getLeJiaUser(), onLineOrder.getTrueScore(),
-                               onLineOrder.getOrderSid());
-
+      if (onLineOrder.getTrueScore() != 0) {
+        if (payOrigin.getId() == 1) {
+          payWay.setId(4L);
+        } else {
+          payWay.setId(8L);
+        }
+        scoreBService.paySuccess(onLineOrder.getLeJiaUser(), onLineOrder.getTrueScore(),
+                                 onLineOrder.getOrderSid());
+      } else {
+        if (payOrigin.getId() == 1) {
+          payWay.setId(2L);
+        } else {
+          payWay.setId(6L);
+        }
+      }
+      onLineOrder.setPayOrigin(payWay);
       orderRepository.save(onLineOrder);
     }
-
-
   }
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
@@ -351,6 +384,8 @@ public class OrderService {
     onLineOrder.setOrderDetails(orderDetails);
     onLineOrder.setState(0);
     onLineOrder.setTruePrice(totalPrice);
+    PayOrigin payOrigin = new PayOrigin(5L); //设置支付来源
+    onLineOrder.setPayOrigin(payOrigin);
 
     onLineOrder.setTotalScore((long) Math.floor(Double.parseDouble(totalScore.toString()) / 100));
     orderRepository.save(onLineOrder);
@@ -418,9 +453,11 @@ public class OrderService {
         String returnCode = (String) orderMap.get("return_code");
         String resultCode = (String) orderMap.get("result_code");
         String tradeState = (String) orderMap.get("trade_state");
-        if ("SUCCESS".equals(returnCode) && "SUCCESS".equals(resultCode) && "SUCCESS".equals(tradeState)) {
+        if ("SUCCESS".equals(returnCode) && "SUCCESS".equals(resultCode) && "SUCCESS"
+            .equals(tradeState)) {
           //对订单进行处理
-          weixinPayLogService.savePayLog(onLineOrder.getOrderSid(),returnCode,resultCode,tradeState);
+          weixinPayLogService
+              .savePayLog(onLineOrder.getOrderSid(), returnCode, resultCode, tradeState);
           paySuccessQuery(onLineOrder);
         }
       }

@@ -41,7 +41,7 @@ public class ScoreBService {
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public void paySuccess(LeJiaUser leJiaUser, Long totalScore,String orderSid) {
     ScoreB scoreB = findScoreBByWeiXinUser(leJiaUser);
-    if(totalScore != 0){
+
       if (scoreB.getScore() - totalScore >= 0) {
         scoreB.setScore(scoreB.getScore() - totalScore);
         ScoreBDetail scoreBDetail = new ScoreBDetail();
@@ -55,7 +55,7 @@ public class ScoreBService {
       }else{
         throw new RuntimeException("积分不足");
       }
-    }
+
   }
 
   /**

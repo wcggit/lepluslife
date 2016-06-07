@@ -186,7 +186,7 @@ public class OrderController {
     orderDto.setProductNum(productNum);
     orderDto.setProductSpec(productSpecId);
     Address address = addressService.findAddressByLeJiaUserAndState(leJiaUser);
-    OnLineOrder onLineOrder = orderService.createOrder(orderDto, leJiaUser, address);
+    OnLineOrder onLineOrder = orderService.createOrder(orderDto, leJiaUser, address, 1L);
     ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(leJiaUser);
     OnLineOrderDto onLineOrderDto = new OnLineOrderDto();
     try {
@@ -230,7 +230,7 @@ public class OrderController {
   public LejiaResult paySuccess(@RequestParam Long orderId) {
 
     OnLineOrder order = orderService.findOnLineOrderById(orderId);
-      HashMap<String, Object> map = new HashMap<>();
+    HashMap<String, Object> map = new HashMap<>();
     if (order != null) {
       ScoreADetail aDetail = scoreAService.findScoreADetailByOrderSid(order.getOrderSid());
       if (aDetail != null) {
@@ -241,11 +241,15 @@ public class OrderController {
           return LejiaResult.build(200, "ok", map);
         }
       }
-        //为了防止微信处理失败或者慢导致未找到信息，使用计算数据
-        Integer PAY_BACK_SCALE = Integer.parseInt(dictionaryService.findDictionaryById(3L).getValue());
-        map.put("payBackScore", (long) Math.ceil((double) (order.getTruePrice() * PAY_BACK_SCALE) / 100));
-        map.put("totalScore", scoreAService.findScoreAByLeJiaUser(order.getLeJiaUser()).getTotalScore());
-        return LejiaResult.build(200, "ok", map);
+      //为了防止微信处理失败或者慢导致未找到信息，使用计算数据
+      Integer
+          PAY_BACK_SCALE =
+          Integer.parseInt(dictionaryService.findDictionaryById(3L).getValue());
+      map.put("payBackScore",
+              (long) Math.ceil((double) (order.getTruePrice() * PAY_BACK_SCALE) / 100));
+      map.put("totalScore",
+              scoreAService.findScoreAByLeJiaUser(order.getLeJiaUser()).getTotalScore());
+      return LejiaResult.build(200, "ok", map);
     }
     return LejiaResult.build(405, "未找到订单信息");
   }

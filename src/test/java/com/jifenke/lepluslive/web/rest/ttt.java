@@ -18,31 +18,26 @@ import com.jifenke.lepluslive.topic.domain.entities.Topic;
 import com.jifenke.lepluslive.topic.service.TopicService;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.repository.WeiXinUserRepository;
+import com.jifenke.lepluslive.weixin.service.WeiXinService;
 import com.jifenke.lepluslive.weixin.service.WeixinPayLogService;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.quartz.JobBuilder;
-import org.quartz.JobDetail;
-import org.quartz.Scheduler;
-import org.quartz.Trigger;
-import org.quartz.TriggerBuilder;
-import org.quartz.TriggerKey;
+
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
+
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+
 import java.util.List;
-import java.util.Random;
-import java.util.Scanner;
+import java.util.Map;
+
 
 import javax.inject.Inject;
-import javax.transaction.Transactional;
+
 
 /**
  * Created by wcg on 16/4/15.
@@ -78,10 +73,32 @@ public class ttt {
   @Inject
   private WeixinPayLogService weixinPayLogService;
 
+  @Inject
+  private WeiXinService weiXinService;
 
   @Test
   public void tttt() {
-    weixinPayLogService.savePayLog("ceshi", "nihao", "dindan问题");
+    List<WeiXinUser> list = weiXinUserRepository.findAll();
+    String
+        token =
+        "codQ4NCNGJlhXeodZzHD-pXhT7wzmYqBzGxXkuTWI-s2cpIx-Uxp1yEpGeyyjZGaAEtLsCdlQRGRsa-DktKCYR_CnLFCaadsy3LheQq-jrQ5VwCpNC1XljCkX01Djq8REJHhAFAWBZ";
+    for (WeiXinUser weiXinUser : list) {
+      Map<String, Object>
+          userDetail =
+          weiXinService.getWeiXinUserInfo(token, weiXinUser.getOpenId());
+      if (userDetail.get("errcode") != null) {
+          System.out.println(userDetail.get("errcode").toString());
+      } else {
+        String
+            unionId =
+            userDetail.get("unionid") != null ? userDetail.get("unionid").toString() : null;
+        weiXinUser.setUnionId(unionId);
+        weiXinUserRepository.save(weiXinUser);
+      }
+
+    }
+
+
   }
 }
 
