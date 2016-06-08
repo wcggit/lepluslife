@@ -1,11 +1,13 @@
 package com.jifenke.lepluslive.weixin.service;
 
 import com.jifenke.lepluslive.weixin.domain.entities.AutoReplyRule;
+import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.domain.entities.WeixinReply;
 import com.jifenke.lepluslive.weixin.domain.entities.WeixinReplyImageText;
 import com.jifenke.lepluslive.weixin.domain.entities.WeixinReplyText;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
@@ -22,6 +24,16 @@ public class WeixinReplyService {
   @Inject
   private AutoReplyService autoReplyService;
 
+  @Inject
+  private WeiXinService weiXinService;
+
+  @Inject
+  private WeiXinUserService weiXinUserService;
+
+  @Inject
+  private WeiXinUserInfoService weiXinUserInfoService;
+
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public String routeWeixinEvent(Map map) {
 
     String str = "";
@@ -29,12 +41,16 @@ public class WeixinReplyService {
       case "subscribe":
 //                关注公众号的事件，包括手动关注和二维码关注两种
         str = buildFocusMessageReply(map);
+        //关注公众号后查询数据库有没有该用户信息，没有的话主动获取
+        subscribeWeiXinUser(map);
         break;
       case "unsubscribe":
         break;
       case "SCAN":
         break;
       case "LOCATION":
+        //上报地理位置
+        str = buildLocationReply(map);
         break;
       case "CLICK":
 //                用户点击菜单事件
@@ -138,5 +154,33 @@ public class WeixinReplyService {
       return str;
     }
     return "";
+  }
+
+  /**
+   * 上报地理位置时发送的信息
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  private String buildLocationReply(Map map) {
+    weiXinUserInfoService.saveWeiXinUserInfo(map);
+    return "success";
+  }
+
+  /**
+   * 关注公众号后查询数据库有没有该用户信息，没有的话主动获取
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  private void subscribeWeiXinUser(Map map) {
+    String openId = map.get("FromUserName").toString();
+    WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByOpenId(openId);
+    if (weiXinUser == null) {
+      Map<String, Object> userDetail = weiXinService.getWeiXinUserInfo(openId);
+      if (null == userDetail.get("errcode")) {
+        try {
+          weiXinUserService.saveWeiXinUserBySubscribe(userDetail);
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    }
   }
 }

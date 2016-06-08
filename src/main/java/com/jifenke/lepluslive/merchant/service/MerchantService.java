@@ -94,7 +94,8 @@ public class MerchantService {
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public List<MerchantDto> findMerchantListByCustomCondition(Double latitude, Double longitude,
-                                                             Integer page, Long type, Long areaId) {
+                                                             Integer page, Long type, Long cityId,
+                                                             Long areaId) {
     if (page == null) {
       page = 1;
     }
@@ -115,6 +116,9 @@ public class MerchantService {
 
     if (areaId != null) {
       sql += " AND m.area_id = " + areaId;
+      sql += " ORDER BY sid LIMIT " + (page - 1) + "," + 10 + "";
+    } else if (cityId != null) {
+      sql += " AND m.city_id = " + cityId;
       sql += " ORDER BY sid LIMIT " + (page - 1) + "," + 10 + "";
     } else if (latitude != null) {
       sql += " ORDER BY distance LIMIT " + (page - 1) + "," + 10 + "";

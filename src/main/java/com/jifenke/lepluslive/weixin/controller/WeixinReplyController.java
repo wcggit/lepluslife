@@ -37,12 +37,11 @@ public class WeixinReplyController {
     if (!weiXinService
         .checkWeiXinRequest(request.getParameter("signature"), request.getParameter("timestamp"),
                             request.getParameter("nonce"))) {
-      response.getWriter().write("");
       return "";
     }
     if (request.getParameter("echostr") != null) {
-      response.getWriter().write(request.getParameter("echostr"));
-      return "";
+     // response.getWriter().write(request.getParameter("echostr"));
+      return request.getParameter("echostr");
     }
     InputStreamReader inputStreamReader = new InputStreamReader(request.getInputStream(), "utf-8");
     BufferedReader bufferedReader = new BufferedReader(inputStreamReader);

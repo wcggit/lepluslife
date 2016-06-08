@@ -30,9 +30,10 @@ public class WeiXinFilter implements HandlerInterceptor {
 
   @Override
   public boolean preHandle(HttpServletRequest request,
-                              HttpServletResponse httpServletResponse, Object o) throws Exception {
+                           HttpServletResponse httpServletResponse, Object o) throws Exception {
     String action = request.getRequestURI();
-    if (action.equals("/weixin/load")||action.equals("/weixin/userRegister")||action.equals("/weixin/pay/afterPay")) {
+    if (action.equals("/weixin/weixinReply") || action.equals("/weixin/load") || action
+        .equals("/weixin/userRegister") || action.equals("/weixin/pay/afterPay")) {
       return true;
     }
     String openId = CookieUtils.getCookieValue(request, appId + "-user-open-id");
