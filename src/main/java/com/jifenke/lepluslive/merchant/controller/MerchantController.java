@@ -58,11 +58,12 @@ public class MerchantController {
       @ApiParam(value = "纬度(保留六位小数)") @RequestParam(required = false) Double latitude,
       @ApiParam(value = "第几页") @RequestParam(required = false) Integer page,
       @ApiParam(value = "商家类别") @RequestParam(required = false) Long type,
+      @ApiParam(value = "城市id") @RequestParam(required = false) Long cityId,
       @ApiParam(value = "某个城市的区域id") @RequestParam(required = false) Long areaId) {
 
     List<MerchantDto>
         merchantDtoList =
-        merchantService.findMerchantListByCustomCondition(latitude, longitude, page, type, areaId);
+        merchantService.findMerchantListByCustomCondition(latitude, longitude, page, type,cityId, areaId);
 
     return LejiaResult.build(200, "ok", merchantDtoList);
   }

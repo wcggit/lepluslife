@@ -213,7 +213,7 @@ public class LeJiaUserController {
     return LejiaResult.build(200, "验证码正确");
   }
 
-  @ApiOperation(value = "打开软件")
+  @ApiOperation(value = "打开软件1.0")
   @RequestMapping(value = "/open", method = RequestMethod.POST)
   public
   @ResponseBody

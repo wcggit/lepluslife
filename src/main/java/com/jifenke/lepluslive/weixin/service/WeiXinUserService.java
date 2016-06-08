@@ -7,12 +7,10 @@ import com.jifenke.lepluslive.filemanage.service.FileImageService;
 import com.jifenke.lepluslive.global.config.Constants;
 import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.score.domain.entities.ScoreA;
-import com.jifenke.lepluslive.score.domain.entities.ScoreADetail;
 import com.jifenke.lepluslive.score.domain.entities.ScoreB;
 import com.jifenke.lepluslive.score.domain.entities.ScoreBDetail;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
-import com.jifenke.lepluslive.score.repository.ScoreADetailRepository;
 import com.jifenke.lepluslive.score.repository.ScoreARepository;
 import com.jifenke.lepluslive.score.repository.ScoreBDetailRepository;
 import com.jifenke.lepluslive.score.repository.ScoreBRepository;
@@ -57,9 +55,6 @@ public class WeiXinUserService {
 
   @Inject
   private ScoreBDetailRepository scoreBDetailRepository;
-
-  @Inject
-  private ScoreADetailRepository scoreADetailRepository;
 
   @Inject
   private LeJiaUserRepository leJiaUserRepository;
@@ -134,6 +129,49 @@ public class WeiXinUserService {
     weiXinUser.setAccessToken(map.get("access_token").toString());
     weiXinUser.setRefreshToken(map.get("refresh_token").toString());
     weiXinUser.setLastUserInfoDate(new Date());
+    weiXinUser.setState(1);
+    weiXinUserRepository.save(weiXinUser);
+  }
+
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  public void saveWeiXinUserBySubscribe(Map<String, Object> userDetail)
+      throws IOException {
+    String openid = userDetail.get("openid").toString();
+    String
+        unionId =
+        userDetail.get("unionid") != null ? userDetail.get("unionid").toString() : null;
+    Date date = new Date();
+    WeiXinUser weiXinUser = new WeiXinUser();
+    weiXinUser.setLastUpdated(date);
+    LeJiaUser leJiaUser = new LeJiaUser();
+    leJiaUser.setHeadImageUrl(userDetail.get("headimgurl").toString());
+    leJiaUser.setWeiXinUser(weiXinUser);
+    RegisterOrigin registerOrigin = new RegisterOrigin();
+    registerOrigin.setId(1L);
+    leJiaUser.setRegisterOrigin(registerOrigin);
+    leJiaUserRepository.save(leJiaUser);
+    weiXinUser.setLeJiaUser(leJiaUser);
+    ScoreA scoreA = new ScoreA();
+    scoreA.setScore(0L);
+    scoreA.setTotalScore(0L);
+    scoreA.setLeJiaUser(leJiaUser);
+    scoreARepository.save(scoreA);
+    ScoreB scoreB = new ScoreB();
+    scoreB.setScore(0L);
+    scoreB.setTotalScore(0L);
+    scoreB.setLeJiaUser(leJiaUser);
+    scoreBRepository.save(scoreB);
+
+    weiXinUser.setOpenId(openid);
+    weiXinUser.setUnionId(unionId);
+    weiXinUser.setCity(userDetail.get("city").toString());
+    weiXinUser.setCountry(userDetail.get("country").toString());
+    weiXinUser.setSex(Long.parseLong(userDetail.get("sex").toString()));
+    weiXinUser.setNickname(userDetail.get("nickname").toString());
+    weiXinUser.setLanguage(userDetail.get("language").toString());
+    weiXinUser.setHeadImageUrl(userDetail.get("headimgurl").toString());
+    weiXinUser.setProvince(userDetail.get("province").toString());
+    weiXinUser.setLastUserInfoDate(date);
     weiXinUser.setState(1);
     weiXinUserRepository.save(weiXinUser);
   }

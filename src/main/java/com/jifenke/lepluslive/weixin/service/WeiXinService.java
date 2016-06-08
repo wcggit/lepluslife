@@ -3,6 +3,7 @@ package com.jifenke.lepluslive.weixin.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jifenke.lepluslive.global.config.Constants;
 import com.jifenke.lepluslive.global.util.CookieUtils;
+import com.jifenke.lepluslive.global.util.WeixinPayUtil;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -98,7 +99,11 @@ public class WeiXinService {
   }
 
   //主动获取微信用户信息
-  public Map<String, Object> getWeiXinUserInfo(String accessToken, String openid) {
+  public Map<String, Object> getWeiXinUserInfo(String openid) {
+    String accessToken = WeixinPayUtil.getAccessToken().getJsapiTickek();
+//    String
+//        accessToken =
+//        "Gu-yGZhWqC5ADzk5SS-gYf31AawVLMPuRPNeivwiJ6r9azPQ3wNGvYScEfFeb_pDtepmKNp8nCJs5HLjx9jJE7aNiLsL3IofTYoziwNab_wD7P6ez0AyrwAtV49JklfjXRAfAJAQKT";
     String
         getUrl =
         "https://api.weixin.qq.com/cgi-bin/user/info?access_token=" + accessToken + "&openid="
