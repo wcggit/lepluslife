@@ -32,7 +32,7 @@
         <%--<button class="yzmbtn" onclick="getVerify()" id="sendCode">获取验证码</button>--%>
         <%--<button class="atonce" onclick="openHongbao()">马上领取</button>--%>
 
-        <input type="tel" placeholder="请输入姓名" name="realName" class="phonenum"/>
+        <input type="text" placeholder="请输入姓名" name="realName" class="phonenum"/>
         <input type="tel" style="margin:10px auto;" placeholder="请输入手机号" name="phoneNumber" class="phonenum"/>
         <button class="atonce" onclick="openHongbao()">马上领取</button>
     </div>
