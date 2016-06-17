@@ -1,5 +1,6 @@
 package com.jifenke.lepluslive.weixin.controller;
 
+import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.global.util.WeixinPayUtil;
 import com.jifenke.lepluslive.order.domain.entities.OnLineOrder;
@@ -164,5 +165,8 @@ public class WeixinPayController {
     model.addAttribute("orderId", orderId);
     return MvUtil.go("/weixin/product");
   }
+
+
+
 
 }

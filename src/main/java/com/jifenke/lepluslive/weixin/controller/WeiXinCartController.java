@@ -161,7 +161,7 @@ public class WeiXinCartController {
   @RequestMapping(value = "/cart/deleteCart", method = RequestMethod.GET)
   public
   @ResponseBody
-  LejiaResult deleteCart(@RequestParam Long product, @RequestParam Long productSpec,
+  LejiaResult deleteCart(@RequestParam long product, @RequestParam long productSpec,
                          HttpServletRequest request, HttpServletResponse response) {
     String openId = CookieUtils.getCookieValue(request, appid + "-user-open-id");
     String cart = CookieUtils.getCookieValue(request, openId + "-cart");
@@ -169,14 +169,14 @@ public class WeiXinCartController {
     List<CartDetailDto> cartDetailDtos = null;
     if (cart != null) {
       cartDetailDtos = JsonUtils.jsonToList(cart, CartDetailDto.class);
-      for (CartDetailDto cartDetail : cartDetailDtos) {
-        if (cartDetail.getProduct().getId() == product
-            && cartDetail.getProductSpec().getId() == productSpec) {
-          cartDetailDtos.remove(count);
-          break;
+        for (CartDetailDto cartDetail : cartDetailDtos) {
+            if (cartDetail.getProduct().getId() == product
+              && cartDetail.getProductSpec().getId() == productSpec) {
+            cartDetailDtos.remove(count);
+            break;
+          }
+          count++;
         }
-        count++;
-      }
     }
     CookieUtils
         .setCookie(request, response, openId + "-cart", JsonUtils.objectToJson(cartDetailDtos),
@@ -187,8 +187,8 @@ public class WeiXinCartController {
   @RequestMapping(value = "/cart/changeNumber", method = RequestMethod.GET)
   public
   @ResponseBody
-  LejiaResult changeProductNumber(@RequestParam Long product, @RequestParam Long productSpec,
-                                  @RequestParam Integer number,
+  LejiaResult changeProductNumber(@RequestParam long product, @RequestParam long productSpec,
+                                  @RequestParam int number,
                                   HttpServletRequest request, HttpServletResponse response) {
     String openId = CookieUtils.getCookieValue(request, appid + "-user-open-id");
     String cart = CookieUtils.getCookieValue(request, openId + "-cart");
