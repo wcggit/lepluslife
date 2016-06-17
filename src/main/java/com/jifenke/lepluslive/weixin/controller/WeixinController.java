@@ -102,7 +102,9 @@ public class WeixinController {
         productService.findAllProductDetailsByProduct(product);
     ProductDto productDto = new ProductDto();
     productDto.setProductSpecs(productService.findAllProductSpec(product));
-    Integer FREIGHT_FREE_PRICE = Integer.parseInt(dictionaryService.findDictionaryById(1L).getValue());
+    Integer
+        FREIGHT_FREE_PRICE =
+        Integer.parseInt(dictionaryService.findDictionaryById(1L).getValue());
     productDto.setFreePrice(FREIGHT_FREE_PRICE);
     try {
       BeanUtils.copyProperties(productDto, product);
@@ -179,16 +181,28 @@ public class WeixinController {
     return MvUtil.go("/weixin/hongbao");
   }
 
+//  @RequestMapping("/hongbao/open")
+//  public ModelAndView goHongbaoOpenPage(@RequestParam String phoneNumber,
+//                                        HttpServletRequest request, HttpServletResponse response,
+//                                        Model model) {
+//    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
+//    LeJiaUser leJiaUser = leJiaUserService.findUserByPhoneNumber(phoneNumber);  //是否已注册
+//    if (leJiaUser == null && weiXinUser.getHongBaoState() == 0) {
+//      weiXinUserService.openHongBao(weiXinUser, phoneNumber);
+//    }
+//
+//    return MvUtil.go("/weixin/hongbaoOpen");
+//  }
+
   @RequestMapping("/hongbao/open")
   public ModelAndView goHongbaoOpenPage(@RequestParam String phoneNumber,
-                                        HttpServletRequest request, HttpServletResponse response,
-                                        Model model) {
+                                        @RequestParam String realName,
+                                        HttpServletRequest request) {
     WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
     LeJiaUser leJiaUser = leJiaUserService.findUserByPhoneNumber(phoneNumber);  //是否已注册
     if (leJiaUser == null && weiXinUser.getHongBaoState() == 0) {
-      weiXinUserService.openHongBao(weiXinUser, phoneNumber);
+      weiXinUserService.openHongBao(weiXinUser, phoneNumber, realName);
     }
-
     return MvUtil.go("/weixin/hongbaoOpen");
   }
 

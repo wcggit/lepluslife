@@ -27,11 +27,14 @@
     <div class="topbg"></div>
     <div class="middleform">
 
-        <input type="tel" placeholder="请输入手机号" name="phoneNumber" class="phonenum"/>
-        <input type="text" placeholder="请输入验证码" class="yanzhengma" name="verifyCode">
-        <button class="yzmbtn" onclick="getVerify()" id="sendCode">获取验证码</button>
-        <button class="atonce" onclick="openHongbao()">马上领取</button>
+        <%--<input type="tel" placeholder="请输入手机号" name="phoneNumber" class="phonenum"/>--%>
+        <%--<input type="text" placeholder="请输入验证码" class="yanzhengma" name="verifyCode">--%>
+        <%--<button class="yzmbtn" onclick="getVerify()" id="sendCode">获取验证码</button>--%>
+        <%--<button class="atonce" onclick="openHongbao()">马上领取</button>--%>
 
+        <input type="tel" placeholder="请输入姓名" name="realName" class="phonenum"/>
+        <input type="tel" style="margin:10px auto;" placeholder="请输入手机号" name="phoneNumber" class="phonenum"/>
+        <button class="atonce" onclick="openHongbao()">马上领取</button>
     </div>
 </div>
 
@@ -81,41 +84,57 @@
         }
     }
 
+    <%--function openHongbao() {--%>
+    <%--var phoneNumber = $("input[name='phoneNumber']").val(),--%>
+    <%--validateCode = $("input[name='verifyCode']").val();--%>
+
+    <%--if (!phoneNumber.match(/1\d{10}/g)) {--%>
+    <%--alert("请输入正确的手机号");--%>
+    <%--return false;--%>
+    <%--}--%>
+    <%--if (!validateCode || validateCode.length < 1) {--%>
+    <%--alert("请输入验证码");--%>
+    <%--return false;--%>
+    <%--}--%>
+
+    <%--$.ajax({--%>
+    <%--type: "post",--%>
+    <%--url: "${wxRootUrl}/user/validate",--%>
+    <%--data: {--%>
+    <%--phoneNumber: phoneNumber,--%>
+    <%--code: validateCode--%>
+    <%--},--%>
+    <%--success: function (data) {--%>
+    <%--if (data.status == 200) {--%>
+    <%--location.href =--%>
+    <%--"${wxRootUrl}/weixin/hongbao/open?phoneNumber=" + phoneNumber;--%>
+    <%--} else if (data.status == 202) {--%>
+    <%--alert("验证码不正确!");--%>
+    <%--return false;--%>
+    <%--} else {--%>
+    <%--alert("注册失败!");--%>
+    <%--}--%>
+    <%--},--%>
+    <%--error: function () {--%>
+    <%--alert("注册失败！");--%>
+    <%--}--%>
+    <%--})--%>
+    <%--}--%>
     function openHongbao() {
-        var phoneNumber = $("input[name='phoneNumber']").val(),
-                validateCode = $("input[name='verifyCode']").val();
+        var phoneNumber = $("input[name='phoneNumber']").val(), realName = $("input[name='realName']").val();
+
+        if (realName == null || realName == '') {
+            alert("请输入姓名");
+            return false;
+        }
 
         if (!phoneNumber.match(/1\d{10}/g)) {
             alert("请输入正确的手机号");
             return false;
         }
-        if (!validateCode || validateCode.length < 1) {
-            alert("请输入验证码");
-            return false;
-        }
 
-        $.ajax({
-                   type: "post",
-                   url: "${wxRootUrl}/user/validate",
-                   data: {
-                       phoneNumber: phoneNumber,
-                       code: validateCode
-                   },
-                   success: function (data) {
-                       if (data.status == 200) {
-                           location.href =
-                           "${wxRootUrl}/weixin/hongbao/open?phoneNumber=" + phoneNumber;
-                       } else if (data.status == 202) {
-                           alert("验证码不正确!");
-                           return false;
-                       } else {
-                           alert("注册失败!");
-                       }
-                   },
-                   error: function () {
-                       alert("注册失败！");
-                   }
-               })
+        location.href =
+        "${wxRootUrl}/weixin/hongbao/open?phoneNumber=" + phoneNumber + "&realName=" + realName;
     }
 </script>
 </html>

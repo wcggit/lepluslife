@@ -51,6 +51,8 @@ public class LeJiaUser {
 
     private String headImageUrl;
 
+    private String userName;  //用户名
+
     @ManyToOne(fetch = FetchType.LAZY)
     private RegisterOrigin registerOrigin;
 
@@ -140,5 +142,13 @@ public class LeJiaUser {
 
     public void setUserSid(String userSid) {
         this.userSid = userSid;
+    }
+
+    public String getUserName() {
+      return userName;
+    }
+
+    public void setUserName(String userName) {
+      this.userName = userName;
     }
 }

@@ -27,23 +27,23 @@
 <div class="content">
     <div class="topbg"></div>
     <div class="middlediv">
-        <%--<div class="redpacket">--%>
-            <%--<div class="lefticon"></div>--%>
-            <%--<div class="redright">--%>
-                <%--<p class="num"><span>￥</span>10</p>--%>
-                <%--<p class="word">红包</p>--%>
-            <%--</div>--%>
-        <%--</div>--%>
-        <div class="goldbox">
+        <div class="redpacket">
             <div class="lefticon"></div>
-            <div class="goldright">
-                <p class="num"><span>￥</span>100</p>
-                <p class="word">乐+积分</p>
+            <div class="redright">
+                <p class="num"><span>￥</span>10</p>
+                <p class="word">红包</p>
             </div>
         </div>
-        <div class="atonce">
-            <a href="${wxRootUrl}/weixin/shop">立即消费</a>
-        </div>
+        <%--<div class="goldbox">--%>
+            <%--<div class="lefticon"></div>--%>
+            <%--<div class="goldright">--%>
+                <%--<p class="num"><span>￥</span>100</p>--%>
+                <%--<p class="word">乐+积分</p>--%>
+            <%--</div>--%>
+        <%--</div>--%>
+        <%--<div class="atonce">--%>
+            <%--<a href="${wxRootUrl}/weixin/shop">立即消费</a>--%>
+        <%--</div>--%>
     </div>
 </div>
 </body>

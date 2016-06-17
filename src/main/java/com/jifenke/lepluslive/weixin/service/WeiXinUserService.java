@@ -7,9 +7,11 @@ import com.jifenke.lepluslive.filemanage.service.FileImageService;
 import com.jifenke.lepluslive.global.config.Constants;
 import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.score.domain.entities.ScoreA;
+import com.jifenke.lepluslive.score.domain.entities.ScoreADetail;
 import com.jifenke.lepluslive.score.domain.entities.ScoreB;
 import com.jifenke.lepluslive.score.domain.entities.ScoreBDetail;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
+import com.jifenke.lepluslive.score.repository.ScoreADetailRepository;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.score.repository.ScoreARepository;
 import com.jifenke.lepluslive.score.repository.ScoreBDetailRepository;
@@ -55,6 +57,9 @@ public class WeiXinUserService {
 
   @Inject
   private ScoreBDetailRepository scoreBDetailRepository;
+
+  @Inject
+  private ScoreADetailRepository scoreADetailRepository;
 
   @Inject
   private LeJiaUserRepository leJiaUserRepository;
@@ -229,35 +234,61 @@ public class WeiXinUserService {
     return leJiaUser;
   }
 
+//  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+//  public void openHongBao(WeiXinUser weiXinUser, String phoneNumber) {
+//    LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
+//    leJiaUser.setPhoneNumber(phoneNumber);
+//    leJiaUserRepository.save(leJiaUser);
+//
+////    ScoreA scoreA = scoreARepository.findByLeJiaUser(leJiaUser);
+//    ScoreB scoreB = scoreBRepository.findByLeJiaUser(leJiaUser);
+////    scoreA.setScore(scoreA.getScore() + 1000);
+////    scoreA.setTotalScore(scoreA.getTotalScore() + 1000);
+//    Date date = new Date();
+////    scoreA.setLastUpdateDate(date);
+//    scoreB.setLastUpdateDate(date);
+//    scoreB.setScore(scoreB.getScore() + 100);
+//    scoreB.setTotalScore(scoreB.getTotalScore() + 100);
+//    scoreBRepository.save(scoreB);
+////    scoreARepository.save(scoreA);
+//
+////    ScoreADetail scoreADetail = new ScoreADetail();
+////    scoreADetail.setNumber(1000L);
+////    scoreADetail.setScoreA(scoreA);
+////    scoreADetail.setOperate("关注送红包");
+////    scoreADetailRepository.save(scoreADetail);
+//
+//    ScoreBDetail scoreBDetail = new ScoreBDetail();
+//    scoreBDetail.setNumber(100L);
+//    scoreBDetail.setScoreB(scoreB);
+//    scoreBDetail.setOperate("关注送积分");
+//    scoreBDetailRepository.save(scoreBDetail);
+//    weiXinUser.setHongBaoState(1);
+//    weiXinUserRepository.save(weiXinUser);
+//  }
+
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public void openHongBao(WeiXinUser weiXinUser, String phoneNumber) {
+  public void openHongBao(WeiXinUser weiXinUser, String phoneNumber, String realName) {
     LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
     leJiaUser.setPhoneNumber(phoneNumber);
+    leJiaUser.setUserName(realName);
     leJiaUserRepository.save(leJiaUser);
 
-//    ScoreA scoreA = scoreARepository.findByLeJiaUser(leJiaUser);
-    ScoreB scoreB = scoreBRepository.findByLeJiaUser(leJiaUser);
-//    scoreA.setScore(scoreA.getScore() + 1000);
-//    scoreA.setTotalScore(scoreA.getTotalScore() + 1000);
+    ScoreA scoreA = scoreARepository.findByLeJiaUser(leJiaUser);
+
+    scoreA.setScore(scoreA.getScore() + 1000);
+    scoreA.setTotalScore(scoreA.getTotalScore() + 1000);
     Date date = new Date();
-//    scoreA.setLastUpdateDate(date);
-    scoreB.setLastUpdateDate(date);
-    scoreB.setScore(scoreB.getScore() + 100);
-    scoreB.setTotalScore(scoreB.getTotalScore() + 100);
-    scoreBRepository.save(scoreB);
-//    scoreARepository.save(scoreA);
+    scoreA.setLastUpdateDate(date);
 
-//    ScoreADetail scoreADetail = new ScoreADetail();
-//    scoreADetail.setNumber(1000L);
-//    scoreADetail.setScoreA(scoreA);
-//    scoreADetail.setOperate("关注送红包");
-//    scoreADetailRepository.save(scoreADetail);
+    scoreARepository.save(scoreA);
 
-    ScoreBDetail scoreBDetail = new ScoreBDetail();
-    scoreBDetail.setNumber(100L);
-    scoreBDetail.setScoreB(scoreB);
-    scoreBDetail.setOperate("关注送积分");
-    scoreBDetailRepository.save(scoreBDetail);
+    ScoreADetail scoreADetail = new ScoreADetail();
+    scoreADetail.setNumber(1000L);
+    scoreADetail.setScoreA(scoreA);
+    scoreADetail.setOperate("关注送红包");
+    scoreADetailRepository.save(scoreADetail);
+
     weiXinUser.setHongBaoState(1);
     weiXinUserRepository.save(weiXinUser);
   }
