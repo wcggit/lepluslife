@@ -6,6 +6,10 @@ import com.jifenke.lepluslive.lejiauser.service.BarcodeService;
 import com.jifenke.lepluslive.filemanage.service.FileImageService;
 import com.jifenke.lepluslive.global.config.Constants;
 import com.jifenke.lepluslive.global.util.MvUtil;
+import com.jifenke.lepluslive.merchant.domain.entities.Merchant;
+import com.jifenke.lepluslive.merchant.service.MerchantService;
+import com.jifenke.lepluslive.partner.domain.entities.Partner;
+import com.jifenke.lepluslive.partner.service.PartnerService;
 import com.jifenke.lepluslive.score.domain.entities.ScoreA;
 import com.jifenke.lepluslive.score.domain.entities.ScoreADetail;
 import com.jifenke.lepluslive.score.domain.entities.ScoreB;
@@ -26,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -56,13 +61,16 @@ public class WeiXinUserService {
   private ScoreBRepository scoreBRepository;
 
   @Inject
-  private ScoreBDetailRepository scoreBDetailRepository;
-
-  @Inject
   private ScoreADetailRepository scoreADetailRepository;
 
   @Inject
   private LeJiaUserRepository leJiaUserRepository;
+
+  @Inject
+  private MerchantService merchantService;
+
+  @Inject
+  private PartnerService partnerService;
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public WeiXinUser findWeiXinUserByOpenId(String openId) {
@@ -134,7 +142,6 @@ public class WeiXinUserService {
     weiXinUser.setAccessToken(map.get("access_token").toString());
     weiXinUser.setRefreshToken(map.get("refresh_token").toString());
     weiXinUser.setLastUserInfoDate(new Date());
-    weiXinUser.setState(1);
     weiXinUserRepository.save(weiXinUser);
   }
 
@@ -145,27 +152,54 @@ public class WeiXinUserService {
     String
         unionId =
         userDetail.get("unionid") != null ? userDetail.get("unionid").toString() : null;
-    Date date = new Date();
-    WeiXinUser weiXinUser = new WeiXinUser();
-    weiXinUser.setLastUpdated(date);
-    LeJiaUser leJiaUser = new LeJiaUser();
-    leJiaUser.setHeadImageUrl(userDetail.get("headimgurl").toString());
-    leJiaUser.setWeiXinUser(weiXinUser);
-    RegisterOrigin registerOrigin = new RegisterOrigin();
-    registerOrigin.setId(1L);
-    leJiaUser.setRegisterOrigin(registerOrigin);
-    leJiaUserRepository.save(leJiaUser);
-    weiXinUser.setLeJiaUser(leJiaUser);
-    ScoreA scoreA = new ScoreA();
-    scoreA.setScore(0L);
-    scoreA.setTotalScore(0L);
-    scoreA.setLeJiaUser(leJiaUser);
-    scoreARepository.save(scoreA);
-    ScoreB scoreB = new ScoreB();
-    scoreB.setScore(0L);
-    scoreB.setTotalScore(0L);
-    scoreB.setLeJiaUser(leJiaUser);
-    scoreBRepository.save(scoreB);
+    WeiXinUser weiXinUser = weiXinUserRepository.findByOpenId(openid);
+
+    LeJiaUser leJiaUser = null;
+
+    ScoreA scoreA = null;
+    ScoreB scoreB = null;
+    if (weiXinUser == null) {
+      weiXinUser = new WeiXinUser();
+      weiXinUser.setLastUpdated(new Date());
+      leJiaUser = new LeJiaUser();
+      leJiaUser.setHeadImageUrl(userDetail.get("headimgurl").toString());
+      leJiaUser.setWeiXinUser(weiXinUser);
+      RegisterOrigin registerOrigin = new RegisterOrigin();
+      registerOrigin.setId(1L);
+      leJiaUser.setRegisterOrigin(registerOrigin);
+      leJiaUserRepository.save(leJiaUser);
+      weiXinUser.setLeJiaUser(leJiaUser);
+      scoreA = new ScoreA();
+      scoreA.setScore(0L);
+      scoreA.setTotalScore(0L);
+      scoreA.setLeJiaUser(leJiaUser);
+      scoreARepository.save(scoreA);
+      scoreB = new ScoreB();
+      scoreB.setScore(0L);
+      scoreB.setTotalScore(0L);
+      scoreB.setLeJiaUser(leJiaUser);
+      scoreBRepository.save(scoreB);
+    }
+
+    leJiaUser = weiXinUser.getLeJiaUser();
+
+    //判断是否需要绑定商户
+    if (leJiaUser.getBindMerchant() == null) {
+      Long merchantId = leJiaUserRepository.checkUserBindMerchant(leJiaUser.getId());
+      if (merchantId != null) {
+        Merchant merchant = merchantService.findMerchantById(merchantId);
+        long userLimit = leJiaUserRepository.countMerchantBindLeJiaUser(merchantId);
+        System.out.println(merchant.getUserLimit() < userLimit);
+        if (merchant.getUserLimit() > userLimit) {
+          leJiaUser.setBindMerchant(merchant);
+          Partner partner = merchant.getPartner();
+          long partnerUserLimit = leJiaUserRepository.countPartnerBindLeJiaUser(partner.getId());
+          if (partner.getUserLimit() > partnerUserLimit) {
+            leJiaUser.setBindPartner(partner);
+          }
+        }
+      }
+    }
 
     weiXinUser.setOpenId(openid);
     weiXinUser.setUnionId(unionId);
@@ -176,7 +210,7 @@ public class WeiXinUserService {
     weiXinUser.setLanguage(userDetail.get("language").toString());
     weiXinUser.setHeadImageUrl(userDetail.get("headimgurl").toString());
     weiXinUser.setProvince(userDetail.get("province").toString());
-    weiXinUser.setLastUserInfoDate(date);
+    weiXinUser.setLastUserInfoDate(new Date());
     weiXinUser.setState(1);
     weiXinUserRepository.save(weiXinUser);
   }

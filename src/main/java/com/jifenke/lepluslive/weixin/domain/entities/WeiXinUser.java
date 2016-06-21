@@ -19,7 +19,6 @@ import javax.persistence.Entity;
  */
 @Entity
 @Table(name = "WEI_XIN_USER")
-@Cacheable
 public class WeiXinUser {
 
   @Id

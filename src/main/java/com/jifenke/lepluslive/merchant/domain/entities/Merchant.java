@@ -1,10 +1,13 @@
 package com.jifenke.lepluslive.merchant.domain.entities;
 
 import com.jifenke.lepluslive.global.util.MvUtil;
+import com.jifenke.lepluslive.partner.domain.entities.Partner;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
+import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -13,6 +16,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -25,230 +29,324 @@ import javax.persistence.Table;
 @Table(name = "MERCHANT")
 public class Merchant {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  private Long id;
 
-    private Integer sid;
+  private Integer sid;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    private MerchantBank merchantBank;
+  @OneToOne(cascade = CascadeType.ALL)
+  private MerchantBank merchantBank;
 
-    private String merchantSid = MvUtil.getMerchantSid();
+  private String merchantSid = MvUtil.getMerchantSid();
 
-    @ManyToOne
-    private City city;
+  @ManyToOne
+  private City city;
 
-    private String thumb;//缩略图
+  private String thumb;//缩略图
 
-    @ManyToOne
-    private MerchantType merchantType;
+  @ManyToOne
+  private MerchantType merchantType;
 
-    private String location;
+  @ManyToOne
+  private Partner partner;
 
-    private String name;
+  private String location;
 
-    private String picture;
+  private String name;
 
-    private String phoneNumber; //商户电话
+  private String picture;
 
-    private Integer partnership; //合作关系
+  private String phoneNumber; //服务电话
 
-    private Integer discount; //折扣
+  private Integer partnership; //合作关系
 
-    private Integer rebate;  //返利
+  private Double lng=0.0;
 
-    private Double lng;
+  private Double lat=0.0;
 
-    private Double lat;
+  private String payee; //收款人
 
-    private String payee;
+  private Integer state = 0;  //状态0 代表未开启乐店 ,
 
-    private Integer ljCommission;//佣金点 如果为0代表普通商户
+  private Integer receiptAuth; //收款权限为1 代表可以使用乐加红包支付,0代表不能使用乐加红包
 
-    private String merchantPhone; //绑定手机号
+  private String qrCodePicture; //商户收款码
 
-    private Integer state = 1;
+  private Long userLimit; //会员绑定上线
 
-    private String qrCodePicture; //商户收款码
+  private BigDecimal ljCommission; //乐加佣金 单位百分比
 
-    @ManyToOne
-    private Area area;
+  private BigDecimal ljBrokerage = new BigDecimal(0); //只有联盟商户才不为空 , 代表非乐加会员消费时,收取的手续费
 
-    public String getQrCodePicture() {
-        return qrCodePicture;
-    }
+  private BigDecimal scoreARebate; //返a积分比 单位百分比
 
-    public void setQrCodePicture(String qrCodePicture) {
-        this.qrCodePicture = qrCodePicture;
-    }
+  private BigDecimal scoreBRebate;
 
-    public Integer getState() {
-        return state;
-    }
+  private String contact; //联系人
 
-    public void setState(Integer state) {
-        this.state = state;
-    }
+  private Date createDate = new Date();
 
-    public String getMerchantPhone() {
-        return merchantPhone;
-    }
+  public BigDecimal getLjBrokerage() {
+    return ljBrokerage;
+  }
 
-    public void setMerchantPhone(String merchantPhone) {
-        this.merchantPhone = merchantPhone;
-    }
+  public void setLjBrokerage(BigDecimal ljBrokerage) {
+    this.ljBrokerage = ljBrokerage;
+  }
 
-    public Integer getPartnership() {
-        return partnership;
-    }
+  private Integer cycle;  //结算周期  1 一个工作日 2 2个工作日
 
-    public void setPartnership(Integer partnership) {
-        this.partnership = partnership;
-    }
+  private String merchantPhone; //绑定电话
 
-    public Integer getLjCommission() {
-        return ljCommission;
-    }
+  private String officeHour; //营业时间
 
-    public void setLjCommission(Integer ljCommission) {
-        this.ljCommission = ljCommission;
-    }
+  public String getMerchantPhone() {
+    return merchantPhone;
+  }
 
-    public String getPayee() {
-        return payee;
-    }
+  public void setMerchantPhone(String merchantPhone) {
+    this.merchantPhone = merchantPhone;
+  }
 
-    public void setPayee(String payee) {
-        this.payee = payee;
-    }
+  public String getOfficeHour() {
+    return officeHour;
+  }
 
-    public MerchantBank getMerchantBank() {
-        return merchantBank;
-    }
-
-    public void setMerchantBank(MerchantBank merchantBank) {
-        this.merchantBank = merchantBank;
-    }
-
-    public String getMerchantSid() {
-        return merchantSid;
-    }
-
-    public void setMerchantSid(String merchantSid) {
-        this.merchantSid = merchantSid;
-    }
-
-    public String getThumb() {
-        return thumb;
-    }
-
-    public void setThumb(String thumb) {
-        this.thumb = thumb;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    public Integer getDiscount() {
-        return discount;
-    }
-
-    public void setDiscount(Integer discount) {
-        this.discount = discount;
-    }
-
-    public Integer getRebate() {
-        return rebate;
-    }
-
-    public void setRebate(Integer rebate) {
-        this.rebate = rebate;
-    }
-
-    public MerchantType getMerchantType() {
-        return merchantType;
-    }
-
-    public void setMerchantType(MerchantType merchantType) {
-        this.merchantType = merchantType;
-    }
-
-    public Area getArea() {
-        return area;
-    }
-
-    public void setArea(Area area) {
-        this.area = area;
-    }
-
-    public Double getLng() {
-        return lng;
-    }
-
-    public void setLng(Double lng) {
-        this.lng = lng;
-    }
-
-    public Double getLat() {
-        return lat;
-    }
-
-    public void setLat(Double lat) {
-        this.lat = lat;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Integer getSid() {
-        return sid;
-    }
-
-    public void setSid(Integer sid) {
-        this.sid = sid;
-    }
-
-    public City getCity() {
-        return city;
-    }
-
-    public void setCity(City city) {
-        this.city = city;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getPicture() {
-        return picture;
-    }
-
-    public void setPicture(String picture) {
-        this.picture = picture;
-    }
+  public void setOfficeHour(String officeHour) {
+    this.officeHour = officeHour;
+  }
+
+  public Integer getCycle() {
+    return cycle;
+  }
+
+  public void setCycle(Integer cycle) {
+    this.cycle = cycle;
+  }
+
+
+  public String getContact() {
+    return contact;
+  }
+
+  public void setContact(String contact) {
+    this.contact = contact;
+  }
+
+  public BigDecimal getScoreBRebate() {
+    return scoreBRebate;
+  }
+
+  public void setScoreBRebate(BigDecimal scoreBRebate) {
+    this.scoreBRebate = scoreBRebate;
+  }
+
+  public BigDecimal getLjCommission() {
+    return ljCommission;
+  }
+
+  public void setLjCommission(BigDecimal ljCommission) {
+    this.ljCommission = ljCommission;
+  }
+
+  public BigDecimal getScoreARebate() {
+    return scoreARebate;
+  }
+
+  public void setScoreARebate(BigDecimal scoreARebate) {
+    this.scoreARebate = scoreARebate;
+  }
+
+  public Date getCreateDate() {
+    return createDate;
+  }
+
+  public void setCreateDate(Date createDate) {
+    this.createDate = createDate;
+  }
+
+  public Long getUserLimit() {
+    return userLimit;
+  }
+
+  public void setUserLimit(Long userLimit) {
+    this.userLimit = userLimit;
+  }
+
+  public Partner getPartner() {
+    return partner;
+  }
+
+  public void setPartner(Partner partner) {
+    this.partner = partner;
+  }
+
+
+  public Long getLimit() {
+    return userLimit;
+  }
+
+  public void setLimit(Long userLimit) {
+    this.userLimit = userLimit;
+  }
+
+  @ManyToOne
+  private Area area;
+
+  public Integer getReceiptAuth() {
+    return receiptAuth;
+  }
+
+  public void setReceiptAuth(Integer receiptAuth) {
+    this.receiptAuth = receiptAuth;
+  }
+
+
+  public String getQrCodePicture() {
+    return qrCodePicture;
+  }
+
+  public void setQrCodePicture(String qrCodePicture) {
+    this.qrCodePicture = qrCodePicture;
+  }
+
+  public Integer getState() {
+    return state;
+  }
+
+  public void setState(Integer state) {
+    this.state = state;
+  }
+
+
+  public Integer getPartnership() {
+    return partnership;
+  }
+
+  public void setPartnership(Integer partnership) {
+    this.partnership = partnership;
+  }
+
+  public String getPayee() {
+    return payee;
+  }
+
+  public void setPayee(String payee) {
+    this.payee = payee;
+  }
+
+  public MerchantBank getMerchantBank() {
+    return merchantBank;
+  }
+
+  public void setMerchantBank(MerchantBank merchantBank) {
+    this.merchantBank = merchantBank;
+  }
+
+  public String getMerchantSid() {
+    return merchantSid;
+  }
+
+  public void setMerchantSid(String merchantSid) {
+    this.merchantSid = merchantSid;
+  }
+
+  public String getThumb() {
+    return thumb;
+  }
+
+  public void setThumb(String thumb) {
+    this.thumb = thumb;
+  }
+
+  public String getPhoneNumber() {
+    return phoneNumber;
+  }
+
+  public void setPhoneNumber(String phoneNumber) {
+    this.phoneNumber = phoneNumber;
+  }
+
+
+  public MerchantType getMerchantType() {
+    return merchantType;
+  }
+
+  public void setMerchantType(MerchantType merchantType) {
+    this.merchantType = merchantType;
+  }
+
+  public Area getArea() {
+    return area;
+  }
+
+  public void setArea(Area area) {
+    this.area = area;
+  }
+
+  public Double getLng() {
+    return lng;
+  }
+
+  public void setLng(Double lng) {
+    this.lng = lng;
+  }
+
+  public Double getLat() {
+    return lat;
+  }
+
+  public void setLat(Double lat) {
+    this.lat = lat;
+  }
+
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public Integer getSid() {
+    return sid;
+  }
+
+  public void setSid(Integer sid) {
+    this.sid = sid;
+  }
+
+  public City getCity() {
+    return city;
+  }
+
+  public void setCity(City city) {
+    this.city = city;
+  }
+
+  public String getLocation() {
+    return location;
+  }
+
+  public void setLocation(String location) {
+    this.location = location;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public String getPicture() {
+    return picture;
+  }
+
+  public void setPicture(String picture) {
+    this.picture = picture;
+  }
 
 }

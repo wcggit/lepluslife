@@ -32,6 +32,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -75,31 +76,15 @@ public class ttt {
 
   @Inject
   private WeiXinService weiXinService;
-
-  @Test
-  public void tttt() {
-    List<WeiXinUser> list = weiXinUserRepository.findAll();
-    String
-        token =
-        "codQ4NCNGJlhXeodZzHD-pXhT7wzmYqBzGxXkuTWI-s2cpIx-Uxp1yEpGeyyjZGaAEtLsCdlQRGRsa-DktKCYR_CnLFCaadsy3LheQq-jrQ5VwCpNC1XljCkX01Djq8REJHhAFAWBZ";
-    for (WeiXinUser weiXinUser : list) {
-      Map<String, Object>
-          userDetail =
-          weiXinService.getWeiXinUserInfo(token, weiXinUser.getOpenId());
-      if (userDetail.get("errcode") != null) {
-          System.out.println(userDetail.get("errcode").toString());
-      } else {
-        String
-            unionId =
-            userDetail.get("unionid") != null ? userDetail.get("unionid").toString() : null;
-        weiXinUser.setUnionId(unionId);
-        weiXinUserRepository.save(weiXinUser);
-      }
-
-    }
-
-
-  }
+//
+//  @Test
+//  public void tttt() {
+//    Date start = new Date();
+//    Long aLong = leJiaUserRepository.checkUserBindMerchant(50L);
+//    Date end = new Date();
+//    System.out.println(end.getTime()-start.getTime());
+//
+//  }
 }
 
 ////  public static void main(String[] args) {

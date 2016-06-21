@@ -172,7 +172,7 @@ public class WeixinReplyService {
   private void subscribeWeiXinUser(Map map) {
     String openId = map.get("FromUserName").toString();
     WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByOpenId(openId);
-    if (weiXinUser == null) {
+    if (weiXinUser == null||weiXinUser.getState()==0) {
       Map<String, Object> userDetail = weiXinService.getWeiXinUserInfo(openId);
       if (null == userDetail.get("errcode")) {
         try {

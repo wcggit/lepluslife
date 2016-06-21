@@ -46,6 +46,9 @@ public class WeiXinService {
   @Inject
   private WeiXinUserService weiXinUserService;
 
+  @Inject
+  private DictionaryService dictionaryService;
+
 
   public Map<String, Object> getSnsAccessToken(String code) {
     String
@@ -100,7 +103,7 @@ public class WeiXinService {
 
   //主动获取微信用户信息
   public Map<String, Object> getWeiXinUserInfo(String openid) {
-    String accessToken = WeixinPayUtil.getAccessToken().getJsapiTickek();
+    String accessToken = dictionaryService.findDictionaryById(7L).getValue();
 //    String
 //        accessToken =
 //        "Gu-yGZhWqC5ADzk5SS-gYf31AawVLMPuRPNeivwiJ6r9azPQ3wNGvYScEfFeb_pDtepmKNp8nCJs5HLjx9jJE7aNiLsL3IofTYoziwNab_wD7P6ez0AyrwAtV49JklfjXRAfAJAQKT";
