@@ -46,6 +46,9 @@ public class WeixinReplyService {
         break;
       case "unsubscribe":
         break;
+      case "MASSSENDJOBFINISH": //群发任务即将完成的时候，推送群发结果
+        massEndJobFinish(map);
+        break;
       case "SCAN":
         break;
       case "LOCATION":
@@ -172,7 +175,7 @@ public class WeixinReplyService {
   private void subscribeWeiXinUser(Map map) {
     String openId = map.get("FromUserName").toString();
     WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByOpenId(openId);
-    if (weiXinUser == null||weiXinUser.getState()==0) {
+    if (weiXinUser == null || weiXinUser.getState() == 0) {
       Map<String, Object> userDetail = weiXinService.getWeiXinUserInfo(openId);
       if (null == userDetail.get("errcode")) {
         try {
@@ -182,5 +185,12 @@ public class WeixinReplyService {
         }
       }
     }
+  }
+
+  /**
+   * 群发任务即将完成的时候，推送群发结果 将结果保存到数据库
+   */
+  private void massEndJobFinish(Map map) {
+
   }
 }
