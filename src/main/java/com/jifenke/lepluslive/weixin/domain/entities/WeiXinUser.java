@@ -54,7 +54,9 @@ public class WeiXinUser {
   Date lastUpdated;
   Date lastUserInfoDate;   //上次从微信服务器抓取用户信息的时间
 
-  private Integer state;
+  private Integer state = 0;   //0=从未关注过   1=关注   2=曾经关注现取消关注
+
+  private Integer massRemain = 4;  //本月群发余数
 
   public Integer getHongBaoState() {
     return hongBaoState;
@@ -207,5 +209,13 @@ public class WeiXinUser {
 
   public void setUnionId(String unionId) {
     this.unionId = unionId;
+  }
+
+  public Integer getMassRemain() {
+    return massRemain;
+  }
+
+  public void setMassRemain(Integer massRemain) {
+    this.massRemain = massRemain;
   }
 }
