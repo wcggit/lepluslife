@@ -192,10 +192,12 @@ public class WeiXinUserService {
         System.out.println(merchant.getUserLimit() < userLimit);
         if (merchant.getUserLimit() > userLimit) {
           leJiaUser.setBindMerchant(merchant);
+          leJiaUser.setBindMerchantDate(new Date());
           Partner partner = merchant.getPartner();
           long partnerUserLimit = leJiaUserRepository.countPartnerBindLeJiaUser(partner.getId());
           if (partner.getUserLimit() > partnerUserLimit) {
             leJiaUser.setBindPartner(partner);
+            leJiaUser.setBindPartnerDate(new Date());
           }
         }
       }

@@ -65,6 +65,27 @@ public class LeJiaUser {
   private Partner bindPartner;
 
 
+  private Date bindMerchantDate;
+
+  private Date bindPartnerDate;
+
+
+  public Date getBindMerchantDate() {
+    return bindMerchantDate;
+  }
+
+  public void setBindMerchantDate(Date bindMerchantDate) {
+    this.bindMerchantDate = bindMerchantDate;
+  }
+
+  public Date getBindPartnerDate() {
+    return bindPartnerDate;
+  }
+
+  public void setBindPartnerDate(Date bindPartnerDate) {
+    this.bindPartnerDate = bindPartnerDate;
+  }
+
   public Partner getBindPartner() {
     return bindPartner;
   }
