@@ -218,6 +218,16 @@ public class WeixinReplyService {
     WeixinMessage weixinMessage = weixinMessageService.findMessageByMsgID(msgID);
     if (weixinMessage != null) {
       try {
+        weixinMessage.setToUserName(String.valueOf(map.get("ToUserName")));
+        weixinMessage.setFromUserName(String.valueOf(map.get("FromUserName")));
+        weixinMessage.setCreateTime(String.valueOf(map.get("CreateTime")));
+        weixinMessage.setMsgType(String.valueOf(map.get("MsgType")));
+        weixinMessage.setEvent(String.valueOf(map.get("Event")));
+        weixinMessage.setStatus(String.valueOf(map.get("Status")));
+        weixinMessage.setTotalCount(Integer.valueOf(String.valueOf(map.get("TotalCount"))));
+        weixinMessage.setFilterCount(Integer.valueOf(String.valueOf(map.get("FilterCount"))));
+        weixinMessage.setSentCount(Integer.valueOf(String.valueOf(map.get("SentCount"))));
+        weixinMessage.setErrorCount(Integer.valueOf(String.valueOf(map.get("ErrorCount"))));
         weixinMessageService.saveNews(weixinMessage);
       } catch (Exception e) {
         e.printStackTrace();
