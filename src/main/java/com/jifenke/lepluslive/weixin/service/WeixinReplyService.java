@@ -2,6 +2,7 @@ package com.jifenke.lepluslive.weixin.service;
 
 import com.jifenke.lepluslive.weixin.domain.entities.AutoReplyRule;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
+import com.jifenke.lepluslive.weixin.domain.entities.WeixinMessage;
 import com.jifenke.lepluslive.weixin.domain.entities.WeixinReply;
 import com.jifenke.lepluslive.weixin.domain.entities.WeixinReplyImageText;
 import com.jifenke.lepluslive.weixin.domain.entities.WeixinReplyText;
@@ -33,6 +34,9 @@ public class WeixinReplyService {
   @Inject
   private WeiXinUserInfoService weiXinUserInfoService;
 
+  @Inject
+  private WeixinMessageService weixinMessageService;
+
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public String routeWeixinEvent(Map map) {
 
@@ -44,7 +48,8 @@ public class WeixinReplyService {
         //关注公众号后查询数据库有没有该用户信息，没有的话主动获取
         subscribeWeiXinUser(map);
         break;
-      case "unsubscribe":
+      case "unsubscribe"://取消关注公众号的事件
+        unSubscribeWeiXinUser(map);
         break;
       case "MASSSENDJOBFINISH": //群发任务即将完成的时候，推送群发结果
         massEndJobFinish(map);
@@ -188,9 +193,35 @@ public class WeixinReplyService {
   }
 
   /**
+   * 取消关注公众号后查询数据库有没有该用户信息，有的话取消关注
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  private void unSubscribeWeiXinUser(Map map) {
+    String openId = map.get("FromUserName").toString();
+    WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByOpenId(openId);
+    if (weiXinUser != null) {
+      weiXinUser.setState(2);
+      try {
+        weiXinUserService.saveWeiXinUserByUnSubscribe(weiXinUser);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+  }
+
+  /**
    * 群发任务即将完成的时候，推送群发结果 将结果保存到数据库
    */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   private void massEndJobFinish(Map map) {
-
+    String msgID = map.get("MsgID").toString();
+    WeixinMessage weixinMessage = weixinMessageService.findMessageByMsgID(msgID);
+    if (weixinMessage != null) {
+      try {
+        weixinMessageService.saveNews(weixinMessage);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
   }
 }

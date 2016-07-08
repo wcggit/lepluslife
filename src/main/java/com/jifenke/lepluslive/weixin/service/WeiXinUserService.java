@@ -96,6 +96,11 @@ public class WeiXinUserService {
     return weiXinUser;
   }
 
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  public void saveWeiXinUserByUnSubscribe(WeiXinUser weiXinUser) throws Exception {
+    weiXinUserRepository.save(weiXinUser);
+  }
+
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public void saveWeiXinUser(Map<String, Object> userDetail, Map<String, Object> map)
