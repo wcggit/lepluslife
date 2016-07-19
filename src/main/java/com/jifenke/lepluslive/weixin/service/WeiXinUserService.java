@@ -331,6 +331,7 @@ public class WeiXinUserService {
     scoreADetailRepository.save(scoreADetail);
 
     weiXinUser.setHongBaoState(1);
+    weiXinUser.setState(1);
     weiXinUserRepository.save(weiXinUser);
   }
 }
