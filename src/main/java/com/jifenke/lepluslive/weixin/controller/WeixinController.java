@@ -17,7 +17,6 @@ import com.jifenke.lepluslive.score.domain.entities.ScoreB;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.score.service.ScoreAService;
 import com.jifenke.lepluslive.score.service.ScoreBService;
-import com.jifenke.lepluslive.weixin.repository.DictionaryRepository;
 import com.jifenke.lepluslive.weixin.service.DictionaryService;
 import com.jifenke.lepluslive.weixin.service.WeiXinService;
 import com.jifenke.lepluslive.weixin.service.WeiXinUserService;
@@ -206,7 +205,6 @@ public class WeixinController {
     return MvUtil.go("/weixin/hongbaoOpen");
   }
 
-
   @RequestMapping("/user")
   public ModelAndView goUserPage(Model model, HttpServletRequest request,
                                  HttpServletResponse response) throws IOException {
@@ -228,7 +226,8 @@ public class WeixinController {
   }
 
   @RequestMapping("/city")
-  public ModelAndView goMerchantPage() {
+  public ModelAndView goMerchantPage(HttpServletRequest request, Model model) {
+    model.addAttribute("wxConfig", weiXinService.getWeiXinConfig(request));
     return MvUtil.go("/weixin/merchant");
   }
 

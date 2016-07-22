@@ -21,58 +21,67 @@ import javax.inject.Inject;
 @Transactional(readOnly = true)
 public class CityService {
 
-    @Inject
-    private CityRepository cityRepository;
+  @Inject
+  private CityRepository cityRepository;
 
-    @Inject
-    private AreaRepository areaRepository;
+  @Inject
+  private AreaRepository areaRepository;
 
-    @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
-    public List<City> findCitiesByPage(Pageable pageable) {
-        return cityRepository.findAll(pageable).getContent();
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+  public List<City> findCitiesByPage(Pageable pageable) {
+    return cityRepository.findAll(pageable).getContent();
+  }
+
+  public City findCityById(Long id) {
+
+    City city = cityRepository.findOne(id);
+    if (city == null) {
+      throw new RuntimeException("不存在的城市");
     }
 
-    public City findCityById(Long id) {
+    return city;
+  }
 
-        City city = cityRepository.findOne(id);
-        if (city == null) {
-            throw new RuntimeException("不存在的城市");
-        }
+  public City findCityByName(String name) {
 
-        return city;
+    List<City> cityList = cityRepository.findByName(name);
+    if (cityList != null && cityList.size() > 0) {
+      return cityList.get(0);
     }
+    return null;
+  }
 
-    public void createCity(City city) {
-        if (city.getId() != null) {
-            throw new RuntimeException("新建城市ID不为null");
-        }
-        cityRepository.save(city);
+  public void createCity(City city) {
+    if (city.getId() != null) {
+      throw new RuntimeException("新建城市ID不为null");
     }
+    cityRepository.save(city);
+  }
 
-    public void editCity(City city) {
-        City cityOri = cityRepository.findOne(city.getId());
-        if (cityOri == null) {
-            throw new RuntimeException("不存在的商户");
-        }
-        cityOri.setName(city.getName());
-        cityOri.setSid(city.getSid());
-
-        cityRepository.save(cityOri);
+  public void editCity(City city) {
+    City cityOri = cityRepository.findOne(city.getId());
+    if (cityOri == null) {
+      throw new RuntimeException("不存在的商户");
     }
+    cityOri.setName(city.getName());
+    cityOri.setSid(city.getSid());
 
-    public void deleteCity(Long id) {
-        cityRepository.delete(id);
-    }
+    cityRepository.save(cityOri);
+  }
 
-    /**
-     * 获取某个城市的所有地区列表
-     * @param id 城市id
-     * @return
-     */
-    @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
-    public List<Area> findAreaListByCity(Long id) {
-        City city = new City();
-        city.setId(id);
-        return areaRepository.findAllByCity(city);
-    }
+  public void deleteCity(Long id) {
+    cityRepository.delete(id);
+  }
+
+  /**
+   * 获取某个城市的所有地区列表
+   *
+   * @param id 城市id
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+  public List<Area> findAreaListByCity(Long id) {
+    City city = new City();
+    city.setId(id);
+    return areaRepository.findAllByCity(city);
+  }
 }

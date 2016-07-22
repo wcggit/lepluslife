@@ -3,6 +3,7 @@ package com.jifenke.lepluslive.merchant.controller.dto;
 
 import com.jifenke.lepluslive.merchant.domain.entities.MerchantDetail;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -31,6 +32,14 @@ public class MerchantDto {
   private Double lng;
 
   private Double lat;  //纬度
+
+  private String typeName;
+
+  private String cityName;
+
+  private BigDecimal star;
+
+  private String areaName;
 
   private List<MerchantDetail> detailList;
 
@@ -130,4 +139,35 @@ public class MerchantDto {
     this.rebate = rebate;
   }
 
+  public String getTypeName() {
+    return typeName;
+  }
+
+  public void setTypeName(String typeName) {
+    this.typeName = typeName;
+  }
+
+  public String getCityName() {
+    return cityName;
+  }
+
+  public void setCityName(String cityName) {
+    this.cityName = cityName;
+  }
+
+  public BigDecimal getStar() {
+    return star;
+  }
+
+  public void setStar(BigDecimal star) {
+    this.star = star;
+  }
+
+  public String getAreaName() {
+    return areaName;
+  }
+
+  public void setAreaName(String areaName) {
+    this.areaName = areaName;
+  }
 }

@@ -6,7 +6,9 @@ import com.jifenke.lepluslive.global.util.PaginationUtil;
 import com.jifenke.lepluslive.merchant.controller.dto.MerchantDto;
 import com.jifenke.lepluslive.merchant.domain.entities.Merchant;
 import com.jifenke.lepluslive.merchant.domain.entities.MerchantDetail;
+import com.jifenke.lepluslive.merchant.domain.entities.MerchantScroll;
 import com.jifenke.lepluslive.merchant.service.MerchantService;
+import com.jifenke.lepluslive.weixin.service.WeiXinService;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -29,6 +31,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Created by wcg on 16/3/17.
@@ -40,13 +43,75 @@ public class MerchantController {
   @Inject
   private MerchantService merchantService;
 
+  @Inject
+  private WeiXinService weiXinService;
+
+  @RequestMapping("/index")
+  public ModelAndView goMerchantPage(HttpServletRequest request, Model model) {
+    model.addAttribute("wxConfig", weiXinService.getWeiXinConfig(request));
+    return MvUtil.go("/weixin/merchant");
+  }
+
+  @RequestMapping("/type")
+  public ModelAndView goMerchantTypePage(@RequestParam(required = false) String cityName,
+                                         @RequestParam(required = false) Integer status,
+                                         @RequestParam(required = false) Integer condition,
+                                         @RequestParam(required = false) Long type,
+                                         @RequestParam(required = false) Double lat,
+                                         @RequestParam(required = false) Double lon, Model model) {
+    model.addAttribute("cityName", cityName);
+    if (condition == null) {
+      condition = 0;
+    }
+    model.addAttribute("condition", condition);
+    model.addAttribute("status", status);
+    model.addAttribute("type", type);
+    model.addAttribute("lat", lat);
+    model.addAttribute("lon", lon);
+    return MvUtil.go("/weixin/merchantType");
+  }
+
   //分页
-  @RequestMapping(value = "/list", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+  @RequestMapping(value = "/list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
   public
   @ResponseBody
-  List<Merchant> findPageProduct(
-      @RequestParam(value = "page", required = false) Integer offset) {
-    return merchantService.findMerchantsByPage(offset);
+  List<MerchantDto> findPageMerchant(
+      @RequestParam(value = "page", required = false) Integer offset,
+      @RequestParam(required = false) String cityName,
+      @RequestParam(required = false) Integer status, @RequestParam(required = false) Long type,
+      @RequestParam(required = false) Integer condition,
+      @RequestParam(required = false) Double lat, @RequestParam(required = false) Double lon) {
+//    return merchantService.findMerchantsByPage(offset);
+    if (offset == null) {
+      offset = 1;
+    }
+    List<MerchantDto>
+        merchantDtoList =
+        merchantService
+            .findWxMerchantListByCustomCondition(status, lat, lon, offset, type, cityName,
+                                                 condition);
+    return merchantDtoList;
+  }
+
+  @RequestMapping(value = "/info/{id}", method = RequestMethod.GET)
+  public ModelAndView goMerchantPage(HttpServletRequest request, Model model,
+                                     @PathVariable Long id,
+                                     @RequestParam(required = false) String distance,
+                                     @RequestParam(required = false) Integer status) {
+    Merchant merchant = merchantService.findMerchantById(id);
+    List<MerchantScroll> scrolls = merchantService.findAllScorllPicture(merchant);
+    model.addAttribute("merchant", merchant);
+    if (scrolls == null || scrolls.size() < 1) {
+      model.addAttribute("hasScroll", 0);
+    } else {
+      model.addAttribute("hasScroll", 1);
+    }
+    model.addAttribute("scrolls", scrolls);
+
+    model.addAttribute("distance", distance);
+    model.addAttribute("status", status);
+    model.addAttribute("wxConfig", weiXinService.getWeiXinConfig(request));
+    return MvUtil.go("/weixin/merchantInfo");
   }
 
   @ApiOperation(value = "首页加载商家列表及周边1.0")
@@ -63,7 +128,8 @@ public class MerchantController {
 
     List<MerchantDto>
         merchantDtoList =
-        merchantService.findMerchantListByCustomCondition(latitude, longitude, page, type,cityId, areaId);
+        merchantService
+            .findMerchantListByCustomCondition(latitude, longitude, page, type, cityId, areaId);
 
     return LejiaResult.build(200, "ok", merchantDtoList);
   }

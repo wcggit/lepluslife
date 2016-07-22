@@ -7,6 +7,10 @@ import com.jifenke.lepluslive.global.config.Constants;
 import com.jifenke.lepluslive.job.OrderJob;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.lejiauser.repository.LeJiaUserRepository;
+import com.jifenke.lepluslive.merchant.domain.entities.Merchant;
+import com.jifenke.lepluslive.merchant.domain.entities.MerchantInfo;
+import com.jifenke.lepluslive.merchant.repository.MerchantRepository;
+import com.jifenke.lepluslive.merchant.service.MerchantService;
 import com.jifenke.lepluslive.order.domain.entities.OnLineOrder;
 import com.jifenke.lepluslive.order.domain.entities.OrderDetail;
 import com.jifenke.lepluslive.order.repository.OrderDetailRepository;
@@ -76,15 +80,24 @@ public class ttt {
 
   @Inject
   private WeiXinService weiXinService;
-//
-//  @Test
-//  public void tttt() {
-//    Date start = new Date();
-//    Long aLong = leJiaUserRepository.checkUserBindMerchant(50L);
-//    Date end = new Date();
-//    System.out.println(end.getTime()-start.getTime());
-//
-//  }
+
+  @Inject
+  private MerchantRepository merchantRepository;
+
+  @Inject
+  private MerchantService merchantService;
+
+  @Test
+  public void tttt() {
+    List<Merchant> list = merchantRepository.findAll();
+    for (Merchant merchant : list) {
+      MerchantInfo info = merchant.getMerchantInfo();
+      if (info == null) {
+        merchantService.test(merchant);
+      }
+    }
+
+  }
 }
 
 ////  public static void main(String[] args) {

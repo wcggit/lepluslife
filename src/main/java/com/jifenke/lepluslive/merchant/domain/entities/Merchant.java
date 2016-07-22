@@ -61,9 +61,9 @@ public class Merchant {
 
   private Integer partnership; //合作关系
 
-  private Double lng=0.0;
+  private Double lng = 0.0;
 
-  private Double lat=0.0;
+  private Double lat = 0.0;
 
   private String payee; //收款人
 
@@ -100,6 +100,9 @@ public class Merchant {
   private String merchantPhone; //绑定电话
 
   private String officeHour; //营业时间
+
+  @OneToOne(cascade = CascadeType.ALL)
+  private MerchantInfo merchantInfo;   //商家详情介绍
 
   public String getMerchantPhone() {
     return merchantPhone;
@@ -349,4 +352,11 @@ public class Merchant {
     this.picture = picture;
   }
 
+  public MerchantInfo getMerchantInfo() {
+    return merchantInfo;
+  }
+
+  public void setMerchantInfo(MerchantInfo merchantInfo) {
+    this.merchantInfo = merchantInfo;
+  }
 }

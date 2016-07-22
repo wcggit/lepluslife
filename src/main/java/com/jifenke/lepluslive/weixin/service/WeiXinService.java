@@ -3,6 +3,7 @@ package com.jifenke.lepluslive.weixin.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jifenke.lepluslive.global.config.Constants;
 import com.jifenke.lepluslive.global.util.CookieUtils;
+import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.global.util.WeixinPayUtil;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 
@@ -22,6 +23,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -48,6 +51,9 @@ public class WeiXinService {
 
   @Inject
   private DictionaryService dictionaryService;
+
+  @Inject
+  private WeiXinPayService weiXinPayService;
 
 
   public Map<String, Object> getSnsAccessToken(String code) {
@@ -144,5 +150,19 @@ public class WeiXinService {
     Arrays.sort(strs);
     String sign = strs[0] + strs[1] + strs[2];
     return DigestUtils.sha1Hex(sign).equals(signature);
+  }
+
+  /**
+   * 获取页面调用接口所需的配置参数wxconfig
+   */
+  public Map getWeiXinConfig(HttpServletRequest request) {
+    Long timestamp = new Date().getTime() / 1000;
+    String noncestr = MvUtil.getRandomStr();
+    Map map = new HashMap<>();
+    map.put("appId", appid);
+    map.put("timestamp", timestamp);
+    map.put("noncestr", noncestr);
+    map.put("signature", weiXinPayService.getJsapiSignature(request, noncestr, timestamp));
+    return map;
   }
 }
