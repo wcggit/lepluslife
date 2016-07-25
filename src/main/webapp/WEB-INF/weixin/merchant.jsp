@@ -179,7 +179,8 @@
                     imgLength = data.length;
                     for (var i = 0; i < data.length; i++) {
                         shopList.append(
-                                $("<div></div>").attr("id", "aaa" + data[i].id).append(
+                                $("<div></div>").attr("id", "aaa-" + data[i].id + "-"
+                                                            + data[i].distance).append(
                                         $("<div></div>").append(
                                                 $("<img>").attr("src",
                                                                 (data[i].picture == null
@@ -244,12 +245,12 @@
                                         )
                                 )
                         );
-                        var tests = "aaa" + data[i].id;
-                        var locationIt = "${wxRootUrl}/weixin/merchant/info/" + data[i].id
-                                         + "?distance="
-                                         + data[i].distance + "&status=" + gps.status;
+                        var tests = "aaa-" + data[i].id + "-" + data[i].distance;
                         document.getElementById(tests).addEventListener('tap', function () {
-                            location.href = locationIt;
+                            var str = $(this).attr("id").split('-');
+                            location.href = "${wxRootUrl}/weixin/merchant/info/" + str[1]
+                                            + "?distance="
+                                            + str[2] + "&status=" + gps.status;
                         }, false);
                         var star = parseInt(data[i].star);
 
