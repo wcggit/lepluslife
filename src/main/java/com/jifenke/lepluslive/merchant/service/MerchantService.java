@@ -147,6 +147,7 @@ public class MerchantService {
     List<Object[]> list = query.getResultList();
 
     em.close();
+    entityManagerFactory.close();
 
     List<MerchantDto> dtoList = new ArrayList<>();
     for (Object[] o : list) {
@@ -219,6 +220,7 @@ public class MerchantService {
     List<Object[]> list = query.getResultList();
 
     em.close();
+    entityManagerFactory.close();
 
     List<MerchantDto> dtoList = new ArrayList<>();
     for (Object[] o : list) {
