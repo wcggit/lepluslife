@@ -40,7 +40,7 @@ public class MerchantService {
   private MerchantDetailRepository merchantDetailRepository;
 
   @Inject
-  private EntityManagerFactory entityManagerFactory;
+  private EntityManager em;
 
   @Inject
   MerchantInfoRepository merchantInfoRepository;
@@ -115,7 +115,7 @@ public class MerchantService {
       page = 1;
     }
 
-    EntityManager em = entityManagerFactory.createEntityManager();
+//    EntityManager em = entityManagerFactory.createEntityManager();
     //定义SQL
     String sql = null;
 
@@ -146,8 +146,8 @@ public class MerchantService {
 
     List<Object[]> list = query.getResultList();
 
-    em.close();
-    entityManagerFactory.close();
+//    em.close();
+//    entityManagerFactory.close();
 
     List<MerchantDto> dtoList = new ArrayList<>();
     for (Object[] o : list) {
@@ -174,7 +174,7 @@ public class MerchantService {
                                                                Integer page, Long type,
                                                                String cityName, Integer condition) {
 
-    EntityManager em = entityManagerFactory.createEntityManager();
+//    EntityManager em = entityManagerFactory.createEntityManager();
     //定义SQL
     String sql = null;
     if (status == 1) {
@@ -219,8 +219,8 @@ public class MerchantService {
     Query query = em.createNativeQuery(sql);
     List<Object[]> list = query.getResultList();
 
-    em.close();
-    entityManagerFactory.close();
+//    em.close();
+//    entityManagerFactory.close();
 
     List<MerchantDto> dtoList = new ArrayList<>();
     for (Object[] o : list) {

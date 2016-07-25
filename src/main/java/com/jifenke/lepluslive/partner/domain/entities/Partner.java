@@ -19,11 +19,40 @@ public class Partner {
   private Long id;
 
 
-  private String name;
+  private String name; //账户名
 
 
   private Long userLimit = 0L;
 
+  private String partnerName; //合伙人姓名
+
+  private String phoneNumber;
+
+  private String password;
+
+  public String getPartnerName() {
+    return partnerName;
+  }
+
+  public void setPartnerName(String partnerName) {
+    this.partnerName = partnerName;
+  }
+
+  public String getPhoneNumber() {
+    return phoneNumber;
+  }
+
+  public void setPhoneNumber(String phoneNumber) {
+    this.phoneNumber = phoneNumber;
+  }
+
+  public String getPassword() {
+    return password;
+  }
+
+  public void setPassword(String password) {
+    this.password = password;
+  }
 
   public Long getUserLimit() {
     return userLimit;

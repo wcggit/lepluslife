@@ -1,0 +1,137 @@
+Index: src/main/java/com/jifenke/lepluslive/merchant/service/MerchantService.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/com/jifenke/lepluslive/merchant/service/MerchantService.java	(revision 2bd89d4b4f6ff8d32906937fa8ddaa87d9ba87ea)
++++ src/main/java/com/jifenke/lepluslive/merchant/service/MerchantService.java	(revision )
+@@ -365,4 +365,31 @@
+         merchantWallet.getTotalTransferMoney() + financialStatistic.getTransferPrice());
+     merchantWalletRepository.save(merchantWallet);
+   }
++
++  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
++  public Merchant pureQrCodeManage(Long id) {
++    Merchant merchant = merchantRepository.findOne(id);
++
++    if (merchant.getPureQrCode() == null) {
++      byte[]
++          bytes =
++          new byte[0];
++      try {
++        bytes = barcodeService.qrCode(Constants.MERCHANT_URL + merchant.getMerchantSid()+"?pure=access",
++                                      BarcodeConfig.QRCode.defaultConfig());
++      } catch (InterruptedException e) {
++        e.printStackTrace();
++      } catch (IOException e) {
++        e.printStackTrace();
++      }
++      String filePath = MvUtil.getFilePath(Constants.BAR_CODE_EXT);
++      fileImageService.SaveBarCode(bytes, filePath);
++
++      merchant.setPureQrCode(barCodeRootUrl + "/" + filePath);
++
++      merchantRepository.save(merchant);
++    }
++
++    return merchant;
++  }
+ }
+Index: src/main/java/com/jifenke/lepluslive/merchant/domain/entities/Merchant.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/com/jifenke/lepluslive/merchant/domain/entities/Merchant.java	(revision 2bd89d4b4f6ff8d32906937fa8ddaa87d9ba87ea)
++++ src/main/java/com/jifenke/lepluslive/merchant/domain/entities/Merchant.java	(revision )
+@@ -73,6 +73,8 @@
+ 
+   private String qrCodePicture; //商户收款码
+ 
++  private String pureQrCode; //纯支付码
++
+   private Long userLimit; //会员绑定上线
+ 
+   private BigDecimal ljCommission; //乐加佣金 单位百分比
+@@ -88,6 +90,15 @@
+   private String contact; //联系人
+ 
+   private Date createDate = new Date();
++
++
++  public String getPureQrCode() {
++    return pureQrCode;
++  }
++
++  public void setPureQrCode(String pureQrCode) {
++    this.pureQrCode = pureQrCode;
++  }
+ 
+   public BigDecimal getMemberCommission() {
+     return memberCommission;
+Index: src/main/java/com/jifenke/lepluslive/merchant/controller/MerchantController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/com/jifenke/lepluslive/merchant/controller/MerchantController.java	(revision 2bd89d4b4f6ff8d32906937fa8ddaa87d9ba87ea)
++++ src/main/java/com/jifenke/lepluslive/merchant/controller/MerchantController.java	(revision )
+@@ -174,8 +174,15 @@
+   @RequestMapping(value = "/merchant/qrCode", method = RequestMethod.GET)
+   public
+   @ResponseBody
+-  LejiaResult productQrCode(@RequestParam Long id) {
++  LejiaResult merchantQrCode(@RequestParam Long id) {
+     return LejiaResult.ok(merchantService.qrCodeManage(id));
++  }
++
++  @RequestMapping(value = "/merchant/pureQrCode", method = RequestMethod.GET)
++  public
++  @ResponseBody
++  LejiaResult pureQrCode(@RequestParam Long id) {
++    return LejiaResult.ok(merchantService.pureQrCodeManage(id));
+   }
+ 
+ 
+Index: src/main/webapp/WEB-INF/merchant/merchantList.jsp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/webapp/WEB-INF/merchant/merchantList.jsp	(revision 2bd89d4b4f6ff8d32906937fa8ddaa87d9ba87ea)
++++ src/main/webapp/WEB-INF/merchant/merchantList.jsp	(revision )
+@@ -425,6 +425,10 @@
+                            '<button type="button" class="btn btn-default editMerchant">编辑</button>';
+                            contentStr +=
+                            '<button type="button" class="btn btn-default editMerchantContent">内容管理</button>';
++                           if(content[i].partnership==1){
++                               contentStr +=
++                               '<button type="button" class="btn btn-default showPureQRCode">纯支付码</button>';
++                           }
+                            if (content[i].state == 0) {
+                                contentStr +=
+                                '<button type="button" class="btn btn-default disableMerchant">开启乐店</button></td></tr>';
+@@ -475,6 +479,23 @@
+                                                                                                                   });
+                                                                                                   },
+                                                                                                   false);
++                                          }
++                                      });
++                           });
++                       });
++                       $(".showPureQRCode").each(function (i) {
++                           $(".showPureQRCode").eq(i).bind("click", function () {
++                               var id = $(this).parent().find(".id-hidden").val();
++                               $.ajax({
++                                          type: "get",
++                                          data: {id: id},
++                                          url: "/manage/merchant/pureQrCode",
++                                          success: function (data) {
++                                              var merchant = data.data;
++                                              var url = "${productUrl}" + id;
++                                              $(".shopName").html(merchant.name);
++                                              $("#qrCode").attr("src", merchant.pureQrCode);
++                                              $("#qrWarn").modal("show");
+                                           }
+                                       });
+                            });
