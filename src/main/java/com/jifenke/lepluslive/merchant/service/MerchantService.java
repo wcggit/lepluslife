@@ -97,11 +97,11 @@ public class MerchantService {
       merchantDto.setPhoneNumber(o[3].toString());
       merchantDto.setName(o[4].toString());
       merchantDto.setPicture(o[5].toString());
-      merchantDto.setDiscount(o[6] != null ? Integer.parseInt(o[6].toString()) : 10);
-      merchantDto.setRebate(o[7] != null ? Integer.parseInt(o[7].toString()) : 0);
-      merchantDto.setLng(Double.parseDouble(o[8].toString()));
-      merchantDto.setLat(Double.parseDouble(o[9].toString()));
-      merchantDto.setDistance(o[10] != null ? Double.valueOf(o[10].toString()) : null);
+//      merchantDto.setDiscount(o[6] != null ? Integer.parseInt(o[6].toString()) : 10);
+//      merchantDto.setRebate(o[7] != null ? Integer.parseInt(o[7].toString()) : 0);
+      merchantDto.setLng(Double.parseDouble(o[6].toString()));
+      merchantDto.setLat(Double.parseDouble(o[7].toString()));
+      merchantDto.setDistance(o[8] != null ? Double.valueOf(o[8].toString()) : null);
       dtoList.add(merchantDto);
     }
     return dtoList;
@@ -120,7 +120,7 @@ public class MerchantService {
     String sql = null;
 
     sql =
-        "SELECT m.id,m.sid,m.location,m.phone_number,m.`name`,m.picture,m.discount,m.rebate,m.lng,m.lat, ROUND( 6378.138 * 2 * ASIN(SQRT(POW(SIN(("
+        "SELECT m.id,m.sid,m.location,m.phone_number,m.`name`,m.picture,m.lng,m.lat, ROUND( 6378.138 * 2 * ASIN(SQRT(POW(SIN(("
         + latitude + " * PI() / 180 - m.lat * PI() / 180) / 2),2) + COS(" + latitude
         + " * PI() / 180) * COS(m.lat * PI() / 180) * POW(SIN((" + longitude
         + " * PI() / 180 - m.lng * PI() / 180) / 2),2))) * 1000) AS distance FROM merchant m WHERE 1=1";
@@ -158,11 +158,11 @@ public class MerchantService {
       merchantDto.setPhoneNumber(o[3].toString());
       merchantDto.setName(o[4].toString());
       merchantDto.setPicture(o[5].toString());
-      merchantDto.setDiscount(o[6] != null ? Integer.parseInt(o[6].toString()) : 10);
-      merchantDto.setRebate(o[7] != null ? Integer.parseInt(o[7].toString()) : 0);
-      merchantDto.setLng(Double.parseDouble(o[8].toString()));
-      merchantDto.setLat(Double.parseDouble(o[9].toString()));
-      merchantDto.setDistance(o[10] != null ? Double.valueOf(o[10].toString()) : null);
+//      merchantDto.setDiscount(o[6] != null ? Integer.parseInt(o[6].toString()) : 10);
+//      merchantDto.setRebate(o[7] != null ? Integer.parseInt(o[7].toString()) : 0);
+      merchantDto.setLng(Double.parseDouble(o[6].toString()));
+      merchantDto.setLat(Double.parseDouble(o[7].toString()));
+      merchantDto.setDistance(o[8] != null ? Double.valueOf(o[8].toString()) : null);
       dtoList.add(merchantDto);
     }
     return dtoList;
@@ -179,13 +179,13 @@ public class MerchantService {
     String sql = null;
     if (status == 1) {
       sql =
-          "SELECT m.id,m.sid,m.location,m.phone_number,m.`name`,m.picture,m.discount,m.rebate,m.lng,m.lat,t.`name` AS tName,ci.`name` AS cName,mi.star,area.`name` AS aName,ROUND( 6378.138 * 2 * ASIN(SQRT(POW(SIN(("
+          "SELECT m.id,m.sid,m.location,m.phone_number,m.`name`,m.picture,m.lng,m.lat,t.`name` AS tName,ci.`name` AS cName,mi.star,area.`name` AS aName,ROUND( 6378.138 * 2 * ASIN(SQRT(POW(SIN(("
           + latitude + " * PI() / 180 - m.lat * PI() / 180) / 2),2) + COS(" + latitude
           + " * PI() / 180) * COS(m.lat * PI() / 180) * POW(SIN((" + longitude
           + " * PI() / 180 - m.lng * PI() / 180) / 2),2))) * 1000) AS distance FROM merchant m,merchant_type t,city ci,merchant_info mi,area WHERE m.merchant_type_id = t.id AND m.city_id = ci.id AND m.merchant_info_id=mi.id AND m.area_id=area.id";
     } else {
       sql =
-          "SELECT m.id,m.sid,m.location,m.phone_number,m.`name`,m.picture,m.discount,m.rebate,m.lng,m.lat,t.`name` AS tName,ci.`name` AS cName,mi.star,area.`name` AS aName FROM merchant m,merchant_type t,city ci,merchant_info mi,area WHERE m.merchant_type_id = t.id AND m.city_id = ci.id AND m.merchant_info_id=mi.id AND m.area_id=area.id";
+          "SELECT m.id,m.sid,m.location,m.phone_number,m.`name`,m.picture,m.lng,m.lat,t.`name` AS tName,ci.`name` AS cName,mi.star,area.`name` AS aName FROM merchant m,merchant_type t,city ci,merchant_info mi,area WHERE m.merchant_type_id = t.id AND m.city_id = ci.id AND m.merchant_info_id=mi.id AND m.area_id=area.id";
     }
 
     sql += " AND m.state = 1";
@@ -231,16 +231,16 @@ public class MerchantService {
       merchantDto.setPhoneNumber(String.valueOf(o[3]));
       merchantDto.setName(String.valueOf(o[4]));
       merchantDto.setPicture(o[5] != null ? String.valueOf(o[5]) : null);
-      merchantDto.setDiscount(o[6] != null ? Integer.parseInt(o[6].toString()) : 10);
-      merchantDto.setRebate(o[7] != null ? Integer.parseInt(o[7].toString()) : 0);
-      merchantDto.setLng(Double.parseDouble(String.valueOf(o[8])));
-      merchantDto.setLat(Double.parseDouble(String.valueOf(o[9])));
-      merchantDto.setTypeName(String.valueOf(o[10]));
-      merchantDto.setCityName(String.valueOf(o[11]));
-      merchantDto.setStar(new BigDecimal(String.valueOf(o[12])));
-      merchantDto.setAreaName(String.valueOf(o[13]));
-      if (o.length > 14) {
-        merchantDto.setDistance(o[14] != null ? Double.valueOf(o[14].toString()) : null);
+//      merchantDto.setDiscount(o[6] != null ? Integer.parseInt(o[6].toString()) : 10);
+//      merchantDto.setRebate(o[7] != null ? Integer.parseInt(o[7].toString()) : 0);
+      merchantDto.setLng(Double.parseDouble(String.valueOf(o[6])));
+      merchantDto.setLat(Double.parseDouble(String.valueOf(o[7])));
+      merchantDto.setTypeName(String.valueOf(o[8]));
+      merchantDto.setCityName(String.valueOf(o[9]));
+      merchantDto.setStar(new BigDecimal(String.valueOf(o[10])));
+      merchantDto.setAreaName(String.valueOf(o[11]));
+      if (o.length > 12) {
+        merchantDto.setDistance(o[12] != null ? Double.valueOf(o[12].toString()) : null);
       }
       dtoList.add(merchantDto);
     }

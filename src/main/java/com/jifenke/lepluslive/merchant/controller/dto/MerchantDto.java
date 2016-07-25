@@ -23,9 +23,9 @@ public class MerchantDto {
 
   private String picture;
 
-  private Integer discount; //折扣
-
-  private Integer rebate;  //返利
+//  private Integer discount; //折扣
+//
+//  private Integer rebate;  //返利
 
   private Double distance;
 
@@ -121,22 +121,6 @@ public class MerchantDto {
 
   public void setDistance(Double distance) {
     this.distance = distance;
-  }
-
-  public Integer getDiscount() {
-    return discount;
-  }
-
-  public void setDiscount(Integer discount) {
-    this.discount = discount;
-  }
-
-  public Integer getRebate() {
-    return rebate;
-  }
-
-  public void setRebate(Integer rebate) {
-    this.rebate = rebate;
   }
 
   public String getTypeName() {
