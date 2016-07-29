@@ -3,6 +3,7 @@ package com.jifenke.lepluslive.weixin.controller;
 import com.jifenke.lepluslive.global.config.Constants;
 import com.jifenke.lepluslive.global.util.CookieUtils;
 import com.jifenke.lepluslive.global.util.JsonUtils;
+import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.lejiauser.service.LeJiaUserService;
@@ -29,6 +30,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -41,6 +43,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 
 /**
  * Created by wcg on 16/3/18.
@@ -171,39 +174,44 @@ public class WeixinController {
 
 
   @RequestMapping("/hongbao")
-  public ModelAndView goHongbaoPage(HttpServletRequest request) {
+  public ModelAndView goHongbaoPage(HttpServletRequest request, Model model) {
     String openId = CookieUtils.getCookieValue(request, appId + "-user-open-id");
     WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByOpenId(openId);
+    model.addAttribute("wxConfig", weiXinService.getWeiXinConfig(request));
     if (weiXinUser != null && weiXinUser.getHongBaoState() == 1) {
-      return MvUtil.go("/weixin/hongbaoOpen");
+      LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
+      model.addAttribute("status", 1);
+      model.addAttribute("phoneNumber", leJiaUser != null ? leJiaUser.getPhoneNumber() : "");
+      return MvUtil.go("/weixin/hongbao");
     }
+    model.addAttribute("status", 0);
     return MvUtil.go("/weixin/hongbao");
+  }
+
+  @RequestMapping(value = "/hongbao/open")
+  public
+  @ResponseBody
+  LejiaResult HongbaoOpen(@RequestParam String phoneNumber, HttpServletRequest request) {
+    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
+    LeJiaUser leJiaUser = leJiaUserService.findUserByPhoneNumber(phoneNumber);  //是否已注册
+    if (leJiaUser == null && weiXinUser.getHongBaoState() == 0) {
+      weiXinUserService.openHongBao(weiXinUser, phoneNumber);
+      return LejiaResult.build(200, phoneNumber);
+    }
+    return LejiaResult.build(201, "手机号已被使用或已领取红包");
   }
 
 //  @RequestMapping("/hongbao/open")
 //  public ModelAndView goHongbaoOpenPage(@RequestParam String phoneNumber,
-//                                        HttpServletRequest request, HttpServletResponse response,
-//                                        Model model) {
+//                                        @RequestParam String realName,
+//                                        HttpServletRequest request) {
 //    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
 //    LeJiaUser leJiaUser = leJiaUserService.findUserByPhoneNumber(phoneNumber);  //是否已注册
 //    if (leJiaUser == null && weiXinUser.getHongBaoState() == 0) {
-//      weiXinUserService.openHongBao(weiXinUser, phoneNumber);
+//      weiXinUserService.openHongBao(weiXinUser, phoneNumber, realName);
 //    }
-//
 //    return MvUtil.go("/weixin/hongbaoOpen");
 //  }
-
-  @RequestMapping("/hongbao/open")
-  public ModelAndView goHongbaoOpenPage(@RequestParam String phoneNumber,
-                                        @RequestParam String realName,
-                                        HttpServletRequest request) {
-    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
-    LeJiaUser leJiaUser = leJiaUserService.findUserByPhoneNumber(phoneNumber);  //是否已注册
-    if (leJiaUser == null && weiXinUser.getHongBaoState() == 0) {
-      weiXinUserService.openHongBao(weiXinUser, phoneNumber, realName);
-    }
-    return MvUtil.go("/weixin/hongbaoOpen");
-  }
 
   @RequestMapping("/user")
   public ModelAndView goUserPage(Model model, HttpServletRequest request,

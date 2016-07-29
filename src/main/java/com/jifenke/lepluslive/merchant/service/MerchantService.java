@@ -172,7 +172,8 @@ public class MerchantService {
   public List<MerchantDto> findWxMerchantListByCustomCondition(Integer status, Double latitude,
                                                                Double longitude,
                                                                Integer page, Long type,
-                                                               String cityName, Integer condition) {
+                                                               String cityName, Integer condition,
+                                                               Integer partnership) {
 
 //    EntityManager em = entityManagerFactory.createEntityManager();
     //定义SQL
@@ -194,6 +195,10 @@ public class MerchantService {
       sql += " AND m.merchant_type_id = " + type;
     }
 
+    if (null != partnership && 1 == partnership) {
+      sql += " AND m.partnership = 1 ";
+    }
+
     if (cityName != null && cityName.length() > 1) {
       cityName = cityName.substring(0, cityName.length() - 1);
       City city = cityService.findCityByName(cityName);
@@ -210,8 +215,16 @@ public class MerchantService {
       }
     }
 
-    if (status == 1 && condition != null && condition != 0) { //离我最近
-      sql += " ,distance ASC ";
+    if (status == 1) {
+      if (condition != null) {
+        if (condition != 0) {  //先其他 后离我最近
+          sql += " ,distance ASC ";
+        } else {                //离我最近
+          sql += " ORDER BY distance ASC ";
+        }
+      } else {
+        sql += " ORDER BY distance ASC ";
+      }
     }
 
     sql += " LIMIT " + (page - 1) * 10 + "," + 10;

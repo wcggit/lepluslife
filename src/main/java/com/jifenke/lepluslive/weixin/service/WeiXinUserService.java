@@ -219,6 +219,7 @@ public class WeiXinUserService {
     weiXinUser.setProvince(userDetail.get("province").toString());
     weiXinUser.setLastUserInfoDate(new Date());
     weiXinUser.setState(1);
+    weiXinUser.setSubState(1);
     weiXinUserRepository.save(weiXinUser);
   }
 
@@ -309,10 +310,10 @@ public class WeiXinUserService {
 //  }
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public void openHongBao(WeiXinUser weiXinUser, String phoneNumber, String realName) {
+  public void openHongBao(WeiXinUser weiXinUser, String phoneNumber) {
     LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
     leJiaUser.setPhoneNumber(phoneNumber);
-    leJiaUser.setUserName(realName);
+    //  leJiaUser.setUserName(realName);
     leJiaUserRepository.save(leJiaUser);
 
     ScoreA scoreA = scoreARepository.findByLeJiaUser(leJiaUser);

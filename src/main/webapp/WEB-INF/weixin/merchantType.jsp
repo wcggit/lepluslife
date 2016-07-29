@@ -63,14 +63,6 @@
         gps.condition = '${condition}';
         gps.type = '${type}';
 
-//        if (gps.condition == 2) {
-//            $(".s").removeClass("active");
-//            $("#condition2").addClass("active");
-//        } else if (gps.condition == 3) {
-//            $(".s").removeClass("active");
-//            $("#condition3").addClass("active");
-//        }
-
         pullupRefresh();
     }
     window.onload = initPage;//不要括号
@@ -93,7 +85,6 @@
         setTimeout(function () {
             mui('#pullrefresh').pullRefresh().endPullupToRefresh((imgLength < 10)); //参数为true代表没有更多数据了。
             var shopList = $("#shopList");
-
             mui.ajax(url + '?page=' + count, {
                 dataType: 'json',//服务器返回json格式数据
                 type: 'post',//HTTP请求类型
@@ -103,7 +94,8 @@
                     imgLength = data.length;
                     for (var i = 0; i < data.length; i++) {
                         shopList.append(
-                                $("<div></div>").attr("id", "aaa" + data[i].id).append(
+                                $("<div></div>").attr("id", "aaa-" + data[i].id + "-"
+                                                            + data[i].distance).append(
                                         $("<div></div>").append(
                                                 $("<img>").attr("src",
                                                                 (data[i].picture == null
@@ -168,12 +160,12 @@
                                         )
                                 )
                         );
-                        var tests = "aaa" + data[i].id;
-                        var locationIt = "${wxRootUrl}/weixin/merchant/info/" + data[i].id
-                                         + "?distance="
-                                         + data[i].distance + "&status=" + gps.status;
+                        var tests = "aaa-" + data[i].id + "-" + data[i].distance;
                         document.getElementById(tests).addEventListener('tap', function () {
-                            location.href = locationIt;
+                            var str = $(this).attr("id").split('-');
+                            location.href = "${wxRootUrl}/weixin/merchant/info/" + str[1]
+                                            + "?distance="
+                                            + str[2] + "&status=" + gps.status;
                         }, false);
                         var star = parseInt(data[i].star);
 
@@ -219,16 +211,6 @@
         imgLength = 10;
         $("#shopList").html('');
         mui('#pullrefresh').pullRefresh().refresh(true);
-
-        <%--if (gps.status == 1) {--%>
-        <%--location.href = "${wxRootUrl}/wxReply/merchant/type?status=" +--%>
-        <%--gps.status + "&type=" + gps.type + "&lat=" + gps.lat + "&lon=" + gps.lon--%>
-        <%--+ "&cityName=" + gps.cityName + "&condition=" + gps.condition;--%>
-        <%--} else {--%>
-        <%--location.href =--%>
-        <%--"${wxRootUrl}/wxReply/merchant/type?status=" + gps.status + "&type=" + gps.type--%>
-        <%--+ "&condition=" + gps.condition;--%>
-        <%--}--%>
         pullupRefresh();
     }
 </script>

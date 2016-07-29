@@ -180,7 +180,7 @@ public class WeixinReplyService {
   private void subscribeWeiXinUser(Map map) {
     String openId = map.get("FromUserName").toString();
     WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByOpenId(openId);
-    if (weiXinUser == null || weiXinUser.getState() == 0) {
+    if (weiXinUser == null || weiXinUser.getState() == 0 || weiXinUser.getSubState() == 0) {
       Map<String, Object> userDetail = weiXinService.getWeiXinUserInfo(openId);
       if (null == userDetail.get("errcode")) {
         try {
@@ -200,7 +200,7 @@ public class WeixinReplyService {
     String openId = map.get("FromUserName").toString();
     WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByOpenId(openId);
     if (weiXinUser != null) {
-      weiXinUser.setState(2);
+      weiXinUser.setSubState(2);
       try {
         weiXinUserService.saveWeiXinUserByUnSubscribe(weiXinUser);
       } catch (Exception e) {

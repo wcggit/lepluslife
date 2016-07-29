@@ -71,13 +71,36 @@
 <div id="pullrefresh" class="mui-content mui-scroll-wrapper">
     <div class="mui-scroll">
         <div class="shopList" id="shopList">
-
+            <div id="loading" style="width: 40%;margin: 0 auto;">
+                <div class="spinner" style="float: left;margin: 0 20px 0 0;width: 20px;">
+                    <div class="spinner-container container1">
+                        <div class="circle1"></div>
+                        <div class="circle2"></div>
+                        <div class="circle3"></div>
+                        <div class="circle4"></div>
+                    </div>
+                    <div class="spinner-container container2">
+                        <div class="circle1"></div>
+                        <div class="circle2"></div>
+                        <div class="circle3"></div>
+                        <div class="circle4"></div>
+                    </div>
+                    <div class="spinner-container container3">
+                        <div class="circle1"></div>
+                        <div class="circle2"></div>
+                        <div class="circle3"></div>
+                        <div class="circle4"></div>
+                    </div>
+                </div>
+                <span>正在定位中……</span>
+            </div>
         </div>
     </div>
 </div>
 </body>
 <script src="${resourceUrl}/js/jquery-1.11.3.min.js"></script>
-
+<script type="text/javascript"
+        src="http://webapi.amap.com/maps?v=1.3&key=48f94cad8f49fc73c9ba59b281bb1e84"></script>
 <script type="text/javascript" src="${resourceUrl}/js/mui.min.js"></script>
 <script>
     //count判断是第几次加载
@@ -93,7 +116,6 @@
                   ] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
               });
     wx.ready(function () {
-        // config信息验证后会执行ready方法，所有接口调用都必须在config接口获得结果之后，config是一个客户端的异步操作，所以如果需要在页面加载时就调用相关接口，则须把相关接口放在ready函数中调用来确保正确执行。对于用户触发时才调用的接口，则可以直接调用，不需要放在ready函数中。
         //获取地理位置
         wx.getLocation({
                            type: 'wgs84', // 默认为wgs84的gps坐标，如果要返回直接给openLocation用的火星坐标，可传入'gcj02'
@@ -103,42 +125,43 @@
                                gps.status = 1;
                                gps.lat = latitude;
                                gps.lon = longitude;
-                               $.ajax({
-                                          async: false,
-                                          url: "http://api.map.baidu.com/geocoder/v2/?ak=UjkyChtGyFq9Gm1BOPp1jg9Y9j4PrZ72&callback=renderReverse&location="
-                                               +
-                                               "" + latitude + "," + longitude
-                                               + "&output=json&pois=1",
-                                          type: "GET",
-                                          dataType: 'jsonp',
-                                          //jsonp的值自定义,如果使用jsoncallback,那么服务器端,要返回一个jsoncallback的值对应的对象.
-                                          //   jsonp: 'jsoncallback',
-                                          //要传递的参数,没有传参时，也一定要写上
-                                          data: null,
-                                          timeout: 5000,
-                                          //返回Json类型
-                                          contentType: "application/json;utf-8",
-                                          //服务器段返回的对象包含name,data属性.
-                                          success: function (result) {
-                                              var currCity = result.result.addressComponent.city;
-                                              $("#currentCity").html(currCity);
-                                              gps.cityName = currCity;
-                                              pullupRefresh();
-                                          },
-                                          error: function (jqXHR, textStatus, errorThrown) {
-                                              pullupRefresh();
-                                          }
-                                      });
+                               var lnglatXY = [longitude, latitude];//地图上所标点的坐标
+                               AMap.service('AMap.Geocoder', function () {//回调函数
+                                   //实例化Geocoder
+                                   geocoder = new AMap.Geocoder({
+                                                                    city: "010"//城市，默认：“全国”
+                                                                });
+                                   //TODO: 使用geocoder 对象完成相关功能
+                                   //逆地理编码
+                                   geocoder.getAddress(lnglatXY, function (status, result) {
+                                       if (status === 'complete' && result.info === 'OK') {
+                                           //获得了有效的地址信息:
+                                           var currCity = result.regeocode.addressComponent.city;
+                                           if (currCity == null || currCity == '') {
+                                               currCity =
+                                               result.regeocode.addressComponent.province;
+                                           }
+                                           $("#currentCity").html(currCity);
+                                           gps.cityName = currCity;
+                                           $("#loading").hide();
+                                           pullupRefresh();
+                                       } else {
+                                           //获取地址失败
+                                           $("#loading").hide();
+                                           pullupRefresh();
+                                       }
+                                   });
+                               });
                            },
                            fail: function (res) {
                                gps.status = 0;
-                               //  alert("fail： ");
+                               $("#loading").hide();
                                pullupRefresh();
                            }
                            ,
                            cancel: function (res) {
                                gps.status = 0;
-                               //   alert("cancel: ");
+                               $("#loading").hide();
                                pullupRefresh();
                            }
                        });

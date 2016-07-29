@@ -80,6 +80,7 @@ public class MerchantController {
       @RequestParam(required = false) String cityName,
       @RequestParam(required = false) Integer status, @RequestParam(required = false) Long type,
       @RequestParam(required = false) Integer condition,
+      @RequestParam(required = false) Integer partnership,
       @RequestParam(required = false) Double lat, @RequestParam(required = false) Double lon) {
 //    return merchantService.findMerchantsByPage(offset);
     if (offset == null) {
@@ -89,7 +90,7 @@ public class MerchantController {
         merchantDtoList =
         merchantService
             .findWxMerchantListByCustomCondition(status, lat, lon, offset, type, cityName,
-                                                 condition);
+                                                 condition,partnership);
     return merchantDtoList;
   }
 
