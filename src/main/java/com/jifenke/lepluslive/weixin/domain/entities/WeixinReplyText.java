@@ -21,7 +21,7 @@ public class WeixinReplyText extends WeixinReply {
   }
 
   @Override
-  public String buildReplyXmlString() {
+  public String buildReplyXmlString(Map<String, String> map) {
     StringBuffer buffer = new StringBuffer();
     buffer.append("<xml>");
     buffer.append("<ToUserName><![CDATA[" + this.getToUserName() + "]]></ToUserName>");

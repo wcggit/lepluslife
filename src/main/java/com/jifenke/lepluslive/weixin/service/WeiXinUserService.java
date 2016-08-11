@@ -13,12 +13,10 @@ import com.jifenke.lepluslive.partner.service.PartnerService;
 import com.jifenke.lepluslive.score.domain.entities.ScoreA;
 import com.jifenke.lepluslive.score.domain.entities.ScoreADetail;
 import com.jifenke.lepluslive.score.domain.entities.ScoreB;
-import com.jifenke.lepluslive.score.domain.entities.ScoreBDetail;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.score.repository.ScoreADetailRepository;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.score.repository.ScoreARepository;
-import com.jifenke.lepluslive.score.repository.ScoreBDetailRepository;
 import com.jifenke.lepluslive.score.repository.ScoreBRepository;
 import com.jifenke.lepluslive.lejiauser.repository.LeJiaUserRepository;
 import com.jifenke.lepluslive.weixin.repository.WeiXinUserRepository;
@@ -30,7 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -151,21 +148,22 @@ public class WeiXinUserService {
   }
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public void saveWeiXinUserBySubscribe(Map<String, Object> userDetail)
+  public void saveWeiXinUserBySubscribe(Map<String, Object> userDetail, WeiXinUser weiXinUser)
       throws IOException {
     String openid = userDetail.get("openid").toString();
     String
         unionId =
         userDetail.get("unionid") != null ? userDetail.get("unionid").toString() : null;
-    WeiXinUser weiXinUser = weiXinUserRepository.findByOpenId(openid);
+    //  WeiXinUser weiXinUser = weiXinUserRepository.findByOpenId(openid);
 
     LeJiaUser leJiaUser = null;
-
+    Date date = new Date();
     ScoreA scoreA = null;
     ScoreB scoreB = null;
     if (weiXinUser == null) {
       weiXinUser = new WeiXinUser();
-      weiXinUser.setLastUpdated(new Date());
+      weiXinUser.setDateCreated(date);
+      weiXinUser.setLastUpdated(date);
       leJiaUser = new LeJiaUser();
       leJiaUser.setHeadImageUrl(userDetail.get("headimgurl").toString());
       leJiaUser.setWeiXinUser(weiXinUser);
@@ -197,12 +195,12 @@ public class WeiXinUserService {
         System.out.println(merchant.getUserLimit() < userLimit);
         if (merchant.getUserLimit() > userLimit) {
           leJiaUser.setBindMerchant(merchant);
-          leJiaUser.setBindMerchantDate(new Date());
+          leJiaUser.setBindMerchantDate(date);
           Partner partner = merchant.getPartner();
           long partnerUserLimit = leJiaUserRepository.countPartnerBindLeJiaUser(partner.getId());
           if (partner.getUserLimit() > partnerUserLimit) {
             leJiaUser.setBindPartner(partner);
-            leJiaUser.setBindPartnerDate(new Date());
+            leJiaUser.setBindPartnerDate(date);
           }
         }
       }
@@ -217,9 +215,15 @@ public class WeiXinUserService {
     weiXinUser.setLanguage(userDetail.get("language").toString());
     weiXinUser.setHeadImageUrl(userDetail.get("headimgurl").toString());
     weiXinUser.setProvince(userDetail.get("province").toString());
-    weiXinUser.setLastUserInfoDate(new Date());
+    weiXinUser.setLastUserInfoDate(date);
     weiXinUser.setState(1);
     weiXinUser.setSubState(1);
+    if (weiXinUser.getSubDate() == null) {
+      weiXinUser.setSubDate(date);
+    }
+    if (weiXinUser.getSubSource() == null || "".equals(weiXinUser.getSubSource())) {
+      weiXinUser.setSubSource(userDetail.get("subSource").toString());
+    }
     weiXinUserRepository.save(weiXinUser);
   }
 
@@ -316,7 +320,7 @@ public class WeiXinUserService {
     //  leJiaUser.setUserName(realName);
     leJiaUserRepository.save(leJiaUser);
 
-    ScoreA scoreA = scoreARepository.findByLeJiaUser(leJiaUser);
+    ScoreA scoreA = scoreARepository.findByLeJiaUser(leJiaUser).get(0);
 
     scoreA.setScore(scoreA.getScore() + 1000);
     scoreA.setTotalScore(scoreA.getTotalScore() + 1000);

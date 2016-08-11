@@ -20,7 +20,7 @@ public class WeixinReplyImageText extends WeixinReply {
   }
 
   @Override
-  public String buildReplyXmlString() {
+  public String buildReplyXmlString(Map<String, String> map) {
     StringBuffer buffer = new StringBuffer();
     buffer.append("<xml>");
     buffer.append("<ToUserName><![CDATA[" + this.getToUserName() + "]]></ToUserName>");
@@ -30,15 +30,28 @@ public class WeixinReplyImageText extends WeixinReply {
     buffer.append("<ArticleCount>1</ArticleCount>");
     buffer.append("<Articles>");
     buffer.append("<item>");
-    buffer.append("<Title><![CDATA[" + this.getAutoReplyRule().getReplyImageText0().getTextTitle()
-                  + "]]></Title>");
-    buffer.append(
-        "<Description><![CDATA[" + this.getAutoReplyRule().getReplyImageText0().getTextNote()
-        + "]]></Description>");
-    buffer.append("<PicUrl><![CDATA[" + this.getAutoReplyRule().getReplyImageText0().getImageUrl()
-                  + "]]></PicUrl>");
-    buffer.append("<Url><![CDATA[" + this.getAutoReplyRule().getReplyImageText0().getTextLink()
-                  + "]]></Url>");
+    if (map == null) {
+      buffer.append("<Title><![CDATA[" + this.getAutoReplyRule().getReplyImageText0().getTextTitle()
+                    + "]]></Title>");
+      buffer.append(
+          "<Description><![CDATA[" + this.getAutoReplyRule().getReplyImageText0().getTextNote()
+          + "]]></Description>");
+      buffer.append("<PicUrl><![CDATA[" + this.getAutoReplyRule().getReplyImageText0().getImageUrl()
+                    + "]]></PicUrl>");
+      buffer.append("<Url><![CDATA[" + this.getAutoReplyRule().getReplyImageText0().getTextLink()
+                    + "]]></Url>");
+    } else {
+      buffer.append("<Title><![CDATA[" + map.get("title")
+                    + "]]></Title>");
+      buffer.append(
+          "<Description><![CDATA[" + map.get("description")
+          + "]]></Description>");
+      buffer.append("<PicUrl><![CDATA[" + this.getAutoReplyRule().getReplyImageText0().getImageUrl()
+                    + "]]></PicUrl>");
+      buffer.append("<Url><![CDATA[" + map.get("url")
+                    + "]]></Url>");
+    }
+
     buffer.append("</item>");
     buffer.append("</Articles>");
     buffer.append("</xml>");
