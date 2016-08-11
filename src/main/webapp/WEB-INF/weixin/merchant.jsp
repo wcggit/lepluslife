@@ -265,7 +265,14 @@
                                                                 ) : ""
                                                         )
                                                 )
-                                        )
+                                        )/*.append(
+                                                $("<div></div>").attr("class","hui").append(
+                                                        $("<div></div>").append(
+                                                                $("<img>").attr("src","")
+                                                        ),
+                                                        $("<div></div>").attr("style","margin-bottom:-10px;color:#8d8d8d;font-size:14px;width:90%;display:block;white-space:nowrap; overflow:hidden; text-overflow:ellipsis;").html("每次消费100元，送12元鼓励金")
+                                                )
+                                        )*/
                                 )
                         );
                         var tests = "aaa-" + data[i].id + "-" + data[i].distance;

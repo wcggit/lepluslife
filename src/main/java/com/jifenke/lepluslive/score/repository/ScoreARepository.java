@@ -5,12 +5,14 @@ import com.jifenke.lepluslive.score.domain.entities.ScoreA;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
+
 /**
  * Created by wcg on 16/3/18.
  */
 public interface ScoreARepository extends JpaRepository<ScoreA,Long>{
 
-  ScoreA findByLeJiaUser(LeJiaUser leJiaUser);
+  List<ScoreA> findByLeJiaUser(LeJiaUser leJiaUser);
 
 
 

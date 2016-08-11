@@ -31,9 +31,9 @@ public class ScoreADetail {
   private String operate;
   private Date dateCreated = new Date();
 
-  private Integer origin;  //1=线上返还  2=线上消费  3=线下消费  4=线下返还
+  private Integer origin;  //1=线上返还  2=线上消费  3=线下消费  4=线下返还   5=活动返还
 
-  private String orderSid;  //对应的订单号
+  private String orderSid;  //对应的订单号或对应的活动类型和id
 
   public Integer getOrigin() {
     return origin;

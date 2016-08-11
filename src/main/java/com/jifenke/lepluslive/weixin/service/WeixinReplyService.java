@@ -1,5 +1,9 @@
 package com.jifenke.lepluslive.weixin.service;
 
+import com.jifenke.lepluslive.activity.domain.entities.ActivityCodeBurse;
+import com.jifenke.lepluslive.activity.domain.entities.ActivityJoinLog;
+import com.jifenke.lepluslive.activity.service.ActivityCodeBurseService;
+import com.jifenke.lepluslive.activity.service.ActivityJoinLogService;
 import com.jifenke.lepluslive.weixin.domain.entities.AutoReplyRule;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.domain.entities.WeixinMessage;
@@ -11,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -37,6 +43,12 @@ public class WeixinReplyService {
   @Inject
   private WeixinMessageService weixinMessageService;
 
+  @Inject
+  private ActivityCodeBurseService activityCodeBurseService;
+
+  @Inject
+  private ActivityJoinLogService activityJoinLogService;
+
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public String routeWeixinEvent(Map map) {
 
@@ -45,8 +57,6 @@ public class WeixinReplyService {
       case "subscribe":
 //                关注公众号的事件，包括手动关注和二维码关注两种
         str = buildFocusMessageReply(map);
-        //关注公众号后查询数据库有没有该用户信息，没有的话主动获取
-        subscribeWeiXinUser(map);
         break;
       case "unsubscribe"://取消关注公众号的事件
         unSubscribeWeiXinUser(map);
@@ -54,7 +64,9 @@ public class WeixinReplyService {
       case "MASSSENDJOBFINISH": //群发任务即将完成的时候，推送群发结果
         massEndJobFinish(map);
         break;
-      case "SCAN":
+      case "SCAN":  //用户已关注后扫描带参数二维码
+//                关注公众号的事件，包括手动关注和二维码关注两种
+        str = buildFocusMessageReply(map); //关注公众号后查询数据库有没有该用户信息，没有的话主动获取
         break;
       case "LOCATION":
         //上报地理位置
@@ -106,20 +118,83 @@ public class WeixinReplyService {
   /**
    * 关注公众号时发送的信息
    */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   private String buildFocusMessageReply(Map map) {
-
+    WeiXinUser
+        user =
+        weiXinUserService.findWeiXinUserByOpenId(map.get("FromUserName").toString());
     AutoReplyRule rule = autoReplyService.findByReplyType("focusReply");
+    String str = "";
+    ActivityCodeBurse codeBurse = null;
     if (rule != null) {
       WeixinReply reply = null;
       if (null != rule.getReplyText() && (!"".equals(rule.getReplyText()))) {
         reply = new WeixinReplyText(map, rule);
+        str = reply.buildReplyXmlString(null);
       } else {
         reply = new WeixinReplyImageText(map, rule);
+        HashMap<String, String> buildMap = new HashMap<>();
+        //判断是不是永久二维码
+        if (map.get("Ticket") != null && (!"".equals(map.get("Ticket").toString()))) {//是永久二维码
+          codeBurse = activityCodeBurseService.findCodeBurseByTicket(
+              map.get("Ticket").toString());
+          if (codeBurse != null) {
+            //活动优先级最高(已结束||暂停||派发完毕)
+            if (codeBurse.getEndDate().getTime() < new Date().getTime() || codeBurse.getState() == 0
+                || codeBurse.getBudget().intValue() < codeBurse.getTotalMoney().intValue()) {
+              buildMap.put("title", "活动已结束，期待下一次吧！");
+              buildMap.put("description", "↑↑↑红包被人抢光了");
+            } else {
+              //判断是否已参与过活动（走到这儿肯定是未关注的用户）
+              if (user == null || user.getSubState() == 0) {//1.数据库没有数据，肯定没关注
+                buildMap.put("title", "点击领取红包，鞍山56店通用，花多少都能用");
+                buildMap.put("description", "↑↑↑戳这里，累计5000人领取");
+              } else {//2.判断是否参与过该种活动
+                ActivityJoinLog
+                    joinLog =
+                    activityJoinLogService
+                        .findLogBySubActivityAndOpenId(codeBurse.getType(), user.getOpenId());
+                if (joinLog == null) {//未参与
+                  buildMap.put("title", "点击领取红包，鞍山56店通用，花多少都能用");
+                  buildMap.put("description", "↑↑↑戳这里，累计5000人领取");
+                } else {
+                  buildMap.put("title", "您已经领取过红包了");
+                  buildMap.put("description", "↑↑↑点击查看怎么花红包");
+                }
+              }
+            }
+            buildMap.put("url",
+                         "http://www.lepluslife.com/weixin/activity/" + codeBurse.getType()
+                         + "_" + codeBurse.getId());
+            str = reply.buildReplyXmlString(buildMap);
+          } else {
+            str = reply.buildReplyXmlString(null);
+          }
+        } else {
+          //判断是否曾经关注过,是否得到过红包
+          if (user != null) {
+            ActivityJoinLog joinLog = activityJoinLogService.findLogBySubActivityAndOpenId(0,
+                                                                                           user.getOpenId());
+            if (joinLog == null) {//未参与
+              buildMap.put("title", "点击领取红包，鞍山56店通用，花多少都能用");
+              buildMap.put("description", "↑↑↑戳这里，累计5000人领取");
+            } else {
+              buildMap.put("title", "您已经领取过红包了");
+              buildMap.put("description", "↑↑↑点击查看怎么花红包");
+            }
+          } else {
+            buildMap.put("title", "点击领取红包，鞍山56店通用，花多少都能用");
+            buildMap.put("description", "↑↑↑戳这里，累计5000人领取");
+          }
+          buildMap.put("url",
+                       "http://www.lepluslife.com/weixin/activity/0_0");
+          str = reply.buildReplyXmlString(buildMap);
+        }
       }
-      String str = reply.buildReplyXmlString();
-      return str;
     }
-    return "";
+    //关注公众号后查询数据库有没有该用户信息，没有的话主动获取
+    subscribeWeiXinUser(map, user, codeBurse);
+    return str;
   }
 
   /**
@@ -137,7 +212,7 @@ public class WeixinReplyService {
       } else {
         reply = new WeixinReplyImageText(map, rule);
       }
-      String str = reply.buildReplyXmlString();
+      String str = reply.buildReplyXmlString(null);
       return str;
     }
     return "";
@@ -158,7 +233,7 @@ public class WeixinReplyService {
       } else {
         reply = new WeixinReplyImageText(map, rule);
       }
-      String str = reply.buildReplyXmlString();
+      String str = reply.buildReplyXmlString(null);
       return str;
     }
     return "";
@@ -177,14 +252,37 @@ public class WeixinReplyService {
    * 关注公众号后查询数据库有没有该用户信息，没有的话主动获取
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  private void subscribeWeiXinUser(Map map) {
-    String openId = map.get("FromUserName").toString();
-    WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByOpenId(openId);
-    if (weiXinUser == null || weiXinUser.getState() == 0 || weiXinUser.getSubState() == 0) {
+  private void subscribeWeiXinUser(Map map, WeiXinUser weiXinUser,
+                                   ActivityCodeBurse codeBurse) {
+    if (weiXinUser == null || weiXinUser.getState() == 0 || weiXinUser.getSubState() != 1) {
+      String openId = map.get("FromUserName").toString();
       Map<String, Object> userDetail = weiXinService.getWeiXinUserInfo(openId);
+      //拼接关注来源并添加该活动的关注人数
+      if (codeBurse != null) {
+        if (codeBurse.getType() == 1) {
+          userDetail.put("subSource", codeBurse.getType() + "_" + codeBurse.getId() + "_0");
+        } else if (codeBurse.getType() == 2) { //临时二维码 为weiXinUserId
+          String key = map.get("EventKey").toString();
+          String[] keys = key.split("_");
+          if (keys.length > 1) {
+            userDetail
+                .put("subSource", codeBurse.getType() + "_" + codeBurse.getId() + "_" + keys[1]);
+          } else {
+            userDetail.put("subSource", codeBurse.getType() + "_" + codeBurse.getId() + "_" + key);
+          }
+
+        } else {
+          userDetail.put("subSource", codeBurse.getType() + "_" + codeBurse.getId() + "_1");
+        }
+        //添加该活动的关注人数
+        codeBurse.setScanInviteNumber(codeBurse.getScanInviteNumber() + 1);
+        activityCodeBurseService.saveActivityCodeBurse(codeBurse);
+      } else {
+        userDetail.put("subSource", "0_0_0");
+      }
       if (null == userDetail.get("errcode")) {
         try {
-          weiXinUserService.saveWeiXinUserBySubscribe(userDetail);
+          weiXinUserService.saveWeiXinUserBySubscribe(userDetail, weiXinUser);
         } catch (Exception e) {
           e.printStackTrace();
         }

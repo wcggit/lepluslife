@@ -1,11 +1,6 @@
 package com.jifenke.lepluslive.lejiauser.service;
 
-
-import com.jifenke.lepluslive.filemanage.service.FileImageService;
-import com.jifenke.lepluslive.global.config.Constants;
 import com.jifenke.lepluslive.global.util.MD5Util;
-import com.jifenke.lepluslive.global.util.MvUtil;
-import com.jifenke.lepluslive.lejiauser.BarcodeConfig;
 import com.jifenke.lepluslive.lejiauser.controller.dto.LeJiaUserDto;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.lejiauser.domain.entities.RegisterOrigin;
@@ -37,12 +32,6 @@ public class LeJiaUserService {
 
   @Inject
   private LeJiaUserRepository leJiaUserRepository;
-
-  @Inject
-  private BarcodeService barcodeService;
-
-  @Inject
-  private FileImageService fileImageService;
 
   @Inject
   private ScoreARepository scoreARepository;

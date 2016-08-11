@@ -20,7 +20,7 @@ public abstract class WeixinReply {
     this.msgType = m.get("MsgType").toString();
   }
 
-  public abstract String buildReplyXmlString();
+  public abstract String buildReplyXmlString(Map<String,String> map);
 
   public String getToUserName() {
     return toUserName;

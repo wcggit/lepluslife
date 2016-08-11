@@ -5,7 +5,6 @@ import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 
 import java.util.Date;
 
-import javax.persistence.Cacheable;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -46,7 +45,7 @@ public class WeiXinUser {
 
   private Integer hongBaoState = 0; //红包状态 0 未开红包, 1 已开红包;
 
-  @OneToOne(fetch = FetchType.LAZY)
+  @OneToOne
   private LeJiaUser leJiaUser; //条形码
 
   Date dateCreated;
@@ -56,6 +55,15 @@ public class WeiXinUser {
   private Integer state = 0;   //是否是会员 0=不是   1=是
 
   private Integer subState = 0;   //关注状态 0=从未关注过   1=关注   2=曾经关注现取消关注
+
+  private Date subDate;       //关注时间
+
+  //  类型_活动ID_来源ID
+  // 1_2_0表示送红包活动,活动id为2,0无意义
+  // 2_3_456表示裂变活动,活动id为3,邀请人weiXinUser的id为456
+  // 0_0_0表示表示默认关注
+  // 3_4_1表示其他活动,活动id为4,1无意义
+  private String subSource;   //关注来源
 
   private Integer massRemain = 4;  //本月群发余数
 
@@ -222,6 +230,22 @@ public class WeiXinUser {
 
   public Integer getSubState() {
     return subState;
+  }
+
+  public Date getSubDate() {
+    return subDate;
+  }
+
+  public void setSubDate(Date subDate) {
+    this.subDate = subDate;
+  }
+
+  public String getSubSource() {
+    return subSource;
+  }
+
+  public void setSubSource(String subSource) {
+    this.subSource = subSource;
   }
 
   public void setSubState(Integer subState) {
