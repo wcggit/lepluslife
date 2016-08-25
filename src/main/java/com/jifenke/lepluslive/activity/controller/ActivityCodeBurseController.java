@@ -7,9 +7,12 @@ import com.jifenke.lepluslive.activity.service.ActivityJoinLogService;
 import com.jifenke.lepluslive.global.util.CookieUtils;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
+import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
+import com.jifenke.lepluslive.lejiauser.service.LeJiaUserService;
 import com.jifenke.lepluslive.score.service.ScoreAService;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.service.DictionaryService;
+import com.jifenke.lepluslive.weixin.service.WeiXinService;
 import com.jifenke.lepluslive.weixin.service.WeiXinUserService;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -24,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.Date;
+import java.util.Random;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -49,6 +53,52 @@ public class ActivityCodeBurseController {
 
   @Inject
   private DictionaryService dictionaryService;
+
+  @Inject
+  private WeiXinService weiXinService;
+
+  @Inject
+  private LeJiaUserService leJiaUserService;
+
+  //关注图文链接页面
+  @RequestMapping("/subPage")
+  public ModelAndView subPage(HttpServletRequest request, Model model) {
+    String openId = CookieUtils.getCookieValue(request, appId + "-user-open-id");
+    WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByOpenId(openId);
+    model.addAttribute("wxConfig", weiXinService.getWeiXinConfig(request));
+    //判断是否获得过红包
+    ActivityJoinLog joinLog = activityJoinLogService.findLogBySubActivityAndOpenId(0, weiXinUser
+        .getOpenId());
+    if (joinLog == null) {//未参与
+      model.addAttribute("status", 0);
+    } else {
+      model.addAttribute("scoreA", joinLog.getDetail());
+      model.addAttribute("status", 1);
+    }
+    return MvUtil.go("/activity/subPage");
+  }
+
+  //关注图文链接页面 点击领取红包
+  @RequestMapping(value = "/subPage/open")
+  public
+  @ResponseBody
+  LejiaResult subPageOpen(@RequestParam String phoneNumber, HttpServletRequest request) {
+    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
+    LeJiaUser leJiaUser = leJiaUserService.findUserByPhoneNumber(phoneNumber);  //是否已注册
+    ActivityJoinLog joinLog = activityJoinLogService.findLogBySubActivityAndOpenId(0, weiXinUser
+        .getOpenId());
+    if (leJiaUser == null && joinLog == null) {
+      int defaultScoreA = (new Random().nextInt(6) + 10) * 10;
+      //派发红包,填充手机号码成为会员
+      int status = weiXinUserService.giveScoreAByDefault(weiXinUser, defaultScoreA, phoneNumber);
+      //添加参加记录
+      if (status == 1) {
+        activityJoinLogService.addCodeBurseLogByDefault(weiXinUser, defaultScoreA);
+        return LejiaResult.build(200, "" + defaultScoreA);
+      }
+    }
+    return LejiaResult.build(201, "手机号已被使用或已领取红包");
+  }
 
   @RequestMapping(value = "/activity/{id}", method = RequestMethod.GET)
   public ModelAndView goActivityPage(HttpServletRequest request, @PathVariable String id,
