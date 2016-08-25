@@ -42,7 +42,7 @@ public class ScoreAService {
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public ScoreA findScoreAByLeJiaUser(LeJiaUser leJiaUser) {
     List<ScoreA> aList = scoreARepository.findByLeJiaUser(leJiaUser);
-    if (aList.size() > 0) {
+    if (aList != null && aList.size() > 0) {
       return aList.get(0);
     }
     return null;

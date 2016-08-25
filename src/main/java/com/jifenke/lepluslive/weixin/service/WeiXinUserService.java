@@ -216,7 +216,7 @@ public class WeiXinUserService {
     weiXinUser.setHeadImageUrl(userDetail.get("headimgurl").toString());
     weiXinUser.setProvince(userDetail.get("province").toString());
     weiXinUser.setLastUserInfoDate(date);
-    weiXinUser.setState(1);
+    // weiXinUser.setState(1);
     weiXinUser.setSubState(1);
     if (weiXinUser.getSubDate() == null) {
       weiXinUser.setSubDate(date);
@@ -338,5 +338,39 @@ public class WeiXinUserService {
     weiXinUser.setHongBaoState(1);
     weiXinUser.setState(1);
     weiXinUserRepository.save(weiXinUser);
+  }
+
+  //普通关注送红包
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  public int giveScoreAByDefault(WeiXinUser weiXinUser, int defaultScoreA, String phoneNumber) {
+    LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
+    ScoreA scoreA = scoreARepository.findByLeJiaUser(leJiaUser).get(0);
+    try {
+      leJiaUser.setPhoneNumber(phoneNumber);
+      leJiaUserRepository.save(leJiaUser);
+
+      scoreA.setScore(scoreA.getScore() + defaultScoreA);
+      scoreA.setTotalScore(scoreA.getTotalScore() + defaultScoreA);
+      Date date = new Date();
+      scoreA.setLastUpdateDate(date);
+      scoreARepository.save(scoreA);
+
+      ScoreADetail scoreADetail = new ScoreADetail();
+      scoreADetail.setNumber(Long.valueOf(String.valueOf(defaultScoreA)));
+      scoreADetail.setScoreA(scoreA);
+      scoreADetail.setOperate("关注送红包");
+      scoreADetail.setOrigin(0);
+      scoreADetail.setOrderSid("0_" + defaultScoreA);
+      scoreADetailRepository.save(scoreADetail);
+
+      weiXinUser.setHongBaoState(1);
+      weiXinUser.setState(1);
+      weiXinUser.setStateDate(date);
+      weiXinUserRepository.save(weiXinUser);
+    } catch (Exception e) {
+      e.printStackTrace();
+      return 0;
+    }
+    return 1;
   }
 }

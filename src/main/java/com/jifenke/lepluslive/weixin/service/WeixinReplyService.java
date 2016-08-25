@@ -172,22 +172,24 @@ public class WeixinReplyService {
           }
         } else {
           //判断是否曾经关注过,是否得到过红包
-          if (user != null) {
-            ActivityJoinLog joinLog = activityJoinLogService.findLogBySubActivityAndOpenId(0,
-                                                                                           user.getOpenId());
-            if (joinLog == null) {//未参与
-              buildMap.put("title", "点击领取红包，鞍山56店通用，花多少都能用");
-              buildMap.put("description", "↑↑↑戳这里，累计5000人领取");
-            } else {
-              buildMap.put("title", "您已经领取过红包了");
-              buildMap.put("description", "↑↑↑点击查看怎么花红包");
-            }
-          } else {
-            buildMap.put("title", "点击领取红包，鞍山56店通用，花多少都能用");
-            buildMap.put("description", "↑↑↑戳这里，累计5000人领取");
-          }
+//          if (user != null) {
+//            ActivityJoinLog joinLog = activityJoinLogService.findLogBySubActivityAndOpenId(0,
+//                                                                                           user.getOpenId());
+//            if (joinLog == null) {//未参与
+//              buildMap.put("title", "点击领取红包，鞍山56店通用，花多少都能用");
+//              buildMap.put("description", "↑↑↑戳这里，累计5000人领取");
+//            } else {
+//              buildMap.put("title", "您已经领取过红包了");
+//              buildMap.put("description", "↑↑↑点击查看怎么花红包");
+//            }
+//          } else {
+//            buildMap.put("title", "点击领取红包，鞍山56店通用，花多少都能用");
+//            buildMap.put("description", "↑↑↑戳这里，累计5000人领取");
+//          }
+          buildMap.put("title", "感谢您的关注，恭喜您获得乐＋红包一个");
+          buildMap.put("description", "↑↑↑戳这里，累计5000人领取");
           buildMap.put("url",
-                       "http://www.lepluslife.com/weixin/activity/0_0");
+                       "http://www.lepluslife.com/weixin/subPage");
           str = reply.buildReplyXmlString(buildMap);
         }
       }
@@ -254,7 +256,7 @@ public class WeixinReplyService {
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   private void subscribeWeiXinUser(Map map, WeiXinUser weiXinUser,
                                    ActivityCodeBurse codeBurse) {
-    if (weiXinUser == null || weiXinUser.getState() == 0 || weiXinUser.getSubState() != 1) {
+    if (weiXinUser == null || weiXinUser.getSubState() != 1) {
       String openId = map.get("FromUserName").toString();
       Map<String, Object> userDetail = weiXinService.getWeiXinUserInfo(openId);
       //拼接关注来源并添加该活动的关注人数
