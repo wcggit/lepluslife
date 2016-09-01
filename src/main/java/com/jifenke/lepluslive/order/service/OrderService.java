@@ -323,7 +323,10 @@ public class OrderService {
     OnLineOrder onLineOrder = orderRepository.findOne(orderId);
     onLineOrder.setOrderSid(MvUtil.getOrderNumber());
     onLineOrder.setTruePrice(truePrice);
-    onLineOrder.setTrueScore(trueScore);
+    if (trueScore != null) {
+      onLineOrder.setTrueScore(trueScore);
+    }
+
     if (onLineOrder.getState() == -1) {
       List<OrderDetail> orderDetails = onLineOrder.getOrderDetails();
       if (productService.editProductSpecRepository(orderDetails.get(0).getProductSpec().getId(),

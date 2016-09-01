@@ -61,7 +61,7 @@ public class ActivitySportLogService {
   @Inject
   private DictionaryRepository dictionaryRepository;
 
-  //判断今天运动数据是否已添加
+  //判断今天运动数据是否已添加 1=已添加
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public int findBySportUserAndCurrDate(LeJiaUserInfo leJiaUserInfo, String currDate) {
     List<ActivitySportLog> list = activitySportLogRepository.findByLeJiaUserInfoAndSportTime(
@@ -91,7 +91,7 @@ public class ActivitySportLogService {
 
       //判断运动距离应获取多少红包和积分
       String currRule = getScoreByDistance(distance);
-      if (!"0".equals(currRule)) {
+      if (!"0_0".equals(currRule)) {
         activitySportLog.setGetScore(1);
         ScoreA scoreA = null;
         ScoreB scoreB = null;

@@ -25,4 +25,11 @@ public class DictionaryService {
     return dictionaryRepository.findOne(id);
   }
 
+  //获取分享文案 06/09/01
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+  public void find() {
+
+
+  }
+
 }

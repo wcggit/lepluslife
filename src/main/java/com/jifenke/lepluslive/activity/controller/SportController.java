@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import javax.inject.Inject;
 
 import io.swagger.annotations.ApiOperation;
@@ -54,18 +57,23 @@ public class SportController {
     if (leJiaUserInfo == null) {  //创建新运动信息
       LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);
       if (leJiaUser != null) {
-        leJiaUserInfo = leJiaUserInfoService.createSportUser(leJiaUser);
+        leJiaUserInfo = leJiaUserInfoService.createUserInfo(leJiaUser);
       }
     }
     //返回数据
     String rule = dictionaryService.findDictionaryById(19L).getValue();
     String hour = dictionaryService.findDictionaryById(20L).getValue();
+    String currDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+    //查询今日是否已添加运动数据
+    int flag = activitySportLogService.findBySportUserAndCurrDate(leJiaUserInfo, currDate);
+
     if (leJiaUserInfo != null) {
       return LejiaResult
           .build(200, "ok",
-                 new SportDto(leJiaUserInfo.getSportA(), leJiaUserInfo.getSportB(), rule, hour));
+                 new SportDto(leJiaUserInfo.getSportA(), leJiaUserInfo.getSportB(), rule, hour,
+                              flag));
     } else {
-      return LejiaResult.build(200, "未登陆", new SportDto(0, 0, rule, hour));
+      return LejiaResult.build(200, "未登陆", new SportDto(0, 0, rule, hour, flag));
     }
   }
 
@@ -83,7 +91,7 @@ public class SportController {
     if (leJiaUserInfo == null) {  //创建新运动信息
       LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);
       if (leJiaUser != null) {
-        leJiaUserInfo = leJiaUserInfoService.createSportUser(leJiaUser);
+        leJiaUserInfo = leJiaUserInfoService.createUserInfo(leJiaUser);
       }
     }
     //处理数据

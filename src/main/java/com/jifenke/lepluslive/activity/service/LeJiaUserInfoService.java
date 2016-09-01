@@ -50,11 +50,11 @@ public class LeJiaUserInfoService {
 
   //新建sportUser
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public LeJiaUserInfo createSportUser(LeJiaUser leJiaUser) {
+  public LeJiaUserInfo createUserInfo(LeJiaUser leJiaUser) {
 
     LeJiaUserInfo leJiaUserInfo = new LeJiaUserInfo();
     leJiaUserInfo.setLeJiaUser(leJiaUser);
-    leJiaUserInfo.setToken(leJiaUser.getToken());
+    leJiaUserInfo.setToken(leJiaUser.getUserSid());
     leJiaUserInfoRepository.save(leJiaUserInfo);
 
     return leJiaUserInfo;

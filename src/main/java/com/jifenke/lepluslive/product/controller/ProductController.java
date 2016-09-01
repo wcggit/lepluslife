@@ -49,6 +49,14 @@ public class ProductController {
   @Inject
   private DictionaryService dictionaryService;
 
+  @ApiOperation(value = "获取所有的商品类别名称及顶部图片")
+  @RequestMapping(value = "/type", method = RequestMethod.GET)
+  public
+  @ResponseBody
+  LejiaResult findAllProductType() {
+    return LejiaResult.ok(productService.findAllProductType());
+  }
+
   //分页
   @ApiOperation(value = "查看商品列表")
   @RequestMapping(value = "/product", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)

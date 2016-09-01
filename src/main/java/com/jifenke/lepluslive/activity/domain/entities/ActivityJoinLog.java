@@ -13,7 +13,6 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-
 /**
  * 参加活动记录 Created by zhangwen on 2016/8/5.
  */
@@ -38,11 +37,11 @@ public class ActivityJoinLog {
 
   private String openIdHelp;   //助力人或扫码人的openId
 
-  private Integer type;  // //活动类型 1=永久二维码送红包活动  2=临时二维码关注裂变红包活动
+  private Integer type;  // //活动类型 1=永久二维码送红包活动  2=临时二维码关注裂变红包活动  3=APP邀请好友
 
   private Long activityId;   //活动id
 
-  private String detail;    //活动说明（例领取红包金额）
+  private String detail;    //活动说明（例领取红包金额）(type=3:50_100 分享人获得红包_被分享人获得红包)
 
   public String getId() {
     return id;

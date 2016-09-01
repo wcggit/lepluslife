@@ -66,7 +66,7 @@
 <c:if test="${truePrice!=null}">
     <div id="mask-success">
         <div class="mask-top">
-            <p>￥<font>${truePrice/100}</font></p>
+            <p>￥<font>${payBackScore/100}</font></p>
 
             <p>您在乐+商城的消费获得<font>${payBackScore/100}</font>元红包</p>
 

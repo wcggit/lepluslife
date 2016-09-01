@@ -14,7 +14,9 @@ import com.jifenke.lepluslive.score.domain.entities.ScoreA;
 import com.jifenke.lepluslive.score.domain.entities.ScoreADetail;
 import com.jifenke.lepluslive.score.domain.entities.ScoreB;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
+import com.jifenke.lepluslive.score.domain.entities.ScoreBDetail;
 import com.jifenke.lepluslive.score.repository.ScoreADetailRepository;
+import com.jifenke.lepluslive.score.repository.ScoreBDetailRepository;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.score.repository.ScoreARepository;
 import com.jifenke.lepluslive.score.repository.ScoreBRepository;
@@ -65,6 +67,9 @@ public class WeiXinUserService {
 
   @Inject
   private MerchantService merchantService;
+
+  @Inject
+  private ScoreBDetailRepository scoreBDetailRepository;
 
   @Inject
   private PartnerService partnerService;
@@ -345,6 +350,7 @@ public class WeiXinUserService {
   public int giveScoreAByDefault(WeiXinUser weiXinUser, int defaultScoreA, String phoneNumber) {
     LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
     ScoreA scoreA = scoreARepository.findByLeJiaUser(leJiaUser).get(0);
+    ScoreB scoreB = scoreBRepository.findByLeJiaUser(leJiaUser);
     try {
       leJiaUser.setPhoneNumber(phoneNumber);
       leJiaUserRepository.save(leJiaUser);
@@ -355,6 +361,11 @@ public class WeiXinUserService {
       scoreA.setLastUpdateDate(date);
       scoreARepository.save(scoreA);
 
+      scoreB.setLastUpdateDate(date);
+      scoreB.setScore(scoreB.getScore() + 10);
+      scoreB.setTotalScore(scoreB.getTotalScore() + 10);
+      scoreBRepository.save(scoreB);
+
       ScoreADetail scoreADetail = new ScoreADetail();
       scoreADetail.setNumber(Long.valueOf(String.valueOf(defaultScoreA)));
       scoreADetail.setScoreA(scoreA);
@@ -362,6 +373,14 @@ public class WeiXinUserService {
       scoreADetail.setOrigin(0);
       scoreADetail.setOrderSid("0_" + defaultScoreA);
       scoreADetailRepository.save(scoreADetail);
+
+      ScoreBDetail scoreBDetail = new ScoreBDetail();
+      scoreBDetail.setNumber(10L);
+      scoreBDetail.setScoreB(scoreB);
+      scoreBDetail.setOperate("关注送积分");
+      scoreBDetail.setOrigin(0);
+      scoreBDetail.setOrderSid("0_10");
+      scoreBDetailRepository.save(scoreBDetail);
 
       weiXinUser.setHongBaoState(1);
       weiXinUser.setState(1);

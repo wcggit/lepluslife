@@ -128,7 +128,7 @@ public class SwaggerConfig {
   @Bean
   public Docket scoreApi() {
     return new Docket(DocumentationType.SWAGGER_2)
-        .groupName("积分和红包")
+        .groupName("score")
         .genericModelSubstitutes(DeferredResult.class)
         .useDefaultResponseMessages(false)
         .forCodeGeneration(true)
@@ -142,7 +142,7 @@ public class SwaggerConfig {
   @Bean
   public Docket sportApi() {
     return new Docket(DocumentationType.SWAGGER_2)
-        .groupName("运动得红包接口")
+        .groupName("sport")
         .genericModelSubstitutes(DeferredResult.class)
         .useDefaultResponseMessages(false)
         .forCodeGeneration(true)
@@ -151,6 +151,34 @@ public class SwaggerConfig {
         .paths(or(regex("/app/sport/.*")))
         .build()
         .apiInfo(sportApiInfo());
+  }
+
+  @Bean
+  public Docket rockApi() {
+    return new Docket(DocumentationType.SWAGGER_2)
+        .groupName("rock")
+        .genericModelSubstitutes(DeferredResult.class)
+        .useDefaultResponseMessages(false)
+        .forCodeGeneration(true)
+        .pathMapping("/")
+        .select()
+        .paths(or(regex("/app/rock/.*")))
+        .build()
+        .apiInfo(rockApiInfo());
+  }
+
+  @Bean
+  public Docket bannerApi() {
+    return new Docket(DocumentationType.SWAGGER_2)
+        .groupName("bannerImage")
+        .genericModelSubstitutes(DeferredResult.class)
+        .useDefaultResponseMessages(false)
+        .forCodeGeneration(true)
+        .pathMapping("/")
+        .select()
+        .paths(or(regex("/app/banner/.*")))
+        .build()
+        .apiInfo(bannerApiInfo());
   }
 
 
@@ -268,6 +296,34 @@ public class SwaggerConfig {
 
   private ApiInfo sportApiInfo() {
     ApiInfo apiInfo = new ApiInfo("运动得红包和积分",//大标题
+                                  "EHR Platform's REST API, all the applications could access the Object model data via JSON.",
+//小标题
+                                  "0.1",//版本
+                                  "NO terms of service",
+                                  "zhangwenit@126.com",//作者
+                                  "The Apache License, Version 2.0",//链接显示文字
+                                  "http://www.apache.org/licenses/LICENSE-2.0.html"//网站链接
+    );
+
+    return apiInfo;
+  }
+
+  private ApiInfo rockApiInfo() {
+    ApiInfo apiInfo = new ApiInfo("摇一摇得红包和积分",//大标题
+                                  "EHR Platform's REST API, all the applications could access the Object model data via JSON.",
+//小标题
+                                  "0.1",//版本
+                                  "NO terms of service",
+                                  "zhangwenit@126.com",//作者
+                                  "The Apache License, Version 2.0",//链接显示文字
+                                  "http://www.apache.org/licenses/LICENSE-2.0.html"//网站链接
+    );
+
+    return apiInfo;
+  }
+
+  private ApiInfo bannerApiInfo() {
+    ApiInfo apiInfo = new ApiInfo("各种轮播图",//大标题
                                   "EHR Platform's REST API, all the applications could access the Object model data via JSON.",
 //小标题
                                   "0.1",//版本

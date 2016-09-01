@@ -35,9 +35,6 @@ public class CityService {
   public City findCityById(Long id) {
 
     City city = cityRepository.findOne(id);
-    if (city == null) {
-      throw new RuntimeException("不存在的城市");
-    }
 
     return city;
   }
