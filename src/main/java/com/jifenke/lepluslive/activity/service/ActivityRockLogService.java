@@ -68,6 +68,9 @@ public class ActivityRockLogService {
     int flag;
     if (currDate.equals(leJiaUserInfo.getRockDate())) {
       flag = 3 - leJiaUserInfo.getRockTime();
+      if (flag > 0) {
+        leJiaUserInfo.setRockTime(leJiaUserInfo.getRockTime() + 1);
+      }
     } else {
       flag = 3;
       leJiaUserInfo.setRockDate(currDate);
@@ -95,10 +98,9 @@ public class ActivityRockLogService {
         scoreB = scoreBService.findScoreBByWeiXinUser(leJiaUser);
       }
       if (scoreA != null && scoreB != null) {
-        //SportUser更新总积分和红包及总距离
+        //SportUser更新总积分和红包及次数
         leJiaUserInfo.setRockA(leJiaUserInfo.getRockA() + numberA);
         leJiaUserInfo.setRockB(leJiaUserInfo.getRockB() + numberB);
-        leJiaUserInfo.setRockTime(leJiaUserInfo.getRockTime() + 1);
         leJiaUserInfoRepository.save(leJiaUserInfo);
         //添加红包
         scoreA.setTotalScore(scoreA.getTotalScore() + numberA);

@@ -89,7 +89,7 @@ public class ActivityCodeBurseController {
         .getOpenId());
     if (leJiaUser == null && joinLog == null) {
       int defaultScoreA = (new Random().nextInt(6) + 10) * 10;
-      //派发红包,填充手机号码成为会员
+      //派发红包和积分,填充手机号码成为会员
       int status = weiXinUserService.giveScoreAByDefault(weiXinUser, defaultScoreA, phoneNumber);
       //添加参加记录
       if (status == 1) {

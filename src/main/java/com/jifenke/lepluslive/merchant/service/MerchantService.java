@@ -19,7 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -97,8 +99,6 @@ public class MerchantService {
       merchantDto.setPhoneNumber(o[3].toString());
       merchantDto.setName(o[4].toString());
       merchantDto.setPicture(o[5].toString());
-//      merchantDto.setDiscount(o[6] != null ? Integer.parseInt(o[6].toString()) : 10);
-//      merchantDto.setRebate(o[7] != null ? Integer.parseInt(o[7].toString()) : 0);
       merchantDto.setLng(Double.parseDouble(o[6].toString()));
       merchantDto.setLat(Double.parseDouble(o[7].toString()));
       merchantDto.setDistance(o[8] != null ? Double.valueOf(o[8].toString()) : null);
@@ -108,64 +108,79 @@ public class MerchantService {
   }
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
-  public List<MerchantDto> findMerchantListByCustomCondition(Double latitude, Double longitude,
-                                                             Integer page, Long type, Long cityId,
-                                                             Long areaId) {
-    if (page == null) {
-      page = 1;
+  public List<Map> findMerchantListByCustomCondition(Integer status, Double latitude,
+                                                     Double longitude,
+                                                     Integer page, Long type, Long cityId,
+                                                     Integer condition) {
+    String sql = null;
+    if (status == 1) {
+      sql =
+          "SELECT m.id,m.sid,m.location,m.`name`,m.picture,t.`name` AS tName,mi.star,area.`name` AS aName,m.lj_commission,m.scorearebate,m.partnership,ROUND( 6378.138 * 2 * ASIN(SQRT(POW(SIN(("
+          + latitude + " * PI() / 180 - m.lat * PI() / 180) / 2),2) + COS(" + latitude
+          + " * PI() / 180) * COS(m.lat * PI() / 180) * POW(SIN((" + longitude
+          + " * PI() / 180 - m.lng * PI() / 180) / 2),2))) * 1000) AS distance FROM merchant m,merchant_type t,city ci,merchant_info mi,area WHERE m.merchant_type_id = t.id AND m.city_id = ci.id AND m.merchant_info_id=mi.id AND m.area_id=area.id";
+    } else {
+      sql =
+          "SELECT m.id,m.sid,m.location,m.`name`,m.picture,t.`name` AS tName,mi.star,area.`name` AS aName,m.lj_commission,m.scorearebate,m.partnership FROM merchant m,merchant_type t,city ci,merchant_info mi,area WHERE m.merchant_type_id = t.id AND m.city_id = ci.id AND m.merchant_info_id=mi.id AND m.area_id=area.id";
     }
 
-//    EntityManager em = entityManagerFactory.createEntityManager();
-    //定义SQL
-    String sql = null;
-
-    sql =
-        "SELECT m.id,m.sid,m.location,m.phone_number,m.`name`,m.picture,m.lng,m.lat, ROUND( 6378.138 * 2 * ASIN(SQRT(POW(SIN(("
-        + latitude + " * PI() / 180 - m.lat * PI() / 180) / 2),2) + COS(" + latitude
-        + " * PI() / 180) * COS(m.lat * PI() / 180) * POW(SIN((" + longitude
-        + " * PI() / 180 - m.lng * PI() / 180) / 2),2))) * 1000) AS distance FROM merchant m WHERE 1=1";
+    sql += " AND m.state = 1";
 
     if (type != null) {
       sql += " AND m.merchant_type_id = " + type;
     }
 
-    if (areaId != null) {
-      sql += " AND m.area_id = " + areaId;
-      sql += " ORDER BY sid LIMIT " + (page - 1) * 10 + "," + 10 + "";
-    } else if (cityId != null) {
+    if (cityId != null) {
       sql += " AND m.city_id = " + cityId;
-      sql += " ORDER BY sid LIMIT " + (page - 1) * 10 + "," + 10 + "";
-    } else if (latitude != null) {
-      sql += " ORDER BY distance LIMIT " + (page - 1) * 10 + "," + 10 + "";
-    } else {
-      sql += " ORDER BY sid LIMIT " + (page - 1) * 10 + "," + 10 + "";
     }
 
-    //创建原生SQL查询QUERY实例
-    Query query = em.createNativeQuery(sql);
+    if (condition != null) {
+      if (condition == 2) {  //送红包最多
+        sql += " ORDER BY m.lj_commission DESC";
+      } else if (condition == 3) { //评价最高
+        sql += " ORDER BY mi.star DESC";
+      }
+    }
 
+    if (status == 1) {
+      if (condition != null) {
+        if (condition != 0) {  //先其他 后离我最近
+          sql += " ,distance ASC ";
+        } else {                //离我最近
+          sql += " ORDER BY distance ASC ";
+        }
+      } else {
+        sql += " ORDER BY distance ASC ";
+      }
+    }
+
+    sql += " LIMIT " + (page - 1) * 10 + "," + 10;
+
+    Query query = em.createNativeQuery(sql);
     List<Object[]> list = query.getResultList();
 
-//    em.close();
-//    entityManagerFactory.close();
-
-    List<MerchantDto> dtoList = new ArrayList<>();
+    List<Map> mapList = new ArrayList<>();
     for (Object[] o : list) {
-      MerchantDto merchantDto = new MerchantDto();
-      merchantDto.setId(Long.parseLong(o[0].toString()));
-      merchantDto.setSid(Integer.parseInt(o[1].toString()));
-      merchantDto.setLocation(o[2].toString());
-      merchantDto.setPhoneNumber(o[3].toString());
-      merchantDto.setName(o[4].toString());
-      merchantDto.setPicture(o[5].toString());
-//      merchantDto.setDiscount(o[6] != null ? Integer.parseInt(o[6].toString()) : 10);
-//      merchantDto.setRebate(o[7] != null ? Integer.parseInt(o[7].toString()) : 0);
-      merchantDto.setLng(Double.parseDouble(o[6].toString()));
-      merchantDto.setLat(Double.parseDouble(o[7].toString()));
-      merchantDto.setDistance(o[8] != null ? Double.valueOf(o[8].toString()) : null);
-      dtoList.add(merchantDto);
+      Map<String, Object> map = new HashMap<>();
+      map.put("id", o[0]);
+      map.put("sid", o[1]);
+      map.put("location", o[2]);
+      map.put("name", o[3]);
+      map.put("picture", o[4]);
+      map.put("typeName", o[5]);
+      map.put("star", o[6]);
+      map.put("area", o[7]);
+      map.put("commission", o[8]);
+      map.put("aRebate", o[9]);
+      map.put("friend", o[10]);
+      if (o.length > 11) {
+        map.put("distance", o[11]);
+      } else {
+        map.put("distance", 0);
+      }
+      mapList.add(map);
     }
-    return dtoList;
+    return mapList;
   }
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)

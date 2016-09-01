@@ -53,7 +53,7 @@ public class RockController {
     if (leJiaUserInfo == null) {  //创建新运动信息
       LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);
       if (leJiaUser != null) {
-        leJiaUserInfo = leJiaUserInfoService.createSportUser(leJiaUser);
+        leJiaUserInfo = leJiaUserInfoService.createUserInfo(leJiaUser);
       }
     }
 
@@ -89,7 +89,7 @@ public class RockController {
     if (leJiaUserInfo == null) {  //创建新摇一摇信息
       LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);
       if (leJiaUser != null) {
-        leJiaUserInfo = leJiaUserInfoService.createSportUser(leJiaUser);
+        leJiaUserInfo = leJiaUserInfoService.createUserInfo(leJiaUser);
       }
     }
     //处理数据
