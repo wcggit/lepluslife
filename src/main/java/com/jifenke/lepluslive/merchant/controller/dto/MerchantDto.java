@@ -37,9 +37,17 @@ public class MerchantDto {
 
   private String cityName;
 
-  private BigDecimal star;
-
   private String areaName;
+
+  private BigDecimal star;   //星级
+
+  private Integer perSale;  //客单价
+
+  private Integer park;   //有停车? 0=无
+
+  private Integer wifi;   //有wifi? 0=无
+
+  private Integer card;   //可刷卡? 0=不可
 
   private List<MerchantDetail> detailList;
 
@@ -145,6 +153,38 @@ public class MerchantDto {
 
   public void setStar(BigDecimal star) {
     this.star = star;
+  }
+
+  public Integer getPerSale() {
+    return perSale;
+  }
+
+  public void setPerSale(Integer perSale) {
+    this.perSale = perSale;
+  }
+
+  public Integer getPark() {
+    return park;
+  }
+
+  public void setPark(Integer park) {
+    this.park = park;
+  }
+
+  public Integer getWifi() {
+    return wifi;
+  }
+
+  public void setWifi(Integer wifi) {
+    this.wifi = wifi;
+  }
+
+  public Integer getCard() {
+    return card;
+  }
+
+  public void setCard(Integer card) {
+    this.card = card;
   }
 
   public String getAreaName() {

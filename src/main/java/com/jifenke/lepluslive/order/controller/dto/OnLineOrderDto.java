@@ -31,6 +31,8 @@ public class OnLineOrderDto {
 
   private Address address; //默认收货地址
 
+  private Integer minPrice;   //免运费最低价格
+
   private List<OrderDetail> orderDetails;
 
   public Long getId() {
@@ -103,6 +105,14 @@ public class OnLineOrderDto {
 
   public void setOrderSid(String orderSid) {
     this.orderSid = orderSid;
+  }
+
+  public Integer getMinPrice() {
+    return minPrice;
+  }
+
+  public void setMinPrice(Integer minPrice) {
+    this.minPrice = minPrice;
   }
 
   public Address getAddress() {

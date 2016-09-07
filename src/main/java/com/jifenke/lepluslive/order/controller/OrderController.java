@@ -22,16 +22,16 @@ import com.jifenke.lepluslive.score.service.ScoreAService;
 import com.jifenke.lepluslive.score.service.ScoreBService;
 import com.jifenke.lepluslive.weixin.controller.dto.CartDetailDto;
 import com.jifenke.lepluslive.weixin.controller.dto.OrderDto;
-import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
+
 import com.jifenke.lepluslive.weixin.service.DictionaryService;
 import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
-import com.jifenke.lepluslive.weixin.service.WeiXinService;
+
 
 import org.apache.commons.beanutils.BeanUtils;
-import org.springframework.http.MediaType;
+
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
+
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -49,7 +49,7 @@ import java.util.SortedMap;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -83,23 +83,22 @@ public class OrderController {
   private WeiXinPayService weiXinPayService;
 
   @Inject
-  private WeiXinService weiXinService;
-
-  @Inject
   private DictionaryService dictionaryService;
 
-  @ApiOperation("获取用户所有的订单")
+  @ApiOperation("获取用户的订单")
   @RequestMapping(value = "/orderList", method = RequestMethod.POST)
   public
   @ResponseBody
-  LejiaResult orderList(@RequestParam(required = false) String token) {
+  LejiaResult orderList(@RequestParam(required = true) String token,
+                        @ApiParam(value = "订单状态(0=待付款|1=待发货|2=待收货|3=已完成|5=全部)")
+                        @RequestParam(required = true) Integer status) {
     LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);
     if (leJiaUser == null) {
       return LejiaResult.build(206, "未找到用户");
     }
     List<OnLineOrder>
         onLineOrders =
-        orderService.getCurrentUserOrders(leJiaUser);
+        orderService.getCurrentUserOrders(leJiaUser, status);
     return LejiaResult.build(200, "ok", onLineOrders);
   }
 
@@ -124,10 +123,17 @@ public class OrderController {
     List<CartDetailDto> cartDetailDtoList = stringToList(cartDetailDtos);
     Address address = addressService.findAddressByLeJiaUserAndState(leJiaUser);
     ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(leJiaUser);
-    OnLineOrder onLineOrder = orderService.createCartOrder(cartDetailDtoList, leJiaUser, address);
+    //免运费最低价格
+    Integer
+        FREIGHT_FREE_PRICE =
+        Integer.parseInt(dictionaryService.findDictionaryById(1L).getValue());
+    OnLineOrder
+        onLineOrder =
+        orderService.createCartOrder(cartDetailDtoList, leJiaUser, address, FREIGHT_FREE_PRICE);
     OnLineOrderDto orderDto = new OnLineOrderDto();
     try {
       BeanUtils.copyProperties(orderDto, onLineOrder);
+      orderDto.setMinPrice(FREIGHT_FREE_PRICE);
     } catch (IllegalAccessException e) {
       e.printStackTrace();
     } catch (InvocationTargetException e) {
@@ -157,6 +163,7 @@ public class OrderController {
     OnLineOrderDto orderDto = new OnLineOrderDto();
     try {
       BeanUtils.copyProperties(orderDto, onLineOrder);
+      orderDto.setMinPrice(Integer.valueOf(dictionaryService.findDictionaryById(1L).getValue()));
     } catch (IllegalAccessException e) {
       e.printStackTrace();
     } catch (InvocationTargetException e) {
@@ -186,11 +193,18 @@ public class OrderController {
     orderDto.setProductNum(productNum);
     orderDto.setProductSpec(productSpecId);
     Address address = addressService.findAddressByLeJiaUserAndState(leJiaUser);
-    OnLineOrder onLineOrder = orderService.createOrder(orderDto, leJiaUser, address, 1L);
+    //免运费最低价格
+    Integer
+        FREIGHT_FREE_PRICE =
+        Integer.parseInt(dictionaryService.findDictionaryById(1L).getValue());
+    OnLineOrder
+        onLineOrder =
+        orderService.createOrder(orderDto, leJiaUser, address, 1L, FREIGHT_FREE_PRICE);
     ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(leJiaUser);
     OnLineOrderDto onLineOrderDto = new OnLineOrderDto();
     try {
       BeanUtils.copyProperties(onLineOrderDto, onLineOrder);
+      onLineOrderDto.setMinPrice(FREIGHT_FREE_PRICE);
     } catch (IllegalAccessException e) {
       e.printStackTrace();
     } catch (InvocationTargetException e) {
@@ -232,23 +246,26 @@ public class OrderController {
     OnLineOrder order = orderService.findOnLineOrderById(orderId);
     HashMap<String, Object> map = new HashMap<>();
     if (order != null) {
-      ScoreADetail aDetail = scoreAService.findScoreADetailByOrderSid(order.getOrderSid());
-      if (aDetail != null) {
-        ScoreA scoreA = aDetail.getScoreA();
-        if (scoreA != null) {
-          map.put("payBackScore", aDetail.getNumber());
-          map.put("totalScore", scoreA.getTotalScore());
-          return LejiaResult.build(200, "ok", map);
-        }
-      }
+      map.put("sid", order.getOrderSid());
+      map.put("truePrice", order.getTruePrice());
+      map.put("trueScore", order.getTrueScore());
+//      ScoreADetail aDetail = scoreAService.findScoreADetailByOrderSid(order.getOrderSid());
+//      if (aDetail != null) {
+//        ScoreA scoreA = aDetail.getScoreA();
+//        if (scoreA != null) {
+//          map.put("payBackScore", aDetail.getNumber());
+//          map.put("totalScore", scoreA.getTotalScore());
+//          return LejiaResult.build(200, "ok", map);
+//        }
+//      }
       //为了防止微信处理失败或者慢导致未找到信息，使用计算数据
       Integer
           PAY_BACK_SCALE =
           Integer.parseInt(dictionaryService.findDictionaryById(3L).getValue());
       map.put("payBackScore",
               (long) Math.ceil((double) (order.getTruePrice() * PAY_BACK_SCALE) / 100));
-      map.put("totalScore",
-              scoreAService.findScoreAByLeJiaUser(order.getLeJiaUser()).getTotalScore());
+//      map.put("totalScore",
+//              scoreAService.findScoreAByLeJiaUser(order.getLeJiaUser()).getTotalScore());
       return LejiaResult.build(200, "ok", map);
     }
     return LejiaResult.build(405, "未找到订单信息");

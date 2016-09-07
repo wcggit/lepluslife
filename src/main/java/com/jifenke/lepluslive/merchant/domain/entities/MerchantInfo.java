@@ -29,6 +29,13 @@ public class MerchantInfo {
 
   private Integer card = 1;   //可刷卡? 0=不可
 
+  private Integer qrCode = 0;    //是否有永久二维码
+
+  private String parameter;  //二维码参数(1-32位)随机生成  最多2万个
+
+  private String ticket;      //获取的二维码ticket，凭借此ticket可以在有效时间内换取二维码
+
+
   public Long getId() {
     return id;
   }
@@ -67,6 +74,30 @@ public class MerchantInfo {
 
   public void setWifi(Integer wifi) {
     this.wifi = wifi;
+  }
+
+  public Integer getQrCode() {
+    return qrCode;
+  }
+
+  public void setQrCode(Integer qrCode) {
+    this.qrCode = qrCode;
+  }
+
+  public String getParameter() {
+    return parameter;
+  }
+
+  public void setParameter(String parameter) {
+    this.parameter = parameter;
+  }
+
+  public String getTicket() {
+    return ticket;
+  }
+
+  public void setTicket(String ticket) {
+    this.ticket = ticket;
   }
 
   public Integer getCard() {

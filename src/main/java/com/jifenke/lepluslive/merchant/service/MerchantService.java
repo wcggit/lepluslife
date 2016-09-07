@@ -3,7 +3,6 @@ package com.jifenke.lepluslive.merchant.service;
 import com.jifenke.lepluslive.merchant.controller.dto.MerchantDto;
 import com.jifenke.lepluslive.merchant.domain.entities.City;
 import com.jifenke.lepluslive.merchant.domain.entities.Merchant;
-import com.jifenke.lepluslive.merchant.domain.entities.MerchantDetail;
 import com.jifenke.lepluslive.merchant.domain.entities.MerchantInfo;
 import com.jifenke.lepluslive.merchant.domain.entities.MerchantScroll;
 import com.jifenke.lepluslive.merchant.repository.MerchantDetailRepository;
@@ -25,7 +24,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
 
 /**
@@ -39,28 +37,19 @@ public class MerchantService {
   private MerchantRepository merchantRepository;
 
   @Inject
-  private MerchantDetailRepository merchantDetailRepository;
-
-  @Inject
   private EntityManager em;
 
   @Inject
-  MerchantInfoRepository merchantInfoRepository;
+  private MerchantInfoRepository merchantInfoRepository;
 
   @Inject
   private CityService cityService;
 
   @Inject
-  private MerchantScrollRepository merchantScrollRepository;
+  private MerchantDetailRepository merchantDetailRepository;
 
-  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
-  public List<Merchant> findMerchantsByPage(Integer offset) {
-    if (offset == null) {
-      offset = 1;
-    }
-    return merchantRepository.findAll(
-        new PageRequest(offset - 1, 10, new Sort(Sort.Direction.ASC, "sid"))).getContent();
-  }
+  @Inject
+  private MerchantScrollRepository merchantScrollRepository;
 
   /**
    * 获取商家详情
@@ -71,47 +60,57 @@ public class MerchantService {
   }
 
   /**
-   * 获取商家轮播图
+   * APP获取商家详情  06/09/02
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
-  public List<MerchantDetail> findAllMerchantDetailByMerchant(Merchant merchant) {
-    return merchantDetailRepository.findAllByMerchant(merchant);
-  }
-
-  /**
-   * 按照距离远近对商家排序  以后可以被findMerchantListByCustomCondition取代 open app 暂时使用
-   *
-   * @param latitude  经度
-   * @param longitude 纬度
-   */
-  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
-  public List<MerchantDto> findOrderByDistance(Double latitude, Double longitude) {
-
-    List<MerchantDto> dtoList = new ArrayList<>();
-    List<Object[]>
-        list =
-        merchantRepository.findOrderByDistance(latitude, longitude, 0, 10);
+  public Map findMerchant(Long id) {
+    Map<String, Object> map = new HashMap<>();
+    Merchant merchant = new Merchant();
+    merchant.setId(id);
+    List<Object[]> list = merchantRepository.findMerchantById(id);
     for (Object[] o : list) {
-      MerchantDto merchantDto = new MerchantDto();
-      merchantDto.setId(Long.parseLong(o[0].toString()));
-      merchantDto.setSid(Integer.parseInt(o[1].toString()));
-      merchantDto.setLocation(o[2].toString());
-      merchantDto.setPhoneNumber(o[3].toString());
-      merchantDto.setName(o[4].toString());
-      merchantDto.setPicture(o[5].toString());
-      merchantDto.setLng(Double.parseDouble(o[6].toString()));
-      merchantDto.setLat(Double.parseDouble(o[7].toString()));
-      merchantDto.setDistance(o[8] != null ? Double.valueOf(o[8].toString()) : null);
-      dtoList.add(merchantDto);
+      map.put("id", o[0]);
+      map.put("name", o[1]);
+      map.put("location", o[2]);
+      map.put("phoneNumber", o[3]);
+      map.put("lng", o[4]); //经
+      map.put("lat", o[5]);
+      map.put("typeName", o[6]);
+      map.put("areaName", o[7]);
+      map.put("star", o[8]);
+      map.put("card", o[9]);
+      map.put("park", o[10]);
+      map.put("perSale", o[11]);
+      map.put("wifi", o[12]);
     }
-    return dtoList;
+    //商家轮播图
+    List<Map> scrollList = new ArrayList<>();
+    List<Object[]> list2 = merchantScrollRepository.findMerchantScrollsByMerchantId(id);
+    for (Object[] o : list2) {
+      Map<String, Object> m = new HashMap<>();
+      m.put("sid", o[0]);
+      m.put("picture", o[1]);
+      scrollList.add(m);
+    }
+    map.put("scrolls", scrollList);
+    //商家详情图
+    List<Map> detailList = new ArrayList<>();
+    List<Object[]> list3 = merchantDetailRepository.findMerchantDetailsByMerchantId(id);
+    for (Object[] o : list3) {
+      Map<String, Object> m = new HashMap<>();
+      m.put("sid", o[0]);
+      m.put("picture", o[1]);
+      detailList.add(m);
+    }
+    map.put("details", detailList);
+    return map;
   }
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public List<Map> findMerchantListByCustomCondition(Integer status, Double latitude,
                                                      Double longitude,
                                                      Integer page, Long type, Long cityId,
-                                                     Integer condition) {
+                                                     Integer condition, String value) {
     String sql = null;
     if (status == 1) {
       sql =
@@ -134,6 +133,10 @@ public class MerchantService {
       sql += " AND m.city_id = " + cityId;
     }
 
+    if (value != null && (!"".equals(value))) {
+      sql += " AND (m.`name` LIKE '%" + value + "%' OR location LIKE '%" + value + "%') ";
+    }
+
     if (condition != null) {
       if (condition == 2) {  //送红包最多
         sql += " ORDER BY m.lj_commission DESC";
@@ -153,7 +156,9 @@ public class MerchantService {
         sql += " ORDER BY distance ASC ";
       }
     }
-
+    if (page < 1) {
+      page = 1;
+    }
     sql += " LIMIT " + (page - 1) * 10 + "," + 10;
 
     Query query = em.createNativeQuery(sql);
@@ -259,8 +264,6 @@ public class MerchantService {
       merchantDto.setPhoneNumber(String.valueOf(o[3]));
       merchantDto.setName(String.valueOf(o[4]));
       merchantDto.setPicture(o[5] != null ? String.valueOf(o[5]) : null);
-//      merchantDto.setDiscount(o[6] != null ? Integer.parseInt(o[6].toString()) : 10);
-//      merchantDto.setRebate(o[7] != null ? Integer.parseInt(o[7].toString()) : 0);
       merchantDto.setLng(Double.parseDouble(String.valueOf(o[6])));
       merchantDto.setLat(Double.parseDouble(String.valueOf(o[7])));
       merchantDto.setTypeName(String.valueOf(o[8]));
@@ -283,8 +286,65 @@ public class MerchantService {
     merchantRepository.save(merchant);
   }
 
+  /**
+   * 获取商家轮播图
+   */
   public List<MerchantScroll> findAllScorllPicture(Merchant merchant) {
     return merchantScrollRepository.findAllByMerchant(merchant);
   }
+
+  /**
+   * 根据二维码参数获取商家信息  16/09/07
+   *
+   * @param parameter 二维码参数
+   * @return 商家id
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+  public Object findMerchantIdByParameter(String parameter) {
+    List<Object[]> list = merchantInfoRepository.findByParameter(parameter);
+    if (list.size() > 0) {
+      return list.get(0)[0];
+    }
+    return null;
+  }
+
+  //  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+//  public List<Merchant> findMerchantsByPage(Integer offset) {
+//    if (offset == null) {
+//      offset = 1;
+//    }
+//    return merchantRepository.findAll(
+//        new PageRequest(offset - 1, 10, new Sort(Sort.Direction.ASC, "sid"))).getContent();
+//  }
+
+  //  /**
+//   * 按照距离远近对商家排序  以后可以被findMerchantListByCustomCondition取代 open app 暂时使用
+//   *
+//   * @param latitude  经度
+//   * @param longitude 纬度
+//   */
+//  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+//  public List<MerchantDto> findOrderByDistance(Double latitude, Double longitude) {
+//
+//    List<MerchantDto> dtoList = new ArrayList<>();
+//    List<Object[]>
+//        list =
+//        merchantRepository.findOrderByDistance(latitude, longitude, 0, 10);
+//    for (Object[] o : list) {
+//      MerchantDto merchantDto = new MerchantDto();
+//      merchantDto.setId(Long.parseLong(o[0].toString()));
+//      merchantDto.setSid(Integer.parseInt(o[1].toString()));
+//      merchantDto.setLocation(o[2].toString());
+//      merchantDto.setPhoneNumber(o[3].toString());
+//      merchantDto.setName(o[4].toString());
+//      merchantDto.setPicture(o[5].toString());
+//      merchantDto.setLng(Double.parseDouble(o[6].toString()));
+//      merchantDto.setLat(Double.parseDouble(o[7].toString()));
+//      merchantDto.setDistance(o[8] != null ? Double.valueOf(o[8].toString()) : null);
+//      dtoList.add(merchantDto);
+//    }
+//    return dtoList;
+//  }
+
 
 }

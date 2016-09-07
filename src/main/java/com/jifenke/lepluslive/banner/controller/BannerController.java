@@ -98,4 +98,12 @@ public class BannerController {
     String hotWord = bannerService.hotWord(id);
     return LejiaResult.ok(hotWord);
   }
+
+  @ApiOperation(value = "好店推荐页顶部图片")
+  @RequestMapping(value = "/niceShopImage", method = RequestMethod.GET)
+  public
+  @ResponseBody
+  LejiaResult findNiceShopImage() {
+    return LejiaResult.ok(dictionaryService.findDictionaryById(26L).getValue());
+  }
 }

@@ -46,6 +46,7 @@ public class BannerService {
       map.put("url", o[3]);
       map.put("merchantId", o[4]);
       map.put("productId", o[5]);
+      map.put("urlTitle", o[6]);
       mapList.add(map);
     }
     return mapList;
@@ -67,6 +68,7 @@ public class BannerService {
       map.put("title", o[4]);
       map.put("content", o[5]);
       map.put("shopName", o[6]);
+      map.put("urlTitle", o[7]);
       mapList.add(map);
     }
     return mapList;
@@ -87,6 +89,7 @@ public class BannerService {
       map.put("picture", o[1]);
       map.put("url", o[2]);
       map.put("merchantId", o[3]);
+      map.put("urlTitle", o[4]);
       mapList.add(map);
     }
     return mapList;
@@ -109,6 +112,7 @@ public class BannerService {
       map.put("title", o[5]);
       map.put("content", o[6]);
       map.put("price", o[7]);
+      map.put("urlTitle", o[8]);
       mapList.add(map);
     }
     return mapList;
@@ -133,6 +137,7 @@ public class BannerService {
       map.put("title", o[5]);
       map.put("content", o[6]);
       map.put("price", o[7]);
+      map.put("urlTitle", o[8]);
       mapList.add(map);
     }
     return mapList;

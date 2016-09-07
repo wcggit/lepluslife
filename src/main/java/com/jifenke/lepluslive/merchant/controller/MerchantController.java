@@ -4,7 +4,6 @@ import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.merchant.controller.dto.MerchantDto;
 import com.jifenke.lepluslive.merchant.domain.entities.Merchant;
-import com.jifenke.lepluslive.merchant.domain.entities.MerchantDetail;
 import com.jifenke.lepluslive.merchant.domain.entities.MerchantScroll;
 import com.jifenke.lepluslive.merchant.service.MerchantService;
 import com.jifenke.lepluslive.weixin.service.WeiXinService;
@@ -12,7 +11,6 @@ import com.jifenke.lepluslive.weixin.service.WeiXinService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 
-import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.http.MediaType;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,7 +21,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 
@@ -123,33 +120,24 @@ public class MerchantController {
       @ApiParam(value = "第几页") @RequestParam(required = true) Integer page,
       @ApiParam(value = "商家类别") @RequestParam(required = false) Long type,
       @ApiParam(value = "城市id") @RequestParam(required = false) Long cityId,
-      @ApiParam(value = "排序条件0=离我最近,2=送红包最多,3=评价最高") @RequestParam(required = false) Integer condition) {
+      @ApiParam(value = "排序条件0=离我最近,2=送红包最多,3=评价最高") @RequestParam(required = false) Integer condition,
+      @ApiParam(value = "搜索框输入的文字") @RequestParam(required = false) String value) {
 
     List<Map> merchantList = merchantService.findMerchantListByCustomCondition(status, latitude,
                                                                                longitude, page,
                                                                                type, cityId,
-                                                                               condition);
+                                                                               condition, value);
 
     return LejiaResult.ok(merchantList);
   }
 
   @ApiOperation(value = "进入商家详情页")
-  @RequestMapping(value = "/detail", method = RequestMethod.POST)
+  @RequestMapping(value = "/detail/{id}", method = RequestMethod.GET)
   public
   @ResponseBody
-  LejiaResult detail(@ApiParam(value = "商家Id") @RequestParam(required = true) Long id) {
-    MerchantDto merchantDto = new MerchantDto();
-    Merchant merchant = merchantService.findMerchantById(id);
-    List<MerchantDetail> detailList = merchantService.findAllMerchantDetailByMerchant(merchant);
-    try {
-      BeanUtils.copyProperties(merchantDto, merchant);
-      merchantDto.setDetailList(detailList);
-    } catch (IllegalAccessException e) {
-      e.printStackTrace();
-    } catch (InvocationTargetException e) {
-      e.printStackTrace();
-    }
-    return LejiaResult.build(200, "ok", merchantDto);
+  LejiaResult detail(@ApiParam(value = "商家Id") @PathVariable Long id) {
+    Map map = merchantService.findMerchant(id);
+    return LejiaResult.build(200, "ok", map);
   }
 
 }

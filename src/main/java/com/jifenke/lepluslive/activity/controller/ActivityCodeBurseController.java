@@ -33,7 +33,7 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Created by wcg on 16/3/17.
+ * 活动 Created by zhangwen on 16/9/2.
  */
 @RestController
 @RequestMapping("/weixin")
@@ -59,6 +59,24 @@ public class ActivityCodeBurseController {
 
   @Inject
   private LeJiaUserService leJiaUserService;
+
+  //分享页面 06/09/02
+  @RequestMapping(value = "/share/{id}", method = RequestMethod.GET)
+  public ModelAndView sharePage(@PathVariable String id, HttpServletRequest request, Model model) {
+    String openId = CookieUtils.getCookieValue(request, appId + "-user-open-id");
+    WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByOpenId(openId);
+
+    //判断是否获得过红包
+    ActivityJoinLog joinLog = activityJoinLogService.findLogBySubActivityAndOpenId(0, weiXinUser
+        .getOpenId());
+    if (joinLog == null) {//未参与
+      model.addAttribute("status", 0);
+    } else {
+      model.addAttribute("scoreA", joinLog.getDetail());
+      model.addAttribute("status", 1);
+    }
+    return MvUtil.go("/activity/subPage");
+  }
 
   //关注图文链接页面
   @RequestMapping("/subPage")
@@ -100,6 +118,7 @@ public class ActivityCodeBurseController {
     return LejiaResult.build(201, "手机号已被使用或已领取红包");
   }
 
+  //关注永久二维码领取红包
   @RequestMapping(value = "/activity/{id}", method = RequestMethod.GET)
   public ModelAndView goActivityPage(HttpServletRequest request, @PathVariable String id,
                                      Model model) {
@@ -158,16 +177,5 @@ public class ActivityCodeBurseController {
     return MvUtil.go("/activity/codeBurse");
   }
 
-  @RequestMapping(value = "/codeBurse/ajaxList", method = RequestMethod.POST)
-  public
-  @ResponseBody
-  LejiaResult getCodeBurses(@RequestParam Integer offset) {
-    if (offset == null) {
-      offset = 1;
-    }
-    Page page = activityCodeBurseService.findByPage(offset, 10);
-
-    return LejiaResult.ok(page);
-  }
 
 }

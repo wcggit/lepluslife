@@ -4,10 +4,8 @@ import com.jifenke.lepluslive.Address.domain.entities.Address;
 import com.jifenke.lepluslive.global.config.Constants;
 import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.job.OrderStatusQueryJob;
-import com.jifenke.lepluslive.job.ValidateCodeJob;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.order.domain.entities.PayOrigin;
-import com.jifenke.lepluslive.order.repository.OrderDetailRepository;
 import com.jifenke.lepluslive.product.domain.entities.Product;
 import com.jifenke.lepluslive.product.domain.entities.ProductSpec;
 import com.jifenke.lepluslive.product.service.ProductService;
@@ -15,7 +13,6 @@ import com.jifenke.lepluslive.weixin.controller.dto.CartDetailDto;
 import com.jifenke.lepluslive.weixin.controller.dto.OrderDto;
 import com.jifenke.lepluslive.order.domain.entities.OnLineOrder;
 import com.jifenke.lepluslive.order.domain.entities.OrderDetail;
-import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.order.repository.OrderRepository;
 import com.jifenke.lepluslive.Address.service.AddressService;
 import com.jifenke.lepluslive.score.service.ScoreAService;
@@ -23,8 +20,6 @@ import com.jifenke.lepluslive.score.service.ScoreBService;
 import com.jifenke.lepluslive.weixin.repository.DictionaryRepository;
 import com.jifenke.lepluslive.weixin.service.JobThread;
 import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
-import com.jifenke.lepluslive.weixin.service.WeiXinService;
-import com.jifenke.lepluslive.weixin.service.WeiXinUserService;
 import com.jifenke.lepluslive.weixin.service.WeixinPayLogService;
 
 import org.quartz.JobBuilder;
@@ -40,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
@@ -62,12 +58,6 @@ public class OrderService {
   private AddressService addressService;
 
   @Inject
-  private WeiXinService weiXinService;
-
-  @Inject
-  private WeiXinUserService weiXinUserService;
-
-  @Inject
   private WeiXinPayService weiXinPayService;
 
   @Inject
@@ -86,18 +76,34 @@ public class OrderService {
   private DictionaryRepository dictionaryRepository;
 
   @Inject
-  private OrderDetailRepository orderDetailRepository;
-
-  @Inject
   private WeixinPayLogService weixinPayLogService;
 
   private static String jobGroupName = "ORDER_JOBGROUP_NAME";
   private static String triggerGroupName = "ORDER_TRIGGERGROUP_NAME";
 
+  /**
+   * 我的 获取用户不同状态订单数  16/09/05
+   *
+   * @param leJiaUserId leJiaUserId
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+  public Map getOrdersCount(Long leJiaUserId) {
+    List<Object[]> list = orderRepository.getOrdersCount(leJiaUserId);
+    Map<String, Object> map = new HashMap<>();
+    for (Object[] o : list) {
+      map.put("status_" + o[0], o[1]);
+    }
+    for (int i = 0; i < 3; i++) {
+      if (map.get("status_" + i) == null) {
+        map.put("status_" + i, 0);
+      }
+    }
+    return map;
+  }
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public OnLineOrder createOrder(OrderDto orderDto, LeJiaUser leJiaUser, Address address,
-                                 Long payWayId) {
+                                 Long payWayId, Integer FREIGHT_FREE_PRICE) {
     Product product = productService.findOneProduct(orderDto.getProductId());
 //    productService.editProductSpecRepository(orderDto.getProductSpec(), orderDto.getProductNum());
     OnLineOrder onLineOrder = new OnLineOrder();
@@ -105,7 +111,6 @@ public class OrderService {
     Long totalPrice = productSpec.getPrice() * orderDto.getProductNum();
     Long totalMinPrice = productSpec.getMinPrice() * orderDto.getProductNum();
     Long totalScore = totalPrice - totalMinPrice;
-    Integer FREIGHT_FREE_PRICE = Integer.parseInt(dictionaryRepository.findOne(1L).getValue());
     //判断是否包邮
     if (totalPrice.intValue() >= FREIGHT_FREE_PRICE) {
       onLineOrder.setFreightPrice(0L);
@@ -115,8 +120,11 @@ public class OrderService {
       onLineOrder.setFreightPrice(FREIGHT_PRICE);
       onLineOrder.setTotalPrice(totalPrice + FREIGHT_PRICE);
     }
-
     onLineOrder.setTruePrice(totalPrice);
+//    onLineOrder.setFreightPrice(0L);
+//    onLineOrder.setTotalPrice(1L);
+//    onLineOrder.setTruePrice(1L);
+
     onLineOrder.setTotalScore(
         (long) Math.floor(Double.parseDouble(totalScore.toString()) / 100));
     onLineOrder.setLeJiaUser(leJiaUser);
@@ -249,12 +257,19 @@ public class OrderService {
   }
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
-  public List<OnLineOrder> getCurrentUserOrders(LeJiaUser leJiaUser) {
-    List<Integer> states = new ArrayList<>();
-    states.add(-1);
-    states.add(4);
-    return orderRepository
-        .findAllByLeJiaUserAndStateNotInOrderByCreateDateDesc(leJiaUser, states);
+  public List<OnLineOrder> getCurrentUserOrders(LeJiaUser leJiaUser, Integer status) {
+    List<OnLineOrder> list = null;
+    //订单状态(0=待付款|1=待发货|2=待收货|3=已完成|5=全部)
+    if (5 == status) {
+      List<Integer> states = new ArrayList<>();
+      states.add(-1);
+      states.add(4);
+      list = orderRepository
+          .findAllByLeJiaUserAndStateNotInOrderByCreateDateDesc(leJiaUser, states);
+    } else {
+      list = orderRepository.findAllByLeJiaUserAndStateOrderByCreateDateDesc(leJiaUser, status);
+    }
+    return list;
   }
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
@@ -345,7 +360,7 @@ public class OrderService {
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public OnLineOrder createCartOrder(List<CartDetailDto> cartDetailDtos, LeJiaUser leJiaUser,
-                                     Address address) {
+                                     Address address, Integer FREIGHT_FREE_PRICE) {
     OnLineOrder onLineOrder = new OnLineOrder();
     List<OrderDetail> orderDetails = onLineOrder.getOrderDetails();
     Long totalPrice = 0L;
@@ -371,7 +386,6 @@ public class OrderService {
       orderDetails.add(orderDetail);
     }
     //判断是否包邮
-    Integer FREIGHT_FREE_PRICE = Integer.parseInt(dictionaryRepository.findOne(1L).getValue());
     if (totalPrice.intValue() >= FREIGHT_FREE_PRICE) {
       onLineOrder.setFreightPrice(0L);
       onLineOrder.setTotalPrice(totalPrice);

@@ -1,6 +1,7 @@
 package com.jifenke.lepluslive.merchant.domain.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -12,7 +13,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 /**
- * Created by wcg on 16/3/30.
+ * 商家详情图 Created by wcg on 16/3/30.
  */
 @Entity
 @Table(name = "MERCHANT_DETAIL")
@@ -22,6 +23,8 @@ public class MerchantDetail {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   private Long id;
+
+  private Integer sid = 0;  //序号
 
   @ManyToOne
   @JsonIgnore
@@ -43,6 +46,14 @@ public class MerchantDetail {
 
   public void setMerchant(Merchant merchant) {
     this.merchant = merchant;
+  }
+
+  public Integer getSid() {
+    return sid;
+  }
+
+  public void setSid(Integer sid) {
+    this.sid = sid;
   }
 
   public String getPicture() {
