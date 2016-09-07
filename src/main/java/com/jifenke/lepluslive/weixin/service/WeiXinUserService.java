@@ -267,6 +267,8 @@ public class WeiXinUserService {
       scoreB.setTotalScore(0L);
       scoreB.setLeJiaUser(leJiaUser);
       scoreBRepository.save(scoreB);
+    } else {
+      leJiaUser = weiXinUser.getLeJiaUser();
     }
 
     weiXinUser.setAppOpenId(openid);

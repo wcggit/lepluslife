@@ -1,29 +1,9 @@
 package com.jifenke.lepluslive.web.rest;
 
-import com.jifenke.lepluslive.Address.domain.entities.Address;
-import com.jifenke.lepluslive.Address.repository.AddressRepository;
+
 import com.jifenke.lepluslive.Application;
 import com.jifenke.lepluslive.global.config.Constants;
-import com.jifenke.lepluslive.job.OrderJob;
-import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
-import com.jifenke.lepluslive.lejiauser.repository.LeJiaUserRepository;
-import com.jifenke.lepluslive.merchant.domain.entities.Merchant;
-import com.jifenke.lepluslive.merchant.domain.entities.MerchantInfo;
-import com.jifenke.lepluslive.merchant.repository.MerchantRepository;
-import com.jifenke.lepluslive.merchant.service.MerchantService;
-import com.jifenke.lepluslive.order.domain.entities.OnLineOrder;
-import com.jifenke.lepluslive.order.domain.entities.OrderDetail;
-import com.jifenke.lepluslive.order.repository.OrderDetailRepository;
-import com.jifenke.lepluslive.order.repository.OrderRepository;
-import com.jifenke.lepluslive.order.service.OrderService;
-import com.jifenke.lepluslive.score.repository.ScoreARepository;
-import com.jifenke.lepluslive.score.repository.ScoreBRepository;
-import com.jifenke.lepluslive.topic.domain.entities.Topic;
-import com.jifenke.lepluslive.topic.service.TopicService;
-import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
-import com.jifenke.lepluslive.weixin.repository.WeiXinUserRepository;
-import com.jifenke.lepluslive.weixin.service.WeiXinService;
-import com.jifenke.lepluslive.weixin.service.WeixinPayLogService;
+
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,13 +15,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
-
-import javax.inject.Inject;
+import java.util.Random;
 
 
 /**
@@ -54,48 +28,25 @@ import javax.inject.Inject;
 @ActiveProfiles({Constants.SPRING_PROFILE_DEVELOPMENT})
 public class ttt {
 
-  @Inject
-  private AddressRepository addressRepository;
-
-  @Inject
-  private WeiXinUserRepository weiXinUserRepository;
-
-  @Inject
-  private LeJiaUserRepository leJiaUserRepository;
-
-  @Inject
-  private ScoreARepository scoreARepository;
-
-  @Inject
-  private ScoreBRepository scoreBRepository;
-
-  @Inject
-  private OrderDetailRepository orderDetailRepository;
-
-  @Inject
-  private OrderRepository orderRepository;
-
-  @Inject
-  private WeixinPayLogService weixinPayLogService;
-
-  @Inject
-  private WeiXinService weiXinService;
-
-  @Inject
-  private MerchantRepository merchantRepository;
-
-  @Inject
-  private MerchantService merchantService;
 
   @Test
   public void tttt() {
-    List<Merchant> list = merchantRepository.findAll();
-    for (Merchant merchant : list) {
-      MerchantInfo info = merchant.getMerchantInfo();
-      if (info == null) {
-        merchantService.test(merchant);
-      }
+    for (int i = 0; i < 100; i++) {
+      int defaultScoreA = (new Random().nextInt(6) + 10) * 10;
+      System.out.println(defaultScoreA);
     }
+//    int x = 0, y = 0, z = 0;
+//    for (int i = 0; i < 100000; i++) {
+//      double random = Math.random();
+//      if (random < 0.9) {
+//        x++;
+//      } else if (0.9 <= random && random < 0.97) {
+//        y++;
+//      } else {
+//        z++;
+//      }
+//    }
+//    System.out.println("x:" + x + "  y: " + y + "  z: " + z);
 
   }
 }

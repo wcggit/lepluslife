@@ -11,13 +11,20 @@ import java.util.List;
 /**
  * Created by wcg on 16/3/21.
  */
-public interface OrderRepository extends JpaRepository<OnLineOrder,Long>{
+public interface OrderRepository extends JpaRepository<OnLineOrder, Long> {
 
   OnLineOrder findByOrderSid(String orderSid);
 
-  List<OnLineOrder> findAllByLeJiaUserAndStateNotInOrderByCreateDateDesc(LeJiaUser leJiaUser,List<Integer> states);
+  List<OnLineOrder> findAllByLeJiaUserAndStateNotInOrderByCreateDateDesc(LeJiaUser leJiaUser,
+                                                                         List<Integer> states);
 
-  @Query(value = "select count(*) from on_line_order where le_jia_user_id = ?1 and state = 0",nativeQuery = true)
-  Long getCurrentUserObligationOrdersCount(Long  leJiaUserId);
+  List<OnLineOrder> findAllByLeJiaUserAndStateOrderByCreateDateDesc(LeJiaUser leJiaUser,
+                                                                    Integer status);
+
+  @Query(value = "select count(*) from on_line_order where le_jia_user_id = ?1 and state = 0", nativeQuery = true)
+  Long getCurrentUserObligationOrdersCount(Long leJiaUserId);
+
+  @Query(value = "SELECT state,COUNT(state) FROM on_line_order WHERE le_jia_user_id=?1 AND state IN(0,1,2) GROUP BY state", nativeQuery = true)
+  List<Object[]> getOrdersCount(Long leJiaUserId);
 
 }

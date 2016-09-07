@@ -13,7 +13,7 @@ import com.jifenke.lepluslive.product.domain.entities.ProductSpec;
 import com.jifenke.lepluslive.product.service.ProductService;
 import com.jifenke.lepluslive.weixin.controller.dto.CartDetailDto;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
-import com.jifenke.lepluslive.weixin.service.WeiXinService;
+import com.jifenke.lepluslive.weixin.service.DictionaryService;
 import com.jifenke.lepluslive.weixin.service.WeiXinUserService;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -51,7 +51,7 @@ public class WeiXinCartController {
   private OrderService orderService;
 
   @Inject
-  private WeiXinService weiXinService;
+  private DictionaryService dictionaryService;
 
   @Inject
   private AddressService addressService;
@@ -169,14 +169,14 @@ public class WeiXinCartController {
     List<CartDetailDto> cartDetailDtos = null;
     if (cart != null) {
       cartDetailDtos = JsonUtils.jsonToList(cart, CartDetailDto.class);
-        for (CartDetailDto cartDetail : cartDetailDtos) {
-            if (cartDetail.getProduct().getId() == product
-              && cartDetail.getProductSpec().getId() == productSpec) {
-            cartDetailDtos.remove(count);
-            break;
-          }
-          count++;
+      for (CartDetailDto cartDetail : cartDetailDtos) {
+        if (cartDetail.getProduct().getId() == product
+            && cartDetail.getProductSpec().getId() == productSpec) {
+          cartDetailDtos.remove(count);
+          break;
         }
+        count++;
+      }
     }
     CookieUtils
         .setCookie(request, response, openId + "-cart", JsonUtils.objectToJson(cartDetailDtos),
@@ -219,8 +219,8 @@ public class WeiXinCartController {
     WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByOpenId(openId);
 
     Long count = orderService.getCurrentUserObligationOrdersCount(weiXinUser.getLeJiaUser());
-    if(count>=4){
-      return  LejiaResult.build(500,"未支付订单过多,请支付后再下单");
+    if (count >= 4) {
+      return LejiaResult.build(500, "未支付订单过多,请支付后再下单");
     }
     Address address = addressService.findAddressByLeJiaUserAndState(weiXinUser.getLeJiaUser());
     String cart = CookieUtils.getCookieValue(request, openId + "-cart");
@@ -229,7 +229,13 @@ public class WeiXinCartController {
     if (cart != null) {
       cartDetailDtoOrigin = JsonUtils.jsonToList(cart, CartDetailDto.class);
       cartDetailDtoOrigin.removeAll(cartDetailDtos);
-      onLineOrder = orderService.createCartOrder(cartDetailDtos, weiXinUser.getLeJiaUser(), address);
+      //免运费最低价格
+      Integer
+          FREIGHT_FREE_PRICE =
+          Integer.parseInt(dictionaryService.findDictionaryById(1L).getValue());
+      onLineOrder =
+          orderService.createCartOrder(cartDetailDtos, weiXinUser.getLeJiaUser(), address,
+                                       FREIGHT_FREE_PRICE);
     }
 
     CookieUtils

@@ -2,8 +2,6 @@ package com.jifenke.lepluslive.weixin.controller;
 
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
-import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
-import com.jifenke.lepluslive.lejiauser.service.LeJiaUserService;
 import com.jifenke.lepluslive.order.domain.entities.OnLineOrder;
 import com.jifenke.lepluslive.score.domain.entities.ScoreA;
 import com.jifenke.lepluslive.score.domain.entities.ScoreB;
@@ -14,6 +12,7 @@ import com.jifenke.lepluslive.Address.service.AddressService;
 import com.jifenke.lepluslive.order.service.OrderService;
 import com.jifenke.lepluslive.score.service.ScoreAService;
 import com.jifenke.lepluslive.score.service.ScoreBService;
+import com.jifenke.lepluslive.weixin.service.DictionaryService;
 import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
 import com.jifenke.lepluslive.weixin.service.WeiXinService;
 
@@ -64,13 +63,21 @@ public class WeixinOrderController {
   @Inject
   private WeiXinPayService weiXinPayService;
 
+  @Inject
+  private DictionaryService dictionaryService;
+
   //跳转到订单确认页面,并生成预支付订单
   @RequestMapping(value = "/order/confirm", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
   public ModelAndView orderCreate(OrderDto orderDto, HttpServletRequest request, Model model) {
     WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
     Address address = addressService.findAddressByLeJiaUserAndState(weiXinUser.getLeJiaUser());
+    //免运费最低价格
+    Integer
+        FREIGHT_FREE_PRICE =
+        Integer.parseInt(dictionaryService.findDictionaryById(1L).getValue());
     model.addAttribute("order",
-                       orderService.createOrder(orderDto, weiXinUser.getLeJiaUser(), address, 5L));
+                       orderService.createOrder(orderDto, weiXinUser.getLeJiaUser(), address, 5L,
+                                                FREIGHT_FREE_PRICE));
     ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(weiXinUser.getLeJiaUser());
     model.addAttribute("address", address);
     model.addAttribute("wxConfig", getWeiXinPayConfig(request));
@@ -203,7 +210,7 @@ public class WeixinOrderController {
     List<OnLineOrder>
         onLineOrders =
         orderService
-            .getCurrentUserOrders(weiXinService.getCurrentWeiXinUser(request).getLeJiaUser());
+            .getCurrentUserOrders(weiXinService.getCurrentWeiXinUser(request).getLeJiaUser(), 5);
     return LejiaResult.ok(onLineOrders);
   }
 

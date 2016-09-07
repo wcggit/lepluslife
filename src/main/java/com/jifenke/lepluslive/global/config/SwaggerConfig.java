@@ -180,6 +180,19 @@ public class SwaggerConfig {
         .build()
         .apiInfo(bannerApiInfo());
   }
+  @Bean
+  public Docket inviteApi() {
+    return new Docket(DocumentationType.SWAGGER_2)
+        .groupName("邀请invite")
+        .genericModelSubstitutes(DeferredResult.class)
+        .useDefaultResponseMessages(false)
+        .forCodeGeneration(true)
+        .pathMapping("/")
+        .select()
+        .paths(or(regex("/app/invite/.*")))
+        .build()
+        .apiInfo(inviteApiInfo());
+  }
 
 
   private ApiInfo userApiInfo() {
@@ -323,6 +336,19 @@ public class SwaggerConfig {
   }
 
   private ApiInfo bannerApiInfo() {
+    ApiInfo apiInfo = new ApiInfo("邀请及分享",//大标题
+                                  "EHR Platform's REST API, all the applications could access the Object model data via JSON.",
+//小标题
+                                  "0.1",//版本
+                                  "NO terms of service",
+                                  "zhangwenit@126.com",//作者
+                                  "The Apache License, Version 2.0",//链接显示文字
+                                  "http://www.apache.org/licenses/LICENSE-2.0.html"//网站链接
+    );
+
+    return apiInfo;
+  }
+  private ApiInfo inviteApiInfo() {
     ApiInfo apiInfo = new ApiInfo("各种轮播图",//大标题
                                   "EHR Platform's REST API, all the applications could access the Object model data via JSON.",
 //小标题

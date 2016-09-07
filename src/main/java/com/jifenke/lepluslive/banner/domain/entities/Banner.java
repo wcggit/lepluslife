@@ -50,6 +50,8 @@ public class Banner {
 
   private String url;                   //轮播图对应的html的链接
 
+  private String urlTitle;              //轮播图对应的html页面标题
+
   private Integer sid = 1;              //序号
 
   private Integer status = 1;           //状态  1=正常  0=下架
@@ -188,6 +190,14 @@ public class Banner {
 
   public void setOldPicture(String oldPicture) {
     this.oldPicture = oldPicture;
+  }
+
+  public String getUrlTitle() {
+    return urlTitle;
+  }
+
+  public void setUrlTitle(String urlTitle) {
+    this.urlTitle = urlTitle;
   }
 
   public String getPicture() {

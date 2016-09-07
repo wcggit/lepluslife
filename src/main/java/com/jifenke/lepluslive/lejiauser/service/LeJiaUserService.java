@@ -19,6 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.inject.Inject;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by wcg on 16/4/21.
@@ -38,6 +41,30 @@ public class LeJiaUserService {
 
   @Inject
   private ScoreBRepository scoreBRepository;
+
+  /**
+   * APP获取用户信息  16/09/07
+   *
+   * @param token 用户唯一标识
+   * @return 个人信息
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+  public Map getUserInfo(String token) {
+    List<Object[]> list = leJiaUserRepository.getUserInfo(token);
+    if (list.size() > 0) {
+      Map<String, Object> map = new HashMap<>();
+      Object[] o = list.get(0);
+      map.put("nickname", o[0]);
+      map.put("headImageUrl", o[1]);
+      map.put("token", o[2]);
+      map.put("phoneNumber", o[3]);
+      map.put("scoreA", o[4]);
+      map.put("scoreB", o[5]);
+      map.put("bindMerchantId", o[6]);
+      return map;
+    }
+    return null;
+  }
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public LeJiaUser findUserByUserSid(String userSid) {
