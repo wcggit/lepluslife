@@ -16,7 +16,7 @@ public interface LeJiaUserRepository extends JpaRepository<LeJiaUser, Long> {
 
   LeJiaUser findByUserSid(String userSid);
 
-  LeJiaUser findOneByPhoneNumber(String phoneNumber);
+  List<LeJiaUser> findByPhoneNumber(String phoneNumber);
 
   /**
    * APP获取用户信息  16/09/07

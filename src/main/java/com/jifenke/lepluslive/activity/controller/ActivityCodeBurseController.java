@@ -4,6 +4,7 @@ import com.jifenke.lepluslive.activity.domain.entities.ActivityCodeBurse;
 import com.jifenke.lepluslive.activity.domain.entities.ActivityJoinLog;
 import com.jifenke.lepluslive.activity.service.ActivityCodeBurseService;
 import com.jifenke.lepluslive.activity.service.ActivityJoinLogService;
+import com.jifenke.lepluslive.activity.service.ActivityShareLogService;
 import com.jifenke.lepluslive.global.util.CookieUtils;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
@@ -16,7 +17,6 @@ import com.jifenke.lepluslive.weixin.service.WeiXinService;
 import com.jifenke.lepluslive.weixin.service.WeiXinUserService;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -60,22 +60,56 @@ public class ActivityCodeBurseController {
   @Inject
   private LeJiaUserService leJiaUserService;
 
+  @Inject
+  private ActivityShareLogService activityShareLogService;
+
   //分享页面 06/09/02
   @RequestMapping(value = "/share/{id}", method = RequestMethod.GET)
-  public ModelAndView sharePage(@PathVariable String id, HttpServletRequest request, Model model) {
+  public ModelAndView sharePage(@PathVariable String id, HttpServletRequest request,
+                                Model model) {
     String openId = CookieUtils.getCookieValue(request, appId + "-user-open-id");
     WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByOpenId(openId);
-
-    //判断是否获得过红包
-    ActivityJoinLog joinLog = activityJoinLogService.findLogBySubActivityAndOpenId(0, weiXinUser
-        .getOpenId());
-    if (joinLog == null) {//未参与
-      model.addAttribute("status", 0);
+    model.addAttribute("token", id); //记录邀请人的token
+    //判断是否有手机号码
+    LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
+    if (leJiaUser != null) {
+      if (leJiaUser.getPhoneNumber() == null || leJiaUser.getPhoneNumber().equals("")) {
+        model.addAttribute("status", 0);
+      } else {
+        model.addAttribute("status", 1);
+      }
     } else {
-      model.addAttribute("scoreA", joinLog.getDetail());
-      model.addAttribute("status", 1);
+      model.addAttribute("status", 0);
     }
-    return MvUtil.go("/activity/subPage");
+    return MvUtil.go("/activity/share");
+  }
+
+  /**
+   * 分享页面提交  16/09/07
+   *
+   * @param phoneNumber 被邀请的手机号码
+   * @param token       邀请人的token
+   * @param request     请求
+   * @return 状态
+   */
+  @RequestMapping(value = "/share/submit", method = RequestMethod.GET)
+  public
+  @ResponseBody
+  LejiaResult shareSubmit(@RequestParam String phoneNumber, @RequestParam String token,
+                          HttpServletRequest request) {
+    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
+    LeJiaUser leJiaUser = leJiaUserService.findUserByPhoneNumber(phoneNumber);
+    if (leJiaUser == null) { //手机号是否已注册
+      //给双方派发红包和积分,填充手机号码成为会员，修改邀请人邀请记录(info)并记录shareLog
+      try {
+        activityShareLogService.giveScoreByShare(weiXinUser, token, phoneNumber);
+        return LejiaResult.ok();
+      } catch (Exception e) {
+        return LejiaResult.build(202, "服务器异常");
+      }
+    } else {
+      return LejiaResult.build(201, "手机号已被使用");
+    }
   }
 
   //关注图文链接页面

@@ -20,6 +20,7 @@ import com.jifenke.lepluslive.score.service.ScoreAService;
 import com.jifenke.lepluslive.score.service.ScoreBService;
 import com.jifenke.lepluslive.weixin.service.DictionaryService;
 import com.jifenke.lepluslive.weixin.service.WeiXinService;
+import com.jifenke.lepluslive.weixin.service.WeiXinUserInfoService;
 import com.jifenke.lepluslive.weixin.service.WeiXinUserService;
 
 import org.apache.commons.beanutils.BeanUtils;
@@ -84,6 +85,8 @@ public class WeixinController {
   @Inject
   private DictionaryService dictionaryService;
 
+  @Inject
+  private WeiXinUserInfoService weiXinUserInfoService;
 
   @RequestMapping("/shop")
   public ModelAndView goProductPage(HttpServletRequest request, HttpServletResponse response,
@@ -201,30 +204,17 @@ public class WeixinController {
     return LejiaResult.build(201, "手机号已被使用或已领取红包");
   }
 
-//  @RequestMapping("/hongbao/open")
-//  public ModelAndView goHongbaoOpenPage(@RequestParam String phoneNumber,
-//                                        @RequestParam String realName,
-//                                        HttpServletRequest request) {
-//    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
-//    LeJiaUser leJiaUser = leJiaUserService.findUserByPhoneNumber(phoneNumber);  //是否已注册
-//    if (leJiaUser == null && weiXinUser.getHongBaoState() == 0) {
-//      weiXinUserService.openHongBao(weiXinUser, phoneNumber, realName);
-//    }
-//    return MvUtil.go("/weixin/hongbaoOpen");
-//  }
-
   @RequestMapping("/user")
-  public ModelAndView goUserPage(Model model, HttpServletRequest request,
-                                 HttpServletResponse response) throws IOException {
-
+  public ModelAndView goUserPage(Model model, HttpServletRequest request) throws IOException {
     WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
-    if (weiXinUser.getLeJiaUser().getOneBarCodeUrl() == null) {
-      weiXinUser = weiXinUserService.saveBarCodeForUser(weiXinUser);
-    }
+//    if (weiXinUser.getLeJiaUser().getOneBarCodeUrl() == null) {
+//      weiXinUser = weiXinUserService.saveBarCodeForUser(weiXinUser);
+//    }
     model.addAttribute("scoreA", scoreAService.findScoreAByLeJiaUser(weiXinUser.getLeJiaUser()));
     model.addAttribute("user", weiXinUser);
     model.addAttribute("scoreB", scoreBService.findScoreBByWeiXinUser(weiXinUser.getLeJiaUser()));
-    return MvUtil.go("/weixin/user");
+    model.addAttribute("check", weiXinUserInfoService.checkYdAndWarning(weiXinUser));
+    return MvUtil.go("/user/center");
   }
 
 

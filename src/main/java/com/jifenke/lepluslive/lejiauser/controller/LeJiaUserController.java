@@ -71,7 +71,7 @@ public class LeJiaUserController {
    * token获取个人数据 16/09/07
    */
   @ApiOperation(value = "token获取个人数据")
-  @RequestMapping(value = "/open", method = RequestMethod.GET)
+  @RequestMapping(value = "/open", method = RequestMethod.POST)
   public
   @ResponseBody
   LejiaResult open(@RequestParam(required = false) String token) {
