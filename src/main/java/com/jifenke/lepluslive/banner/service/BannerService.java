@@ -53,44 +53,71 @@ public class BannerService {
   }
 
   /**
-   * 当期好店推荐
+   * 当期好店推荐 16/09/14
+   *
+   * @param cityId 城市Id
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
-  public List<Map> findByNewShop() {
+  public List<Map> findByNewShop(Long cityId) {
     List<Map> mapList = new ArrayList<>();
-    List<Object[]> list = bannerRepository.findByNewShop();
-    for (Object[] o : list) {
-      Map<String, Object> map = new HashMap<>();
-      map.put("sid", o[0]);
-      map.put("picture", o[1]);
-      map.put("url", o[2]);
-      map.put("merchantId", o[3]);
-      map.put("title", o[4]);
-      map.put("content", o[5]);
-      map.put("shopName", o[6]);
-      map.put("urlTitle", o[7]);
-      mapList.add(map);
+    List<Object[]> list = null;
+    City city = null;
+    if (cityId != null) {
+      city = cityService.findCityById(cityId);
+    }
+    if (city != null) {
+      list = bannerRepository.findNewShopByCity(cityId);
+    } else {
+      list = bannerRepository.findByNewShop();
+    }
+    if (list != null) {
+      for (Object[] o : list) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("sid", o[0]);
+        map.put("picture", o[1]);
+        map.put("url", o[2]);
+        map.put("merchantId", o[3]);
+        map.put("title", o[4]);
+        map.put("content", o[5]);
+        map.put("shopName", o[6]);
+        map.put("urlTitle", o[7]);
+        map.put("afterType", o[8]);
+        mapList.add(map);
+      }
     }
     return mapList;
   }
 
   /**
-   * 往期好店推荐
+   * 往期好店推荐 16/09/14
    *
+   * @param cityId   城市ID
    * @param startNum 起始记录
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
-  public List<Map> findByOldShop(Integer startNum) {
+  public List<Map> findByOldShop(Long cityId, Integer startNum) {
     List<Map> mapList = new ArrayList<>();
-    List<Object[]> list = bannerRepository.findByOldShop((startNum - 1) * 10, 10);
-    for (Object[] o : list) {
-      Map<String, Object> map = new HashMap<>();
-      map.put("sid", o[0]);
-      map.put("picture", o[1]);
-      map.put("url", o[2]);
-      map.put("merchantId", o[3]);
-      map.put("urlTitle", o[4]);
-      mapList.add(map);
+    List<Object[]> list = null;
+    City city = null;
+    if (cityId != null) {
+      city = cityService.findCityById(cityId);
+    }
+    if (city != null) {
+      list = bannerRepository.findOldShopByCity(cityId, (startNum - 1) * 10, 10);
+    } else {
+      list = bannerRepository.findByOldShop((startNum - 1) * 10, 10);
+    }
+    if (list != null) {
+      for (Object[] o : list) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("sid", o[0]);
+        map.put("picture", o[1]);
+        map.put("url", o[2]);
+        map.put("merchantId", o[3]);
+        map.put("urlTitle", o[4]);
+        map.put("afterType", o[5]);
+        mapList.add(map);
+      }
     }
     return mapList;
   }

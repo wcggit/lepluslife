@@ -140,4 +140,22 @@ public class MerchantController {
     return LejiaResult.build(200, "ok", map);
   }
 
+  /**
+   * 线下支付成功页面获取商家列表数据 16/09/13
+   *
+   * @param id 商家ID
+   */
+  @RequestMapping(value = "/payList/{id}", method = RequestMethod.GET)
+  public
+  @ResponseBody
+  LejiaResult payPageInfo(@PathVariable Long id) {
+    Merchant merchant = merchantService.findMerchantById(id);
+    List<Map> list = merchantService.findPaySuccessMerchantList(merchant);
+    String status = "0";
+    if (merchant.getLat() != null && merchant.getLat() != 0) {
+      status = "1";
+    }
+    return LejiaResult.build(200, status, list);
+  }
+
 }

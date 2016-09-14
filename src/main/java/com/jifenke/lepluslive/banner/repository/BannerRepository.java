@@ -22,12 +22,20 @@ public interface BannerRepository extends JpaRepository<Banner, Long> {
   List<Object[]> findByType123(int type);
 
   //当期好店推荐
-  @Query(value = "SELECT b.sid,b.picture,b.url,b.merchant_id,b.title,b.introduce,m.`name`,b.url_title FROM banner b,banner_type t,merchant m WHERE b.banner_type_id = t.id AND b.merchant_id = m.id AND t.id = 5 AND b.`status` =1 AND b.alive = 1 ORDER BY b.sid ASC", nativeQuery = true)
+  @Query(value = "SELECT b.sid,b.picture,b.url,b.merchant_id,b.title,b.introduce,m.`name`,b.url_title,b.after_type FROM banner b,banner_type t,merchant m WHERE b.banner_type_id = t.id AND b.merchant_id = m.id AND t.id = 5 AND b.`status` =1 AND b.alive = 1 ORDER BY b.sid ASC", nativeQuery = true)
   List<Object[]> findByNewShop();
 
+  //该城市当期好店推荐
+  @Query(value = "SELECT b.sid,b.picture,b.url,b.merchant_id,b.title,b.introduce,m.`name`,b.url_title,b.after_type FROM banner b,banner_type t,merchant m WHERE b.banner_type_id = t.id AND b.merchant_id = m.id AND t.id = 5 AND b.`status` =1 AND b.alive = 1 AND m.city_id=?1 ORDER BY b.sid ASC", nativeQuery = true)
+  List<Object[]> findNewShopByCity(Long cityId);
+
   //往期好店推荐
-  @Query(value = "SELECT b.sid,b.old_picture,b.url,b.merchant_id,b.url_title FROM banner b,banner_type t WHERE b.banner_type_id = t.id AND t.id = 5 AND b.`status` =1 AND b.alive = 0 ORDER BY b.sid ASC LIMIT ?1,?2", nativeQuery = true)
+  @Query(value = "SELECT b.sid,b.old_picture,b.url,b.merchant_id,b.url_title,,b.after_type FROM banner b,banner_type t WHERE b.banner_type_id = t.id AND t.id = 5 AND b.`status` =1 AND b.alive = 0 ORDER BY b.sid ASC LIMIT ?1,?2", nativeQuery = true)
   List<Object[]> findByOldShop(Integer startNum, Integer pageSize);
+
+  //该城市往期好店推荐
+  @Query(value = "SELECT b.sid,b.old_picture,b.url,b.merchant_id,b.url_title,b.after_type FROM banner b,banner_type t,merchant m WHERE b.banner_type_id = t.id AND b.merchant_id=m.id AND t.id = 5 AND b.`status` =1 AND b.alive = 0 AND m.city_id=?1 ORDER BY b.sid ASC LIMIT ?2,?3", nativeQuery = true)
+  List<Object[]> findOldShopByCity(Long cityId, Integer startNum, Integer pageSize);
 
   //当期好货推荐
   @Query(value = "SELECT b.sid,b.picture,b.after_type,b.url,b.product_id,b.title,b.introduce,b.price,b.url_title FROM banner b,banner_type t WHERE b.banner_type_id = t.id AND t.id = 4 AND b.`status` =1 AND b.alive = 1 ORDER BY b.sid ASC", nativeQuery = true)

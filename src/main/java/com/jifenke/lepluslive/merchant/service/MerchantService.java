@@ -308,6 +308,85 @@ public class MerchantService {
     return null;
   }
 
+  /**
+   * 支付成功页获取附近商家列表 16/09/13
+   *
+   * @param merchant 支付商家
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+  public List<Map> findPaySuccessMerchantList(Merchant merchant) {
+    String sql = null;
+    int count = 5;
+    List<Map> mapList = new ArrayList<>();
+    if (merchant.getState() == 1 && merchant.getReceiptAuth() == 1) {
+      count = 4;
+      Map<String, Object> map = new HashMap<>();
+      map.put("id", merchant.getId());
+      map.put("sid", merchant.getSid());
+      map.put("location", merchant.getLocation());
+      map.put("name", merchant.getName());
+      map.put("picture", merchant.getPicture());
+      map.put("typeName", merchant.getMerchantType().getName());
+      map.put("star", merchant.getMerchantInfo().getStar());
+      map.put("area", merchant.getArea().getName());
+      map.put("commission", merchant.getLjCommission());
+      map.put("aRebate", merchant.getScoreARebate());
+      map.put("friend", merchant.getPartnership());
+      map.put("perSale", merchant.getMerchantInfo().getPerSale());
+      map.put("distance", 0);
+      mapList.add(map);
+    }
+    if (merchant.getLat() != null && merchant.getLat() != 0) {
+      sql =
+          "SELECT m.id,m.sid,m.location,m.`name`,m.picture,t.`name` AS tName,mi.star,area.`name` AS aName,m.lj_commission,m.scorearebate,m.partnership,mi.per_sale,ROUND( 6378.138 * 2 * ASIN(SQRT(POW(SIN(("
+          + merchant.getLat() + " * PI() / 180 - m.lat * PI() / 180) / 2),2) + COS(" + merchant
+              .getLat()
+          + " * PI() / 180) * COS(m.lat * PI() / 180) * POW(SIN((" + merchant.getLng()
+          + " * PI() / 180 - m.lng * PI() / 180) / 2),2))) * 1000) AS distance FROM merchant m,merchant_type t,city ci,merchant_info mi,area WHERE m.merchant_type_id = t.id AND m.city_id = ci.id AND m.merchant_info_id=mi.id AND m.area_id=area.id";
+      sql += " AND m.state = 1 AND m.receipt_auth = 1 ORDER BY distance ASC ";
+    } else { //根据区域查询
+      sql =
+          "SELECT m.id,m.sid,m.location,m.`name`,m.picture,t.`name` AS tName,mi.star,area.`name` AS aName,m.lj_commission,m.scorearebate,m.partnership,mi.per_sale FROM merchant m,merchant_type t,city ci,merchant_info mi,area WHERE m.merchant_type_id = t.id AND m.city_id = ci.id AND m.merchant_info_id=mi.id AND m.area_id=area.id AND m.area_id="
+          + merchant.getArea().getId();
+      sql += " AND m.state = 1 AND m.receipt_auth = 1 ORDER BY mi.star DESC ";
+    }
+    sql += " LIMIT 0," + count;
+    Query query = em.createNativeQuery(sql);
+    List<Object[]> list = query.getResultList();
+    if (list.size() < count) {
+      count = count - list.size();
+      sql =
+          "SELECT m.id,m.sid,m.location,m.`name`,m.picture,t.`name` AS tName,mi.star,area.`name` AS aName,m.lj_commission,m.scorearebate,m.partnership,mi.per_sale FROM merchant m,merchant_type t,city ci,merchant_info mi,area WHERE m.merchant_type_id = t.id AND m.city_id = ci.id AND m.merchant_info_id=mi.id AND m.area_id=area.id AND m.area_id !="
+          + merchant.getArea().getId() + " AND m.city_id = " + merchant.getCity().getId()
+          + " AND m.state = 1 AND m.receipt_auth = 1 ORDER BY mi.star DESC LIMIT 0," + count;
+      Query query2 = em.createNativeQuery(sql);
+      List<Object[]> list2 = query2.getResultList();
+      list.addAll(list2);
+    }
+    for (Object[] o : list) {
+      Map<String, Object> map = new HashMap<>();
+      map.put("id", o[0]);
+      map.put("sid", o[1]);
+      map.put("location", o[2]);
+      map.put("name", o[3]);
+      map.put("picture", o[4]);
+      map.put("typeName", o[5]);
+      map.put("star", o[6]);
+      map.put("area", o[7]);
+      map.put("commission", o[8]);
+      map.put("aRebate", o[9]);
+      map.put("friend", o[10]);
+      map.put("perSale", o[11]);
+      if (o.length > 12) {
+        map.put("distance", o[12]);
+      } else {
+        map.put("distance", 0);
+      }
+      mapList.add(map);
+    }
+    return mapList;
+  }
+
   //  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
 //  public List<Merchant> findMerchantsByPage(Integer offset) {
 //    if (offset == null) {
