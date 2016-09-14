@@ -49,6 +49,10 @@ public class WeiXinUserInfoService {
         yd = 0;
         info.setVersion(version);
       }
+      if (info.getYinDao() == 0) {
+        yd = 0;
+        info.setYinDao(1);
+      }
       if (phoneNumber == null || "".equals(phoneNumber)) {
         hasPhone = 0;
         //判断7天内是否引导过

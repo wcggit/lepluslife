@@ -7,6 +7,7 @@ import com.jifenke.lepluslive.weixin.service.DictionaryService;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -44,20 +45,21 @@ public class BannerController {
   @RequestMapping(value = "/newShop", method = RequestMethod.GET)
   public
   @ResponseBody
-  LejiaResult newShop() {
-    List<Map> list = bannerService.findByNewShop();
+  LejiaResult newShop(@RequestParam(required = false) Long cityId) {
+    List<Map> list = bannerService.findByNewShop(cityId);
     return LejiaResult.ok(list);
   }
 
   @ApiOperation(value = "往期好“店”推荐")
-  @RequestMapping(value = "/oldShop/{id}", method = RequestMethod.GET)
+  @RequestMapping(value = "/oldShop", method = RequestMethod.GET)
   public
   @ResponseBody
-  LejiaResult oldShopByPage(@ApiParam(value = "第几页，从1开始") @PathVariable Integer id) {
-    if (id == null || id < 1) {
-      id = 1;
+  LejiaResult oldShopByPage(@ApiParam(value = "第几页，从1开始") @RequestParam(required = true) Integer page,
+                            @ApiParam(value = "城市id") @RequestParam(required = false) Long cityId) {
+    if (page == null || page < 1) {
+      page = 1;
     }
-    List<Map> list = bannerService.findByOldShop(id);
+    List<Map> list = bannerService.findByOldShop(cityId, page);
     return LejiaResult.ok(list);
   }
 

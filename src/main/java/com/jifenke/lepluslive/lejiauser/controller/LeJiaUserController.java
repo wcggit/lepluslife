@@ -13,6 +13,7 @@ import com.jifenke.lepluslive.score.service.ScoreAService;
 import com.jifenke.lepluslive.score.service.ScoreBService;
 
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
+import com.jifenke.lepluslive.weixin.service.DictionaryService;
 import com.jifenke.lepluslive.weixin.service.WeiXinUserService;
 
 import io.swagger.annotations.ApiOperation;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -50,6 +52,9 @@ public class LeJiaUserController {
 
   @Inject
   private OrderService orderService;
+
+  @Inject
+  private DictionaryService dictionaryService;
 
   /**
    * APP个人中心1.1版 16/09/05
@@ -125,6 +130,30 @@ public class LeJiaUserController {
     } else {
       return LejiaResult.build(404, "服务器异常");
     }
+  }
+
+  /**
+   * 检测是否有新版本 16/09/13
+   *
+   * @param version 当前版本
+   */
+  @ApiOperation(value = "检测是否有新版本")
+  @RequestMapping(value = "/checkVersion", method = RequestMethod.GET)
+  public
+  @ResponseBody
+  LejiaResult check(@RequestParam(required = true) String version) {
+    String newVersion = dictionaryService.findDictionaryById(30L).getValue();
+    Map<String, String> map = new HashMap<>();
+    if (newVersion.equals(version)) {
+      map.put("status", "0"); //无需更新
+      return LejiaResult.ok(map);
+    } else {
+      map.put("status", "1"); //有新版本
+      map.put("content", dictionaryService.findDictionaryById(31L).getValue()); //更新内容
+      map.put("downUrl", dictionaryService.findDictionaryById(32L).getValue()); //下载地址
+      return LejiaResult.ok(map);
+    }
+
   }
 
   @RequestMapping(value = "/test", method = RequestMethod.GET)
