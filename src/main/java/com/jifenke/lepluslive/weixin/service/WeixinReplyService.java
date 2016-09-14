@@ -254,7 +254,7 @@ public class WeixinReplyService {
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   private String buildLocationReply(Map map) {
-    weiXinUserInfoService.saveWeiXinUserInfo(map);
+    // weiXinUserInfoService.saveWeiXinUserInfo(map);
     return "success";
   }
 

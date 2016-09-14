@@ -76,7 +76,11 @@ public class LeJiaUserService {
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public LeJiaUser findUserByPhoneNumber(String phoneNumber) {
-    return leJiaUserRepository.findOneByPhoneNumber(phoneNumber);
+    List<LeJiaUser> list = leJiaUserRepository.findByPhoneNumber(phoneNumber);
+    if (list != null && list.size() > 0) {
+      return list.get(0);
+    }
+    return null;
   }
 
   /**

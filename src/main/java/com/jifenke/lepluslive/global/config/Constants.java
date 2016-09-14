@@ -29,6 +29,9 @@ public final class Constants {
     public static final String APPID = "wxe2190d22ce025e4f";
 
     public static final String WEI_XIN_ROOT_URL = "http://www.lepluslife.com";
+   // public static final String APPID = "wxec4f3a2fb6ee8f06";
+
+ //   public static final String WEI_XIN_ROOT_URL = "http://www.tiegancrm.com";
 
     public static final Integer COOKIE_DISABLE_TIME = 604800;
 

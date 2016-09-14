@@ -105,14 +105,15 @@ public class WeixinOrderController {
   }
 
   @RequestMapping("/scoreDetail")
-  public ModelAndView goScoreDetailPage(HttpServletRequest request, Model model) {
-
+  public ModelAndView goScoreDetailPage(HttpServletRequest request, Model model,
+                                        @RequestParam Integer type) {
     WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
     ScoreA scoreA = scoreAService.findScoreAByLeJiaUser(weiXinUser.getLeJiaUser());
     ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(weiXinUser.getLeJiaUser());
     model.addAttribute("scoreADetails", scoreAService.findAllScoreADetail(scoreA));
     model.addAttribute("scoreBDetails", scoreBService.findAllScoreBDetail(scoreB));
     model.addAttribute("openId", weiXinUser.getOpenId());
+    model.addAttribute("type", type);
     return MvUtil.go("/weixin/scoreDetail");
 
   }

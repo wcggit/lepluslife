@@ -16,8 +16,8 @@ import javax.persistence.Table;
  * 邀请日志 Created by zhangwen on 2016/8/18.
  */
 @Entity
-@Table(name = "ACTIVITY_INVITE_LOG")
-public class ActivityInviteLog {
+@Table(name = "ACTIVITY_SHARE_LOG")
+public class ActivityShareLog {
 
   @Id
   @GeneratedValue(generator = "system-uuid")

@@ -12,7 +12,6 @@ import com.jifenke.lepluslive.score.service.ScoreAService;
 import com.jifenke.lepluslive.score.service.ScoreBService;
 import com.jifenke.lepluslive.weixin.service.WeiXinUserService;
 
-import org.codehaus.groovy.util.ListHashMap;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -65,7 +64,8 @@ public class ScoreController {
     List<ScoreADetail> aDetails = scoreAService.findAllScoreADetailByScoreA(scoreA);
 
     if ((aDetails != null) && (aDetails.size() > 0)) {
-      List<ScoreDto> result = formatADetail(aDetails);
+      Map result = formatADetail(aDetails, scoreA);
+
       return LejiaResult.build(200, "ok", result);
     } else {
       return LejiaResult.build(200, "ok", null);
@@ -87,7 +87,7 @@ public class ScoreController {
     List<ScoreBDetail> bDetails = scoreBService.findAllScoreBDetailByScoreB(scoreB);
 
     if ((bDetails != null) && (bDetails.size() > 0)) {
-      List<ScoreDto> result = formatBDetail(bDetails);
+      Map result = formatBDetail(bDetails, scoreB);
       return LejiaResult.build(200, "ok", result);
     } else {
       return LejiaResult.build(200, "ok", null);
@@ -110,7 +110,7 @@ public class ScoreController {
         List<ScoreADetail> aDetails = scoreAService.findAllScoreADetailByScoreA(scoreA);
 
         if ((aDetails != null) && (aDetails.size() > 0)) {
-          List<ScoreDto> result = formatADetail(aDetails);
+          Map result = formatADetail(aDetails, scoreA);
           return LejiaResult.build(200, "ok", result);
         } else {
           return LejiaResult.build(200, "ok", null);
@@ -124,7 +124,7 @@ public class ScoreController {
         List<ScoreBDetail> bDetails = scoreBService.findAllScoreBDetailByScoreB(scoreB);
 
         if ((bDetails != null) && (bDetails.size() > 0)) {
-          List<ScoreDto> result = formatBDetail(bDetails);
+          Map result = formatBDetail(bDetails, scoreB);
           return LejiaResult.build(200, "ok", result);
         } else {
           return LejiaResult.build(200, "ok", null);
@@ -134,8 +134,13 @@ public class ScoreController {
     return LejiaResult.build(201, "未找到用户");
   }
 
-  private List<ScoreDto> formatADetail(List<ScoreADetail> aDetails) {
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+  private Map formatADetail(List<ScoreADetail> aDetails, ScoreA scoreA) {
+    Map<String, Object> resultMap = new HashMap<>();
+    Map<String, Object> map1 = new HashMap<>();
+    map1.put("totalScore", scoreA.getTotalScore());
+    map1.put("currScore", scoreA.getScore());
+    resultMap.put("scoreA", map1);
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
     LinkedHashMap<String, ArrayList<Object>> map = new LinkedHashMap<>();
     List<ScoreDto> result = new ArrayList<>();
     for (int i = 0; i < aDetails.size(); i++) {
@@ -157,11 +162,17 @@ public class ScoreController {
       scoreDto.setList((ArrayList<Object>) entry.getValue());
       result.add(scoreDto);
     }
-    return result;
+    resultMap.put("list", result);
+    return resultMap;
   }
 
-  private List<ScoreDto> formatBDetail(List<ScoreBDetail> bDetails) {
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+  private Map formatBDetail(List<ScoreBDetail> bDetails, ScoreB scoreB) {
+    Map<String, Object> resultMap = new HashMap<>();
+    Map<String, Object> map1 = new HashMap<>();
+    map1.put("totalScore", scoreB.getTotalScore());
+    map1.put("currScore", scoreB.getScore());
+    resultMap.put("scoreA", map1);
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
     LinkedHashMap<String, ArrayList<Object>> map = new LinkedHashMap<>();
     List<ScoreDto> result = new ArrayList<>();
     for (int i = 0; i < bDetails.size(); i++) {
@@ -183,7 +194,8 @@ public class ScoreController {
       scoreDto.setList((ArrayList<Object>) entry.getValue());
       result.add(scoreDto);
     }
-    return result;
+    resultMap.put("list", result);
+    return resultMap;
   }
 
 }

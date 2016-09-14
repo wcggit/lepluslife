@@ -21,16 +21,16 @@ public class WeiXinUserInfo {
   @GeneratedValue(strategy = GenerationType.AUTO)
   private Long id;
 
-  private Double latitude;   //纬度
-
-  private Double longitude;   //经度
-
-  private Date createDate = new Date();     //创建时间
-
-  private String openId;      //等同于WeiXinUser的openId  便于查询
+  private Date createDate;     //创建时间
 
   @OneToOne(fetch = FetchType.LAZY)
   private WeiXinUser weiXinUser;
+
+  private String version;    //引导页版本
+
+  private Date lastOpenDate;     //最近一次打开时间|判断是否出现手机号弹窗|>7天出现
+
+  private Integer yinDao = 1;    //该版本是否引导过  1=引导过|0=未引导过
 
   public Long getId() {
     return id;
@@ -40,20 +40,28 @@ public class WeiXinUserInfo {
     this.id = id;
   }
 
-  public Double getLatitude() {
-    return latitude;
+  public String getVersion() {
+    return version;
   }
 
-  public void setLatitude(Double latitude) {
-    this.latitude = latitude;
+  public void setVersion(String version) {
+    this.version = version;
   }
 
-  public Double getLongitude() {
-    return longitude;
+  public Date getLastOpenDate() {
+    return lastOpenDate;
   }
 
-  public void setLongitude(Double longitude) {
-    this.longitude = longitude;
+  public void setLastOpenDate(Date lastOpenDate) {
+    this.lastOpenDate = lastOpenDate;
+  }
+
+  public Integer getYinDao() {
+    return yinDao;
+  }
+
+  public void setYinDao(Integer yinDao) {
+    this.yinDao = yinDao;
   }
 
   public Date getCreateDate() {
@@ -62,14 +70,6 @@ public class WeiXinUserInfo {
 
   public void setCreateDate(Date createDate) {
     this.createDate = createDate;
-  }
-
-  public String getOpenId() {
-    return openId;
-  }
-
-  public void setOpenId(String openId) {
-    this.openId = openId;
   }
 
   public WeiXinUser getWeiXinUser() {

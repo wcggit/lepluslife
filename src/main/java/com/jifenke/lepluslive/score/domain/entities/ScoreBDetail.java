@@ -33,7 +33,7 @@ public class ScoreBDetail {
   private ScoreB scoreB;
 
 
-  private Integer origin;  //1=线上返还  2=线上消费  3=线下消费  4=线下返还  6=运动   7=摇一摇
+  private Integer origin;  //1=线上返还  2=线上消费  3=线下消费  4=线下返还  6=运动   7=摇一摇  8=APP分享
 
   private String orderSid;  //对应的订单号
 
