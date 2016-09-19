@@ -181,7 +181,7 @@ public class WeixinReplyService {
             } else {
               str = reply.buildReplyXmlString(null);
             }
-          } else if (parameter.startsWith("M")) {
+          } else if (parameter.startsWith("M")) { //商户二维码
             subType = 3;
             Object merchantId = merchantService.findMerchantIdByParameter(parameter);
             if (merchantId != null) { //绑定注册来源

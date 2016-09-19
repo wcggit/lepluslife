@@ -55,6 +55,10 @@ public class ProductSpec {
   @NotNull
   private Long minPrice;
 
+  private Integer minScore = 0;  //兑换最低所需积分
+
+  private Integer saleNumber = 0; //销售量
+
   @JsonIgnore
   private Integer state;
 
@@ -120,6 +124,22 @@ public class ProductSpec {
 
   public void setMinPrice(Long minPrice) {
     this.minPrice = minPrice;
+  }
+
+  public Integer getMinScore() {
+    return minScore;
+  }
+
+  public void setMinScore(Integer minScore) {
+    this.minScore = minScore;
+  }
+
+  public Integer getSaleNumber() {
+    return saleNumber;
+  }
+
+  public void setSaleNumber(Integer saleNumber) {
+    this.saleNumber = saleNumber;
   }
 
   @Override

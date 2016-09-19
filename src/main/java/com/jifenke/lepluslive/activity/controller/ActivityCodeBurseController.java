@@ -10,6 +10,8 @@ import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.lejiauser.service.LeJiaUserService;
+import com.jifenke.lepluslive.merchant.domain.entities.Merchant;
+import com.jifenke.lepluslive.merchant.service.MerchantService;
 import com.jifenke.lepluslive.score.service.ScoreAService;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.service.DictionaryService;
@@ -59,6 +61,9 @@ public class ActivityCodeBurseController {
 
   @Inject
   private LeJiaUserService leJiaUserService;
+
+  @Inject
+  private MerchantService merchantService;
 
   @Inject
   private ActivityShareLogService activityShareLogService;
@@ -140,6 +145,16 @@ public class ActivityCodeBurseController {
     ActivityJoinLog joinLog = activityJoinLogService.findLogBySubActivityAndOpenId(0, weiXinUser
         .getOpenId());
     if (leJiaUser == null && joinLog == null) {
+      //判断是否需要绑定商户
+      String subSource = weiXinUser.getSubSource();
+      if (subSource.startsWith("4")) {
+        Long merchantId = Long.valueOf(subSource.split("_")[2]);
+        Merchant merchant = merchantService.findMerchantById(merchantId);
+        if (merchant != null) {
+          leJiaUserService.checkUserBindMerchant(weiXinUser.getLeJiaUser(), merchant);
+        }
+      }
+
       int defaultScoreA = (new Random().nextInt(6) + 10) * 10;
       //派发红包和积分,填充手机号码成为会员
       int status = weiXinUserService.giveScoreAByDefault(weiXinUser, defaultScoreA, phoneNumber);
