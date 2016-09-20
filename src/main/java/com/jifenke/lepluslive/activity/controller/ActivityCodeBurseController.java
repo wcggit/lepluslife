@@ -12,6 +12,7 @@ import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.lejiauser.service.LeJiaUserService;
 import com.jifenke.lepluslive.merchant.domain.entities.Merchant;
 import com.jifenke.lepluslive.merchant.service.MerchantService;
+import com.jifenke.lepluslive.partner.domain.entities.Partner;
 import com.jifenke.lepluslive.score.service.ScoreAService;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.service.DictionaryService;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.Date;
+import java.util.Map;
 import java.util.Random;
 
 import javax.inject.Inject;
@@ -135,7 +137,11 @@ public class ActivityCodeBurseController {
     return MvUtil.go("/activity/subPage");
   }
 
-  //关注图文链接页面 点击领取红包
+  /**
+   * 关注图文链接页面 输入手机号,点击领取红包 16/09/20
+   *
+   * @param phoneNumber 手机号
+   */
   @RequestMapping(value = "/subPage/open")
   public
   @ResponseBody
@@ -145,23 +151,18 @@ public class ActivityCodeBurseController {
     ActivityJoinLog joinLog = activityJoinLogService.findLogBySubActivityAndOpenId(0, weiXinUser
         .getOpenId());
     if (leJiaUser == null && joinLog == null) {
-      //判断是否需要绑定商户
-      String subSource = weiXinUser.getSubSource();
-      if (subSource.startsWith("4")) {
-        Long merchantId = Long.valueOf(subSource.split("_")[2]);
-        Merchant merchant = merchantService.findMerchantById(merchantId);
-        if (merchant != null) {
-          leJiaUserService.checkUserBindMerchant(weiXinUser.getLeJiaUser(), merchant);
-        }
-      }
+      //判断是否需要绑定商户 4_0_123
+      leJiaUserService.checkUserBindMerchant(weiXinUser);
 
-      int defaultScoreA = (new Random().nextInt(6) + 10) * 10;
       //派发红包和积分,填充手机号码成为会员
-      int status = weiXinUserService.giveScoreAByDefault(weiXinUser, defaultScoreA, phoneNumber);
-      //添加参加记录
-      if (status == 1) {
-        activityJoinLogService.addCodeBurseLogByDefault(weiXinUser, defaultScoreA);
-        return LejiaResult.build(200, "" + defaultScoreA);
+      try {
+        Map<String, Integer> map = weiXinUserService.giveScoreAByDefault(weiXinUser, phoneNumber);
+        //添加参加记录
+        activityJoinLogService.addCodeBurseLogByDefault(weiXinUser, map.get("scoreA"));
+        return LejiaResult.build(200, "" + map.get("scoreA"));
+      } catch (Exception e) {
+        e.printStackTrace();
+        return LejiaResult.build(500, "服务器异常");
       }
     }
     return LejiaResult.build(201, "手机号已被使用或已领取红包");

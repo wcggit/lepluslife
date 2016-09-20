@@ -7,11 +7,13 @@ import com.jifenke.lepluslive.lejiauser.domain.entities.RegisterOrigin;
 import com.jifenke.lepluslive.lejiauser.repository.LeJiaUserRepository;
 
 import com.jifenke.lepluslive.merchant.domain.entities.Merchant;
+import com.jifenke.lepluslive.merchant.service.MerchantService;
 import com.jifenke.lepluslive.partner.domain.entities.Partner;
 import com.jifenke.lepluslive.score.domain.entities.ScoreA;
 import com.jifenke.lepluslive.score.domain.entities.ScoreB;
 import com.jifenke.lepluslive.score.repository.ScoreARepository;
 import com.jifenke.lepluslive.score.repository.ScoreBRepository;
+import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -44,6 +46,9 @@ public class LeJiaUserService {
 
   @Inject
   private ScoreBRepository scoreBRepository;
+
+  @Inject
+  private MerchantService merchantService;
 
   /**
    * APP获取用户信息  16/09/07
@@ -158,35 +163,30 @@ public class LeJiaUserService {
   }
 
   /**
-   * 判断是否需要绑定商户和合伙人
+   * 根据关注来源  16/09/20 判断是否需要绑定商户和合伙人
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public void checkUserBindMerchant(LeJiaUser leJiaUser, Merchant merchant) {
+  public void checkUserBindMerchant(WeiXinUser weiXinUser) {
+    LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
+    String subSource = weiXinUser.getSubSource();
     //判断是否需要绑定商户
-    Date date = new Date();
-    if (leJiaUser.getBindMerchant() == null) {
-      long userLimit = leJiaUserRepository.countMerchantBindLeJiaUser(merchant.getId());
-      if (merchant.getUserLimit() > userLimit) {
-        leJiaUser.setBindMerchant(merchant);
-        Partner partner = merchant.getPartner();
-        leJiaUser.setBindMerchantDate(date);
-        long partnerUserLimit = leJiaUserRepository.countPartnerBindLeJiaUser(partner.getId());
-        partner = merchant.getPartner();
-
-        if (partner.getUserLimit() > partnerUserLimit) {
-          leJiaUser.setBindPartner(partner);
-          leJiaUser.setBindPartnerDate(date);
-        }
-      }
-    } else {
-      if (leJiaUser.getBindPartner() == null) {
-        //已绑定商户但是未绑定合伙人
-        Merchant bindMerchant = leJiaUser.getBindMerchant();
-        Partner partner = bindMerchant.getPartner();
-        long partnerUserLimit = leJiaUserRepository.countPartnerBindLeJiaUser(partner.getId());
-        if (partner.getUserLimit() > partnerUserLimit) {
-          leJiaUser.setBindPartner(partner);
-          leJiaUser.setBindPartnerDate(date);
+    if (subSource != null && subSource.startsWith("4")) {
+      if (leJiaUser.getBindMerchant() == null) {
+        Long merchantId = Long.valueOf(subSource.split("_")[2]);
+        if (merchantId != null) {
+          Merchant merchant = merchantService.findMerchantById(merchantId);
+          long userLimit = leJiaUserRepository.countMerchantBindLeJiaUser(merchantId);
+          if (merchant.getUserLimit() > userLimit) {
+            Date date = new Date();
+            leJiaUser.setBindMerchant(merchant);
+            leJiaUser.setBindMerchantDate(date);
+            Partner partner = merchant.getPartner();
+            long partnerUserLimit = leJiaUserRepository.countPartnerBindLeJiaUser(partner.getId());
+            if (partner.getUserLimit() > partnerUserLimit) {
+              leJiaUser.setBindPartner(partner);
+              leJiaUser.setBindPartnerDate(date);
+            }
+          }
         }
       }
     }

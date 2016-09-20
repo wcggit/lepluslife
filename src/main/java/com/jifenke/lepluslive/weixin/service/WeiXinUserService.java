@@ -30,7 +30,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import javax.inject.Inject;
 
@@ -54,6 +56,9 @@ public class WeiXinUserService {
   private WeiXinUserRepository weiXinUserRepository;
 
   @Inject
+  private DictionaryService dictionaryService;
+
+  @Inject
   private ScoreARepository scoreARepository;
 
   @Inject
@@ -66,13 +71,8 @@ public class WeiXinUserService {
   private LeJiaUserRepository leJiaUserRepository;
 
   @Inject
-  private MerchantService merchantService;
-
-  @Inject
   private ScoreBDetailRepository scoreBDetailRepository;
 
-  @Inject
-  private PartnerService partnerService;
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public WeiXinUser findWeiXinUserByOpenId(String openId) {
@@ -189,29 +189,6 @@ public class WeiXinUserService {
       scoreBRepository.save(scoreB);
     }
 
-    leJiaUser = weiXinUser.getLeJiaUser();
-
-    //判断是否需要绑定商户 4_0_123
-    if (userDetail.get("subSource").toString().startsWith("4")) {
-      if (leJiaUser.getBindMerchant() == null) {
-        Long merchantId = Long.valueOf(userDetail.get("subSource").toString().split("_")[2]);
-        if (merchantId != null) {
-          Merchant merchant = merchantService.findMerchantById(merchantId);
-          long userLimit = leJiaUserRepository.countMerchantBindLeJiaUser(merchantId);
-          if (merchant.getUserLimit() > userLimit) {
-            leJiaUser.setBindMerchant(merchant);
-            leJiaUser.setBindMerchantDate(date);
-            Partner partner = merchant.getPartner();
-            long partnerUserLimit = leJiaUserRepository.countPartnerBindLeJiaUser(partner.getId());
-            if (partner.getUserLimit() > partnerUserLimit) {
-              leJiaUser.setBindPartner(partner);
-              leJiaUser.setBindPartnerDate(date);
-            }
-          }
-        }
-      }
-    }
-
     weiXinUser.setOpenId(openid);
     weiXinUser.setUnionId(unionId);
     weiXinUser.setCity(userDetail.get("city").toString());
@@ -308,6 +285,7 @@ public class WeiXinUserService {
     scoreADetail.setNumber(1000L);
     scoreADetail.setScoreA(scoreA);
     scoreADetail.setOperate("关注送红包");
+    scoreADetail.setOrigin(0);
     scoreADetailRepository.save(scoreADetail);
 
     weiXinUser.setHongBaoState(1);
@@ -315,42 +293,71 @@ public class WeiXinUserService {
     weiXinUserRepository.save(weiXinUser);
   }
 
-  //普通关注送红包
+  /**
+   * 填充手机号送红包 16/09/20
+   */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public int giveScoreAByDefault(WeiXinUser weiXinUser, int defaultScoreA, String phoneNumber) {
+  public Map<String, Integer> giveScoreAByDefault(WeiXinUser weiXinUser, String phoneNumber)
+      throws Exception {
     LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
     ScoreA scoreA = scoreARepository.findByLeJiaUser(leJiaUser).get(0);
     ScoreB scoreB = scoreBRepository.findByLeJiaUser(leJiaUser);
+
+    String aRule = dictionaryService.findDictionaryById(34L).getValue(); //返A规则
+    String bRule = dictionaryService.findDictionaryById(35L).getValue(); //返B规则
+    int valueA = 0;
+    int valueB = 0;
+    Date date = new Date();
+    Map<String, Integer> map = new HashMap<>();
     try {
       leJiaUser.setPhoneNumber(phoneNumber);
       leJiaUserRepository.save(leJiaUser);
 
-      scoreA.setScore(scoreA.getScore() + defaultScoreA);
-      scoreA.setTotalScore(scoreA.getTotalScore() + defaultScoreA);
-      Date date = new Date();
-      scoreA.setLastUpdateDate(date);
-      scoreARepository.save(scoreA);
+      //是否返红包|返红包规则
+      String[] aRules = aRule.split("_");
+      if (!"0".equals(aRules[1])) {      //发红包
+        int maxA = Integer.valueOf(aRules[1]);
+        if ("0".equals(aRules[0])) {   //固定红包
+          valueA = maxA;
+        } else {//随机红包
+          int minA = Integer.valueOf(aRules[0]);
+          valueA = new Random().nextInt(maxA - minA) + minA;
+        }
+        scoreA.setScore(scoreA.getScore() + valueA);
+        scoreA.setTotalScore(scoreA.getTotalScore() + valueA);
+        scoreA.setLastUpdateDate(date);
+        scoreARepository.save(scoreA);
+        ScoreADetail scoreADetail = new ScoreADetail();
+        scoreADetail.setNumber(Long.valueOf(String.valueOf(valueA)));
+        scoreADetail.setScoreA(scoreA);
+        scoreADetail.setOperate("注册送礼");
+        scoreADetail.setOrigin(0);
+        scoreADetail.setOrderSid("0_" + valueA);
+        scoreADetailRepository.save(scoreADetail);
+      }
 
-      scoreB.setLastUpdateDate(date);
-      scoreB.setScore(scoreB.getScore() + 10);
-      scoreB.setTotalScore(scoreB.getTotalScore() + 10);
-      scoreBRepository.save(scoreB);
-
-      ScoreADetail scoreADetail = new ScoreADetail();
-      scoreADetail.setNumber(Long.valueOf(String.valueOf(defaultScoreA)));
-      scoreADetail.setScoreA(scoreA);
-      scoreADetail.setOperate("关注送红包");
-      scoreADetail.setOrigin(0);
-      scoreADetail.setOrderSid("0_" + defaultScoreA);
-      scoreADetailRepository.save(scoreADetail);
-
-      ScoreBDetail scoreBDetail = new ScoreBDetail();
-      scoreBDetail.setNumber(10L);
-      scoreBDetail.setScoreB(scoreB);
-      scoreBDetail.setOperate("关注送积分");
-      scoreBDetail.setOrigin(0);
-      scoreBDetail.setOrderSid("0_10");
-      scoreBDetailRepository.save(scoreBDetail);
+      //是否返积分|返积分规则
+      String[] bRules = bRule.split("_");
+      if (!"0".equals(bRules[1])) {      //发积分
+        int maxB = Integer.valueOf(bRules[1]);
+        if ("0".equals(bRules[0])) {   //固定积分
+          valueB = maxB;
+        } else {//随机积分
+          int minB = Integer.valueOf(bRules[0]);
+          valueB = new Random().nextInt(maxB - minB) + minB;
+        }
+        scoreB.setLastUpdateDate(date);
+        scoreB.setScore(scoreB.getScore() + valueB);
+        scoreB.setTotalScore(scoreB.getTotalScore() + valueB);
+        scoreBRepository.save(scoreB);
+        ScoreBDetail scoreBDetail = new ScoreBDetail();
+        scoreBDetail.setNumber((long) valueB);
+        scoreBDetail.setScoreB(scoreB);
+        scoreBDetail.setOperate("注册送礼");
+        scoreBDetail.setOrigin(0);
+        scoreBDetail.setOrderSid("0_" + valueB);
+        scoreBDetailRepository.save(scoreBDetail);
+      }
 
       weiXinUser.setHongBaoState(1);
       weiXinUser.setState(1);
@@ -358,8 +365,9 @@ public class WeiXinUserService {
       weiXinUserRepository.save(weiXinUser);
     } catch (Exception e) {
       e.printStackTrace();
-      return 0;
     }
-    return 1;
+    map.put("scoreA", valueA);
+    map.put("scoreB", valueB);
+    return map;
   }
 }

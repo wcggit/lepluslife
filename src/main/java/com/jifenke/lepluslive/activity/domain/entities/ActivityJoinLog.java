@@ -37,7 +37,7 @@ public class ActivityJoinLog {
 
   private String openIdHelp;   //助力人或扫码人的openId
 
-  private Integer type;  // //活动类型 1=永久二维码送红包活动  2=临时二维码关注裂变红包活动  3=APP邀请好友
+  private Integer type;  // //活动类型 0=关注填充手机号 | 1=永久二维码送红包活动  2=临时二维码关注裂变红包活动  3=APP邀请好友
 
   private Long activityId;   //活动id
 
