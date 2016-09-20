@@ -19,6 +19,6 @@ public interface MerchantInfoRepository extends JpaRepository<MerchantInfo, Long
    * @return 商家id
    */
   @Query(value = "SELECT m.id FROM merchant m,merchant_info i WHERE m.merchant_info_id=i.id AND i.parameter=?1", nativeQuery = true)
-  List<Object[]> findByParameter(String parameter);
+  List<Object> findByParameter(String parameter);
 
 }
