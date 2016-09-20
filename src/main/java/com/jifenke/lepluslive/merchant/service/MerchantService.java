@@ -301,9 +301,9 @@ public class MerchantService {
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public Object findMerchantIdByParameter(String parameter) {
-    List<Object[]> list = merchantInfoRepository.findByParameter(parameter);
+    List<Object> list = merchantInfoRepository.findByParameter(parameter);
     if (list.size() > 0) {
-      return list.get(0)[0];
+      return list.get(0);
     }
     return null;
   }
