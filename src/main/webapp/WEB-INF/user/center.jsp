@@ -113,7 +113,7 @@
     </div>
 </section>
 <section class="own">
-    <div class="ownMain" onclick="goPage('scoreDetail?type=0')">
+    <div class="ownMain" onclick="goPage('weixin/scoreDetail?type=0')">
         <div><span>${scoreA.score/100}</span>元</div>
         <div>
             <div>
@@ -122,7 +122,7 @@
             <div>红包</div>
         </div>
     </div>
-    <div class="ownMain" onclick="goPage('scoreDetail?type=1')">
+    <div class="ownMain" onclick="goPage('weixin/scoreDetail?type=1')">
         <div><span>${scoreB.score}</span>积分</div>
         <div>
             <div>
@@ -142,7 +142,7 @@
     </div>
 </section>
 <section class="module">
-    <div onclick="goPage('shop')">
+    <div onclick="goPage('merchant/index')">
         <div>
             <img src="${resourceUrl}/frontRes/user/center/img/zhoubian.png" alt="">
         </div>
@@ -154,7 +154,7 @@
         </div>
         <p>积分专享</p>
     </div>
-    <div onclick="goPage('merchant/index')">
+    <div onclick="goPage('weixin/shop')">
         <div>
             <img src="${resourceUrl}/frontRes/user/center/img/zhenpin.png" alt="">
         </div>
@@ -313,7 +313,7 @@
         $(".hb").show();
     }
     function goPage(page) {
-        location.href = "${wxRootUrl}/weixin/" + page;
+        location.href = "${wxRootUrl}/" + page;
     }
 
     function clickPic(o) {

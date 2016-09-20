@@ -275,7 +275,7 @@ public class OrderController {
   @RequestMapping(value = "/editOrderAddr", method = RequestMethod.POST)
   public
   @ResponseBody
-  LejiaResult editAddress(@RequestParam(required = false) Long orderId,
+  LejiaResult editAddress(@RequestParam(required = true) Long orderId,
                           @RequestParam(required = false) Long addrId) {
     OnLineOrder onLineOrder = orderService.findOrderById(orderId, false);
     Address address = addressService.findOneAddress(addrId);

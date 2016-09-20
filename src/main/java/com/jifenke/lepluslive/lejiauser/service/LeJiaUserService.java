@@ -6,6 +6,8 @@ import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.lejiauser.domain.entities.RegisterOrigin;
 import com.jifenke.lepluslive.lejiauser.repository.LeJiaUserRepository;
 
+import com.jifenke.lepluslive.merchant.domain.entities.Merchant;
+import com.jifenke.lepluslive.partner.domain.entities.Partner;
 import com.jifenke.lepluslive.score.domain.entities.ScoreA;
 import com.jifenke.lepluslive.score.domain.entities.ScoreB;
 import com.jifenke.lepluslive.score.repository.ScoreARepository;
@@ -19,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.inject.Inject;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -152,6 +155,41 @@ public class LeJiaUserService {
       leJiaUserRepository.save(leJiaUser);
     }
     return leJiaUser;
+  }
+
+  /**
+   * 判断是否需要绑定商户和合伙人
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  public void checkUserBindMerchant(LeJiaUser leJiaUser, Merchant merchant) {
+    //判断是否需要绑定商户
+    Date date = new Date();
+    if (leJiaUser.getBindMerchant() == null) {
+      long userLimit = leJiaUserRepository.countMerchantBindLeJiaUser(merchant.getId());
+      if (merchant.getUserLimit() > userLimit) {
+        leJiaUser.setBindMerchant(merchant);
+        Partner partner = merchant.getPartner();
+        leJiaUser.setBindMerchantDate(date);
+        long partnerUserLimit = leJiaUserRepository.countPartnerBindLeJiaUser(partner.getId());
+        partner = merchant.getPartner();
+
+        if (partner.getUserLimit() > partnerUserLimit) {
+          leJiaUser.setBindPartner(partner);
+          leJiaUser.setBindPartnerDate(date);
+        }
+      }
+    } else {
+      if (leJiaUser.getBindPartner() == null) {
+        //已绑定商户但是未绑定合伙人
+        Merchant bindMerchant = leJiaUser.getBindMerchant();
+        Partner partner = bindMerchant.getPartner();
+        long partnerUserLimit = leJiaUserRepository.countPartnerBindLeJiaUser(partner.getId());
+        if (partner.getUserLimit() > partnerUserLimit) {
+          leJiaUser.setBindPartner(partner);
+          leJiaUser.setBindPartnerDate(date);
+        }
+      }
+    }
   }
 
 }
