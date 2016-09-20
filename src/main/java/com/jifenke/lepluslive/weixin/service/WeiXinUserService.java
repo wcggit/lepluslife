@@ -191,21 +191,22 @@ public class WeiXinUserService {
 
     leJiaUser = weiXinUser.getLeJiaUser();
 
-    //判断是否需要绑定商户
-    if (leJiaUser.getBindMerchant() == null) {
-      Long merchantId = leJiaUserRepository.checkUserBindMerchant(leJiaUser.getId());
-      if (merchantId != null) {
-        Merchant merchant = merchantService.findMerchantById(merchantId);
-        long userLimit = leJiaUserRepository.countMerchantBindLeJiaUser(merchantId);
-        System.out.println(merchant.getUserLimit() < userLimit);
-        if (merchant.getUserLimit() > userLimit) {
-          leJiaUser.setBindMerchant(merchant);
-          leJiaUser.setBindMerchantDate(date);
-          Partner partner = merchant.getPartner();
-          long partnerUserLimit = leJiaUserRepository.countPartnerBindLeJiaUser(partner.getId());
-          if (partner.getUserLimit() > partnerUserLimit) {
-            leJiaUser.setBindPartner(partner);
-            leJiaUser.setBindPartnerDate(date);
+    //判断是否需要绑定商户 4_0_123
+    if (userDetail.get("subSource").toString().startsWith("4")) {
+      if (leJiaUser.getBindMerchant() == null) {
+        Long merchantId = Long.valueOf(userDetail.get("subSource").toString().split("_")[2]);
+        if (merchantId != null) {
+          Merchant merchant = merchantService.findMerchantById(merchantId);
+          long userLimit = leJiaUserRepository.countMerchantBindLeJiaUser(merchantId);
+          if (merchant.getUserLimit() > userLimit) {
+            leJiaUser.setBindMerchant(merchant);
+            leJiaUser.setBindMerchantDate(date);
+            Partner partner = merchant.getPartner();
+            long partnerUserLimit = leJiaUserRepository.countPartnerBindLeJiaUser(partner.getId());
+            if (partner.getUserLimit() > partnerUserLimit) {
+              leJiaUser.setBindPartner(partner);
+              leJiaUser.setBindPartnerDate(date);
+            }
           }
         }
       }
