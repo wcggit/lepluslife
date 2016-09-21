@@ -29,21 +29,21 @@
         <div class="swiper-container swiper-shade">
             <div class="swiper-wrapper">
                 <div class="swiper-slide">
-                    <img src="${resourceUrl}/frontRes/user/center/img/guide1.png" alt="">
+                    <img src="${resourceUrl}/frontRes/user/center/img/guide1.jpg" alt="">
 
                     <div class="nextPage swiperNext">
                         <img src="${resourceUrl}/frontRes/user/center/img/next.png" alt="">
                     </div>
                 </div>
                 <div class="swiper-slide">
-                    <img src="${resourceUrl}/frontRes/user/center/img/guide2.png" alt="">
+                    <img src="${resourceUrl}/frontRes/user/center/img/guide2.jpg" alt="">
 
                     <div class="nextPage swiperNext position">
                         <img src="${resourceUrl}/frontRes/user/center/img/next.png" alt="">
                     </div>
                 </div>
                 <div class="swiper-slide">
-                    <img src="${resourceUrl}/frontRes/user/center/img/guide3.png" alt="">
+                    <img src="${resourceUrl}/frontRes/user/center/img/guide3.jpg" alt="">
 
                     <div class="nextPage know position">
                         <img src="${resourceUrl}/frontRes/user/center/img/know.png" alt="">
@@ -71,22 +71,23 @@
                         </div>
                     </div>
                     <div class="swiper-slide">
-                        <div class="w-text">
-                            <img src="${resourceUrl}/frontRes/user/center/img/text1.png" alt="">
+                        <div class="w-text" style="width: 100%;padding-top: 0;">
+                            <img src="${resourceUrl}/frontRes/user/center/img/text3.png" alt="">
                         </div>
                     </div>
                 </div>
                 <!-- Add Pagination -->
                 <div class="swiper-pagination shadeColor"></div>
             </div>
-            <div style="margin: -7px 0 -4px 0;"><img style="width: 100%;"
-                                                     src="${resourceUrl}/frontRes/user/center/img/hb-bg2.png"
-                                                     alt="">
+            <div><img style="width: 100%;"
+                      src="${resourceUrl}/frontRes/user/center/img/hb-bg2.png"
+                      alt="">
             </div>
             <div class="w-input">
                 <input type="number" id="phoneNumber" placeholder="请输入手机号"/>
 
-                <p id="warning" style="display: none;color: red"></p>
+                <p id="warning"
+                   style="display: none;color: red;text-align: left;padding: 0px 0 0px 7%;margin: -11px 0"></p>
                 <br/>
                 <button onclick="register()">立即领取</button>
             </div>
@@ -95,7 +96,7 @@
 </c:if>
 <section class="user">
     <div>
-        <div>
+        <div class="headImg">
             <img src="${user.headImageUrl}" alt="">
         </div>
         <div>
@@ -148,20 +149,26 @@
         </div>
         <p>周边好店</p>
     </div>
-    <div class="msg">
-        <div>
-            <img src="${resourceUrl}/frontRes/user/center/img/jifenzhuanxiang.png" alt="">
-        </div>
-        <p>积分专享</p>
-    </div>
     <div onclick="goPage('weixin/shop')">
         <div>
             <img src="${resourceUrl}/frontRes/user/center/img/zhenpin.png" alt="">
         </div>
         <p>臻品商城</p>
     </div>
+    <div class="msg">
+        <div>
+            <img src="${resourceUrl}/frontRes/user/center/img/jifenzhuanxiang.png" alt="">
+        </div>
+        <p>积分专享</p>
+    </div>
 </section>
 <section class="module">
+    <div class="msg">
+        <div>
+            <img src="${resourceUrl}/frontRes/user/center/img/lingquanzhongxin.png" alt="">
+        </div>
+        <p>领券中心</p>
+    </div>
     <div class="msg">
         <div>
             <img src="${resourceUrl}/frontRes/user/center/img/yinhangka.png" alt="">
@@ -173,12 +180,6 @@
             <img src="${resourceUrl}/frontRes/user/center/img/jiaoyijilu.png" alt="">
         </div>
         <p>交易记录</p>
-    </div>
-    <div class="msg">
-        <div>
-            <img src="${resourceUrl}/frontRes/user/center/img/lingquanzhongxin.png" alt="">
-        </div>
-        <p>领券中心</p>
     </div>
 </section>
 <section class="banner">
@@ -210,24 +211,33 @@
             autoplay: 2500,
             autoplayDisableOnInteraction: false
         });
+    }
+
+    function showPhoneModel() {
         var swiper2 = new Swiper('.swiper-hb', {
             pagination: '.swiper-pagination',
             paginationClickable: true,
             spaceBetween: 30,
             centeredSlides: true,
-            autoplay: 2500,
             autoplayDisableOnInteraction: false
         });
     }
 
 </script>
 <script>
+    var yd = '${check.yd}'; //是否引导过 1=引导过，无需出现引导页
+    var phone = '${check.phone}'; //7天内是否出现过手机号弹窗 1=出现过，无需出现
     //    $(".hb").hide();
     $(".yd .swiper-container").css("height", $(window).height() + "px");
-    $(".hb").css("height", $(window).height() + "px");
+    $(".hb").css("height", $(window).height() - 30 + "px");
+    $(".headImg").css("height", $(".headImg").width() + "px");
     $(".swiper-hb").css("height", $(window).width() * 0.8 * 516 / 666 + 18 + "px");
     $(".know").click(function () {
         $(".yd").hide();
+        if (phone == 0) {
+            $(".hb").show();  //手机号弹窗
+            showPhoneModel();
+        }
     });
     $(".hb img").click(function () {
         $(".hb").hide();
@@ -259,16 +269,15 @@
                });
     }
     window.onload = getBanners();
-    var yd = '${check.yd}'; //是否引导过 1=引导过，无需出现引导页
-    var phone = '${check.phone}'; //7天内是否出现过手机号弹窗 1=出现过，无需出现
     //    var phone = 0;
     //    var yd = 0;
-    if (phone == 0) {
-        $(".hb").show();  //手机号弹窗
-    } else if (yd == 0) {
+    if (yd == 0) {
         $(".yd").show();
         ydLive();
         yd = 1;
+    } else if (phone == 0) {
+        $(".hb").show();  //手机号弹窗
+        showPhoneModel();
     }
 
     function showYd() {
@@ -287,7 +296,7 @@
         }
         $.ajax({
                    type: "get",
-                   url: "/weixin/hongbao/open?phoneNumber=" + phoneNumber,
+                   url: "/weixin//subPage/open?phoneNumber=" + phoneNumber,
                    success: function (data) {
                        if (data.status == 200) {
                            $(".hb").hide();
@@ -298,7 +307,8 @@
                                yd = 1;
                            }
                        } else {
-                           $("#warning").html("手机号被占用");
+                           $("#warning").show();
+                           $("#warning").html("手机号已被占用");
                        }
                    }
                });
@@ -311,6 +321,7 @@
     }
     function showPhone() {
         $(".hb").show();
+        showPhoneModel();
     }
     function goPage(page) {
         location.href = "${wxRootUrl}/" + page;
