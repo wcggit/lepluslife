@@ -1,5 +1,7 @@
 package com.jifenke.lepluslive.weixin.controller;
 
+import com.jifenke.lepluslive.global.util.CookieUtils;
+import com.jifenke.lepluslive.global.util.JsonUtils;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.order.domain.entities.OnLineOrder;
@@ -101,7 +103,6 @@ public class WeixinOrderController {
   @RequestMapping("/orderDetail")
   public ModelAndView goOrderDetailPage() {
     return MvUtil.go("/weixin/orderDetail");
-
   }
 
   @RequestMapping("/scoreDetail")
@@ -139,7 +140,7 @@ public class WeixinOrderController {
   }
 
   /**
-   * 立刻支付按钮跳转到支付页面
+   * 立刻支付按钮跳转到支付页面  16/09/23
    */
   @RequestMapping(value = "/order/{orderId}", method = RequestMethod.GET)
   public ModelAndView orderPay(@PathVariable Long orderId, HttpServletRequest request,
@@ -176,15 +177,16 @@ public class WeixinOrderController {
   @RequestMapping(value = "/order/{orderId}", method = RequestMethod.POST)
   public ModelAndView editAddress(Address address, @PathVariable Long orderId, Model model,
                                   HttpServletRequest request) {
-    OnLineOrder onLineOrder = orderService.findOrderById(orderId, false);
+//    OnLineOrder onLineOrder = orderService.findOrderById(orderId, false);
+    OnLineOrder onLineOrder = orderService.findOnLineOrderById(orderId);
     WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
-    address = addressService.editAddress(address, weiXinUser, onLineOrder);
+    addressService.editAddress(address, weiXinUser, onLineOrder);
     model.addAttribute("order", onLineOrder);
-    model.addAttribute("address", address);
     model.addAttribute("wxConfig", getWeiXinPayConfig(request));
-    model.addAttribute("scoreB",
-                       scoreBService.findScoreBByWeiXinUser(weiXinUser.getLeJiaUser()).getScore());
-    return MvUtil.go("/weixin/confirmOrder");
+    model.addAttribute("canUseScore",
+                       scoreBService.findScoreBByWeiXinUser(weiXinUser.getLeJiaUser())
+                           .getScore()); //用户可用积分
+    return MvUtil.go("/order/confirmOrder");
   }
 
   /**

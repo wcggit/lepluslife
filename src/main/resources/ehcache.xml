@@ -26,6 +26,18 @@
     </cache>
 
     <cache name="com.jifenke.lepluslive.product.domain.entities.Product"
+           timeToLiveSeconds="600">
+    </cache>
+
+    <cache name="com.jifenke.lepluslive.product.domain.entities.ProductType"
+           timeToLiveSeconds="3600">
+    </cache>
+
+    <cache name="com.jifenke.lepluslive.product.domain.entities.ScrollPicture"
+           timeToLiveSeconds="3600">
+    </cache>
+
+    <cache name="com.jifenke.lepluslive.product.domain.entities.ProductDetail"
            timeToLiveSeconds="3600">
     </cache>
 

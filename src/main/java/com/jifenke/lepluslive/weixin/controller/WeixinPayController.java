@@ -4,9 +4,13 @@ import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.global.util.WeixinPayUtil;
 import com.jifenke.lepluslive.order.domain.entities.OnLineOrder;
+import com.jifenke.lepluslive.order.service.OnlineOrderService;
 import com.jifenke.lepluslive.order.service.OrderService;
+import com.jifenke.lepluslive.product.domain.entities.ProductType;
 import com.jifenke.lepluslive.product.service.ProductService;
+import com.jifenke.lepluslive.score.domain.entities.ScoreB;
 import com.jifenke.lepluslive.score.service.ScoreAService;
+import com.jifenke.lepluslive.score.service.ScoreBService;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.service.DictionaryService;
 import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
@@ -29,6 +33,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 
@@ -61,24 +66,38 @@ public class WeixinPayController {
   private ScoreAService scoreAService;
 
   @Inject
+  private ScoreBService scoreBService;
+
+  @Inject
   private DictionaryService dictionaryService;
 
   @Inject
   private WeixinPayLogService weixinPayLogService;
+
+  @Inject
+  private OnlineOrderService onlineOrderService;
 
   //微信支付接口
   @RequestMapping(value = "/weixinpay")
   public
   @ResponseBody
   Map<Object, Object> weixinPay(@RequestParam Long orderId, @RequestParam String truePrice,
-                                @RequestParam Long trueScore, HttpServletRequest request) {
+                                @RequestParam Long trueScore,
+                                @RequestParam Integer transmitWay,
+                                HttpServletRequest request) {
     Long newTruePrice = (long) (Float.parseFloat(truePrice) * 100);
-    OnLineOrder onLineOrder = orderService.setPriceScoreForOrder(orderId, newTruePrice, trueScore);
-    if (onLineOrder == null) {
-      HashMap<Object, Object> map = new HashMap<>();
-      map.put("err_msg", "库存不足~");
-      return map;
+    if (newTruePrice == 0) {//全积分兑换流程
+      try {
+        return onlineOrderService.orderPayByScoreB(orderId, trueScore, transmitWay, 10L);
+      } catch (Exception e) {
+        Map<Object, Object> map = new HashMap<>();
+        map.put("status", 500);
+        return map;
+      }
     }
+    OnLineOrder
+        onLineOrder =
+        orderService.setPriceScoreForOrder(orderId, newTruePrice, trueScore, transmitWay);
 
     //封装订单参数
     SortedMap<Object, Object> map = weiXinPayService.buildOrderParams(request, onLineOrder);
@@ -153,20 +172,35 @@ public class WeixinPayController {
     Integer PAY_BACK_SCALE = Integer.parseInt(dictionaryService.findDictionaryById(3L).getValue());
     model.addAttribute("payBackScore",
                        (long) Math.ceil((double) (truePrice * PAY_BACK_SCALE) / 100));
-    model.addAttribute("productTypes", productService.findAllProductType());
     model.addAttribute("truePrice", truePrice);
-    return MvUtil.go("/weixin/product");
+
+    ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(weiXinUser.getLeJiaUser());
+    //商品分类
+    List<ProductType> typeList = productService.findAllProductType();
+    //主打爆品
+    Map product = productService.findMainHotProduct();
+    model.addAttribute("scoreB", scoreB);
+    model.addAttribute("product", product);
+    model.addAttribute("typeList", typeList);
+    return MvUtil.go("/product/productIndex");
   }
 
 
   @RequestMapping(value = "/payFail/{orderId}")
-  public ModelAndView goPayFailPage(@PathVariable Long orderId, Model model) {
-    model.addAttribute("productTypes", productService.findAllProductType());
+  public ModelAndView goPayFailPage(@PathVariable Long orderId, Model model,
+                                    HttpServletRequest request) {
+    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
+    ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(weiXinUser.getLeJiaUser());
+    //商品分类
+    List<ProductType> typeList = productService.findAllProductType();
+    //主打爆品
+    Map product = productService.findMainHotProduct();
+    model.addAttribute("scoreB", scoreB);
+    model.addAttribute("product", product);
+    model.addAttribute("typeList", typeList);
     model.addAttribute("orderId", orderId);
-    return MvUtil.go("/weixin/product");
+    return MvUtil.go("/product/productIndex");
   }
-
-
 
 
 }

@@ -39,7 +39,7 @@ public class WeixinReplyService {
   private WeiXinUserService weiXinUserService;
 
   @Inject
-  private WeiXinUserInfoService weiXinUserInfoService;
+  private WeiXinQrCodeService weiXinQrCodeService;
 
   @Inject
   private WeixinMessageService weixinMessageService;
@@ -60,7 +60,7 @@ public class WeixinReplyService {
     switch ((String) map.get("Event")) {
       case "subscribe":
 //                关注公众号的事件，包括手动关注和二维码关注两种
-        str = buildFocusMessageReply(map);
+        str = buildFocusMessageReply(map, 1);
         break;
       case "unsubscribe"://取消关注公众号的事件
         unSubscribeWeiXinUser(map);
@@ -70,7 +70,7 @@ public class WeixinReplyService {
         break;
       case "SCAN":  //用户已关注后扫描带参数二维码
 //                关注公众号的事件，包括手动关注和二维码关注两种
-        str = buildFocusMessageReply(map); //关注公众号后查询数据库有没有该用户信息，没有的话主动获取
+        str = buildFocusMessageReply(map, 2); //关注公众号后查询数据库有没有该用户信息，没有的话主动获取
         break;
       case "LOCATION":
         //上报地理位置
@@ -123,7 +123,7 @@ public class WeixinReplyService {
    * 关注公众号时发送的信息
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  private String buildFocusMessageReply(Map map) {
+  private String buildFocusMessageReply(Map map, Integer eventType) {
     WeiXinUser
         user =
         weiXinUserService.findWeiXinUserByOpenId(map.get("FromUserName").toString());
@@ -143,8 +143,31 @@ public class WeixinReplyService {
         //判断是不是永久二维码
         if (map.get("Ticket") != null && (!"".equals(map.get("Ticket").toString()))) {//是永久二维码
           //判断是活动二维码还是商家二维码
-          String parameter = map.get("EventKey").toString().split("_")[1];
-          if (parameter.startsWith("Y")) { //活动二维码
+          String parameter;
+          if (eventType == 1) {
+            parameter = map.get("EventKey").toString().split("_")[1];
+          } else {
+            parameter = map.get("EventKey").toString();
+          }
+          if (parameter.startsWith("M")) { //商户二维码
+            subType = 3;
+            Object[]
+                o =
+                merchantService
+                    .findMerchantIdByParameter(parameter);//o[0]=merchantId|o[1]=partnership
+            if (o != null) { //绑定注册来源,判断绑定流程
+//              buildMap.put("title", "感谢您的关注，恭喜您获得乐＋红包一个");
+//              buildMap.put("description", "↑↑↑戳这里，累计5000人领取");
+//              buildMap.put("url",
+//                           "http://www.lepluslife.com/weixin/subPage");
+              HashMap<String, String>
+                  result =
+                  subscribeByMerchantQrCode(map, user, Long.valueOf(o[0].toString()),
+                                            Integer.valueOf(o[1].toString()));
+              str = reply.buildReplyXmlString(result);
+              return str;
+            }
+          } else if (parameter.startsWith("Y")) { //活动二维码
             subType = 2;
             codeBurse = activityCodeBurseService.findCodeBurseByTicket(
                 map.get("Ticket").toString());
@@ -152,7 +175,7 @@ public class WeixinReplyService {
               //活动优先级最高(已结束||暂停||派发完毕)
               if (codeBurse.getEndDate().getTime() < new Date().getTime()
                   || codeBurse.getState() == 0
-                  || codeBurse.getBudget().intValue() < codeBurse.getTotalMoney().intValue()) {
+                  || codeBurse.getBudget() < codeBurse.getTotalMoney()) {
                 buildMap.put("title", "活动已结束，期待下一次吧！");
                 buildMap.put("description", "↑↑↑红包被人抢光了");
               } else {
@@ -180,17 +203,6 @@ public class WeixinReplyService {
               str = reply.buildReplyXmlString(buildMap);
             } else {
               str = reply.buildReplyXmlString(null);
-            }
-          } else if (parameter.startsWith("M")) { //商户二维码
-            subType = 3;
-            Object merchantId = merchantService.findMerchantIdByParameter(parameter);
-            if (merchantId != null) { //绑定注册来源
-              subSource = "4_0_" + merchantId;
-              buildMap.put("title", "感谢您的关注，恭喜您获得乐＋红包一个");
-              buildMap.put("description", "↑↑↑戳这里，累计5000人领取");
-              buildMap.put("url",
-                           "http://www.lepluslife.com/weixin/subPage");
-              str = reply.buildReplyXmlString(buildMap);
             }
           }
         } else {
@@ -264,43 +276,74 @@ public class WeixinReplyService {
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   private void subscribeWeiXinUser(Map map, WeiXinUser weiXinUser,
                                    ActivityCodeBurse codeBurse, int subType, String subSource) {
-    if (weiXinUser == null || weiXinUser.getSubState() != 1) {
+    String openId = map.get("FromUserName").toString();
+    Map<String, Object> userDetail = weiXinService.getWeiXinUserInfo(openId);
+    //拼接关注来源并添加该活动的关注人数
+    if (subType == 1 || subType == 3) {
+      userDetail.put("subSource", subSource);
+    } else if (subType == 2) {
+      if (codeBurse != null) {
+        if (codeBurse.getType() == 1) {
+          userDetail.put("subSource", codeBurse.getType() + "_" + codeBurse.getId() + "_0");
+        } else if (codeBurse.getType() == 2) { //裂变临时二维码 为weiXinUserId
+          String key = map.get("EventKey").toString();
+          String[] keys = key.split("_");
+          if (keys.length > 1) {
+            userDetail
+                .put("subSource", codeBurse.getType() + "_" + codeBurse.getId() + "_" + keys[1]);
+          } else {
+            userDetail
+                .put("subSource", codeBurse.getType() + "_" + codeBurse.getId() + "_" + key);
+          }
+
+        } else {
+          userDetail.put("subSource", codeBurse.getType() + "_" + codeBurse.getId() + "_1");
+        }
+        //添加该活动的关注人数
+        codeBurse.setScanInviteNumber(codeBurse.getScanInviteNumber() + 1);
+        activityCodeBurseService.saveActivityCodeBurse(codeBurse);
+      }
+    }
+    if (null == userDetail.get("errcode")) {
+      try {
+        weiXinUserService.saveWeiXinUserBySubscribe(userDetail, weiXinUser);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+
+  }
+
+  /**
+   * 商户二维码关注处理流程 16/09/27
+   *
+   * @param map         关注时微信发送的数据
+   * @param weiXinUser  从数据库查找的用户信息(没有时为null)
+   * @param merchantId  永久二维码对应的商户id
+   * @param partnership 永久二维码对应的商户类型
+   * @return 图文消息的内容
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  private HashMap<String, String> subscribeByMerchantQrCode(Map map, WeiXinUser weiXinUser,
+                                                            Long merchantId, Integer partnership) {
+
+    if (weiXinUser == null) { //数据库中没有该用户
       String openId = map.get("FromUserName").toString();
       Map<String, Object> userDetail = weiXinService.getWeiXinUserInfo(openId);
-      //拼接关注来源并添加该活动的关注人数
-      if (subType == 1 || subType == 3) {
-        userDetail.put("subSource", subSource);
-      } else if (subType == 2) {
-        if (codeBurse != null) {
-          if (codeBurse.getType() == 1) {
-            userDetail.put("subSource", codeBurse.getType() + "_" + codeBurse.getId() + "_0");
-          } else if (codeBurse.getType() == 2) { //裂变临时二维码 为weiXinUserId
-            String key = map.get("EventKey").toString();
-            String[] keys = key.split("_");
-            if (keys.length > 1) {
-              userDetail
-                  .put("subSource", codeBurse.getType() + "_" + codeBurse.getId() + "_" + keys[1]);
-            } else {
-              userDetail
-                  .put("subSource", codeBurse.getType() + "_" + codeBurse.getId() + "_" + key);
-            }
-
-          } else {
-            userDetail.put("subSource", codeBurse.getType() + "_" + codeBurse.getId() + "_1");
-          }
-          //添加该活动的关注人数
-          codeBurse.setScanInviteNumber(codeBurse.getScanInviteNumber() + 1);
-          activityCodeBurseService.saveActivityCodeBurse(codeBurse);
-        }
-      }
+      //拼接关注来源,将用户信息及关注来源保存到数据库
       if (null == userDetail.get("errcode")) {
         try {
-          weiXinUserService.saveWeiXinUserBySubscribe(userDetail, weiXinUser);
+          userDetail.put("subSource", "4_0_" + merchantId);
+          weiXinUser = weiXinUserService.saveWeiXinUserBySubscribe(userDetail, null);
         } catch (Exception e) {
           e.printStackTrace();
         }
       }
     }
+    //获取到weiXinUser,进行绑定及回复内容的操作
+
+
+    return null;
   }
 
   /**

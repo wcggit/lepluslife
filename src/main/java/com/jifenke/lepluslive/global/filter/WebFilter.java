@@ -13,6 +13,7 @@ import javax.inject.Inject;
  */
 @Configuration
 public class WebFilter extends WebMvcConfigurerAdapter {
+
   @Inject
   private WeiXinUserService weiXinUserService;
 
@@ -20,7 +21,7 @@ public class WebFilter extends WebMvcConfigurerAdapter {
   public void addInterceptors(InterceptorRegistry registry) {
     WeiXinFilter weiXinFilter = new WeiXinFilter();
     weiXinFilter.setWeiXinUserService(weiXinUserService);
-    registry.addInterceptor(weiXinFilter).addPathPatterns("/weixin/**");
+    registry.addInterceptor(weiXinFilter).addPathPatterns("/weixin/**").addPathPatterns("/*/*/weixin/**");
     super.addInterceptors(registry);
   }
 }

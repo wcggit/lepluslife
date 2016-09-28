@@ -28,6 +28,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -220,27 +221,26 @@ public class WeiXinCartController {
 
     Long count = orderService.getCurrentUserObligationOrdersCount(weiXinUser.getLeJiaUser());
     if (count >= 4) {
-      return LejiaResult.build(500, "未支付订单过多,请支付后再下单");
+      return LejiaResult.build(5001, "未支付订单过多,请支付后再下单");
     }
     Address address = addressService.findAddressByLeJiaUserAndState(weiXinUser.getLeJiaUser());
     String cart = CookieUtils.getCookieValue(request, openId + "-cart");
     List<CartDetailDto> cartDetailDtoOrigin = null;
-    OnLineOrder onLineOrder = null;
     if (cart != null) {
       cartDetailDtoOrigin = JsonUtils.jsonToList(cart, CartDetailDto.class);
       cartDetailDtoOrigin.removeAll(cartDetailDtos);
-      //免运费最低价格
-      Integer
-          FREIGHT_FREE_PRICE =
-          Integer.parseInt(dictionaryService.findDictionaryById(1L).getValue());
-      onLineOrder =
+      Map<String, Object>
+          result =
           orderService.createCartOrder(cartDetailDtos, weiXinUser.getLeJiaUser(), address,
-                                       FREIGHT_FREE_PRICE);
+                                       5L);
+      if ("200".equals(result.get("status").toString())) {
+        CookieUtils
+            .setCookie(request, response, openId + "-cart",
+                       JsonUtils.objectToJson(cartDetailDtoOrigin),
+                       Constants.COOKIE_DISABLE_TIME);
+      }
+      return LejiaResult.build((Integer) result.get("status"), "ok", result.get("data"));
     }
-
-    CookieUtils
-        .setCookie(request, response, openId + "-cart", JsonUtils.objectToJson(cartDetailDtoOrigin),
-                   Constants.COOKIE_DISABLE_TIME);
-    return LejiaResult.build(200, onLineOrder.getId() + "");
+    return LejiaResult.build(500, "购物车无数据");
   }
 }

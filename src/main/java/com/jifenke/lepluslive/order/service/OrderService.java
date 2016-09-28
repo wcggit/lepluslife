@@ -18,6 +18,7 @@ import com.jifenke.lepluslive.Address.service.AddressService;
 import com.jifenke.lepluslive.score.service.ScoreAService;
 import com.jifenke.lepluslive.score.service.ScoreBService;
 import com.jifenke.lepluslive.weixin.repository.DictionaryRepository;
+import com.jifenke.lepluslive.weixin.service.DictionaryService;
 import com.jifenke.lepluslive.weixin.service.JobThread;
 import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
 import com.jifenke.lepluslive.weixin.service.WeixinPayLogService;
@@ -78,6 +79,9 @@ public class OrderService {
   @Inject
   private WeixinPayLogService weixinPayLogService;
 
+  @Inject
+  private DictionaryService dictionaryService;
+
   private static String jobGroupName = "ORDER_JOBGROUP_NAME";
   private static String triggerGroupName = "ORDER_TRIGGERGROUP_NAME";
 
@@ -101,6 +105,7 @@ public class OrderService {
     return map;
   }
 
+  //APP立即购买操作  即将改版
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public OnLineOrder createOrder(OrderDto orderDto, LeJiaUser leJiaUser, Address address,
                                  Long payWayId, Integer FREIGHT_FREE_PRICE) {
@@ -152,29 +157,169 @@ public class OrderService {
     return onLineOrder;
   }
 
-//  public void createOrderScheduler(Long orderId) {
-//    //====创建订单后,生成quartz任务
-//
-//    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//    try {
-//      Date time = sdf.parse(sdf.format(new Date().getTime() + Constants.ORDER_EXPIRED));
-//      JobDetail completedOrderJobDetail = JobBuilder.newJob(OrderJob.class)
-//          .withIdentity("OrderJob" + orderId, jobGroupName)
-//          .usingJobData("orderId", orderId)
-//          .build();
-//      Trigger completedOrderJobTrigger = TriggerBuilder.newTrigger()
-//          .withIdentity(
-//              TriggerKey.triggerKey("autoCompletedOrderJobTrigger"
-//                                    + orderId, triggerGroupName))
-//          .startAt(time)
-//          .build();
-//      scheduler.scheduleJob(completedOrderJobDetail, completedOrderJobTrigger);
-//      scheduler.start();
-//
-//    } catch (Exception e) {
-//      e.printStackTrace();
-//    }
-//  }
+  /**
+   * 普通商品立即购买创建的待支付订单 16/09/24
+   *
+   * @param productId 商品Id
+   * @param specId    商品规格Id
+   * @param buyNumber 该规格购买数量
+   * @param leJiaUser 购买用户
+   * @param address   用户地址
+   * @param payWayId  购买来源Id
+   * @return 返回状态码和data
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  public Map createBuyOrder(Long productId, Long specId, Integer buyNumber, LeJiaUser leJiaUser,
+                            Address address,
+                            Long payWayId) throws Exception {
+    Map<String, Object> result = new HashMap<>();
+    Product product = productService.findOneProduct(productId);
+    if (product == null) {
+      result.put("status", 500);  //异常
+      return result;
+    }
+    ProductSpec productSpec = productService.editProductSpecRepository(specId, buyNumber);
+    if (productSpec == null) {
+      result.put("status", 5003); //无库存了
+      return result;
+    }
+    OnLineOrder onLineOrder = new OnLineOrder();
+    List<OrderDetail> orderDetails = onLineOrder.getOrderDetails();
+    //订单信息
+    try {
+      Long orderPrice = productSpec.getPrice() * buyNumber;
+      Long totalPrice = productSpec.getMinPrice() * buyNumber;    //订单共需付款金额(以后不变)
+      Long truePrice = productSpec.getMinPrice() * buyNumber;  //该订单最低需使用金额>=totalPrice
+      Long freightPrice = 0L;
+      //免运费最低价格
+      Integer FREIGHT_FREE_PRICE = Integer.parseInt(dictionaryRepository.findOne(1L).getValue());
+      //判断是否包邮
+      if (orderPrice.intValue() < FREIGHT_FREE_PRICE) {
+        Long FREIGHT_PRICE = Long.parseLong(dictionaryRepository.findOne(2L).getValue());
+        freightPrice = FREIGHT_PRICE;
+        totalPrice += FREIGHT_PRICE;
+        truePrice += FREIGHT_PRICE;
+      }
+
+      Long totalScore = orderPrice - totalPrice;//订单最高可使用积分(以后不变)
+
+      onLineOrder.setLeJiaUser(leJiaUser);
+      if (address != null) {
+        onLineOrder.setAddress(address);
+      }
+      onLineOrder.setFreightPrice(freightPrice);
+      onLineOrder.setTotalPrice(totalPrice);
+      onLineOrder.setTotalScore(
+          (long) Math.floor(Double.parseDouble(totalScore.toString()) / 100));
+      onLineOrder.setTruePrice(truePrice);  //最少需要money
+
+      onLineOrder.setState(0);
+      onLineOrder.setPayState(0);
+      onLineOrder.setPayOrigin(new PayOrigin(payWayId));
+      //订单详情
+      OrderDetail orderDetail = new OrderDetail();
+      orderDetail.setState(1);
+      orderDetail.setProduct(product);
+      orderDetail.setProductNumber(buyNumber);
+      orderDetail.setProductSpec(productSpec);
+      orderDetail.setOnLineOrder(onLineOrder);
+      orderDetails.add(orderDetail);
+
+      onLineOrder.setOrderDetails(orderDetails);
+
+      orderRepository.save(onLineOrder);
+      JobThread jobThread = new JobThread(onLineOrder.getId(), scheduler);
+      jobThread.start();
+
+      result.put("status", 200);
+      result.put("data", onLineOrder);
+      return result;
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new Exception();
+    }
+  }
+
+  /**
+   * 购物车生成订单基本信息 16/09/24
+   *
+   * @param cartDetailDtos 订单详情
+   * @param leJiaUser      用户
+   * @param address        地址
+   * @param payWayId       订单来源
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  public Map<String, Object> createCartOrder(List<CartDetailDto> cartDetailDtos,
+                                             LeJiaUser leJiaUser,
+                                             Address address, Long payWayId) {
+    Map<String, Object> result = new HashMap<>();
+    OnLineOrder onLineOrder = new OnLineOrder();
+    List<OrderDetail> orderDetails = onLineOrder.getOrderDetails();
+    Long orderPrice = 0L;
+    Long freightPrice = 0L;
+    Long totalScore = 0L;//订单最高可使用积分(以后不变)
+    Long totalPrice = 0L;    //订单共需付款金额(以后不变)
+    Long truePrice = 0L;  //该订单最低需使用金额>=totalPrice
+    for (CartDetailDto cartDetailDto : cartDetailDtos) {
+      OrderDetail orderDetail = new OrderDetail();
+      Product product = productService.findOneProduct(cartDetailDto.getProduct().getId());
+      ProductSpec productSpec = productService.editProductSpecRepository(
+          cartDetailDto.getProductSpec().getId(),
+          cartDetailDto.getProductNumber());
+      if (productSpec != null) {
+        orderPrice += productSpec.getPrice() * cartDetailDto.getProductNumber();
+        totalPrice += productSpec.getMinPrice() * cartDetailDto.getProductNumber();
+        truePrice += productSpec.getMinPrice() * cartDetailDto.getProductNumber();
+        totalScore +=
+            (productSpec.getPrice() - productSpec.getMinPrice()) * cartDetailDto.getProductNumber();
+      } else {
+        result.put("status", 5005); //某件商品的某种规格无库存了
+        result.put("data", product.getName() + "_" + cartDetailDto.getProductNumber());
+        break;
+      }
+      orderDetail.setState(1);
+      orderDetail.setProduct(product);
+      orderDetail.setProductNumber(cartDetailDto.getProductNumber());
+      orderDetail.setProductSpec(productSpec);
+      orderDetail.setOnLineOrder(onLineOrder);
+      orderDetails.add(orderDetail);
+    }
+    //判断是否某件商品库存不足
+    if (result.get("status") != null) {
+      return result;
+    }
+    //免运费最低价格
+    Integer FREIGHT_FREE_PRICE = Integer.parseInt(dictionaryRepository.findOne(1L).getValue());
+    //判断是否包邮
+    if (orderPrice.intValue() < FREIGHT_FREE_PRICE) {
+      Long FREIGHT_PRICE = Long.parseLong(dictionaryRepository.findOne(2L).getValue());
+      freightPrice = FREIGHT_PRICE;
+      totalPrice += FREIGHT_PRICE;
+      truePrice += FREIGHT_PRICE;
+    }
+    onLineOrder.setLeJiaUser(leJiaUser);
+    if (address != null) {
+      onLineOrder.setAddress(address);
+    }
+    onLineOrder.setOrderDetails(orderDetails);
+    onLineOrder.setState(0);
+    onLineOrder.setPayState(0);
+    onLineOrder.setTotalPrice(totalPrice);
+    onLineOrder.setTruePrice(truePrice);
+    onLineOrder.setTotalScore((long) Math.floor(Double.parseDouble(totalScore.toString()) / 100));
+    onLineOrder.setFreightPrice(freightPrice);
+    PayOrigin payOrigin = new PayOrigin(payWayId); //设置支付来源
+    onLineOrder.setPayOrigin(payOrigin);
+    orderRepository.save(onLineOrder);
+
+    JobThread jobThread = new JobThread(onLineOrder.getId(), scheduler);
+    jobThread.start();
+
+    result.put("status", 200);
+    result.put("data", onLineOrder);
+    return result;
+  }
+
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public String orderConfirm(Long orderId, Long addressId) {
@@ -199,9 +344,15 @@ public class OrderService {
     PayOrigin payWay = new PayOrigin();
     System.out.println(onLineOrder.getState() + "之前");
     if (onLineOrder.getState() == 0) {
+      Integer PAY_BACK_SCALE = Integer.parseInt(dictionaryRepository.findOne(3L).getValue());
+      Long
+          payBackScore =
+          (long) Math.ceil((double) (onLineOrder.getTruePrice() * PAY_BACK_SCALE) / 100);
       onLineOrder.setState(1);
-      scoreAService.paySuccess(onLineOrder.getLeJiaUser()
-          , onLineOrder.getTruePrice(), onLineOrder.getOrderSid());
+      onLineOrder.setPayState(1);
+      onLineOrder.setPayDate(new Date());
+      onLineOrder.setPayBackA(payBackScore);
+      scoreAService.paySuccess(onLineOrder.getLeJiaUser(), payBackScore, onLineOrder.getOrderSid());
       if (onLineOrder.getTrueScore() != 0) {
         if (payOrigin.getId() == 1) {
           payWay.setId(4L);
@@ -218,11 +369,15 @@ public class OrderService {
         }
       }
       onLineOrder.setPayOrigin(payWay);
+      //订单相关product的销量等数据处理
+      try {
+        productService.editProductSaleByPayOrder(onLineOrder);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
       System.out.println(onLineOrder.getState() + "之后");
       orderRepository.save(onLineOrder);
     }
-
-
   }
 
   /**
@@ -231,11 +386,17 @@ public class OrderService {
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public void paySuccessQuery(OnLineOrder onLineOrder) {
     if (onLineOrder.getState() == 0 || onLineOrder.getState() == 4) {
+      Integer PAY_BACK_SCALE = Integer.parseInt(dictionaryRepository.findOne(3L).getValue());
+      Long
+          payBackScore =
+          (long) Math.ceil((double) (onLineOrder.getTruePrice() * PAY_BACK_SCALE) / 100);
       PayOrigin payOrigin = onLineOrder.getPayOrigin();
       PayOrigin payWay = new PayOrigin();
       onLineOrder.setState(1);
-      scoreAService.paySuccess(onLineOrder.getLeJiaUser()
-          , onLineOrder.getTruePrice(), onLineOrder.getOrderSid());
+      onLineOrder.setPayState(1);
+      onLineOrder.setPayDate(new Date());
+      onLineOrder.setPayBackA(payBackScore);
+      scoreAService.paySuccess(onLineOrder.getLeJiaUser(), payBackScore, onLineOrder.getOrderSid());
       if (onLineOrder.getTrueScore() != 0) {
         if (payOrigin.getId() == 1) {
           payWay.setId(4L);
@@ -252,6 +413,12 @@ public class OrderService {
         }
       }
       onLineOrder.setPayOrigin(payWay);
+      //订单相关product的销量等数据处理
+      try {
+        productService.editProductSaleByPayOrder(onLineOrder);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
       orderRepository.save(onLineOrder);
     }
   }
@@ -334,10 +501,12 @@ public class OrderService {
   }
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public OnLineOrder setPriceScoreForOrder(Long orderId, Long truePrice, Long trueScore) {
+  public OnLineOrder setPriceScoreForOrder(Long orderId, Long truePrice, Long trueScore,
+                                           Integer transmitWay) {
     OnLineOrder onLineOrder = orderRepository.findOne(orderId);
     onLineOrder.setOrderSid(MvUtil.getOrderNumber());
     onLineOrder.setTruePrice(truePrice);
+    onLineOrder.setTransmitWay(transmitWay);
     if (trueScore != null) {
       onLineOrder.setTrueScore(trueScore);
     }
@@ -356,7 +525,7 @@ public class OrderService {
   }
 
   /**
-   * 购物车生成订单基本信息
+   * 购物车生成订单基本信息 原来的，待删除
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public OnLineOrder createCartOrder(List<CartDetailDto> cartDetailDtos, LeJiaUser leJiaUser,
@@ -412,7 +581,6 @@ public class OrderService {
   }
 
   public Long getCurrentUserObligationOrdersCount(LeJiaUser leJiaUser) {
-    Long id = leJiaUser.getId();
     return orderRepository.
         getCurrentUserObligationOrdersCount(leJiaUser.getId());
   }

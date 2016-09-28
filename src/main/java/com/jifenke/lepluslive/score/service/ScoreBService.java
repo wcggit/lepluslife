@@ -46,7 +46,7 @@ public class ScoreBService {
         scoreB.setScore(scoreB.getScore() - totalScore);
         ScoreBDetail scoreBDetail = new ScoreBDetail();
         scoreBDetail.setOperate("乐+商城消费");
-        scoreBDetail.setOrigin(1);
+        scoreBDetail.setOrigin(2);
         scoreBDetail.setOrderSid(orderSid);
         scoreBDetail.setScoreB(scoreB);
         scoreBDetail.setNumber(-totalScore);

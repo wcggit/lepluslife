@@ -109,9 +109,9 @@
                     <h5><font>${order.freightPrice/100}</font>元</h5>
                 </div>
                 <%--<c:if test="${order.freightPrice == 0}">--%>
-                    <%--<div class="mui-table-cell mui-col-xs-3 mui-text-right">--%>
-                        <%--<h5>包邮</h5>--%>
-                    <%--</div>--%>
+                <%--<div class="mui-table-cell mui-col-xs-3 mui-text-right">--%>
+                <%--<h5>包邮</h5>--%>
+                <%--</div>--%>
                 <%--</c:if>--%>
             </div>
         </li>
@@ -270,7 +270,8 @@
                 $.post('${wxRootUrl}/weixin/pay/weixinpay', {
                     orderId: '${order.id}',
                     truePrice: truePrice,
-                    trueScore: trueScore
+                    trueScore: trueScore,
+                    transmitWay: 2
                 }, function (res) {
                     $(this).removeClass('btn-disabled');
 //            调用微信支付js-api接口

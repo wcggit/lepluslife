@@ -1,231 +1,267 @@
+<%--
+  Created by IntelliJ IDEA.
+  User: zhangwen
+  Date: 2016/9/22
+  Time: 17:24
+  Content:订单确认页
+--%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@include file="/WEB-INF/commen.jsp" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <!DOCTYPE html>
 <html>
-
 <head>
     <meta charset="utf-8">
-    <title></title>
+    <title>订单确认</title>
     <meta name="viewport"
           content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <!--标准mui.css-->
-    <link rel="stylesheet" href="${resourceUrl}/css/mui.min.css">
+    <c:set var="resourceUrl" value="http://www.lepluslife.com/resource"></c:set>
+    <c:set var="wxRootUrl" value="http://www.lepluslife.com"></c:set>
     <!--App自定义的css-->
-    <link rel="stylesheet" type="text/css" href="${resourceUrl}/css/confirmOrder.css"/>
-    <script src="${resourceUrl}/js/jquery-1.11.3.min.js"></script>
+    <link rel="stylesheet" href="${resourceUrl}/frontRes/css/reset.css">
+    <link rel="stylesheet" href="${resourceUrl}/frontRes/order/confirmOrder/css/pay.css">
     <script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+    <%--以下代替jquery--%>
+    <script src="${resourceUrl}/js/zepto.min.js"></script>
 </head>
 
 <body>
-<!--头部-->
-<%--<header class="mui-bar mui-bar-nav" style="background: #fff;">--%>
-<%--<a style="color: #D62D2B;" class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"--%>
-<%--onclick="history.go(-1)"></a>--%>
+<section class="address" onclick="goAddressEdit()">
+    <div>
+        <div>
+            <img src="${resourceUrl}/frontRes/order/confirmOrder/img/address.png" alt="">
+        </div>
+    </div>
+    <div>
+        <c:if test="${order.address == null}">
+            <p class="useAddress" style="padding: 13px 0 10px 0;font-size: 15px;">请添加收货地址</p>
+        </c:if>
+        <c:if test="${order.address != null}">
+            <p class="useAddress">${order.address.name}<span
+                    style="font-size: 15px">${order.address.phoneNumber}</span>
+            </p>
 
-<%--<h1 class="mui-title" style="color: #D62D2B;font-weight: bold;">订单确定</h1>--%>
-<%--</header>--%>
-<!--底部菜单-->
-<nav class="mui-bar mui-bar-tab">
-    <a class="mui-tab-item mui-active">
-        <span class="mui-tab-label">实际支付：<font
-                id="turePay">${order.totalPrice/100}</font>元</span>
-    </a>
-    <a class="mui-tab-item mui-active">
-        <span class="mui-tab-label" id="btn-wxpay">去付款</span>
-    </a>
-</nav>
-<div class="mui-content">
-    <ul class="mui-table-view mui-table-view-striped mui-table-view-condensed">
-        <li class="mui-table-view-cell">
-            <div class="mui-table">
-                <div class="mui-table-cell mui-col-xs-12">
-                    <c:if test="${address!=null}">
-                        <h5>
-                            <font class="order-name" color="#333">${address.name}</font>
-                            <font class="order-tel" color="#333">${address.phoneNumber}</font>
-                            <button class="mui-pull-right order-edit" onclick="goAddressEdit()">编辑
-                            </button>
-                        </h5>
-                        <p class="mui-h6 mui-ellipsis">${address.province}${address.city}${address.county}${address.location}</p>
-                    </c:if>
-                    <c:if test="${address==null}">
-                        <h5>
-                            <font class="order-name" color="#333">姓名</font>
-                            <font class="order-tel" color="#333">电话</font>
-                            <button class="mui-pull-right order-edit" onclick="goAddressEdit()">编辑
-                            </button>
-                        </h5>
-                        <p class="mui-h6 mui-ellipsis">地址</p>
-                    </c:if>
+            <p class="useAddress">${order.address.province}${order.address.city}${order.address.county}${order.address.location}</p>
+        </c:if>
+        <p class="notUseAddress" style="padding: 12px 0 10px 0;font-size: 15px;display: none;">
+            已选择线下自提</p>
+    </div>
 
-                </div>
+    <div>
+        <div>
+            <img src="${resourceUrl}/frontRes/order/confirmOrder/img/to.png" alt="">
+        </div>
+    </div>
+</section>
+<section class="goodsList">
+    <c:forEach items="${order.orderDetails}" var="orderDetail">
+        <div>
+            <div>
+                <img src="${orderDetail.product.type == 1 ? orderDetail.productSpec.picture : orderDetail.product.picture}"
+                     alt="">
             </div>
-        </li>
-        <li class="mui-table-view-cell">
-            <c:forEach items="${order.orderDetails}" var="orderDetail">
-                <c:if test="${orderDetail.state==1}">
-                    <div class="mui-table">
-                        <div class="mui-table-cell mui-col-xs-3">
-		                    <span class="order-img">
-		                    	<img src="${orderDetail.productSpec.picture}" alt="">
-		                    </span>
-                        </div>
-                        <div class="mui-table-cell mui-col-xs-10 mui-text-left mui-pull-right">
-                            <h4 class="mui-ellipsis">${orderDetail.product.name}</h4>
-                            <h5>规格：<font>${orderDetail.productSpec.specDetail}</font></h5>
-                            <h5>数量：<font>${orderDetail.productNumber}</font>件</h5>
-                        </div>
+            <div>
+                <div>
+                    <div>${orderDetail.product.name}</div>
+                    <div><span
+                            style="font-size: 16px;color: #666;">×</span>${orderDetail.productNumber}
                     </div>
+                </div>
+                <p>${orderDetail.productSpec.specDetail}</p>
+
+                <p>￥<fmt:formatNumber type="number"
+                                      value="${orderDetail.productSpec.minPrice/100}"
+                                      pattern="0.00"
+                                      maxFractionDigits="2"/>+<span><c:if
+                        test="${orderDetail.product.type == 1}">
+                    <fmt:formatNumber type="number"
+                                      value="${((orderDetail.productSpec.price-orderDetail.productSpec.minPrice) - (orderDetail.productSpec.price-orderDetail.productSpec.minPrice)%100)/100}"
+                                      pattern="0"
+                                      maxFractionDigits="0"/>积分
+
                 </c:if>
-            </c:forEach>
-            <c:forEach items="${order.orderDetails}" var="orderDetail">
-                <c:if test="${orderDetail.state==0}">
-                    <div class="mui-table">
-                        <div class="mui-table-cell mui-col-xs-3">
-		                    <span class="order-img">
-		                    	<img src="${orderDetail.productSpec.picture}" alt="">
-		                    </span>
-                        </div>
-                        <div class="mui-table-cell mui-col-xs-10 mui-text-left mui-pull-right">
-                            <h4 class="mui-ellipsis">${orderDetail.product.name}</h4>
-                            <h5>规格：<font>${orderDetail.productSpec.specDetail}</font></h5>
-                            <h5><font color="red"><s>库存不足</s></font></h5>
-                        </div>
-                    </div>
-                </c:if>
-            </c:forEach>
-        </li>
-    </ul>
-    <ul class="mui-table-view mui-table-view-striped mui-table-view-condensed">
-        <li class="mui-table-view-cell">
-            <div class="mui-table">
-                <div class="mui-table-cell mui-col-xs-3">
-                    <h5>邮费</h5>
-                </div>
-                <div class="mui-table-cell mui-col-xs-5 mui-text-left">
-                    <h5><font>${order.freightPrice/100}</font>元</h5>
-                </div>
-                <%--<c:if test="${order.freightPrice == 0}">--%>
-                    <%--<div class="mui-table-cell mui-col-xs-3 mui-text-right">--%>
-                        <%--<h5>包邮</h5>--%>
-                    <%--</div>--%>
-                <%--</c:if>--%>
+                     <c:if test="${orderDetail.product.type == 2}">
+                         ${orderDetail.productSpec.minScore}积分
+                     </c:if></span>
+                </p>
             </div>
-        </li>
-        <li class="mui-table-view-cell">
-            <div class="mui-table">
-                <div class="mui-table-cell mui-col-xs-3">
-                    <h5>总价</h5>
-                </div>
-                <div class="mui-table-cell mui-col-xs-5 mui-text-left">
-                    <h5>${order.totalPrice/100}元</h5>
-                </div>
-            </div>
-        </li>
-        <li class="mui-table-view-cell">
-            <div class="mui-table">
-                <div class="mui-table-cell mui-col-xs-3">
-                    <h5>支付方式</h5>
-                </div>
-                <div class="mui-table-cell mui-col-xs-5 mui-text-left">
-                    <span class="order-img2"></span><span style="color: #8F8F94;">微信支付</span>
-                </div>
-            </div>
-        </li>
-        <li class="mui-table-view-cell">
-            <div class="mui-table">
-                <div class="mui-table-cell mui-col-xs-3">
-                    <h5>积分抵扣</h5>
-                </div>
-                <div class="mui-table-cell mui-col-xs-5 mui-text-left">
-                    <h5><input type="text" class="btn-entry"/>积分=<font class="entry-change">0</font>元
-                    </h5>
-                </div>
-            </div>
-            <div class="mui-table">
-                <div class="mui-table-cell mui-col-xs-3">
-                    <h5 style="color: #D62C2C;font-size: 12px;">*积分余额：<font>${scoreB}</font></h5>
-                    <input type="hidden" id="score-hidden" value="${scoreB}">
-                </div>
-                <div class="mui-table-cell mui-col-xs-5 mui-text-left">
-                    <span style="color: #D62C2C;font-size: 12px;">该订单最多可使用<font
-                            class="max-jf">${order.totalScore}</font>积分</span>
-                </div>
-            </div>
-        </li>
-    </ul>
-</div>
+        </div>
+    </c:forEach>
+</section>
+<section class="w-text" id="scoreBwarning" style="display: none">
+    <div>
+        <div>*</div>
+        <div id="BWarningText">积分不足，将按1元=1积分补交</div>
+    </div>
+</section>
+<section class="cost">
+    <div style="padding: 20px 0;">
+        <div>使用积分</div>
+        <div class="useJf">
+            <input type="number" id="trueScore"/>
+            <span>最多可使用<span id="maxScore"></span>积分</span>
+        </div>
+        <div class="jfButton">
+            <input type="checkbox" checked="checked" class="check-switch check-switch-anim"/>
+        </div>
+    </div>
+    <div>
+        <div>运费</div>
+        <div id="postage">
+            <c:if test="${order.freightPrice == 0}">
+                包邮
+            </c:if>
+            <c:if test="${order.freightPrice != 0}">
+                ￥<fmt:formatNumber type="number" value="${order.freightPrice/100}" pattern="0.00"
+                                   maxFractionDigits="2"/>
+            </c:if>
+        </div>
+    </div>
+    <div>
+        <div>总价</div>
+        <div>￥<fmt:formatNumber type="number" value="${order.truePrice/100}" pattern="0.00"
+                                maxFractionDigits="2"/>+<span>${order.totalScore}积分</span></div>
+    </div>
+</section>
+<section class="integral">
+    <div class="offline">
+        <div>
+            <img class="off-img" src="${resourceUrl}/frontRes/order/confirmOrder/img/off.png"
+                 alt="">
+        </div>
+        <div>线下自提</div>
+    </div>
+    <div>
+        <p>积分余额：<span>${canUseScore}积分</span></p>
+    </div>
+</section>
+<section class="footer">
+    <div>还需付款：￥<span id="truePrice"></span></div>
+    <div id="btn-wxPay">立即购买</div>
+</section>
 </body>
-<script type="text/javascript">
-    document.title = "订单确定";
-    //		手机号中间四位变*
-    if (${address!=null}) {
-        var value = document.getElementsByClassName('order-tel')[0].innerHTML;
-        value = value.substr(0, 3) + '****' + value.substr(7);
-        document.getElementsByClassName('order-tel')[0].innerHTML = value;
+<script>
+    var canUseScore = eval('${canUseScore}'), orderTotalScore = eval('${order.totalScore}'); //用户可用积分和订单可用积分
+    var maxScore = 0, minPrice = eval('${order.totalPrice}'), freightPrice = eval('${order.freightPrice}'); //最多可用积分和最少需付金额
+    var trueScoreInput = $("#trueScore"), postageInput = $("#postage"), postageText = '';
+    function scoreAndPriceReset() {
+        if (canUseScore >= orderTotalScore) {
+            $('#maxScore').html(orderTotalScore);
+            $('#trueScore').val(orderTotalScore);
+            $('#truePrice').html(toDecimal(minPrice / 100));
+            maxScore = orderTotalScore;
+        } else { //用户积分少于订单可用积分
+            $('#maxScore').html(canUseScore);
+            $('#trueScore').val(canUseScore);
+            $('#truePrice').html(toDecimal((minPrice + (orderTotalScore - canUseScore) * 100)
+                                           / 100));
+            maxScore = canUseScore;
+            $('#scoreBwarning').show();
+            $('#BWarningText').html('您的积分不足，将按1元=1积分补交');
+        }
     }
+    scoreAndPriceReset();
+    /*使用积分开关*/
+    var on = true;//true = on ; false = off
+    $(".jfButton").click(function (e) {
+        if (on) {//不使用积分
+            $(".useJf").hide();
+            trueScoreInput.val(0);
+            on = false;
+            $('#truePrice').html(toDecimal((minPrice + orderTotalScore * 100) / 100));
+            $('#scoreBwarning').show();
+            $('#BWarningText').html('不使用积分，将按1元=1积分补交');
+        } else {//使用积分
+            $(".useJf").show();
+            on = true;
+            scoreAndPriceReset();
+        }
+    });
+    /*线下自提开关*/
+    var offline = false; //true = on ; false = off
+    $(".offline").click(function (e) {
+        if (offline) { //邮寄
+            $(".off-img").attr("src", "${resourceUrl}/frontRes/order/confirmOrder/img/off.png");
+            $(".useAddress").css('display', 'block');
+            $(".notUseAddress").css('display', 'none');
+            $(".address").attr('onclick', 'goAddressEdit()');
+            postageInput.html(postageText);
+            //添加运费
+            minPrice += freightPrice;
+            allClick();
+            offline = false;
+        } else { //线下自提
+            $(".off-img").attr("src", "${resourceUrl}/frontRes/order/confirmOrder/img/on.png");
+            $(".notUseAddress").css('display', 'block');
+            $(".useAddress").css('display', 'none');
+            $(".address").attr('onclick', '');
+            postageText = postageInput.html();
+            postageInput.html('线下自提');
+            //减掉运费
+            minPrice -= freightPrice;
+            allClick();
+            offline = true;
+        }
+    });
 
-    var entry_change = document.getElementsByClassName('entry-change')[0];
-    var btn_entry = document.getElementsByClassName('btn-entry')[0];
-    var max_jf = document.getElementsByClassName('max-jf')[0];
-    btn_entry.oninput = function () {
-        this.value = this.value.replace(/[^\d]/g, '');
-        var score = this.value;
-        var scoreB = $("#score-hidden").val();
-        if (score > eval(max_jf.innerHTML)) {
-            if (scoreB >= eval(max_jf.innerHTML)) {
-                alert('您最多可以使用' + eval(max_jf.innerHTML) + '积分');
-                this.value = eval(max_jf.innerHTML);
-                entry_change.innerHTML = this.value;
+    //数量切换
+    //可买数量的最大值和最小值判断
+    function judgeFun1() {
+        if (eval(trueScoreInput.val()) >= maxScore) {
+            if (maxScore == orderTotalScore) {
+                $('#scoreBwarning').hide();
+            } else if (maxScore == canUseScore) {
+                $('#scoreBwarning').show();
+                $('#BWarningText').html('您的积分不足，将按1元=1积分补交');
             } else {
-                alert('您最多可以使用' + scoreB + '积分');
-                this.value = scoreB;
-                entry_change.innerHTML = this.value;
+                $('#scoreBwarning').show();
+                $('#BWarningText').html('使用积分不足，将按1元=1积分补交');
             }
-            return;
+            trueScoreInput.val(maxScore);
+        } else if (eval(trueScoreInput.val()) <= 0) {
+            trueScoreInput.val(0);
+            $('#scoreBwarning').show();
+            $('#BWarningText').html('使用积分不足，将按1元=1积分补交');
         }
-        score = this.value;
-
-        if (score > eval(scoreB)) {
-            alert('您的积分不足');
-            this.value = $("#score-hidden").val();
-        }
-        entry_change.innerHTML = btn_entry.value;
-
-        $("#turePay").html(numSub(${order.totalPrice/100}, btn_entry.value));
-    };
-    function numSub(num1, num2) {
-        var baseNum, baseNum1, baseNum2;
-        var precision;// 精度
-        try {
-            baseNum1 = num1.toString().split(".")[1].length;
-        } catch (e) {
-            baseNum1 = 0;
-        }
-        try {
-            baseNum2 = num2.toString().split(".")[1].length;
-        } catch (e) {
-            baseNum2 = 0;
-        }
-        baseNum = Math.pow(10, Math.max(baseNum1, baseNum2));
-        precision = (baseNum1 >= baseNum2) ? baseNum1 : baseNum2;
-        return ((num1 * baseNum - num2 * baseNum) / baseNum).toFixed(precision);
     }
+    //点击事件
+    function allClick() {
+        $('#truePrice').html(toDecimal((minPrice + (orderTotalScore - (eval(trueScoreInput.val())
+                                                                       == null ? 0
+                : eval(trueScoreInput.val()))) * 100)
+                                       / 100));
+    }
+    //输入框改变
+    trueScoreInput.bind('keyup', function () {
+        judgeFun1();
+        allClick();
+    });
 
+    //强制保留两位小数
+    function toDecimal(x) {
+        var f = parseFloat(x);
+        if (isNaN(f)) {
+            return false;
+        }
+        var f = Math.round(x * 100) / 100;
+        var s = f.toString();
+        var rs = s.indexOf('.');
+        if (rs < 0) {
+            rs = s.length;
+            s += '.';
+        }
+        while (s.length <= rs + 2) {
+            s += '0';
+        }
+        return s;
+    }
+</script>
+<script type="text/javascript">
     function goAddressEdit() {
-        var truePrice = $("#turePay").html();
-        if (truePrice <= 0) {
-            alert("请选择商品");
-            location.href = "/weixin/shop";
-            return;
-        }
-        location.href = "${wxRootUrl}/weixin/order/addressEdit/${order.id}";
-
+        location.href = "/weixin/order/addressEdit/${order.id}";
     }
-
 
 </script>
 <script>
@@ -252,40 +288,55 @@
 
 </script>
 <script type="text/javascript">
-    setTimeout(function () {
-        $('#btn-wxpay').on('click', function () {
-            if (${address!=null}) {
-                var truePrice = $("#turePay").html();
-                if (truePrice <= 0) {
-                    alert("选择商品后才能付款~");
-                    location.href = "/weixin/shop";
-                    return;
-                }
-                var trueScore = document.getElementsByClassName('btn-entry')[0].value;
-                if ($(this).hasClass('btn-disabled')) {
-                    return false;
-                }
-                $(this).addClass('btn-disabled');
+    function payByWx() {
+        $('#btn-wxPay').attr('onclick', '');
+        //是否线下自提
+        var transmitWay = 0;    //取货方式  1=线下自提|2=快递
+        if (offline) {
+            transmitWay = 1;
+        }
+        if (transmitWay == 1 || ${order.address!=null}) {
+            var truePrice = $("#truePrice").html();
+            if (truePrice < 0) {
+                alert("选择商品后才能付款~");
+                location.href = "/front/product/weixin/productIndex";
+                return;
+            }
+            var trueScore = $('#trueScore').val();
+            var price = eval(truePrice * 100);
+
 //            首先提交请求，生成预支付订单
-                $.post('${wxRootUrl}/weixin/pay/weixinpay', {
-                    orderId: '${order.id}',
-                    truePrice: truePrice,
-                    trueScore: trueScore
-                }, function (res) {
-                    $(this).removeClass('btn-disabled');
-//            调用微信支付js-api接口
+            $.post('/weixin/pay/weixinpay', {
+                orderId: '${order.id}',
+                truePrice: truePrice,
+                trueScore: trueScore,
+                transmitWay: transmitWay
+            }, function (res) {
+                if (price == 0) {
+                    if (res.status == 200) {
+                        location.href = "/front/order/weixin/orderList";
+                    } else {
+                        alert("订单处理异常(" + res.status + ")");
+                        $('#btn-wxPay').attr('onclick', 'payByWx()');
+                    }
+                } else {
+                    //            调用微信支付js-api接口
                     if (res['err_msg'] != null && res['err_msg'] != "") {
                         alert(res['err_msg']);
+                        $('#btn-wxPay').attr('onclick', 'payByWx()');
                         return;
                     } else {
                         weixinPay(res);
                         return;
                     }
-                });
-            } else {
-                location.href = "${wxRootUrl}/weixin/order/addressEdit/${order.id}";
-            }
-        });
+                }
+            });
+        } else {
+            location.href = "/weixin/order/addressEdit/${order.id}";
+        }
+    }
+    setTimeout(function () {
+        $('#btn-wxPay').attr('onclick', 'payByWx()');
     }, 200);
 
     function weixinPay(res) {
@@ -297,17 +348,14 @@
                            paySign: res['sign'], // 支付签名
                            success: function (res) {
                                // 支付成功后的回调函数
-                               var total = $("#turePay").html() * 100;
-                               window.location.href =
-                               '${wxRootUrl}/weixin/pay/paySuccess/' + total;
+                               var total = $("#turePrice").html() * 100;
+                               window.location.href = '/weixin/pay/paySuccess/' + total;
                            },
                            cancel: function (res) {
-                               window.location.href =
-                               '${wxRootUrl}/weixin/pay/payFail/${order.id}';
+                               window.location.href = '/weixin/pay/payFail/${order.id}';
                            },
                            fail: function (res) {
-                               window.location.href =
-                               '${wxRootUrl}/weixin/pay/payFail/${order.id}';
+                               window.location.href = '/weixin/pay/payFail/${order.id}';
                            }
                        });
     }
