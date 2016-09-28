@@ -220,7 +220,7 @@ public class OrderController {
   @ResponseBody
   LejiaResult weixinPay(@RequestParam Long orderId, @RequestParam Long truePrice,
                         @RequestParam Long trueScore, HttpServletRequest request) {
-    OnLineOrder onLineOrder = orderService.setPriceScoreForOrder(orderId, truePrice, trueScore);
+    OnLineOrder onLineOrder = orderService.setPriceScoreForOrder(orderId, truePrice, trueScore, 2);
     if (onLineOrder == null) {
       return LejiaResult.build(403, "库存不足");
     }
@@ -344,10 +344,9 @@ public class OrderController {
     model.addAttribute("order", order);
     model.addAttribute("wxUser", order.getLeJiaUser().getWeiXinUser());
     model.addAttribute("address", order.getAddress());
-    model.addAttribute("payBackScoreA",
-                       scoreAService.findScoreADetailByOrderSid(order.getOrderSid()));
+    model.addAttribute("backA",dictionaryService.findDictionaryById(3L).getValue());
 
-    return MvUtil.go("/weixin/orderInfo");
+    return MvUtil.go("/order/orderDetail");
   }
 
   private List<CartDetailDto> stringToList(String cartDetails) {

@@ -23,6 +23,7 @@
     <link type="text/css" rel="stylesheet" href="${resourceUrl}/css/swiper-3.3.1.min.css">
     <!--App自定义的css-->
     <link rel="stylesheet" type="text/css" href="${resourceUrl}/css/productDetail.css"/>
+    <link rel="stylesheet" href="${resourceUrl}/frontRes/css/tanChuang.css">
     <script type="text/javascript" src="${resourceUrl}/js/swiper-3.3.1.min.js"></script>
     <script src="${resourceUrl}/js/jquery-2.0.3.min.js"></script>
 
@@ -66,8 +67,9 @@
 
                 <p class="ttl_practice">${product.description}</p>
                 <c:if test="${product.minPrice != product.price}">
-                    <p class="ttl_price">￥<font id="min_price">${product.minPrice/100}</font> ~ ￥<font
-                            class="total_price">${product.price/100}</font></p>
+                    <p class="ttl_price">￥<font id="min_price">${product.minPrice/100}</font> ~
+                        ￥<font
+                                class="total_price">${product.price/100}</font></p>
                 </c:if>
                 <c:if test="${product.minPrice == product.price}">
                     <p class="ttl_price">￥<font class="total_price">${product.price/100}</font></p>
@@ -161,18 +163,29 @@
 <div class="xzgg">
     <div>
         <p>请选择规格</p>
+
         <p>知道了</p>
     </div>
 
 </div>
+<%--弹窗--%>
+<section class="shade-layer" style="display: none">
+    <p id="warningInput"></p>
+
+    <div>
+        <div class="layerClose">取消</div>
+        <div class="yes"></div>
+    </div>
+</section>
 
 </body>
 <script type="text/javascript" src="${resourceUrl}/js/mui.min.js"></script>
 <script type="text/javascript" src="${resourceUrl}/js/dropload.min.js"></script>
 <script type="text/javascript" src="${resourceUrl}/js/prodect_detail.js"></script>
+<script src="${resourceUrl}/frontRes/js/layer.js"></script>
 <script>
 
-    var tanState = 0;
+    var tanState = 0, warnType = 1;
     $(function () {
         $(".total_price").text(toDecimal($(".total_price").text()));
         $("#min_price").text(toDecimal($("#min_price").text()));
@@ -251,8 +264,7 @@
         });
     }
 
-    $("#buy").bind("tap", function () {
-
+    function buyNow(){
         $("#productNum").val($(".num1").val());
         var productNum = $("#productNum").val();
         if (productNum == 0) {
@@ -274,14 +286,78 @@
             return;
         }
 
-        $("#buy").unbind("tap");
+        $("#buy").attr("onclick", "");
         var totalPrice = $("#price-hidden").val() * $(".num1").val();
         $("#totalPrice").val(parseInt(totalPrice * 100));
         var totalScore = $("#score-hidden").val() * $(".num1").val();
         $("#totalScore").val(totalScore);
         var productSpec = $(".focusClass").find(".id-hidden").val();
         $("#productSpec").val(productSpec);
-        $("#form").submit();
+        // $("#form").submit();
+        $.ajax({
+                   type: "post",
+                   url: "/front/order/weixin/createCommonOrder",
+                   data: {
+                       productId: ${product.id},
+                       specId: productSpec,
+                       buyNumber: $("#productNum").val()
+                   },
+                   success: function (data) {
+                       if (data.status == 200) {
+                           location.href = "/front/order/weixin/confirmOrder/" + data.data.id;
+                       } else if (data.status == 5004) {
+                           warnType = 1;
+                           showTanChuang();
+                       } else if (data.status == 5003) {
+                           warnType = 2;
+                           showTanChuang();
+                       } else if (data.status == 5001) {
+                           warnType = 3;
+                           showTanChuang();
+                       }
+                   }
+               });
+    }
+
+    $("#buy").attr("onclick", "buyNow()");
+
+    function showTanChuang() {
+        if (warnType == 1) {
+            $("#buy").attr("onclick","buyNow()");
+            $("#warningInput").html('您有该商品的未支付订单！请到订单列表处理');
+            $(".yes").html('查看');
+        } else if (warnType == 2) {
+            $("#warningInput").html('抱歉,该规格已无库存,请选择其他规格');
+            $(".yes").html('知道了');
+        } else if (warnType == 3) {
+            $("#warningInput").html('未支付订单过多,请支付后再下单');
+            $(".yes").html('去处理');
+        }
+        $(".shade-layer").show();
+        layer.open({
+                       type: 1,
+                       area: ['78%', ''], //宽高
+                       content: $(".shade-layer"),
+                       title: false,
+                       closeBtn: 0,
+                       scrollbar: false
+                   });
+    }
+    $(".layerClose").click(function (e) {
+        layer.closeAll();
+        $(".shade-layer").hide();
+        if (warnType == 2) {
+            location.reload(true);
+        }
+    });
+    $(".yes").click(function (e) {
+        if (warnType == 1) {
+            location.href = "/front/order/weixin/orderList";
+        } else if (warnType == 2) {
+            location.reload(true);
+        } else if (warnType == 3) {
+            location.href = "/front/order/weixin/orderList";
+        }
     });
 
     $("#cart").bind("tap", function () {
@@ -328,9 +404,9 @@
     }
 
     function xuanzheguige() {
-        if(tanState == 1){
+        if (tanState == 1) {
             tanchaung();
-            return ;
+            return;
         }
         //先出现
         tanState = 1;
@@ -344,11 +420,13 @@
         $('.mui-scroll').css('transform', 'translate3d(0px, 0px, 0px)');
     }
 
-    function tanchaung(){
+    function tanchaung() {
         //  提示框
-        $('.xzgg').css({'display':'block'});
-        $('.xzgg div').animate({'top':'80vw'});
-        $('.xzgg div p:last-child').on('click',function(){$('.xzgg').css({'display':'none'});})
+        $('.xzgg').css({'display': 'block'});
+        $('.xzgg div').animate({'top': '80vw'});
+        $('.xzgg div p:last-child').on('click', function () {
+            $('.xzgg').css({'display': 'none'});
+        })
     }
 
 </script>

@@ -1,12 +1,11 @@
 package com.jifenke.lepluslive.product.service;
 
-import com.jifenke.lepluslive.global.util.LejiaResult;
+import com.jifenke.lepluslive.order.domain.entities.OnLineOrder;
 import com.jifenke.lepluslive.order.domain.entities.OrderDetail;
 import com.jifenke.lepluslive.product.domain.entities.Product;
 import com.jifenke.lepluslive.product.domain.entities.ProductDetail;
 import com.jifenke.lepluslive.product.domain.entities.ProductSpec;
 import com.jifenke.lepluslive.product.domain.entities.ProductType;
-import com.jifenke.lepluslive.product.domain.entities.ScrollPicture;
 import com.jifenke.lepluslive.product.repository.ProductDetailRepository;
 import com.jifenke.lepluslive.product.repository.ProductRepository;
 import com.jifenke.lepluslive.product.repository.ProductSpecRepository;
@@ -14,13 +13,15 @@ import com.jifenke.lepluslive.product.repository.ProductTypeRepository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -44,6 +45,26 @@ public class ProductService {
   @Inject
   private ProductDetailRepository productDetailRepository;
 
+  /**
+   * 支付成功后修改订单中product的销售量 16/09/27
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  public void editProductSaleByPayOrder(OnLineOrder order) throws Exception {
+    List<OrderDetail> list = order.getOrderDetails();
+    try {
+      for (OrderDetail detail : list) {
+        Product product = detail.getProduct();
+        product
+            .setSaleNumber((product.getSaleNumber() == null ? 0 : product.getSaleNumber()) + detail
+                .getProductNumber());
+        productRepository.save(product);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new Exception();
+    }
+  }
+
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public List<Product> findProductsByPage(Integer offset, Integer productType) {
     if (offset == null) {
@@ -52,10 +73,10 @@ public class ProductService {
 
     Page<Product>
         page =
-        productRepository.findByStateAndProductType(
+        productRepository.findByStateAndProductTypeAndType(
             new PageRequest(offset - 1, 10, new Sort(Sort.Direction.ASC, "sid")), 1,
             new ProductType(
-                productType));
+                productType), 1);
     return page.getContent();
   }
 
@@ -67,45 +88,7 @@ public class ProductService {
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public List<ProductSpec> findAllProductSpec(Product product) {
-    return productSpecRepository.findAllByProductAndState(product,1);
-  }
-
-
-  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public void editProduct(Product product) throws Exception {
-    Product origin = productRepository.findOne(product.getId());
-    origin.setSid(product.getSid());
-    origin.setName(product.getName());
-    origin.setMinPrice(product.getMinPrice());
-    origin.setPacketCount(product.getPacketCount());
-    origin.setPicture(product.getPicture());
-    origin.setPointsCount(product.getPointsCount());
-    origin.setSaleNumber(product.getSaleNumber());
-    origin.setState(product.getState());
-    origin.setPrice(product.getPrice());
-    productRepository.save(product);
-  }
-
-  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public LejiaResult putOnProduct(Long id, Long sid) {
-    Product product = productRepository.findOne(id);
-    if (product == null) {
-      return LejiaResult.build(500, "商品不存在");
-    }
-    product.setSid(sid);
-    productRepository.save(product);
-    return LejiaResult.build(200, "成功上架商品");
-  }
-
-  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public LejiaResult pullOffProduct(Long id) {
-    Product product = productRepository.findOne(id);
-    if (product == null) {
-      return LejiaResult.build(500, "商品不存在");
-    }
-    product.setSid(0L);
-    productRepository.save(product);
-    return LejiaResult.build(200, "成功下架商品");
+    return productSpecRepository.findAllByProductAndState(product, 1);
   }
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
@@ -114,26 +97,9 @@ public class ProductService {
   }
 
 
-  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public void editProductType(ProductType productType) {
-    ProductType productTypeOri = productTypeRepository.findOne(productType.getId());
-    productTypeOri.setType(productType.getType());
-    productTypeRepository.save(productTypeOri);
-  }
-
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public List<ProductType> findAllProductType() {
     return productTypeRepository.findAll();
-  }
-
-  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public void deleteProductType(Integer id) {
-    productTypeRepository.delete(id);
-  }
-
-  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public void addProductType(ProductType productType) {
-    productTypeRepository.save(productType);
   }
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
@@ -155,10 +121,10 @@ public class ProductService {
   public ProductSpec editProductSpecRepository(Long productSpecId, int productNum) {
     ProductSpec productSpec = productSpecRepository.findOne(productSpecId);
     Integer repository = productSpec.getRepository() - productNum;
-    if(repository>=0) {
+    if (repository >= 0) {
       productSpec.setRepository(repository);
       productSpecRepository.save(productSpec);
-      return  productSpec;
+      return productSpec;
     }
 
     return null;
@@ -177,5 +143,82 @@ public class ProductService {
 
   public ProductSpec findOneProductSpec(Long productSpec) {
     return productSpecRepository.findOne(productSpec);
+  }
+
+  /**
+   * 获取主打爆品 16/09/21
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+  public Map findMainHotProduct() {
+    List<Object[]> list = productRepository.findMainHotProductList();
+    if (list != null && list.size() > 0) {
+      Object[] o = list.get(0);
+      Map<String, Object> map = convertData(o);
+      map.put("repository", o[12]);
+      return map;
+    }
+    return null;
+  }
+
+  /**
+   * 分页获取爆品列表 16/09/21
+   *
+   * @param currPage 第几页
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+  public List<Map> findHotProductListByPage(Integer currPage) {
+    List<Map> mapList = new ArrayList<>();
+    List<Object[]> list = productRepository.findHotProductListByPage((currPage - 1) * 10, 10);
+    if (list != null && list.size() > 0) {
+      for (Object[] o : list) {
+        Map<String, Object> map = convertData(o);
+        map.put("repository", o[12]);
+        mapList.add(map);
+      }
+      return mapList;
+    }
+    return null;
+  }
+
+  /**
+   * 分页获取臻品列表 16/09/21
+   *
+   * @param currPage 第几页
+   * @param typeId   臻品类型  0=所有类型
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+  public List<Map> findProductListByTypeAndPage(Integer currPage, Integer typeId) {
+    List<Map> mapList = new ArrayList<>();
+    List<Object[]> list = null;
+    if (typeId == 0) { //不分类
+      list = productRepository.findProductListByPage((currPage - 1) * 10, 10);
+    } else { //分类
+      list = productRepository.findProductListByTypeAndPage(typeId, (currPage - 1) * 10, 10);
+    }
+    if (list != null && list.size() > 0) {
+      for (Object[] o : list) {
+        Map<String, Object> map = convertData(o);
+        map.put("repository", o[12]);
+        mapList.add(map);
+      }
+      return mapList;
+    }
+    return null;
+  }
+
+  private Map<String, Object> convertData(Object[] o) {
+    Map<String, Object> map = new HashMap<>();
+    map.put("id", o[0]);
+    map.put("name", o[1]);
+    map.put("price", o[2]);
+    map.put("minPrice", o[3]);
+    map.put("minScore", o[4]);
+    map.put("picture", o[5]);
+    map.put("thumb", o[6]);
+    map.put("saleNumber", (int) o[7] + (int) o[8]);
+    map.put("hotStyle", o[9]);
+    map.put("postage", o[10]);
+    map.put("buyLimit", o[11]);
+    return map;
   }
 }

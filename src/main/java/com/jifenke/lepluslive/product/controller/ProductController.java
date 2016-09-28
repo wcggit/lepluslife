@@ -26,12 +26,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 /**
  * Created by wcg on 16/3/9.
@@ -128,4 +130,27 @@ public class ProductController {
     }
     return null;
   }
+
+  /**
+   * 获取臻品列表  16/09/21
+   *
+   * @param page   当前页码
+   * @param typeId 臻品类型 0=所有
+   */
+  @RequestMapping(value = "/productList", method = RequestMethod.GET)
+  public
+  @ResponseBody
+  LejiaResult productList(@RequestParam(required = true) Integer page,
+                          @RequestParam(required = true) Integer typeId) {
+    if (page == null || page < 1) {
+      page = 1;
+    }
+    if (typeId == null || typeId < 0) {
+      typeId = 0;
+    }
+    List<Map> list = productService.findProductListByTypeAndPage(page, typeId);
+    return LejiaResult.ok(list);
+  }
+
+
 }

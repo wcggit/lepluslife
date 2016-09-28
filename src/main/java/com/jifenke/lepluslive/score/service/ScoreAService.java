@@ -53,10 +53,8 @@ public class ScoreAService {
   }
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public void paySuccess(LeJiaUser leJiaUser, Long totalPrice, String orderSid) {
+  public void paySuccess(LeJiaUser leJiaUser, Long payBackScore, String orderSid) {
     ScoreA scoreA = findScoreAByLeJiaUser(leJiaUser);
-    Integer PAY_BACK_SCALE = Integer.parseInt(dictionaryRepository.findOne(3L).getValue());
-    Long payBackScore = (long) Math.ceil((double) (totalPrice * PAY_BACK_SCALE) / 100);
     scoreA.setScore(scoreA.getScore() + payBackScore);
     scoreA.setTotalScore(scoreA.getTotalScore() + payBackScore);
     ScoreADetail scoreADetail = new ScoreADetail();

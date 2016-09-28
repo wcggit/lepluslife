@@ -105,8 +105,8 @@
                     timeout: 10000,//超时时间设置为10秒；
                     success: function (data) {
                         //数据的总个数
-                        dataDetail = data.data;
-                        dataLength = data.data.length;
+                        dataDetail = data.data.list;
+                        dataLength = data.data.list.length;
                         count = 0;
                         shangshu = Math.floor(dataLength / 5);
                         yushu = dataLength % 5;

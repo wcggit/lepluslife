@@ -24,16 +24,52 @@
     <!--App自定义的css-->
     <link rel="stylesheet" type="text/css" href="${resourceUrl}/css/shoppingCart.css"/>
     <script type="text/javascript" src="${resourceUrl}/js/jquery-2.0.3.min.js"></script>
+    <link rel="stylesheet" href="${resourceUrl}/frontRes/css/tanChuang.css">
 </head>
-
+<style>
+    .footer {
+        width: 100%;
+        position: fixed;
+        bottom: 0;
+        background-color: #FFFFFF;
+        border-top: 1px solid #d6d6d6;
+        padding: 9px 0 2px 0;
+        z-index: 999;
+    }
+    .footer > div {
+        float: left;
+        width: 25%;
+        text-align: center;
+        font-size: 10px !important;
+        color: #666;
+    }
+    .footer > div > div {
+        width: 20%;
+        margin: 0 auto;
+    }
+    .footer > div:last-child > div {
+        width: 17%;
+        margin: 0 auto;
+    }
+    .footer img {
+        width: 100%;
+    }
+    .footer p {
+        margin-top: -4px;
+        margin-bottom: -2px !important;
+        font-size: 10px !important;
+        color:#666 !important;
+        font-family: "Microsoft YaHei", tahoma, arial, "Hiragino Sans GB", "\5b8b\4f53", sans-serif !important;
+    }
+</style>
 <body>
 <!--底部菜单-->
-<%@include file="/WEB-INF/weixin/common/shopfoot.jsp" %>
+<%--<%@include file="/WEB-INF/weixin/common/shopfoot.jsp" %>--%>
 <div class="mui-content">
     <div class="empty" id="empty" style="display: none">
         <div class="empty-icon"></div>
         <p class="empty-ttl">您的购物车中没有商品，快去选购吧！</p>
-        <a class="empty-btn" href="/weixin/shop">去逛逛</a>
+        <a class="empty-btn" href="/front/product/weixin/productIndex">去逛逛</a>
     </div>
 
     <ul id="list1" class="mui-table-view"></ul>
@@ -53,9 +89,45 @@
     </div>
 
 </div>
+<section class="footer">
+    <div onclick="goMenu(1)">
+        <div>
+            <img src="${resourceUrl}/frontRes/product/hotIndex/img/zhenpin1.png" alt="">
+        </div>
+        <p>臻品</p>
+    </div>
+    <div onclick="goMenu(2)">
+        <div>
+            <img src="${resourceUrl}/frontRes/product/hotIndex/img/miaosha1.png" alt="">
+        </div>
+        <p>秒杀</p>
+    </div>
+    <div>
+        <div>
+            <img src="${resourceUrl}/frontRes/product/hotIndex/img/gouwuche2.png" alt="">
+        </div>
+        <p>购物车</p>
+    </div>
+    <div onclick="goMenu(4)">
+        <div>
+            <img src="${resourceUrl}/frontRes/product/hotIndex/img/dingdan1.png" alt="">
+        </div>
+        <p>订单</p>
+    </div>
+</section>
+<%--弹窗--%>
+<section class="shade-layer" style="display: none">
+    <p id="warningInput"></p>
+
+    <div>
+        <div class="layerClose">取消</div>
+        <div class="yes"></div>
+    </div>
+</section>
 <script src="${resourceUrl}/js/mui.min.js"></script>
+<script src="${resourceUrl}/frontRes/js/layer.js"></script>
 <script>
-    document.title="购物车";
+    document.title = "购物车";
     //		左滑删除
     mui.init();
     (function ($) {
@@ -90,7 +162,7 @@
     })(mui);
 
     //请求ajax
-    var table = document.body.querySelector('#list1');
+    var table = document.body.querySelector('#list1'), warnType = 0, warnText = '';
     var url = '/weixin/cart/ajax';
     mui.ajax(url, {
         dataType: 'json',//服务器返回json格式数据
@@ -178,13 +250,13 @@
             }
         });
 //		        获取选中的li整合成一个数组valArr
-        $("#buy").click(function () {
-            var valArr = [];
-            $(".checboxOne:checked").each(function (i) {
-                valArr.push($(this).parents('li'));
-            });
-            console.log(valArr);
-        });
+//        $("#buy").click(function () {
+//            var valArr = [];
+//            $(".checboxOne:checked").each(function (i) {
+//                valArr.push($(this).parents('li'));
+//            });
+//            console.log(valArr);
+//        });
 
 //		        手动输入购买数量
         $('.num').each(function (i) {
@@ -335,7 +407,13 @@
                    }
                });
     }
-    $("#buy").bind("tap", function () {
+
+    function buyNow() {
+        var valArr = [];
+        $(".checboxOne:checked").each(function (i) {
+            valArr.push($(this).parents('li'));
+        });
+        console.log(valArr);
         var cartDetailDtos = [];
         if ($(".checboxOne:checked").length != 0) {
             $(".checboxOne:checked").each(function (i) {
@@ -351,6 +429,7 @@
                 cartDetailDto.productNumber = $(this).parents('li').find(".num").val();
                 cartDetailDtos.push(cartDetailDto);
             });
+            $("#buy").attr("onclick", "");
             $.ajax({
                        type: "post",
                        url: "/weixin/cart/createCartOrder",
@@ -358,18 +437,76 @@
                        data: JSON.stringify(cartDetailDtos),
                        success: function (data) {
                            if (data.status == 200) {
-                               location.href = "${wxRootUrl}/weixin/order/" + data.msg+"?flag=false";
-                           } else {
-                               alert(data.msg);
-                               location.href = "${wxRootUrl}/weixin/orderDetail";
+                               location.href = "/front/order/weixin/confirmOrder/" + data.data.id;
+                           } else if (data.status == 5001) {
+                               warnType = 1;
+                               showTanChuang();
+                           } else if (data.status == 5005) {
+                               $("#buy").attr("onclick", "buyNow()");
+                               warnText = data.data;
+                               warnType = 2;
+                               showTanChuang();
+                           } else if (data.status == 500) {
+                               alert("购物车无数据");
                            }
                        }
                    });
         } else {
             alert("请选择商品");
         }
+    }
 
+    $("#buy").attr("onclick", "buyNow()");
+
+    function showTanChuang() {
+        if (warnType == 1) {
+            $("#warningInput").html('未支付订单过多,请支付后再下单');
+            $(".yes").html('去处理');
+        } else if (warnType == 2) {
+            var warnContents = warnText.split('_');
+            if (warnContents[1] == 1) {
+                $("#warningInput").html("抱歉," + warnContents[0] + "已无库存");
+            } else {
+                $("#warningInput").html(warnContents[0] + "库存不足" + warnContents[1] + "件");
+            }
+            $(".yes").html('知道了');
+        }
+        $(".shade-layer").show();
+        layer.open({
+                       type: 1,
+                       area: ['78%', ''], //宽高
+                       content: $(".shade-layer"),
+                       title: false,
+                       closeBtn: 0,
+                       scrollbar: false
+                   });
+    }
+    $(".layerClose").click(function (e) {
+        layer.closeAll();
+        $(".shade-layer").hide();
+        if (warnType == 2) {
+            location.reload(true);
+        }
     });
+    $(".yes").click(function (e) {
+        layer.closeAll();
+        $(".shade-layer").hide();
+        if (warnType == 1) {
+            location.href = "/front/order/weixin/orderList";
+        } else if(warnType == 2) {
+            location.reload(true);
+        }
+    });
+
+    function goMenu(curIndex) { //go其他菜单页
+        if (curIndex == 1) {
+            location.href = "/front/product/weixin/productIndex";
+        } else if (curIndex == 2) {
+            location.href = "/front/product/weixin/hotIndex";
+        } else if (curIndex == 4) {
+            location.href = "/front/order/weixin/orderList";
+        }
+    }
 </script>
 </body>
 

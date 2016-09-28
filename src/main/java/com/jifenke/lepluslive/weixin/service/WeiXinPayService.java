@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -60,6 +61,20 @@ public class WeiXinPayService {
   @Inject
   private DictionaryService dictionaryService;
 
+  /**
+   * 获取支付页面的配置参数wxconfig
+   */
+  public Map getWeiXinPayConfig(HttpServletRequest request) {
+    Long timestamp = new Date().getTime() / 1000;
+    String noncestr = MvUtil.getRandomStr();
+    Map<String, Object> map = new HashMap<>();
+    map.put("appId", appId);
+    map.put("timestamp", timestamp);
+    map.put("noncestr", noncestr);
+    map.put("signature", getJsapiSignature(request, noncestr, timestamp));
+    return map;
+  }
+
 
   /**
    * 封装订单参数
@@ -71,13 +86,6 @@ public class WeiXinPayService {
     orderParams.put("appid", appId);
     orderParams.put("mch_id", mchId);
     orderParams.put("nonce_str", MvUtil.getRandomStr());
-//   String body = "";
-//    for (OrderDetail orderDetail : order.getOrderDetails()) {
-//      if (body.equals("")) {
-//        body = body + orderDetail.getProduct().getName();
-//      }
-//      body = body + "+" + orderDetail.getProduct().getName();
-//    }
     orderParams.put("body", "乐加商城消费");
     orderParams.put("out_trade_no", onLineOrder.getOrderSid());
     orderParams.put("fee_type", "CNY");
@@ -108,7 +116,7 @@ public class WeiXinPayService {
     orderParams.put("total_fee", String.valueOf(onLineOrder.getTruePrice()));
 //    orderParams.put("total_fee", "1");
     orderParams.put("spbill_create_ip", getIpAddr(request));
-   orderParams.put("notify_url", weixinRootUrl + "/weixin/pay/afterPay");
+    orderParams.put("notify_url", weixinRootUrl + "/weixin/pay/afterPay");
 //    orderParams.put("notify_url", weixinRootUrl + "/wxTest/weixin/pay/afterPay");
     orderParams.put("trade_type", "APP");
     orderParams.put("input_charset", "UTF-8");

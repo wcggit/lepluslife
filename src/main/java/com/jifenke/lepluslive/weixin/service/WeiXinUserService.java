@@ -153,7 +153,7 @@ public class WeiXinUserService {
   }
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public void saveWeiXinUserBySubscribe(Map<String, Object> userDetail, WeiXinUser weiXinUser)
+  public WeiXinUser saveWeiXinUserBySubscribe(Map<String, Object> userDetail, WeiXinUser weiXinUser)
       throws IOException {
     String openid = userDetail.get("openid").toString();
     String
@@ -204,10 +204,13 @@ public class WeiXinUserService {
     if (weiXinUser.getSubDate() == null) {
       weiXinUser.setSubDate(date);
     }
+
     if (weiXinUser.getSubSource() == null || "".equals(weiXinUser.getSubSource())) {
       weiXinUser.setSubSource(userDetail.get("subSource").toString());
     }
+
     weiXinUserRepository.save(weiXinUser);
+    return weiXinUser;
   }
 
   /**
