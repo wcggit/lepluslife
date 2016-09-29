@@ -1,9 +1,12 @@
 package com.jifenke.lepluslive.partner.domain.entities;
 
+import com.jifenke.lepluslive.global.util.MvUtil;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 /**
@@ -18,17 +21,68 @@ public class Partner {
   @GeneratedValue(strategy = GenerationType.AUTO)
   private Long id;
 
+  private String partnerSid;
 
   private String name; //账户名
 
-
   private Long userLimit = 0L;
+
+  private Long merchantLimit = 0L;
 
   private String partnerName; //合伙人姓名
 
   private String phoneNumber;
 
   private String password;
+
+  private String bankName;
+
+  private String bankNumber;
+
+  private String payee;
+
+  private Integer benefitTime; //发放福利次数
+
+
+  public Integer getBenefitTime() {
+    return benefitTime;
+  }
+
+  public void setBenefitTime(Integer benefitTime) {
+    this.benefitTime = benefitTime;
+  }
+
+  public String getPayee() {
+    return payee;
+  }
+
+  public void setPayee(String payee) {
+    this.payee = payee;
+  }
+
+  public String getBankName() {
+    return bankName;
+  }
+
+  public void setBankName(String bankName) {
+    this.bankName = bankName;
+  }
+
+  public String getBankNumber() {
+    return bankNumber;
+  }
+
+  public void setBankNumber(String bankNumber) {
+    this.bankNumber = bankNumber;
+  }
+
+  public Long getMerchantLimit() {
+    return merchantLimit;
+  }
+
+  public void setMerchantLimit(Long merchantLimit) {
+    this.merchantLimit = merchantLimit;
+  }
 
   public String getPartnerName() {
     return partnerName;
@@ -83,5 +137,13 @@ public class Partner {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  public String getPartnerSid() {
+    return partnerSid;
+  }
+
+  public void setPartnerSid(String partnerSid) {
+    this.partnerSid = partnerSid;
   }
 }
