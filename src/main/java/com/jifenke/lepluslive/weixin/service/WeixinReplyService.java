@@ -4,6 +4,7 @@ import com.jifenke.lepluslive.activity.domain.entities.ActivityCodeBurse;
 import com.jifenke.lepluslive.activity.domain.entities.ActivityJoinLog;
 import com.jifenke.lepluslive.activity.service.ActivityCodeBurseService;
 import com.jifenke.lepluslive.activity.service.ActivityJoinLogService;
+import com.jifenke.lepluslive.lejiauser.service.LeJiaUserService;
 import com.jifenke.lepluslive.merchant.service.MerchantService;
 import com.jifenke.lepluslive.weixin.domain.entities.AutoReplyRule;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
@@ -39,7 +40,7 @@ public class WeixinReplyService {
   private WeiXinUserService weiXinUserService;
 
   @Inject
-  private WeiXinQrCodeService weiXinQrCodeService;
+  private LeJiaUserService leJiaUserService;
 
   @Inject
   private WeixinMessageService weixinMessageService;
@@ -156,11 +157,8 @@ public class WeixinReplyService {
                 merchantService
                     .findMerchantIdByParameter(parameter);//o[0]=merchantId|o[1]=partnership
             if (o != null) { //绑定注册来源,判断绑定流程
-//              buildMap.put("title", "感谢您的关注，恭喜您获得乐＋红包一个");
-//              buildMap.put("description", "↑↑↑戳这里，累计5000人领取");
-//              buildMap.put("url",
-//                           "http://www.lepluslife.com/weixin/subPage");
-              HashMap<String, String>
+//
+              Map<String, String>
                   result =
                   subscribeByMerchantQrCode(map, user, Long.valueOf(o[0].toString()),
                                             Integer.valueOf(o[1].toString()));
@@ -324,13 +322,18 @@ public class WeixinReplyService {
    * @return 图文消息的内容
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  private HashMap<String, String> subscribeByMerchantQrCode(Map map, WeiXinUser weiXinUser,
-                                                            Long merchantId, Integer partnership) {
+  private Map<String, String> subscribeByMerchantQrCode(Map<String, String> map,
+                                                        WeiXinUser weiXinUser,
+                                                        Long merchantId, Integer partnership) {
 
     if (weiXinUser == null) { //数据库中没有该用户
       String openId = map.get("FromUserName").toString();
       Map<String, Object> userDetail = weiXinService.getWeiXinUserInfo(openId);
       //拼接关注来源,将用户信息及关注来源保存到数据库
+      map.put("title", "[转账]邀请您成为乐加会员，点击领取新手大礼包!");
+      map.put("description", "↑↑↑戳这里");
+      map.put("url",
+              "http://www.lepluslife.com/weixin/subPage");
       if (null == userDetail.get("errcode")) {
         try {
           userDetail.put("subSource", "4_0_" + merchantId);
@@ -339,11 +342,24 @@ public class WeixinReplyService {
           e.printStackTrace();
         }
       }
+    } else {
+      if (weiXinUser.getState() == 0) {//非会员
+        map.put("title", "[转账]邀请您成为乐加会员，点击领取新手大礼包!");
+        map.put("description", "↑↑↑戳这里");
+        map.put("url",
+                "http://www.lepluslife.com/weixin/subPage");
+      } else {
+        if (weiXinUser.getLeJiaUser().getBindMerchant() == null) {//未绑上商户
+          leJiaUserService.checkUserBindMerchant(weiXinUser);
+        }
+        map.put("title", "您已领取过新手礼包，不能再领了哦~");
+        map.put("description", "点击查看如何使用积分和红包");
+        map.put("url",
+                "http://www.lepluslife.com/resource/active2.html");
+      }
     }
-    //获取到weiXinUser,进行绑定及回复内容的操作
 
-
-    return null;
+    return map;
   }
 
   /**

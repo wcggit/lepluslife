@@ -52,10 +52,10 @@ public class SchedulerConfigration {
   @Bean
   public SchedulerFactoryBean schedulerFactory(){
     SchedulerFactoryBean bean = new SchedulerFactoryBean ();
-    bean.setConfigLocation(resourceLoader.getResource("classpath:quartz.properties"));
-    bean.setApplicationContextSchedulerContextKey("applicationContextKey");
-    bean.setSchedulerName("order");
-    bean.setDataSource(dataSource);
+//    bean.setConfigLocation(resourceLoader.getResource("classpath:quartz.properties"));
+//    bean.setApplicationContextSchedulerContextKey("applicationContextKey");
+//    bean.setSchedulerName("order");
+//    bean.setDataSource(dataSource);
    // bean.setTriggers (orderTrigger);
     return bean;
   }

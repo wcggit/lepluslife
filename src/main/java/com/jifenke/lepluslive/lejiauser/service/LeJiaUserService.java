@@ -166,30 +166,45 @@ public class LeJiaUserService {
    * 根据关注来源  16/09/20 判断是否需要绑定商户和合伙人
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public void checkUserBindMerchant(WeiXinUser weiXinUser) {
+  public Merchant checkUserBindMerchant(WeiXinUser weiXinUser) {
     LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
     String subSource = weiXinUser.getSubSource();
+    Merchant merchant = null;
     //判断是否需要绑定商户
     if (subSource != null && subSource.startsWith("4")) {
       if (leJiaUser.getBindMerchant() == null) {
         Long merchantId = Long.valueOf(subSource.split("_")[2]);
         if (merchantId != null) {
-          Merchant merchant = merchantService.findMerchantById(merchantId);
-          long userLimit = leJiaUserRepository.countMerchantBindLeJiaUser(merchantId);
-          if (merchant.getUserLimit() > userLimit) {
-            Date date = new Date();
-            leJiaUser.setBindMerchant(merchant);
-            leJiaUser.setBindMerchantDate(date);
-            Partner partner = merchant.getPartner();
+          merchant = merchantService.findMerchantById(merchantId);
+          Partner partner = merchant.getPartner();
+          Date date = new Date();
+          if (merchant.getPartnership() != 2) {
+            long userLimit = leJiaUserRepository.countMerchantBindLeJiaUser(merchantId);
+            if (merchant.getUserLimit() > userLimit) {
+
+              leJiaUser.setBindMerchant(merchant);
+              leJiaUser.setBindMerchantDate(date);
+              long
+                  partnerUserLimit =
+                  leJiaUserRepository.countPartnerBindLeJiaUser(partner.getId());
+              if (partner.getUserLimit() > partnerUserLimit) {
+                leJiaUser.setBindPartner(partner);
+                leJiaUser.setBindPartnerDate(date);
+              }
+            }
+          } else { //虚拟商户操作
             long partnerUserLimit = leJiaUserRepository.countPartnerBindLeJiaUser(partner.getId());
             if (partner.getUserLimit() > partnerUserLimit) {
               leJiaUser.setBindPartner(partner);
               leJiaUser.setBindPartnerDate(date);
+              leJiaUser.setBindMerchant(merchant);
+              leJiaUser.setBindMerchantDate(date);
             }
           }
         }
       }
     }
+    return merchant;
   }
 
 }

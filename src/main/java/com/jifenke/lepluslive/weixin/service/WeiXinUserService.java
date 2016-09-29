@@ -305,7 +305,6 @@ public class WeiXinUserService {
     LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
     ScoreA scoreA = scoreARepository.findByLeJiaUser(leJiaUser).get(0);
     ScoreB scoreB = scoreBRepository.findByLeJiaUser(leJiaUser);
-
     String aRule = dictionaryService.findDictionaryById(34L).getValue(); //返A规则
     String bRule = dictionaryService.findDictionaryById(35L).getValue(); //返B规则
     int valueA = 0;
@@ -361,7 +360,6 @@ public class WeiXinUserService {
         scoreBDetail.setOrderSid("0_" + valueB);
         scoreBDetailRepository.save(scoreBDetail);
       }
-
       weiXinUser.setHongBaoState(1);
       weiXinUser.setState(1);
       weiXinUser.setStateDate(date);

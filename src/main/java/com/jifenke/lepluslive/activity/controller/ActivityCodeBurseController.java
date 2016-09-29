@@ -13,6 +13,7 @@ import com.jifenke.lepluslive.lejiauser.service.LeJiaUserService;
 import com.jifenke.lepluslive.merchant.domain.entities.Merchant;
 import com.jifenke.lepluslive.merchant.service.MerchantService;
 import com.jifenke.lepluslive.partner.domain.entities.Partner;
+import com.jifenke.lepluslive.partner.service.PartnerService;
 import com.jifenke.lepluslive.score.service.ScoreAService;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.service.DictionaryService;
@@ -65,7 +66,7 @@ public class ActivityCodeBurseController {
   private LeJiaUserService leJiaUserService;
 
   @Inject
-  private MerchantService merchantService;
+  private PartnerService partnerService;
 
   @Inject
   private ActivityShareLogService activityShareLogService;
@@ -152,11 +153,19 @@ public class ActivityCodeBurseController {
         .getOpenId());
     if (leJiaUser == null && joinLog == null) {
       //判断是否需要绑定商户 4_0_123
-      leJiaUserService.checkUserBindMerchant(weiXinUser);
+      Merchant merchant = leJiaUserService.checkUserBindMerchant(weiXinUser);
 
       //派发红包和积分,填充手机号码成为会员
       try {
-        Map<String, Integer> map = weiXinUserService.giveScoreAByDefault(weiXinUser, phoneNumber);
+        Map<String, Integer> map = null;
+        if (merchant != null && merchant.getPartnership() == 2) { //虚拟商户由合伙人发放红包金额
+          map = partnerService.lockGiveScoreToUser(weiXinUser, phoneNumber, merchant);
+          if (map.get("return").equals(0)) { //合伙人红包不足,由乐加生活发放红包
+            map = weiXinUserService.giveScoreAByDefault(weiXinUser, phoneNumber);
+          }
+        } else {
+          map = weiXinUserService.giveScoreAByDefault(weiXinUser, phoneNumber);
+        }
         //添加参加记录
         activityJoinLogService.addCodeBurseLogByDefault(weiXinUser, map.get("scoreA"));
         return LejiaResult.build(200, "" + map.get("scoreA"));
