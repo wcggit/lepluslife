@@ -5,19 +5,16 @@ import com.jifenke.lepluslive.Address.service.AddressService;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
-import com.jifenke.lepluslive.lejiauser.service.LeJiaUserService;
 import com.jifenke.lepluslive.order.domain.entities.OnLineOrder;
 import com.jifenke.lepluslive.order.service.OnlineOrderService;
 import com.jifenke.lepluslive.order.service.OrderDetailService;
 import com.jifenke.lepluslive.order.service.OrderService;
-import com.jifenke.lepluslive.product.service.ProductService;
 import com.jifenke.lepluslive.score.domain.entities.ScoreB;
 import com.jifenke.lepluslive.score.service.ScoreBService;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.service.DictionaryService;
 import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
 import com.jifenke.lepluslive.weixin.service.WeiXinService;
-import com.jifenke.lepluslive.weixin.service.WeiXinUserService;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ui.Model;
@@ -36,7 +33,7 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Created by wcg on 16/4/18.
+ * 线上订单 Created by zhangwen on 16/9/18.
  */
 @RestController
 @RequestMapping("/front/order")
@@ -44,9 +41,6 @@ public class OnlineOrderController {
 
   @Value("${weixin.appId}")
   private String appid;
-
-  @Inject
-  private ProductService productService;
 
   @Inject
   private OrderService orderService;
@@ -58,13 +52,7 @@ public class OnlineOrderController {
   private AddressService addressService;
 
   @Inject
-  private WeiXinUserService weiXinUserService;
-
-  @Inject
   private ScoreBService scoreBService;
-
-  @Inject
-  private LeJiaUserService leJiaUserService;
 
   @Inject
   private WeiXinService weiXinService;

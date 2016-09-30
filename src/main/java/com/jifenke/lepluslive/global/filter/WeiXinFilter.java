@@ -38,10 +38,11 @@ public class WeiXinFilter implements HandlerInterceptor {
     }
     String openId = CookieUtils.getCookieValue(request, appId + "-user-open-id");
     if (openId != null) {
-      WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByOpenId(openId);
-      if (weiXinUser != null) {
-        return true;
-      }
+//      WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByOpenId(openId);
+//      if (weiXinUser != null) {
+//        return true;
+//      }
+      return true;
     }
     try {
       String callbackUrl = weixinRootUrl + "/weixin/userRegister?action=" + action;

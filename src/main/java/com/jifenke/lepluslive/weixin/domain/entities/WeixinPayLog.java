@@ -24,20 +24,29 @@ public class WeixinPayLog {
   private String resultCode;
   private String tradeState;
 
+  private Integer logType;    //1=支付后微信回调日志|2=掉单查询订单日志
+
+  private String orderType;   //onLineOrder=公众号线上订单|APPOnLineOrder|offLineOrder|APPOffLineOrder
+
   private Date createDate = new Date();
 
-  public WeixinPayLog(String outTradeNo, String returnCode, String resultCode) {
+  public WeixinPayLog(String outTradeNo, String returnCode, String resultCode, Integer logType,
+                      String orderType) {
     this.outTradeNo = outTradeNo;
     this.returnCode = returnCode;
     this.resultCode = resultCode;
+    this.logType = logType;
+    this.orderType = orderType;
   }
 
   public WeixinPayLog(String outTradeNo, String returnCode, String resultCode,
-                      String tradeState) {
+                      String tradeState, Integer logType, String orderType) {
     this.outTradeNo = outTradeNo;
     this.returnCode = returnCode;
     this.resultCode = resultCode;
     this.tradeState = tradeState;
+    this.logType = logType;
+    this.orderType = orderType;
   }
 
   public Long getId() {
@@ -78,6 +87,22 @@ public class WeixinPayLog {
 
   public void setTradeState(String tradeState) {
     this.tradeState = tradeState;
+  }
+
+  public Integer getLogType() {
+    return logType;
+  }
+
+  public void setLogType(Integer logType) {
+    this.logType = logType;
+  }
+
+  public String getOrderType() {
+    return orderType;
+  }
+
+  public void setOrderType(String orderType) {
+    this.orderType = orderType;
   }
 
   public Date getCreateDate() {

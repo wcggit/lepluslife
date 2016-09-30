@@ -12,7 +12,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" id="viewport" content="width=device-width, initial-scale=1">
     <meta name="format-detection" content="telephone=no">
     <meta name="format-detection" content="telephone=yes"/>
     <meta name="apple-mobile-web-app-capable" content="yes"/>
@@ -27,6 +26,12 @@
     <link rel="stylesheet" href="${resourceUrl}/frontRes/product/hotDetail/css/hot.css">
     <link rel="stylesheet" href="${resourceUrl}/frontRes/css/tanChuang.css">
 </head>
+<style>
+    .swiper-pagination-bullet {
+        width:6px !important;
+        height:6px !important;
+    }
+</style>
 <body>
 <section class="banner">
     <div class="swiper-container swiper-banner">
@@ -63,12 +68,13 @@
 <section class="num">
     <div>数量</div>
     <div class="num-num">
-        <div id="btnCut1">-</div>
+        <div id="btnCut1" style="border: 1px solid #e1e1e1;border-right: 1px solid #999"><img class="w-jian" style="width: 30%;" src="${resourceUrl}/frontRes/product/hotIndex/img/4.png" alt=""></div>
         <div>
             <input id="num1" type="number" value="1"/>
         </div>
-        <div id="btnAdd1">+</div>
+        <div id="btnAdd1"><img class="w-jia" style="width: 30%" src="${resourceUrl}/frontRes/product/hotIndex/img/2.png" alt=""></div>
     </div>
+
 </section>
 <section class="imgText">
     <p>↓下拉加载图文详情↓</p>
@@ -79,9 +85,6 @@
 </section>
 <section class="blank"></section>
 <section class="footer cantPay">
-    <!--<p>立即购买<span>（仅剩8份）</span></p>-->
-    <!--<p>积分不足</p>-->
-    <!--<p>您已兑换过一份，无法继续兑换</p>-->
     <p id="buySubmit">立即购买</p>
 </section>
 
@@ -100,9 +103,16 @@
 <script src="${resourceUrl}/frontRes/js/layer.js"></script>
 <%--------以下是数量切换的逻辑结构--------%>
 <script>
-
+    var u = navigator.userAgent;
+    if (u.indexOf('Android') > -1 || u.indexOf('Linux') > -1) {//安卓手机
+        $(".num-num input").css("margin-top","-0.5px");
+    } else if (u.indexOf('iPhone') > -1) {//苹果手机
+    } else if (u.indexOf('Windows Phone') > -1) {//winphone手机
+    }
+</script>
+<script>
     var num1 = $('#num1'), btnCut1 = $('#btnCut1'), btnAdd1 = $('#btnAdd1'), minPrice = $('#minPrice'), minScore = $('#minScore');
-    var maxNum = '${product.buyLimit}';
+    var maxNum = eval('${product.buyLimit}');
     if (maxNum == 0) {
         maxNum = 10000;
     }
@@ -111,8 +121,19 @@
     function judgeFun1() {
         if (num1.val() >= eval(maxNum)) {
             num1.val(maxNum);
+            $(".w-jia").attr("src","${resourceUrl}/frontRes/product/hotIndex/img/3.png");
+            $("#btnAdd1").attr("style","border: 1px solid #e1e1e1;border-left: 1px solid #999");
+            $("#btnCut1").attr("style","border: 1px solid #999999;");
         } else if (num1.val() <= 0) {
             num1.val(1);
+            $(".w-jian").attr("src","${resourceUrl}/frontRes/product/hotIndex/img/4.png");
+            $("#btnCut1").attr("style","border: 1px solid #e1e1e1;border-right: 1px solid #999");
+            $("#btnAdd1").attr("style","border: 1px solid #999999;");
+        }else {
+            $(".w-jian").attr("src","${resourceUrl}/frontRes/product/hotIndex/img/1.png");
+            $(".w-jia").attr("src","${resourceUrl}/frontRes/product/hotIndex/img/2.png");
+            $("#btnAdd1").attr("style","border: 1px solid #999999;");
+            $("#btnCut1").attr("style","border: 1px solid #999999;");
         }
     }
     //点击事件
@@ -173,7 +194,7 @@
     });
     function createOrder() {
         $(".footer").attr("onclick", "");
-        var productId = '${product.id}', specId = $(".check").prev().prev().prev().val(), buyNumber = num1.val();
+        var productId = '${product.id}', specId = $(".check").prev().prev().prev().val(), buyNumber = eval(num1.val());
         if (maxNum != 10000 && buyNumber > maxNum) {
             alert("最多购买数量为:" + maxNum);
             $(".footer").attr('onclick', 'createOrder()');

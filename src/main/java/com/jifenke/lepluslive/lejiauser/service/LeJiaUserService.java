@@ -163,7 +163,7 @@ public class LeJiaUserService {
   }
 
   /**
-   * 根据关注来源  16/09/20 判断是否需要绑定商户和合伙人
+   * 根据关注来源,判断是否需要绑定商户和合伙人  16/09/20
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public Merchant checkUserBindMerchant(WeiXinUser weiXinUser) {
@@ -175,33 +175,54 @@ public class LeJiaUserService {
       if (leJiaUser.getBindMerchant() == null) {
         Long merchantId = Long.valueOf(subSource.split("_")[2]);
         if (merchantId != null) {
-          merchant = merchantService.findMerchantById(merchantId);
-          Partner partner = merchant.getPartner();
-          Date date = new Date();
-          if (merchant.getPartnership() != 2) {
-            long userLimit = leJiaUserRepository.countMerchantBindLeJiaUser(merchantId);
-            if (merchant.getUserLimit() > userLimit) {
-
-              leJiaUser.setBindMerchant(merchant);
-              leJiaUser.setBindMerchantDate(date);
-              long
-                  partnerUserLimit =
-                  leJiaUserRepository.countPartnerBindLeJiaUser(partner.getId());
-              if (partner.getUserLimit() > partnerUserLimit) {
-                leJiaUser.setBindPartner(partner);
-                leJiaUser.setBindPartnerDate(date);
-              }
-            }
-          } else { //虚拟商户操作
-            long partnerUserLimit = leJiaUserRepository.countPartnerBindLeJiaUser(partner.getId());
-            if (partner.getUserLimit() > partnerUserLimit) {
-              leJiaUser.setBindPartner(partner);
-              leJiaUser.setBindPartnerDate(date);
-              leJiaUser.setBindMerchant(merchant);
-              leJiaUser.setBindMerchantDate(date);
-            }
-          }
+          merchant = bindMerchantAndPartner(merchantId, leJiaUser);
         }
+      }
+    }
+    return merchant;
+  }
+
+  /**
+   * 会员扫码，绑定商户但不修改关注来源  16/09/29 判断是否需要绑定商户和合伙人
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  public void memberSubBindMerchant(WeiXinUser weiXinUser, Long merchantId) {
+    LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
+    bindMerchantAndPartner(merchantId, leJiaUser);
+  }
+
+  /**
+   * 绑定商户及合伙人 16/09/29
+   *
+   * @param merchantId 商户ID
+   * @param leJiaUser  乐加用户
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  private Merchant bindMerchantAndPartner(Long merchantId, LeJiaUser leJiaUser) {
+    Merchant merchant = merchantService.findMerchantById(merchantId);
+    Partner partner = merchant.getPartner();
+    Date date = new Date();
+    if (merchant.getPartnership() != 2) {
+      long userLimit = leJiaUserRepository.countMerchantBindLeJiaUser(merchantId);
+      if (merchant.getUserLimit() > userLimit) {
+
+        leJiaUser.setBindMerchant(merchant);
+        leJiaUser.setBindMerchantDate(date);
+        long
+            partnerUserLimit =
+            leJiaUserRepository.countPartnerBindLeJiaUser(partner.getId());
+        if (partner.getUserLimit() > partnerUserLimit) {
+          leJiaUser.setBindPartner(partner);
+          leJiaUser.setBindPartnerDate(date);
+        }
+      }
+    } else { //虚拟商户操作
+      long partnerUserLimit = leJiaUserRepository.countPartnerBindLeJiaUser(partner.getId());
+      if (partner.getUserLimit() > partnerUserLimit) {
+        leJiaUser.setBindPartner(partner);
+        leJiaUser.setBindPartnerDate(date);
+        leJiaUser.setBindMerchant(merchant);
+        leJiaUser.setBindMerchantDate(date);
       }
     }
     return merchant;

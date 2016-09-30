@@ -13,13 +13,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="viewport" id="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
     <meta name="format-detection" content="telephone=no">
     <meta name="format-detection" content="telephone=yes"/>
     <meta name="apple-mobile-web-app-capable" content="yes"/>
     <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
-    <title>主打爆款</title>
+    <title>秒杀</title>
     <c:set var="resourceUrl" value="http://www.lepluslife.com/resource"></c:set>
     <c:set var="wxRootUrl" value="http://www.lepluslife.com"></c:set>
     <link rel="stylesheet" href="${resourceUrl}/frontRes/css/reset.css">
@@ -34,19 +34,23 @@
 
     <p>主打爆款</p>
 </section>
-<section class="hotGoods">
-    <div>
-        <img src="${product.thumb}" alt="">
-    </div>
-    <div class="only">仅剩${product.repository}份</div>
-    <div>${product.name}</div>
-    <div><span><fmt:formatNumber type="number" value="${product.minPrice/100}" pattern="0.00"
-                                 maxFractionDigits="2"/>元</span> +
-        <span>${product.minScore}积分</span>
+<c:if test="${product != null}">
+    <section class="hotGoods" onclick="goHotDetail(${product.id})">
+        <div>
+            <img src="${product.thumb}" alt="">
+        </div>
+        <div class="only">仅剩${product.repository}份</div>
+        <div>${product.name}</div>
+        <div><span style="color:#333;font-size: 15px;margin-right: -2px"><fmt:formatNumber
+                type="number" value="${product.minPrice/100}" pattern="0.00"
+                maxFractionDigits="2"/>元</span> +
+            <span style="margin-left: -2px;">${product.minScore}积分</span>
         <span class="line-down">市场价<fmt:formatNumber type="number" value="${product.price/100}"
                                                      pattern="0.00" maxFractionDigits="2"/>元</span>
-    </div>
-</section>
+        </div>
+    </section>
+</c:if>
+
 <section class="top">
     <img src="${resourceUrl}/frontRes/product/hotIndex/img/line.png" alt="">
 
@@ -122,8 +126,10 @@
                                            + '" alt=""> </div><div class="only-small">仅剩'
                                            + list[i].repository
                                            + '份</div><div>' + list[i].name
-                                           + '</div><div><span>' + toDecimal(list[i].minPrice / 100)
-                                           + '元</span> + <span>' + list[i].minScore
+                                           + '</div><div><span style="font-size: 14px;color:#333;margin-right: -3px;">'
+                                           + toDecimal(list[i].minPrice / 100)
+                                           + '元</span> + <span style="margin-left: -3px">'
+                                           + list[i].minScore
                                            + '积分</span></div> <div class="line-down">市场价'
                                            + toDecimal(list[i].price / 100) + '元</div></div>';
                                content += currP;
@@ -136,34 +142,6 @@
                    }
                });
     }
-
-    //    function ajaxProductList(page) {
-    //        $.ajax({
-    //                   type: "get",
-    //                   // url: "/front/product/hotList?page=" + page,
-    //                   url: "/shop/productList?typeId=0&page=" + page,
-    //                   success: function (data) {
-    //                       var list = data.data, i = 0, mainContent = $("#hotContent"), content = "";
-    //                       currLength = 0;
-    //                       if (list != null) {
-    //                           currLength = list.length;
-    //                           for (i; i < list.length; i++) {
-    //                               var currP = ' <div onclick="goHotDetail(' + list[i].id
-    //                                           + ')"><div><img src="' + list[i].picture
-    //                                           + '" alt=""> </div><div class="only-small">仅剩'
-    //                                           + list[i].repository
-    //                                           + '份</div><div>' + list[i].name
-    //                                           + '</div><div><span>' + list[i].minPrice / 100
-    //                                           + '元</span> + <span>' + list[i].minScore
-    //                                           + '积分</span></div> <div class="line-down">市场价'
-    //                                           + list[i].price / 100 + '元</div></div>';
-    //                               content += currP;
-    //                           }
-    //                           mainContent.html(mainContent.html() + content);
-    //                       }
-    //                   }
-    //               });
-    //    }
 
     function goHotDetail(id) { //go爆品详情页
         location.href = "/front/product/weixin/limitDetail?productId=" + id;
@@ -192,7 +170,6 @@
                 ajaxHotProductList(currPage);
                 currPage++;
             }
-
         }
     });
 

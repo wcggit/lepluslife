@@ -95,23 +95,34 @@ public class WeixinPayController {
         return map;
       }
     }
-    OnLineOrder
-        onLineOrder =
+    Map<Object, Object>
+        result =
         orderService.setPriceScoreForOrder(orderId, newTruePrice, trueScore, transmitWay);
+    if (!"200".equals(result.get("status").toString())) {
+      return result;
+    }
 
     //封装订单参数
-    SortedMap<Object, Object> map = weiXinPayService.buildOrderParams(request, onLineOrder);
+    SortedMap<Object, Object>
+        map =
+        weiXinPayService.buildOrderParams(request, (OnLineOrder) result.get("data"));
     //获取预支付id
     Map unifiedOrder = weiXinPayService.createUnifiedOrder(map);
     if (unifiedOrder.get("prepay_id") != null) {
       //创建定时任务，5分钟后查询订单是否支付完成防止掉单
-      orderService.startOrderStatusQueryJob(orderId);
+      //修改为支付完成点击“完成”时查询订单状态
+      // orderService.startOrderStatusQueryJob(orderId);
       //返回前端页面
-      return weiXinPayService.buildJsapiParams(unifiedOrder.get("prepay_id").toString());
+      SortedMap
+          jsapiParams =
+          weiXinPayService.buildJsapiParams(unifiedOrder.get("prepay_id").toString());
+      jsapiParams.put("status", 200);
+      return jsapiParams;
     } else {
       log.error(unifiedOrder.get("return_msg").toString());
       unifiedOrder.clear();
-      unifiedOrder.put("err_msg", "出现未知错误,请联系管理员或稍后重试");
+      unifiedOrder.put("status", 500);
+      unifiedOrder.put("msg", "出现未知错误,请联系管理员或稍后重试");
       return unifiedOrder;
     }
   }
@@ -133,7 +144,6 @@ public class WeixinPayController {
     String orderSid = (String) map.get("out_trade_no");
     String returnCode = (String) map.get("return_code");
     String resultCode = (String) map.get("result_code");
-    weixinPayLogService.savePayLog(orderSid, returnCode, resultCode);
     //操作订单
     if ("SUCCESS".equals(returnCode) && "SUCCESS".equals(resultCode)) {
       try {

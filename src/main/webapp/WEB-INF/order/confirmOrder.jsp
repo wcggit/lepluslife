@@ -320,13 +320,12 @@
                         $('#btn-wxPay').attr('onclick', 'payByWx()');
                     }
                 } else {
-                    //            调用微信支付js-api接口
-                    if (res['err_msg'] != null && res['err_msg'] != "") {
-                        alert(res['err_msg']);
-                        $('#btn-wxPay').attr('onclick', 'payByWx()');
+                    if (res.status == 200) {//调用微信支付js-api接口
+                        weixinPay(res);
                         return;
                     } else {
-                        weixinPay(res);
+                        alert(res['msg']);
+                        $('#btn-wxPay').attr('onclick', 'payByWx()');
                         return;
                     }
                 }
@@ -348,7 +347,7 @@
                            paySign: res['sign'], // 支付签名
                            success: function (res) {
                                // 支付成功后的回调函数
-                               var total = $("#turePrice").html() * 100;
+                               var total = eval($("#truePrice").html()) * 100;
                                window.location.href = '/weixin/pay/paySuccess/' + total;
                            },
                            cancel: function (res) {
@@ -359,7 +358,5 @@
                            }
                        });
     }
-
-
 </script>
 </html>

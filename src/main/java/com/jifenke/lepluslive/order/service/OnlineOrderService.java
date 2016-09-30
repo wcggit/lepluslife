@@ -1,7 +1,6 @@
 package com.jifenke.lepluslive.order.service;
 
 import com.jifenke.lepluslive.Address.domain.entities.Address;
-import com.jifenke.lepluslive.Address.service.AddressService;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.order.domain.entities.OnLineOrder;
 import com.jifenke.lepluslive.order.domain.entities.OrderDetail;
@@ -14,18 +13,11 @@ import com.jifenke.lepluslive.score.domain.entities.ScoreB;
 import com.jifenke.lepluslive.score.domain.entities.ScoreBDetail;
 import com.jifenke.lepluslive.score.repository.ScoreBDetailRepository;
 import com.jifenke.lepluslive.score.repository.ScoreBRepository;
-import com.jifenke.lepluslive.score.service.ScoreAService;
 import com.jifenke.lepluslive.score.service.ScoreBService;
-import com.jifenke.lepluslive.weixin.controller.dto.CartDetailDto;
-import com.jifenke.lepluslive.weixin.controller.dto.OrderDto;
-import com.jifenke.lepluslive.weixin.repository.DictionaryRepository;
 import com.jifenke.lepluslive.weixin.service.JobThread;
-import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
-import com.jifenke.lepluslive.weixin.service.WeixinPayLogService;
 
 import org.quartz.Scheduler;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,16 +42,7 @@ public class OnlineOrderService {
   private ProductService productService;
 
   @Inject
-  private AddressService addressService;
-
-  @Inject
-  private WeiXinPayService weiXinPayService;
-
-  @Inject
   private OrderRepository orderRepository;
-
-  @Inject
-  private ScoreAService scoreAService;
 
   @Inject
   private ScoreBRepository scoreBRepository;
@@ -72,18 +55,6 @@ public class OnlineOrderService {
 
   @Inject
   private Scheduler scheduler;
-
-  @Inject
-  private OrderService orderService;
-
-  @Inject
-  private DictionaryRepository dictionaryRepository;
-
-  @Inject
-  private WeixinPayLogService weixinPayLogService;
-
-  private static String jobGroupName = "ORDER_JOBGROUP_NAME";
-  private static String triggerGroupName = "ORDER_TRIGGERGROUP_NAME";
 
   /**
    * 创建爆品的待支付订单 16/09/22
