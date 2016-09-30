@@ -149,7 +149,7 @@
         </div>
         <p>周边好店</p>
     </div>
-    <div onclick="goPage('weixin/shop')">
+    <div onclick="goPage('front/product/weixin/productIndex')">
         <div>
             <img src="${resourceUrl}/frontRes/user/center/img/zhenpin.png" alt="">
         </div>

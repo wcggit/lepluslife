@@ -111,7 +111,7 @@ public class WeiXinUserService {
     String
         unionId =
         userDetail.get("unionid") != null ? userDetail.get("unionid").toString() : null;
-    WeiXinUser weiXinUser = weiXinUserRepository.findByOpenId(openid);
+    WeiXinUser weiXinUser = weiXinUserRepository.findByUnionId(unionId);
     ScoreA scoreA = null;
     ScoreB scoreB = null;
     if (weiXinUser == null) {
