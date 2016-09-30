@@ -228,4 +228,7 @@ public class LeJiaUserService {
     return merchant;
   }
 
+  public long countPartnerBindLeJiaUser(Long id) {
+    return leJiaUserRepository.countPartnerBindLeJiaUser(id);
+  }
 }

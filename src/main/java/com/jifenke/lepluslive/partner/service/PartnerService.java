@@ -1,8 +1,10 @@
 package com.jifenke.lepluslive.partner.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.lejiauser.repository.LeJiaUserRepository;
 import com.jifenke.lepluslive.merchant.domain.entities.Merchant;
+import com.jifenke.lepluslive.merchant.service.MerchantService;
 import com.jifenke.lepluslive.partner.domain.entities.Partner;
 import com.jifenke.lepluslive.partner.domain.entities.PartnerInfo;
 import com.jifenke.lepluslive.partner.domain.entities.PartnerScoreLog;
@@ -19,17 +21,27 @@ import com.jifenke.lepluslive.score.repository.ScoreADetailRepository;
 import com.jifenke.lepluslive.score.repository.ScoreARepository;
 import com.jifenke.lepluslive.score.repository.ScoreBDetailRepository;
 import com.jifenke.lepluslive.score.repository.ScoreBRepository;
+import com.jifenke.lepluslive.weixin.domain.entities.AccessToken;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
-import com.jifenke.lepluslive.weixin.service.DictionaryService;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -68,6 +80,9 @@ public class PartnerService {
 
   @Inject
   private PartnerScoreLogRepository partnerScoreLogRepository;
+
+  @Inject
+  private MerchantService merchantService;
 
   private static ReentrantLock lock = new ReentrantLock();
 
@@ -165,5 +180,60 @@ public class PartnerService {
     Map map = giveScoreToUser(weiXinUser, phoneNumber, merchant);
     lock.unlock();
     return map;
+  }
+
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+  public Partner findPartnerBySid(String sid) {
+    return partnerRepository.findByPartnerSid(sid);
+  }
+
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+  public Optional findPartnerByWeiXinUser(WeiXinUser weiXinUser) {
+    return partnerRepository.findByWeiXinUser(weiXinUser);
+  }
+
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  public Boolean bindWeiXinUser(Partner partner, WeiXinUser weiXinUser) {
+    long partnerUserLimit = leJiaUserRepository.countPartnerBindLeJiaUser(partner.getId());
+    LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
+    boolean flag = true;
+    if (!leJiaUser.getBindPartner().getId().equals(partner.getId())) { //未绑上
+      if (partner.getUserLimit() > partnerUserLimit) {
+        Merchant
+            merchant =
+            merchantService.findMerchantByPartnerAndPartnership(partner, 2).get(0);
+        leJiaUser.setBindMerchant(merchant);
+        leJiaUser.setBindPartner(partner);
+        leJiaUserRepository.save(leJiaUser);
+        partner.setWeiXinUser(weiXinUser);
+        partnerRepository.save(partner);
+      } else {
+        flag = false;
+      }
+    } else {
+      partner.setWeiXinUser(weiXinUser);
+      partnerRepository.save(partner);
+    }
+    if (flag) {
+      new Thread(() -> {
+        String
+            getUrl =
+            "http://www.lepluspay.com/partner/bind_wx_user/" + partner.getPartnerSid();
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet(getUrl);
+        httpGet.addHeader("Content-Type", "text/html;charset=UTF-8");
+        CloseableHttpResponse response = null;
+        try {
+          response = httpclient.execute(httpGet);
+          HttpEntity entity = response.getEntity();
+          EntityUtils.consume(entity);
+          response.close();
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }).start();
+
+    }
+    return flag;
   }
 }

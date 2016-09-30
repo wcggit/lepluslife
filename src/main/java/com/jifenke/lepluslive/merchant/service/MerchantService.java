@@ -9,6 +9,7 @@ import com.jifenke.lepluslive.merchant.repository.MerchantDetailRepository;
 import com.jifenke.lepluslive.merchant.repository.MerchantInfoRepository;
 import com.jifenke.lepluslive.merchant.repository.MerchantRepository;
 import com.jifenke.lepluslive.merchant.repository.MerchantScrollRepository;
+import com.jifenke.lepluslive.partner.domain.entities.Partner;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -385,6 +386,10 @@ public class MerchantService {
       mapList.add(map);
     }
     return mapList;
+  }
+
+  public List<Merchant> findMerchantByPartnerAndPartnership(Partner partner, int i) {
+    return merchantRepository.findByPartnerAndPartnership(partner,i);
   }
 
   //  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)

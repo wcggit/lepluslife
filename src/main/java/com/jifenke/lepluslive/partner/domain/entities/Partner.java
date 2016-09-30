@@ -1,12 +1,14 @@
 package com.jifenke.lepluslive.partner.domain.entities;
 
 import com.jifenke.lepluslive.global.util.MvUtil;
+import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 /**
@@ -43,6 +45,16 @@ public class Partner {
 
   private Integer benefitTime; //发放福利次数
 
+  @OneToOne
+  private WeiXinUser weiXinUser;
+
+  public WeiXinUser getWeiXinUser() {
+    return weiXinUser;
+  }
+
+  public void setWeiXinUser(WeiXinUser weiXinUser) {
+    this.weiXinUser = weiXinUser;
+  }
 
   public Integer getBenefitTime() {
     return benefitTime;

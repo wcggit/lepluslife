@@ -33,6 +33,14 @@ public class PartnerInfo {
   @OneToOne
   private Partner partner;
 
+  public Partner getPartner() {
+    return partner;
+  }
+
+  public void setPartner(Partner partner) {
+    this.partner = partner;
+  }
+
   public Long getId() {
     return id;
   }

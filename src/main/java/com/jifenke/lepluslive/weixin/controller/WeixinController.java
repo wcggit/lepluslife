@@ -7,6 +7,8 @@ import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.lejiauser.service.LeJiaUserService;
+import com.jifenke.lepluslive.partner.domain.entities.Partner;
+import com.jifenke.lepluslive.partner.service.PartnerService;
 import com.jifenke.lepluslive.product.controller.dto.ProductDto;
 import com.jifenke.lepluslive.product.domain.entities.Product;
 import com.jifenke.lepluslive.product.domain.entities.ProductDetail;
@@ -29,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -87,6 +90,10 @@ public class WeixinController {
 
   @Inject
   private WeiXinUserInfoService weiXinUserInfoService;
+
+  @Inject
+  private PartnerService partnerService;
+
 
   @RequestMapping("/shop")
   public ModelAndView goProductPage(HttpServletRequest request, HttpServletResponse response,
@@ -227,6 +234,53 @@ public class WeixinController {
   public ModelAndView goMerchantPage(HttpServletRequest request, Model model) {
     model.addAttribute("wxConfig", weiXinService.getWeiXinConfig(request));
     return MvUtil.go("/weixin/merchant");
+  }
+
+  @RequestMapping("/partner/bind_wx_user/{sid}")
+  public ModelAndView partnerBindUser(@PathVariable String sid, Model model,
+                                      HttpServletRequest request) {
+    Partner partner = partnerService.findPartnerBySid(sid);
+    String openId = CookieUtils.getCookieValue(request, appId + "-user-open-id");
+    model.addAttribute("partner", partner);
+    model.addAttribute("openid", openId);
+    WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByOpenId(openId);
+    model.addAttribute("weiXinUser", weiXinUser);
+    if (partner.getWeiXinUser() == null) {
+      if (partnerService.findPartnerByWeiXinUser(weiXinUser).isPresent()) {
+        model.addAttribute("code", "1"); //该微信号已经绑定合伙人且不是当前合伙人
+      } else {
+        long partnerUserLimit = leJiaUserService.countPartnerBindLeJiaUser(partner.getId());
+        Partner bindPartner = weiXinUser.getLeJiaUser().getBindPartner();
+        if (bindPartner != null && bindPartner.getId().equals(partner.getId())) {//已经绑上无须在考虑绑定
+          model.addAttribute("code", "4");
+        } else {
+          if (partner.getUserLimit() > partnerUserLimit) {
+            model.addAttribute("code", "2"); //名额不足
+          } else {
+            model.addAttribute("code", "4");//正常绑定
+          }
+        }
+      }
+    } else {
+      // 如果已经绑上当前用户
+      if (weiXinUser.getId().equals(partner.getWeiXinUser().getId())) {
+        model.addAttribute("code", "5"); //该微信号已经绑定合伙人且是当前合伙人
+      } else {
+        model.addAttribute("code", "3");//该合伙人已绑定微信号且非该微信号
+      }
+    }
+    return MvUtil.go("/weixin/partnerBind");
+  }
+
+  @RequestMapping(value = "/partner/bind/{sid}")
+  public
+  @ResponseBody
+  LejiaResult bindPartnerConfirm(@PathVariable String sid, HttpServletRequest request) {
+    Partner partner = partnerService.findPartnerBySid(sid);
+    String openId = CookieUtils.getCookieValue(request, appId + "-user-open-id");
+    WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByOpenId(openId);
+    return partnerService.bindWeiXinUser(partner, weiXinUser) ? LejiaResult.ok()
+                                                              : LejiaResult.build(201, "绑定名额已满");
   }
 
 }

@@ -1,6 +1,7 @@
 package com.jifenke.lepluslive.merchant.repository;
 
 import com.jifenke.lepluslive.merchant.domain.entities.Merchant;
+import com.jifenke.lepluslive.partner.domain.entities.Partner;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +23,8 @@ public interface MerchantRepository extends JpaRepository<Merchant, Long> {
   //商家详情
   @Query(value = "SELECT m.id,m.`name` AS mName,m.location,m.phone_number,m.lng,m.lat,t.`name` AS tName,a.`name` AS aName,i.star,i.card,i.park,i.per_sale,i.wifi from merchant m,merchant_info i,merchant_type t,area a WHERE m.merchant_info_id=i.id AND m.merchant_type_id=t.id AND m.area_id=a.id AND m.id=?1", nativeQuery = true)
   List<Object[]> findMerchantById(Long id);
+
+  List<Merchant> findByPartnerAndPartnership(Partner partner, int i);
 
 //  /**
 //   * 按照距离远近对商家排序
