@@ -258,14 +258,16 @@
     <div>
         <div><img src="${resourceUrl}/frontRes/order/orderDetail/img/phone.png" alt=""></div>
         <div>联系乐加客服</div>
-        <a href="tel:4000412800" style="width: 100%; position: fixed;left: 0;bottom: 0;height: 50px;"></a>
+        <a href="tel:4000412800"
+           style="width: 100%; position: fixed;left: 0;bottom: 0;height: 50px;"></a>
     </div>
 </section>
 <section id="waitPay" class="footer" style="display: none;">
     <div>
         <div><img src="${resourceUrl}/frontRes/order/orderDetail/img/phone.png" alt=""></div>
         <div>联系乐加客服</div>
-        <a href="tel:4000412800" style="width: 40%; position: fixed;left: 0;bottom: 0;height: 50px;"></a>
+        <a href="tel:4000412800"
+           style="width: 40%; position: fixed;left: 0;bottom: 0;height: 50px;"></a>
     </div>
     <div class="footerButton">
         <button onclick="orderCancle()">取消订单</button>
@@ -277,7 +279,8 @@
     <div>
         <div><img src="${resourceUrl}/frontRes/order/orderDetail/img/phone.png" alt=""></div>
         <div>联系乐加客服</div>
-        <a href="tel:4000412800" style="width: 40%; position: fixed;left: 0;bottom: 0;height: 50px;"></a>
+        <a href="tel:4000412800"
+           style="width: 40%; position: fixed;left: 0;bottom: 0;height: 50px;"></a>
     </div>
     <div class="footerButton">
         <button onclick="goDeliveryPage()">查看物流</button>
@@ -288,7 +291,8 @@
     <div>
         <div><img src="${resourceUrl}/frontRes/order/orderDetail/img/phone.png" alt=""></div>
         <div>联系乐加客服</div>
-        <a href="tel:4000412800" style="width: 50%; position: fixed;left: 0;bottom: 0;height: 50px;"></a>
+        <a href="tel:4000412800"
+           style="width: 50%; position: fixed;left: 0;bottom: 0;height: 50px;"></a>
     </div>
     <div class="footerButton">
         <button onclick="goDeliveryPage()">查看物流</button>
@@ -430,6 +434,9 @@
             // 显示倒计时效果
             $("#times_minute").html(int_minute);
             $("#times_second").html(int_second);
+            if (eval(int_minute) == 0 && eval(int_second) == 0) {
+                location.href = '/front/order/weixin/orderList';
+            }
             setTimeout(count_down0, 1000);
         }
     }
@@ -477,7 +484,9 @@
 </script>
 <script>
     $(".blank").css("height", $(".footer").height() + 34 + "px");
-    $(".goodsList > div > div:first-child").css("height", $(".goodsList > div > div:first-child").width() + "px");
+    $(".goodsList > div > div:first-child").css("height",
+                                                $(".goodsList > div > div:first-child").width()
+                                                + "px");
     function goDeliveryPage() {//查看物流信息
         location.href = "/order/showExpress/" + ${order.id};
     }

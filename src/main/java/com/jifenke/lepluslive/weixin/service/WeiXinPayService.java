@@ -117,7 +117,6 @@ public class WeiXinPayService {
 //    orderParams.put("total_fee", "1");
     orderParams.put("spbill_create_ip", getIpAddr(request));
     orderParams.put("notify_url", weixinRootUrl + "/weixin/pay/afterPay");
-//    orderParams.put("notify_url", weixinRootUrl + "/wxTest/weixin/pay/afterPay");
     orderParams.put("trade_type", "APP");
     orderParams.put("input_charset", "UTF-8");
     String sign = createSign("UTF-8", orderParams, _mchKey);
@@ -126,7 +125,7 @@ public class WeiXinPayService {
   }
 
   /**
-   * 封装订单查询参数
+   * 公众号封装订单查询参数
    */
   @Transactional(readOnly = true)
   public SortedMap<Object, Object> buildOrderQueryParams(OnLineOrder onLineOrder) {
@@ -136,6 +135,21 @@ public class WeiXinPayService {
     orderParams.put("out_trade_no", onLineOrder.getOrderSid());
     orderParams.put("nonce_str", MvUtil.getRandomStr());
     String sign = createSign("UTF-8", orderParams, mchKey);
+    orderParams.put("sign", sign);
+    return orderParams;
+  }
+
+  /**
+   * APP封装订单查询参数   16/09/29
+   */
+  @Transactional(readOnly = true)
+  public SortedMap<Object, Object> buildAPPOrderQueryParams(OnLineOrder onLineOrder) {
+    SortedMap<Object, Object> orderParams = new TreeMap<Object, Object>();
+    orderParams.put("appid", _appId);
+    orderParams.put("mch_id", _mchId);
+    orderParams.put("out_trade_no", onLineOrder.getOrderSid());
+    orderParams.put("nonce_str", MvUtil.getRandomStr());
+    String sign = createSign("UTF-8", orderParams, _mchKey);
     orderParams.put("sign", sign);
     return orderParams;
   }

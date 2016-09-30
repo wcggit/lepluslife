@@ -220,13 +220,17 @@ public class OrderController {
   @ResponseBody
   LejiaResult weixinPay(@RequestParam Long orderId, @RequestParam Long truePrice,
                         @RequestParam Long trueScore, HttpServletRequest request) {
-    OnLineOrder onLineOrder = orderService.setPriceScoreForOrder(orderId, truePrice, trueScore, 2);
-    if (onLineOrder == null) {
-      return LejiaResult.build(403, "库存不足");
+    Map<Object, Object>
+        result =
+        orderService.setPriceScoreForOrder(orderId, truePrice, trueScore, 2);
+    if (!"200".equals(result.get("status").toString())) {
+      return LejiaResult.build(Integer.valueOf(result.get("status").toString()), "库存不足");
     }
 
     //封装订单参数
-    SortedMap<Object, Object> map = weiXinPayService._buildOrderParams(request, onLineOrder);
+    SortedMap<Object, Object>
+        map =
+        weiXinPayService._buildOrderParams(request, (OnLineOrder) result.get("data"));
     //获取预支付id
     Map unifiedOrder = weiXinPayService.createUnifiedOrder(map);
     if (unifiedOrder.get("prepay_id") != null) {
@@ -242,7 +246,8 @@ public class OrderController {
   @RequestMapping(value = "/paySuccess", method = RequestMethod.POST)
   @ResponseBody
   public LejiaResult paySuccess(@RequestParam Long orderId) {
-
+    //查询是否掉单
+    orderService.orderStatusQuery(orderId, 2);
     OnLineOrder order = orderService.findOnLineOrderById(orderId);
     HashMap<String, Object> map = new HashMap<>();
     if (order != null) {
@@ -344,7 +349,7 @@ public class OrderController {
     model.addAttribute("order", order);
     model.addAttribute("wxUser", order.getLeJiaUser().getWeiXinUser());
     model.addAttribute("address", order.getAddress());
-    model.addAttribute("backA",dictionaryService.findDictionaryById(3L).getValue());
+    model.addAttribute("backA", dictionaryService.findDictionaryById(3L).getValue());
 
     return MvUtil.go("/order/orderDetail");
   }

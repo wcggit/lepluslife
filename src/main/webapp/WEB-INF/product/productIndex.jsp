@@ -13,13 +13,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="viewport" id="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
     <meta name="format-detection" content="telephone=no">
     <meta name="format-detection" content="telephone=yes"/>
     <meta name="apple-mobile-web-app-capable" content="yes"/>
     <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
-    <title>主页</title>
+    <title>臻品</title>
     <c:set var="resourceUrl" value="http://www.lepluslife.com/resource"></c:set>
     <c:set var="wxRootUrl" value="http://www.lepluslife.com"></c:set>
     <link rel="stylesheet" href="${resourceUrl}/frontRes/css/reset.css">
@@ -28,6 +28,11 @@
     <link rel="stylesheet" href="${resourceUrl}/css/paySuccess.css">
     <link rel="stylesheet" href="${resourceUrl}/css/payFailed.css">
 </head>
+<style>
+    .swiper-pagination-bullet-active {
+        background-color: #e94634 !important;
+    }
+</style>
 <body>
 <c:if test="${orderId!=null}">
     <div id="mask-failed">
@@ -107,27 +112,34 @@
 
                             <div style="float: right;margin-top: -6%;font-size: 14px;color: #999999;margin-right: 3%"
                                  onclick="goMenu(2)">
-                                全部>
+                                <img style="width: 10%;position: absolute;right: 0;left:87%;margin-top: 0.8%;"
+                                     src="${resourceUrl}/frontRes/product/hotIndex/img/index_all.png"
+                                     alt=""/>
                             </div>
                         </section>
-                        <section class="hotGoods" onclick="goHotDetail(${product.id})">
-                            <div>
-                                <img src="${product.thumb}" alt="">
-                            </div>
-                            <div class="only">仅剩${product.repository}份</div>
-                            <div>${product.name}</div>
-                            <div><span><fmt:formatNumber type="number"
-                                                         value="${product.minPrice/100}"
-                                                         pattern="0.00"
-                                                         maxFractionDigits="2"/>元</span> +
-                                <span>${product.minScore}积分</span><span
+                        <c:if test="${product != null}">
+                            <section class="hotGoods" onclick="goHotDetail(${product.id})">
+                                <div>
+                                    <img src="${product.thumb}" alt="">
+                                </div>
+                                <div class="only">仅剩${product.repository}份</div>
+                                <div>${product.name}</div>
+                                <div><span
+                                        style="color:#333;font-size: 15px;margin-right: -2px"><fmt:formatNumber
+                                        type="number"
+                                        value="${product.minPrice/100}"
+                                        pattern="0.00"
+                                        maxFractionDigits="2"/>元</span> + <span
+                                        style="margin-left: -2px;">${product.minScore}积分</span><span
                                         class="line-down">市场价<fmt:formatNumber type="number"
                                                                                value="${product.price/100}"
                                                                                pattern="0.00"
                                                                                maxFractionDigits="2"/>元</span>
-                            </div>
-                        </section>
-                        <section class="top" style="margin-bottom: 5px;">
+                                </div>
+                            </section>
+                        </c:if>
+
+                        <section class="top" style="margin-bottom: 2px;">
                             <img src="${resourceUrl}/frontRes/product/hotIndex/img/line.png" alt="">
 
                             <p>臻品推荐</p>
@@ -303,10 +315,12 @@
                                var currP = '<div onclick="goProductDetail(' + list[i].id
                                            + ')"><div><img src="' + list[i].picture
                                            + '" alt=""></div><div>' + list[i].name
-                                           + '</div><div><span>' + toDecimal(list[i].minPrice / 100)
-                                           + '元</span> + <span>' + Math.floor((list[i].price
-                                                                               - list[i].minPrice)
-                                                                              / 100)
+                                           + '</div><div><span style="font-size: 14px;color:#333;margin-right: -3px;">'
+                                           + toDecimal(list[i].minPrice / 100)
+                                           + '元</span> + <span style="margin-left: -3px">'
+                                           + Math.floor((list[i].price
+                                                         - list[i].minPrice)
+                                                        / 100)
                                            + '积分</span></div> <div> <div class="line-down">市场价'
                                            + toDecimal(list[i].price / 100)
                                            + '元</div> <div>' + list[i].saleNumber
@@ -374,12 +388,6 @@
                 typeCurrLength[productType] = 0;
                 ajaxProductList(typeContent, productType, 1);
                 typeCurrPage[productType]++;
-//                if (productType != 0) {
-//                    if (typeCurrPage[productType] == 1) {
-//                        ajaxProductList(typeContent, productType, 1);
-//                        typeCurrPage[productType]++;
-//                    }
-//                }
             }
         });
         $(".tabs > div > div").on('touchstart mousedown', function (e) {

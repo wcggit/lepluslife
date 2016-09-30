@@ -20,6 +20,6 @@ public class OrderStatusQueryJob extends BaseJobBean {
     JobDataMap dataMap = context.getJobDetail().getJobDataMap();
     Long orderId = dataMap.getLong("orderId");
 
-    orderService.orderStatusQuery(orderId);
+    orderService.orderStatusQuery(orderId, 1);
   }
 }

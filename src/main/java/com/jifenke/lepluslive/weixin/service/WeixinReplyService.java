@@ -158,10 +158,7 @@ public class WeixinReplyService {
                     .findMerchantIdByParameter(parameter);//o[0]=merchantId|o[1]=partnership
             if (o != null) { //绑定注册来源,判断绑定流程
 //
-              Map<String, String>
-                  result =
-                  subscribeByMerchantQrCode(map, user, Long.valueOf(o[0].toString()),
-                                            Integer.valueOf(o[1].toString()));
+              Map result = subscribeByMerchantQrCode(map, user, Long.valueOf(o[0].toString()));
               str = reply.buildReplyXmlString(result);
               return str;
             }
@@ -315,16 +312,13 @@ public class WeixinReplyService {
   /**
    * 商户二维码关注处理流程 16/09/27
    *
-   * @param map         关注时微信发送的数据
-   * @param weiXinUser  从数据库查找的用户信息(没有时为null)
-   * @param merchantId  永久二维码对应的商户id
-   * @param partnership 永久二维码对应的商户类型
+   * @param map        关注时微信发送的数据
+   * @param weiXinUser 从数据库查找的用户信息(没有时为null)
+   * @param merchantId 永久二维码对应的商户id
    * @return 图文消息的内容
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  private Map<String, String> subscribeByMerchantQrCode(Map<String, String> map,
-                                                        WeiXinUser weiXinUser,
-                                                        Long merchantId, Integer partnership) {
+  private Map subscribeByMerchantQrCode(Map map, WeiXinUser weiXinUser, Long merchantId) {
 
     if (weiXinUser == null) { //数据库中没有该用户
       String openId = map.get("FromUserName").toString();
@@ -337,7 +331,7 @@ public class WeixinReplyService {
       if (null == userDetail.get("errcode")) {
         try {
           userDetail.put("subSource", "4_0_" + merchantId);
-          weiXinUser = weiXinUserService.saveWeiXinUserBySubscribe(userDetail, null);
+          weiXinUserService.saveWeiXinUserBySubscribe(userDetail, null);
         } catch (Exception e) {
           e.printStackTrace();
         }
@@ -349,8 +343,8 @@ public class WeixinReplyService {
         map.put("url",
                 "http://www.lepluslife.com/weixin/subPage");
       } else {
-        if (weiXinUser.getLeJiaUser().getBindMerchant() == null) {//未绑上商户
-          leJiaUserService.checkUserBindMerchant(weiXinUser);
+        if (weiXinUser.getLeJiaUser().getBindMerchant() == null) {//未绑上商户|绑定商户但不修改关注来源
+          leJiaUserService.memberSubBindMerchant(weiXinUser, merchantId);
         }
         map.put("title", "您已领取过新手礼包，不能再领了哦~");
         map.put("description", "点击查看如何使用积分和红包");

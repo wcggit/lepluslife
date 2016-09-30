@@ -12,8 +12,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="viewport" id="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
     <meta name="format-detection" content="telephone=no">
     <meta name="format-detection" content="telephone=yes"/>
     <meta name="apple-mobile-web-app-capable" content="yes"/>
@@ -96,7 +96,9 @@
     $(".secondsKill").css("margin-bottom", $(".footer").height() + 13 + "px");
     $(".blank").css("height", $(".tab").height() + "px");
     $(".orderList > div:last-child").css("margin-bottom", $(".footer").height() + 10 + "px");
-    var currPageList = [1, 1, 1, 1, 0, 1], hasAjaxList = [1, 0, 0, 0, 0];
+    var currPageList = [1, 1, 1, 1, 0, 1], typeCurrLength = [0, 0, 0, 0, 1, 0], hasAjaxList = [1, 0,
+                                                                                               0, 0,
+                                                                                               0];
     var orderHasProCount = 0, orderState = 5, orderStateClassName = "allOrder", orderCancleId = 0;
     function pushIn(orderState, stateClassName) {
         $.ajax({
@@ -105,7 +107,9 @@
                    data: {state: orderState, currPage: currPageList[orderState]},
                    success: function (data) {
                        var orders = data.data, contentHtml = '';
+                       typeCurrLength[orderState] = 0;
                        if (orders != '' && orders != null) {
+                           typeCurrLength[orderState] = orders.length;
                            for (var i = 0; i < orders.length; i++) {
                                var divHtml = '';
                                if (orders[i].state == 0) {//待支付
@@ -150,7 +154,7 @@
                            empty(stateClassName);
                            $("." + stateClassName).show();
                        }
-                       $(".dImg").css("height",$(".dImg").width() + "px");
+                       $(".dImg").css("height", $(".dImg").width() + "px");
                    }
                });
     }
@@ -275,11 +279,13 @@
         var scrollTop = $(this).scrollTop();
         var scrollHeight = $(document).height();
         var windowHeight = $(this).height();
-        if (scrollTop + windowHeight > scrollHeight) {
-            console.log("this is to next page");
-            //请求数据
-            currPageList[orderState]++;
-            pushIn(orderState, orderStateClassName);
+        if (scrollTop + windowHeight >= scrollHeight) {
+            if (typeCurrLength[orderState] >= 10) {
+                console.log("this is in" + orderState);
+                //请求数据
+                currPageList[orderState]++;
+                pushIn(orderState, orderStateClassName);
+            }
         }
     });
 </script>
