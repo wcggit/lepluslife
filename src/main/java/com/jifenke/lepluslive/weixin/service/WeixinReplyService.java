@@ -319,23 +319,22 @@ public class WeixinReplyService {
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   private Map subscribeByMerchantQrCode(Map map, WeiXinUser weiXinUser, Long merchantId) {
-
+    String openId = map.get("FromUserName").toString();
+    Map<String, Object> userDetail = weiXinService.getWeiXinUserInfo(openId);
+    if (null == userDetail.get("errcode")) {
+      try {
+        userDetail.put("subSource", "4_0_" + merchantId);
+        weiXinUserService.saveWeiXinUserBySubscribe(userDetail, null);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
     if (weiXinUser == null) { //数据库中没有该用户
-      String openId = map.get("FromUserName").toString();
-      Map<String, Object> userDetail = weiXinService.getWeiXinUserInfo(openId);
       //拼接关注来源,将用户信息及关注来源保存到数据库
       map.put("title", "[转账]邀请您成为乐加会员，点击领取新手大礼包!");
       map.put("description", "↑↑↑戳这里");
       map.put("url",
               "http://www.lepluslife.com/weixin/subPage");
-      if (null == userDetail.get("errcode")) {
-        try {
-          userDetail.put("subSource", "4_0_" + merchantId);
-          weiXinUserService.saveWeiXinUserBySubscribe(userDetail, null);
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-      }
     } else {
       if (weiXinUser.getState() == 0) {//非会员
         map.put("title", "[转账]邀请您成为乐加会员，点击领取新手大礼包!");
