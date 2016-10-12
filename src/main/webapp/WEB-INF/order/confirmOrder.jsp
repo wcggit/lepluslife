@@ -49,7 +49,7 @@
             已选择线下自提</p>
     </div>
 
-    <div>
+    <div id="editAddr">
         <div>
             <img src="${resourceUrl}/frontRes/order/confirmOrder/img/to.png" alt="">
         </div>
@@ -192,6 +192,7 @@
             minPrice += freightPrice;
             allClick();
             offline = false;
+            $('#editAddr').css('display', 'block');
         } else { //线下自提
             $(".off-img").attr("src", "${resourceUrl}/frontRes/order/confirmOrder/img/on.png");
             $(".notUseAddress").css('display', 'block');
@@ -203,6 +204,7 @@
             minPrice -= freightPrice;
             allClick();
             offline = true;
+            $('#editAddr').css('display', 'none');
         }
     });
 

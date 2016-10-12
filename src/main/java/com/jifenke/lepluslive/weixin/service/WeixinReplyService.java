@@ -210,7 +210,7 @@ public class WeixinReplyService {
       }
     }
     //关注公众号后查询数据库有没有该用户信息，没有的话主动获取
-    subscribeWeiXinUser(map, user, codeBurse, subType, subSource);
+    subscribeWeiXinUser(map, codeBurse, subType, subSource);
     return str;
   }
 
@@ -269,8 +269,8 @@ public class WeixinReplyService {
    * 关注公众号后查询数据库有没有该用户信息，没有的话主动获取
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  private void subscribeWeiXinUser(Map map, WeiXinUser weiXinUser,
-                                   ActivityCodeBurse codeBurse, int subType, String subSource) {
+  private void subscribeWeiXinUser(Map map, ActivityCodeBurse codeBurse, int subType,
+                                   String subSource) {
     String openId = map.get("FromUserName").toString();
     Map<String, Object> userDetail = weiXinService.getWeiXinUserInfo(openId);
     //拼接关注来源并添加该活动的关注人数
@@ -301,7 +301,7 @@ public class WeixinReplyService {
     }
     if (null == userDetail.get("errcode")) {
       try {
-        weiXinUserService.saveWeiXinUserBySubscribe(userDetail, weiXinUser);
+        weiXinUserService.saveWeiXinUserBySubscribe(userDetail);
       } catch (Exception e) {
         e.printStackTrace();
       }
@@ -324,7 +324,7 @@ public class WeixinReplyService {
     if (null == userDetail.get("errcode")) {
       try {
         userDetail.put("subSource", "4_0_" + merchantId);
-        weiXinUserService.saveWeiXinUserBySubscribe(userDetail, null);
+        weiXinUserService.saveWeiXinUserBySubscribe(userDetail);
       } catch (Exception e) {
         e.printStackTrace();
       }

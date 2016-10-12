@@ -37,6 +37,8 @@ import javax.inject.Inject;
 @Transactional(readOnly = true)
 public class OnlineOrderService {
 
+  @Inject
+  private OrderService orderService;
 
   @Inject
   private ProductService productService;
@@ -194,6 +196,12 @@ public class OnlineOrderService {
     //暂定不反A积分
     if (order.getState() == 4) {
       result.put("status", 5008);
+      return result;
+    }
+    int check = orderService.checkOrderMoney(0L, trueScore, transmitWay, order);
+    if (check == 0) {
+      result.put("status", 5009);
+      result.put("msg", "订单金额或积分计算有误");
       return result;
     }
     Date date = new Date();

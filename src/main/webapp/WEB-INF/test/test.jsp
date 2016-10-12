@@ -13,6 +13,8 @@
 </head>
 <body>
 <input type="button" value="提交" onclick="testM()">
+<p>${test}</p>
+<p>${test2}</p>
 </body>
 
 <script>

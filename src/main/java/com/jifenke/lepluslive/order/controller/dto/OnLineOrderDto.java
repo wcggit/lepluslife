@@ -17,6 +17,8 @@ public class OnLineOrderDto {
 
   private Long scoreB;  //用户可用积分
 
+  private Long orderPrice; //订单虚拟总价
+
   private Long totalPrice;  //包括邮费
 
   private Long totalScore;  //该订单可使用积分
@@ -113,6 +115,14 @@ public class OnLineOrderDto {
 
   public void setMinPrice(Integer minPrice) {
     this.minPrice = minPrice;
+  }
+
+  public Long getOrderPrice() {
+    return orderPrice;
+  }
+
+  public void setOrderPrice(Long orderPrice) {
+    this.orderPrice = orderPrice;
   }
 
   public Address getAddress() {

@@ -91,58 +91,6 @@ public class OrderService {
     return map;
   }
 
-  //APP立即购买操作  即将改版
-  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public OnLineOrder createOrder(OrderDto orderDto, LeJiaUser leJiaUser, Address address,
-                                 Long payWayId, Integer FREIGHT_FREE_PRICE) {
-    Product product = productService.findOneProduct(orderDto.getProductId());
-//    productService.editProductSpecRepository(orderDto.getProductSpec(), orderDto.getProductNum());
-    OnLineOrder onLineOrder = new OnLineOrder();
-    ProductSpec productSpec = productService.findOneProductSpec(orderDto.getProductSpec());
-    Long totalPrice = productSpec.getPrice() * orderDto.getProductNum();
-    Long totalMinPrice = productSpec.getMinPrice() * orderDto.getProductNum();
-    Long totalScore = totalPrice - totalMinPrice;
-    //判断是否包邮
-    if (totalPrice.intValue() >= FREIGHT_FREE_PRICE) {
-      onLineOrder.setFreightPrice(0L);
-      onLineOrder.setTotalPrice(totalPrice);
-    } else {
-      Long FREIGHT_PRICE = Long.parseLong(dictionaryRepository.findOne(2L).getValue());
-      onLineOrder.setFreightPrice(FREIGHT_PRICE);
-      onLineOrder.setTotalPrice(totalPrice + FREIGHT_PRICE);
-    }
-    onLineOrder.setTruePrice(totalPrice);
-//    onLineOrder.setFreightPrice(0L);
-//    onLineOrder.setTotalPrice(1L);
-//    onLineOrder.setTruePrice(1L);
-
-    onLineOrder.setTotalScore(
-        (long) Math.floor(Double.parseDouble(totalScore.toString()) / 100));
-    onLineOrder.setLeJiaUser(leJiaUser);
-    onLineOrder.setState(-1);
-    onLineOrder.setAddress(address);
-    PayOrigin payOrigin = new PayOrigin(payWayId);  //设置支付来源
-    onLineOrder.setPayOrigin(payOrigin);
-    List<OrderDetail> orderDetails = onLineOrder.getOrderDetails();
-    OrderDetail orderDetail = new OrderDetail();
-
-    orderDetail.setProduct(product);
-    orderDetail.setState(1);
-    orderDetail.setProductNumber(orderDto.getProductNum());
-    orderDetail.setProductSpec(productSpec);
-    orderDetail.setOnLineOrder(onLineOrder);
-    orderDetails.add(orderDetail);
-
-    orderRepository.save(onLineOrder);
-
-    //====创建订单后,生成quartz任务
-//    createOrderScheduler(order.getId());
-    JobThread jobThread = new JobThread(onLineOrder.getId(), scheduler);
-    jobThread.start();
-
-    return onLineOrder;
-  }
-
   /**
    * 普通商品立即购买创建的待支付订单 16/09/24
    *
@@ -175,6 +123,7 @@ public class OrderService {
     try {
       Long orderPrice = productSpec.getPrice() * buyNumber;
       Long totalPrice = productSpec.getMinPrice() * buyNumber;    //订单共需付款金额(以后不变)
+      Long totalScore = orderPrice - totalPrice;//订单最高可使用积分(以后不变)
       Long truePrice = productSpec.getMinPrice() * buyNumber;  //该订单最低需使用金额>=totalPrice
       Long freightPrice = 0L;
       //免运费最低价格
@@ -186,8 +135,6 @@ public class OrderService {
         totalPrice += FREIGHT_PRICE;
         truePrice += FREIGHT_PRICE;
       }
-
-      Long totalScore = orderPrice - totalPrice;//订单最高可使用积分(以后不变)
 
       onLineOrder.setLeJiaUser(leJiaUser);
       if (address != null) {
@@ -290,6 +237,7 @@ public class OrderService {
     onLineOrder.setOrderDetails(orderDetails);
     onLineOrder.setState(0);
     onLineOrder.setPayState(0);
+    onLineOrder.setOrderPrice(orderPrice);
     onLineOrder.setTotalPrice(totalPrice);
     onLineOrder.setTruePrice(truePrice);
     onLineOrder.setTotalScore((long) Math.floor(Double.parseDouble(totalScore.toString()) / 100));
@@ -442,8 +390,8 @@ public class OrderService {
     if (onLineOrder != null) {
       if (onLineOrder.getState() == 0) {
         onLineOrder.setState(4);
-        productService.orderCancle(onLineOrder.getOrderDetails());
         orderRepository.save(onLineOrder);
+        productService.orderCancle(onLineOrder.getOrderDetails());
       }
       if (onLineOrder.getState() == -1) {
         orderRepository.delete(onLineOrder);
@@ -451,28 +399,6 @@ public class OrderService {
     }
   }
 
-  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public OnLineOrder findOrderById(Long orderId, Boolean flag) {
-    OnLineOrder onLineOrder = orderRepository.findOne(orderId);
-    List<OrderDetail> orderDetails = onLineOrder.getOrderDetails().stream().filter((orderDetail) ->
-                                                                                       orderDetail
-                                                                                           .getState()
-                                                                                       == 0
-    ).collect(Collectors.toList());
-
-    if (orderDetails.size() == onLineOrder.getOrderDetails().size()) {
-      orderRepository.delete(onLineOrder);
-    }
-
-    if (flag == null) {
-      flag = false;
-    }
-    if (flag) {
-      onLineOrder.getOrderDetails().removeAll(orderDetails);
-    }
-
-    return onLineOrder;
-  }
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public void confrimOrder(Long orderId) {
@@ -503,89 +429,25 @@ public class OrderService {
     OnLineOrder onLineOrder = orderRepository.findOne(orderId);
     if (onLineOrder.getState() == 4) { //订单已经失效
       result.put("status", 5008);
-      result.put("msg", "该订单已失效,请重新下单");
       return result;
     }
 
     //需判断实际使用积分+红包与totalPrice+totalScore是否一致
+    int check = checkOrderMoney(truePrice, trueScore, transmitWay, onLineOrder);
+    if (check == 0) {
+      result.put("status", 5009);
+      return result;
+    }
+
     onLineOrder.setOrderSid(MvUtil.getOrderNumber()); //必须重新设置,否者导致微信订单号重复报错
     onLineOrder.setTruePrice(truePrice);
     onLineOrder.setTransmitWay(transmitWay);
-    if (trueScore != null) {
-      onLineOrder.setTrueScore(trueScore);
-    }
+    onLineOrder.setTrueScore(trueScore);
 
-    if (onLineOrder.getState() == -1) {
-      List<OrderDetail> orderDetails = onLineOrder.getOrderDetails();
-      if (productService.editProductSpecRepository(orderDetails.get(0).getProductSpec().getId(),
-                                                   orderDetails.get(0).getProductNumber()) == null
-          ) {
-        result.put("status", 5005);//无库存了
-        result.put("msg", "已无库存");
-        return result;
-      }
-    }
-    onLineOrder.setState(0);
     orderRepository.saveAndFlush(onLineOrder);
-    result.put("status",200);
+    result.put("status", 200);
     result.put("data", onLineOrder);
     return result;
-  }
-
-  /**
-   * 购物车生成订单基本信息 原来的，待删除
-   */
-  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public OnLineOrder createCartOrder(List<CartDetailDto> cartDetailDtos, LeJiaUser leJiaUser,
-                                     Address address, Integer FREIGHT_FREE_PRICE) {
-    OnLineOrder onLineOrder = new OnLineOrder();
-    List<OrderDetail> orderDetails = onLineOrder.getOrderDetails();
-    Long totalPrice = 0L;
-    Long totalScore = 0L;
-    for (CartDetailDto cartDetailDto : cartDetailDtos) {
-      OrderDetail orderDetail = new OrderDetail();
-      Product product = productService.findOneProduct(cartDetailDto.getProduct().getId());
-      ProductSpec productSpec = productService.editProductSpecRepository(
-          cartDetailDto.getProductSpec().getId(),
-          cartDetailDto.getProductNumber());
-      if (productSpec != null) {
-        totalPrice += productSpec.getPrice() * cartDetailDto.getProductNumber();
-        totalScore +=
-            (productSpec.getPrice() - productSpec.getMinPrice()) * cartDetailDto.getProductNumber();
-        orderDetail.setState(1);
-      } else {
-        orderDetail.setState(0);
-      }
-      orderDetail.setProduct(product);
-      orderDetail.setProductNumber(cartDetailDto.getProductNumber());
-      orderDetail.setProductSpec(productSpec);
-      orderDetail.setOnLineOrder(onLineOrder);
-      orderDetails.add(orderDetail);
-    }
-    //判断是否包邮
-    if (totalPrice.intValue() >= FREIGHT_FREE_PRICE) {
-      onLineOrder.setFreightPrice(0L);
-      onLineOrder.setTotalPrice(totalPrice);
-    } else {
-      Long FREIGHT_PRICE = Long.parseLong(dictionaryRepository.findOne(2L).getValue());
-      onLineOrder.setFreightPrice(FREIGHT_PRICE);
-      onLineOrder.setTotalPrice(totalPrice + FREIGHT_PRICE);
-    }
-    onLineOrder.setLeJiaUser(leJiaUser);
-    if (address != null) {
-      onLineOrder.setAddress(address);
-    }
-    onLineOrder.setOrderDetails(orderDetails);
-    onLineOrder.setState(0);
-    onLineOrder.setTruePrice(totalPrice);
-    PayOrigin payOrigin = new PayOrigin(5L); //设置支付来源
-    onLineOrder.setPayOrigin(payOrigin);
-
-    onLineOrder.setTotalScore((long) Math.floor(Double.parseDouble(totalScore.toString()) / 100));
-    orderRepository.save(onLineOrder);
-    JobThread jobThread = new JobThread(onLineOrder.getId(), scheduler);
-    jobThread.start();
-    return onLineOrder;
   }
 
   public Long getCurrentUserObligationOrdersCount(LeJiaUser leJiaUser) {
@@ -601,36 +463,6 @@ public class OrderService {
     return orderRepository.findOne(id);
   }
 
-//  /**
-//   * 5分钟后查询订单是否支付完成防止掉单
-//   */
-//  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-//  public void startOrderStatusQueryJob(Long orderId) {
-//    new Thread(new Runnable() {
-//      @Override
-//      public void run() {
-//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//        try {
-//          Date time = sdf.parse(sdf.format(new Date().getTime() + Constants.ORDER_QUERY));
-//          JobDetail orderStatusQuery = JobBuilder.newJob(OrderStatusQueryJob.class)
-//              .withIdentity("orderStatusQuery" + orderId, jobGroupName)
-//              .usingJobData("orderId", orderId)
-//              .build();
-//          Trigger orderStatusQueryTrigger = TriggerBuilder.newTrigger()
-//              .withIdentity(
-//                  TriggerKey.triggerKey("orderStatusQueryJobTrigger"
-//                                        + orderId, triggerGroupName))
-//              .startAt(time)
-//              .build();
-//          scheduler.scheduleJob(orderStatusQuery, orderStatusQueryTrigger);
-//          scheduler.start();
-//
-//        } catch (Exception e) {
-//          e.printStackTrace();
-//        }
-//      }
-//    }).start();
-//  }
 
   /**
    * 查询订单是否支付完成防止掉单 16/09/29
@@ -670,8 +502,192 @@ public class OrderService {
     }
   }
 
+  /**
+   * 检测订单实付金额和积分是否正确  2016/10/9
+   *
+   * @param truePrice   实付金额
+   * @param trueScore   实付积分
+   * @param transmitWay 取货方式 1=自提
+   * @param onLineOrder 订单信息
+   * @return 1=ok
+   */
+  public int checkOrderMoney(Long truePrice, Long trueScore, Integer transmitWay,
+                             OnLineOrder onLineOrder) {
+    if (transmitWay == 1) {
+      if ((onLineOrder.getTotalPrice() + onLineOrder.getTotalScore() * 100 - onLineOrder
+          .getFreightPrice()) != (truePrice + trueScore * 100)) {
+        return 0;
+      }
+    } else {
+      if ((onLineOrder.getTotalPrice() + onLineOrder.getTotalScore() * 100) != (truePrice
+                                                                                + trueScore
+                                                                                  * 100)) {
+        return 0;
+      }
+    }
+    return 1;
+  }
+
+  //APP立即购买操作  即将改版
 //  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-//  public void deleteOrder(Long orderId) {
-//    orderRepository.delete(orderId);
+//  public OnLineOrder createOrder(OrderDto orderDto, LeJiaUser leJiaUser, Address address,
+//                                 Long payWayId, Integer FREIGHT_FREE_PRICE) {
+//    Product product = productService.findOneProduct(orderDto.getProductId());
+////    productService.editProductSpecRepository(orderDto.getProductSpec(), orderDto.getProductNum());
+//    OnLineOrder onLineOrder = new OnLineOrder();
+//    ProductSpec productSpec = productService.findOneProductSpec(orderDto.getProductSpec());
+//    Long totalPrice = productSpec.getPrice() * orderDto.getProductNum();
+//    Long totalMinPrice = productSpec.getMinPrice() * orderDto.getProductNum();
+//    Long totalScore = totalPrice - totalMinPrice;
+//    //判断是否包邮
+//    if (totalPrice.intValue() >= FREIGHT_FREE_PRICE) {
+//      onLineOrder.setFreightPrice(0L);
+//      onLineOrder.setTotalPrice(totalPrice);
+//    } else {
+//      Long FREIGHT_PRICE = Long.parseLong(dictionaryRepository.findOne(2L).getValue());
+//      onLineOrder.setFreightPrice(FREIGHT_PRICE);
+//      onLineOrder.setTotalPrice(totalPrice + FREIGHT_PRICE);
+//    }
+//    onLineOrder.setTruePrice(totalPrice);
+////    onLineOrder.setFreightPrice(0L);
+////    onLineOrder.setTotalPrice(1L);
+////    onLineOrder.setTruePrice(1L);
+//
+//    onLineOrder.setTotalScore(
+//        (long) Math.floor(Double.parseDouble(totalScore.toString()) / 100));
+//    onLineOrder.setLeJiaUser(leJiaUser);
+//    onLineOrder.setState(-1);
+//    onLineOrder.setAddress(address);
+//    PayOrigin payOrigin = new PayOrigin(payWayId);  //设置支付来源
+//    onLineOrder.setPayOrigin(payOrigin);
+//    List<OrderDetail> orderDetails = onLineOrder.getOrderDetails();
+//    OrderDetail orderDetail = new OrderDetail();
+//
+//    orderDetail.setProduct(product);
+//    orderDetail.setState(1);
+//    orderDetail.setProductNumber(orderDto.getProductNum());
+//    orderDetail.setProductSpec(productSpec);
+//    orderDetail.setOnLineOrder(onLineOrder);
+//    orderDetails.add(orderDetail);
+//
+//    orderRepository.save(onLineOrder);
+//
+//    //====创建订单后,生成quartz任务
+////    createOrderScheduler(order.getId());
+//    JobThread jobThread = new JobThread(onLineOrder.getId(), scheduler);
+//    jobThread.start();
+//
+//    return onLineOrder;
+//  }
+
+  // 2016/10/9注释
+//  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+//  public OnLineOrder findOrderById(Long orderId, Boolean flag) {
+//    OnLineOrder onLineOrder = orderRepository.findOne(orderId);
+//    List<OrderDetail> orderDetails = onLineOrder.getOrderDetails().stream().filter((orderDetail) ->
+//                                                                                       orderDetail
+//                                                                                           .getState()
+//                                                                                       == 0
+//    ).collect(Collectors.toList());
+//
+//    if (orderDetails.size() == onLineOrder.getOrderDetails().size()) {
+//      orderRepository.delete(onLineOrder);
+//    }
+//
+//    if (flag == null) {
+//      flag = false;
+//    }
+//    if (flag) {
+//      onLineOrder.getOrderDetails().removeAll(orderDetails);
+//    }
+//
+//    return onLineOrder;
+//  }
+
+//  /**
+//   * 5分钟后查询订单是否支付完成防止掉单
+//   */
+//  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+//  public void startOrderStatusQueryJob(Long orderId) {
+//    new Thread(new Runnable() {
+//      @Override
+//      public void run() {
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//        try {
+//          Date time = sdf.parse(sdf.format(new Date().getTime() + Constants.ORDER_QUERY));
+//          JobDetail orderStatusQuery = JobBuilder.newJob(OrderStatusQueryJob.class)
+//              .withIdentity("orderStatusQuery" + orderId, jobGroupName)
+//              .usingJobData("orderId", orderId)
+//              .build();
+//          Trigger orderStatusQueryTrigger = TriggerBuilder.newTrigger()
+//              .withIdentity(
+//                  TriggerKey.triggerKey("orderStatusQueryJobTrigger"
+//                                        + orderId, triggerGroupName))
+//              .startAt(time)
+//              .build();
+//          scheduler.scheduleJob(orderStatusQuery, orderStatusQueryTrigger);
+//          scheduler.start();
+//
+//        } catch (Exception e) {
+//          e.printStackTrace();
+//        }
+//      }
+//    }).start();
+//  }
+
+  //  /**
+//   * 购物车生成订单基本信息 原来的，待删除
+//   */
+//  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+//  public OnLineOrder createCartOrder(List<CartDetailDto> cartDetailDtos, LeJiaUser leJiaUser,
+//                                     Address address, Integer FREIGHT_FREE_PRICE) {
+//    OnLineOrder onLineOrder = new OnLineOrder();
+//    List<OrderDetail> orderDetails = onLineOrder.getOrderDetails();
+//    Long totalPrice = 0L;
+//    Long totalScore = 0L;
+//    for (CartDetailDto cartDetailDto : cartDetailDtos) {
+//      OrderDetail orderDetail = new OrderDetail();
+//      Product product = productService.findOneProduct(cartDetailDto.getProduct().getId());
+//      ProductSpec productSpec = productService.editProductSpecRepository(
+//          cartDetailDto.getProductSpec().getId(),
+//          cartDetailDto.getProductNumber());
+//      if (productSpec != null) {
+//        totalPrice += productSpec.getPrice() * cartDetailDto.getProductNumber();
+//        totalScore +=
+//            (productSpec.getPrice() - productSpec.getMinPrice()) * cartDetailDto.getProductNumber();
+//        orderDetail.setState(1);
+//      } else {
+//        orderDetail.setState(0);
+//      }
+//      orderDetail.setProduct(product);
+//      orderDetail.setProductNumber(cartDetailDto.getProductNumber());
+//      orderDetail.setProductSpec(productSpec);
+//      orderDetail.setOnLineOrder(onLineOrder);
+//      orderDetails.add(orderDetail);
+//    }
+//    //判断是否包邮
+//    if (totalPrice.intValue() >= FREIGHT_FREE_PRICE) {
+//      onLineOrder.setFreightPrice(0L);
+//      onLineOrder.setTotalPrice(totalPrice);
+//    } else {
+//      Long FREIGHT_PRICE = Long.parseLong(dictionaryRepository.findOne(2L).getValue());
+//      onLineOrder.setFreightPrice(FREIGHT_PRICE);
+//      onLineOrder.setTotalPrice(totalPrice + FREIGHT_PRICE);
+//    }
+//    onLineOrder.setLeJiaUser(leJiaUser);
+//    if (address != null) {
+//      onLineOrder.setAddress(address);
+//    }
+//    onLineOrder.setOrderDetails(orderDetails);
+//    onLineOrder.setState(0);
+//    onLineOrder.setTruePrice(totalPrice);
+//    PayOrigin payOrigin = new PayOrigin(5L); //设置支付来源
+//    onLineOrder.setPayOrigin(payOrigin);
+//
+//    onLineOrder.setTotalScore((long) Math.floor(Double.parseDouble(totalScore.toString()) / 100));
+//    orderRepository.save(onLineOrder);
+//    JobThread jobThread = new JobThread(onLineOrder.getId(), scheduler);
+//    jobThread.start();
+//    return onLineOrder;
 //  }
 }

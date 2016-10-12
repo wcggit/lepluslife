@@ -1,24 +1,19 @@
 package com.jifenke.lepluslive.weixin.controller;
 
-import com.jifenke.lepluslive.global.util.CookieUtils;
-import com.jifenke.lepluslive.global.util.JsonUtils;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.order.domain.entities.OnLineOrder;
 import com.jifenke.lepluslive.score.domain.entities.ScoreA;
 import com.jifenke.lepluslive.score.domain.entities.ScoreB;
-import com.jifenke.lepluslive.weixin.controller.dto.OrderDto;
 import com.jifenke.lepluslive.Address.domain.entities.Address;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.Address.service.AddressService;
 import com.jifenke.lepluslive.order.service.OrderService;
 import com.jifenke.lepluslive.score.service.ScoreAService;
 import com.jifenke.lepluslive.score.service.ScoreBService;
-import com.jifenke.lepluslive.weixin.service.DictionaryService;
 import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
 import com.jifenke.lepluslive.weixin.service.WeiXinService;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -29,10 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -59,34 +51,8 @@ public class WeixinOrderController {
   @Inject
   private AddressService addressService;
 
-  @Value("${weixin.appId}")
-  private String appId;
-
   @Inject
   private WeiXinPayService weiXinPayService;
-
-  @Inject
-  private DictionaryService dictionaryService;
-
-  //跳转到订单确认页面,并生成预支付订单
-  @RequestMapping(value = "/order/confirm", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-  public ModelAndView orderCreate(OrderDto orderDto, HttpServletRequest request, Model model) {
-    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
-    Address address = addressService.findAddressByLeJiaUserAndState(weiXinUser.getLeJiaUser());
-    //免运费最低价格
-    Integer
-        FREIGHT_FREE_PRICE =
-        Integer.parseInt(dictionaryService.findDictionaryById(1L).getValue());
-    model.addAttribute("order",
-                       orderService.createOrder(orderDto, weiXinUser.getLeJiaUser(), address, 5L,
-                                                FREIGHT_FREE_PRICE));
-    ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(weiXinUser.getLeJiaUser());
-    model.addAttribute("address", address);
-    model.addAttribute("wxConfig", getWeiXinPayConfig(request));
-    model.addAttribute("scoreB", scoreB.getScore());
-    return MvUtil.go("/weixin/confirmOrder");
-  }
-
 
   //跳转到支付页面
   @RequestMapping("/pay/confirm")
@@ -149,11 +115,11 @@ public class WeixinOrderController {
     WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
     model.addAttribute("scoreB",
                        scoreBService.findScoreBByWeiXinUser(weiXinUser.getLeJiaUser()).getScore());
-    model.addAttribute("order", orderService.findOrderById(orderId, flag));
+    model.addAttribute("order", orderService.findOnLineOrderById(orderId));
     model.addAttribute("address",
                        addressService.findAddressByLeJiaUserAndState(weiXinUser.getLeJiaUser()));
-    model.addAttribute("wxConfig", getWeiXinPayConfig(request));
-    return MvUtil.go("/weixin/confirmOrder");
+    model.addAttribute("wxConfig", weiXinPayService.getWeiXinPayConfig(request));
+    return MvUtil.go("/order/confirmOrder");
   }
 
   /**
@@ -177,30 +143,15 @@ public class WeixinOrderController {
   @RequestMapping(value = "/order/{orderId}", method = RequestMethod.POST)
   public ModelAndView editAddress(Address address, @PathVariable Long orderId, Model model,
                                   HttpServletRequest request) {
-//    OnLineOrder onLineOrder = orderService.findOrderById(orderId, false);
     OnLineOrder onLineOrder = orderService.findOnLineOrderById(orderId);
     WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
     addressService.editAddress(address, weiXinUser, onLineOrder);
     model.addAttribute("order", onLineOrder);
-    model.addAttribute("wxConfig", getWeiXinPayConfig(request));
+    model.addAttribute("wxConfig", weiXinPayService.getWeiXinPayConfig(request));
     model.addAttribute("canUseScore",
                        scoreBService.findScoreBByWeiXinUser(weiXinUser.getLeJiaUser())
                            .getScore()); //用户可用积分
     return MvUtil.go("/order/confirmOrder");
-  }
-
-  /**
-   * 获取支付页面的配置参数wxconfig
-   */
-  private Map getWeiXinPayConfig(HttpServletRequest request) {
-    Long timestamp = new Date().getTime() / 1000;
-    String noncestr = MvUtil.getRandomStr();
-    Map map = new HashMap<>();
-    map.put("appId", appId);
-    map.put("timestamp", timestamp);
-    map.put("noncestr", noncestr);
-    map.put("signature", weiXinPayService.getJsapiSignature(request, noncestr, timestamp));
-    return map;
   }
 
   /**

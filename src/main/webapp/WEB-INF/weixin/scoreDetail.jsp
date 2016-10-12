@@ -45,7 +45,7 @@
 
 <script type="text/javascript">
     document.title="明细记录";
-    var dataDetail, count = 0, shangshu = 0, yushu = 0, dataLength = 0, url = "${wxRootUrl}/score/scoreList";
+    var dataDetail, count = 0, shangshu = 0, yushu = 0, dataLength = 0, url = "/score/scoreList";
     var box = "redbox", span = "redword", text = "红包", jishu = 100;
     var table = $("#article");
     mui.ajax(url, {

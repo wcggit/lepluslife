@@ -10,6 +10,7 @@ import com.jifenke.lepluslive.merchant.repository.MerchantInfoRepository;
 import com.jifenke.lepluslive.merchant.repository.MerchantRepository;
 import com.jifenke.lepluslive.merchant.repository.MerchantScrollRepository;
 import com.jifenke.lepluslive.partner.domain.entities.Partner;
+import com.jifenke.lepluslive.weixin.service.DictionaryService;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -47,7 +48,7 @@ public class MerchantService {
   private CityService cityService;
 
   @Inject
-  private MerchantDetailRepository merchantDetailRepository;
+  private DictionaryService dictionaryService;
 
   @Inject
   private MerchantScrollRepository merchantScrollRepository;
@@ -65,7 +66,7 @@ public class MerchantService {
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public Map findMerchant(Long id) {
-    Map<String, Object> map = new HashMap<>();
+    Map<Object, Object> map = new HashMap<>();
     Merchant merchant = new Merchant();
     merchant.setId(id);
     List<Object[]> list = merchantRepository.findMerchantById(id);
@@ -83,6 +84,24 @@ public class MerchantService {
       map.put("park", o[10]);
       map.put("perSale", o[11]);
       map.put("wifi", o[12]);
+      map.put("description", o[13] == null ? "" : o[13]);
+      map.put("discount", o[14] == null ? 100 : o[14]);
+      if (o[15] != null && (!"".equals(o[15].toString()))) {
+        List<Map> l = new ArrayList<>();
+        String path = "http://www.lepluslife.com/resource/frontRes/merchant/icon/";
+        String suffix = ".png";
+        String[] str = o[15].toString().split("_");
+        String[] details = dictionaryService.findDictionaryById(41L).getValue().split("_");
+        for (String s : str) {
+          Map<Object, Object> m = new HashMap<>();
+          m.put("name", details[Integer.valueOf(s) - 1]);
+          m.put("path", path + s + suffix);
+          l.add(m);
+        }
+        map.put("feature", l);
+      }
+      map.put("reason", o[16] == null ? "" : o[16]);
+      map.put("vipPicture", o[17] == null ? "" : o[17]);
     }
     //商家轮播图
     List<Map> scrollList = new ArrayList<>();
@@ -95,15 +114,15 @@ public class MerchantService {
     }
     map.put("scrolls", scrollList);
     //商家详情图
-    List<Map> detailList = new ArrayList<>();
-    List<Object[]> list3 = merchantDetailRepository.findMerchantDetailsByMerchantId(id);
-    for (Object[] o : list3) {
-      Map<String, Object> m = new HashMap<>();
-      m.put("sid", o[0]);
-      m.put("picture", o[1]);
-      detailList.add(m);
-    }
-    map.put("details", detailList);
+//    List<Map> detailList = new ArrayList<>();
+//    List<Object[]> list3 = merchantDetailRepository.findMerchantDetailsByMerchantId(id);
+//    for (Object[] o : list3) {
+//      Map<String, Object> m = new HashMap<>();
+//      m.put("sid", o[0]);
+//      m.put("picture", o[1]);
+//      detailList.add(m);
+//    }
+//    map.put("details", detailList);
     return map;
   }
 
@@ -389,7 +408,7 @@ public class MerchantService {
   }
 
   public List<Merchant> findMerchantByPartnerAndPartnership(Partner partner, int i) {
-    return merchantRepository.findByPartnerAndPartnership(partner,i);
+    return merchantRepository.findByPartnerAndPartnership(partner, i);
   }
 
   //  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)

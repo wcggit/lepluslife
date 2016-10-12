@@ -53,12 +53,12 @@ public class ScoreController {
   @RequestMapping(value = "/listA", method = RequestMethod.POST)
   public
   @ResponseBody
-  LejiaResult listA(@RequestParam(required = false) String token) {
+  LejiaResult listA(@RequestParam(required = true) String token) {
 
     LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);
     ScoreA scoreA = scoreAService.findScoreAByLeJiaUser(leJiaUser);
     if (scoreA == null) {
-      return LejiaResult.build(207, "请先登录");
+      return LejiaResult.build(6003, "未找到红包记录");
     }
 
     List<ScoreADetail> aDetails = scoreAService.findAllScoreADetailByScoreA(scoreA);
@@ -76,12 +76,12 @@ public class ScoreController {
   @RequestMapping(value = "/listB", method = RequestMethod.POST)
   public
   @ResponseBody
-  LejiaResult listB(@RequestParam(required = false) String token) {
+  LejiaResult listB(@RequestParam(required = true) String token) {
 
     LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);
     ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(leJiaUser);
     if (scoreB == null) {
-      return LejiaResult.build(207, "请先登录");
+      return LejiaResult.build(6001, "未找到积分记录");
     }
 
     List<ScoreBDetail> bDetails = scoreBService.findAllScoreBDetailByScoreB(scoreB);
