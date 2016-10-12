@@ -5,7 +5,6 @@ import com.jifenke.lepluslive.global.util.CookieUtils;
 import com.jifenke.lepluslive.global.util.JsonUtils;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
-import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.lejiauser.service.LeJiaUserService;
 import com.jifenke.lepluslive.partner.domain.entities.Partner;
 import com.jifenke.lepluslive.partner.service.PartnerService;
@@ -31,7 +30,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -94,12 +92,19 @@ public class WeixinController {
   @Inject
   private PartnerService partnerService;
 
-
   @RequestMapping("/shop")
-  public ModelAndView goProductPage(HttpServletRequest request, HttpServletResponse response,
-                                    Model model) {
-    model.addAttribute("productTypes", productService.findAllProductType());
-    return MvUtil.go("/weixin/product");
+  public ModelAndView goProductPage(HttpServletRequest request, Model model) {
+    String openId = CookieUtils.getCookieValue(request, appId + "-user-open-id");
+    WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByOpenId(openId);
+    ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(weiXinUser.getLeJiaUser());
+    //商品分类
+    List<ProductType> typeList = productService.findAllProductType();
+    //主打爆品
+    Map product = productService.findMainHotProduct();
+    model.addAttribute("scoreB", scoreB);
+    model.addAttribute("product", product);
+    model.addAttribute("typeList", typeList);
+    return MvUtil.go("/product/productIndex");
   }
 
   @RequestMapping("/product/{id}")
@@ -180,35 +185,6 @@ public class WeixinController {
       e.printStackTrace();
     }
     return null;
-  }
-
-
-  @RequestMapping("/hongbao")
-  public ModelAndView goHongbaoPage(HttpServletRequest request, Model model) {
-    String openId = CookieUtils.getCookieValue(request, appId + "-user-open-id");
-    WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByOpenId(openId);
-    model.addAttribute("wxConfig", weiXinService.getWeiXinConfig(request));
-    if (weiXinUser != null && weiXinUser.getHongBaoState() == 1) {
-      LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
-      model.addAttribute("status", 1);
-      model.addAttribute("phoneNumber", leJiaUser != null ? leJiaUser.getPhoneNumber() : "");
-      return MvUtil.go("/weixin/hongbao");
-    }
-    model.addAttribute("status", 0);
-    return MvUtil.go("/weixin/hongbao");
-  }
-
-  @RequestMapping(value = "/hongbao/open")
-  public
-  @ResponseBody
-  LejiaResult HongbaoOpen(@RequestParam String phoneNumber, HttpServletRequest request) {
-    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
-    LeJiaUser leJiaUser = leJiaUserService.findUserByPhoneNumber(phoneNumber);  //是否已注册
-    if (leJiaUser == null && weiXinUser.getHongBaoState() == 0) {
-      weiXinUserService.openHongBao(weiXinUser, phoneNumber);
-      return LejiaResult.build(200, phoneNumber);
-    }
-    return LejiaResult.build(201, "手机号已被使用或已领取红包");
   }
 
   @RequestMapping("/user")

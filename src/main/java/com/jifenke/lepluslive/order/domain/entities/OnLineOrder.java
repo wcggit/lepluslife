@@ -33,8 +33,9 @@ public class OnLineOrder {
   @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "onLineOrder")
   private List<OrderDetail> orderDetails = new ArrayList<OrderDetail>();
 
+  private Long orderPrice = 0L;  //对应商品的price和，虚拟总价，不包括邮费
 
-  private Long totalPrice = 0L;  //包括邮费
+  private Long totalPrice = 0L;  //对应商品的minPrice和，最低需付金额，包括邮费
 
   private Long totalScore = 0L;  //订单可用积分
 
@@ -42,7 +43,7 @@ public class OnLineOrder {
 
   private Long trueScore = 0L;  //订单实际使用积分
 
-  private Long freightPrice = 0L;     //运费
+  private Long freightPrice = 0L;     //运费，选择线下自提时不变但没有计算价值(实际为0)
 
   private Long payBackA = 0L;   //订单支付后的返红包额度
 
@@ -234,6 +235,14 @@ public class OnLineOrder {
 
   public void setPayBackA(Long payBackA) {
     this.payBackA = payBackA;
+  }
+
+  public Long getOrderPrice() {
+    return orderPrice;
+  }
+
+  public void setOrderPrice(Long orderPrice) {
+    this.orderPrice = orderPrice;
   }
 
   public Integer getPayState() {

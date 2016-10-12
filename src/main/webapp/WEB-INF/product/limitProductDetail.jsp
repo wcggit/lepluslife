@@ -1,4 +1,4 @@
-<%--
+    <%--
   Created by IntelliJ IDEA.
   User: zhangwen
   Date: 2016/9/19
@@ -68,16 +68,15 @@
 <section class="num">
     <div>数量</div>
     <div class="num-num">
-        <div id="btnCut1" style="border: 1px solid #e1e1e1;border-right: 1px solid #999"><img class="w-jian" style="width: 30%;" src="${resourceUrl}/frontRes/product/hotIndex/img/4.png" alt=""></div>
+        <div id="btnCut1" style="border: 1px solid #e1e1e1;border-right: 1px solid #c1c1c1"><img class="w-jian" style="width: 30%;" src="${resourceUrl}/frontRes/product/hotIndex/img/4.png" alt=""></div>
         <div>
-            <input id="num1" type="number" value="1"/>
+            <input id="num1" type="number" value="1" />
         </div>
         <div id="btnAdd1"><img class="w-jia" style="width: 30%" src="${resourceUrl}/frontRes/product/hotIndex/img/2.png" alt=""></div>
     </div>
 
 </section>
 <section class="imgText">
-    <p>↓下拉加载图文详情↓</p>
 
     <div id="productDetail">
         <%-- < img src="" alt=""> 订单详情--%>
@@ -122,18 +121,18 @@
         if (num1.val() >= eval(maxNum)) {
             num1.val(maxNum);
             $(".w-jia").attr("src","${resourceUrl}/frontRes/product/hotIndex/img/3.png");
-            $("#btnAdd1").attr("style","border: 1px solid #e1e1e1;border-left: 1px solid #999");
-            $("#btnCut1").attr("style","border: 1px solid #999999;");
+            $("#btnAdd1").attr("style","border: 1px solid #e1e1e1;border-left: 1px solid #c1c1c1");
+            $("#btnCut1").attr("style","border: 1px solid #c1c1c1;");
         } else if (num1.val() <= 0) {
             num1.val(1);
             $(".w-jian").attr("src","${resourceUrl}/frontRes/product/hotIndex/img/4.png");
-            $("#btnCut1").attr("style","border: 1px solid #e1e1e1;border-right: 1px solid #999");
-            $("#btnAdd1").attr("style","border: 1px solid #999999;");
+            $("#btnCut1").attr("style","border: 1px solid #e1e1e1;border-right: 1px solid #c1c1c1");
+            $("#btnAdd1").attr("style","border: 1px solid #c1c1c1;");
         }else {
             $(".w-jian").attr("src","${resourceUrl}/frontRes/product/hotIndex/img/1.png");
             $(".w-jia").attr("src","${resourceUrl}/frontRes/product/hotIndex/img/2.png");
-            $("#btnAdd1").attr("style","border: 1px solid #999999;");
-            $("#btnCut1").attr("style","border: 1px solid #999999;");
+            $("#btnAdd1").attr("style","border: 1px solid #c1c1c1;");
+            $("#btnCut1").attr("style","border: 1px solid #c1c1c1;");
         }
     }
     //点击事件

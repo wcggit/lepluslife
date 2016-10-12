@@ -1,5 +1,6 @@
 package com.jifenke.lepluslive.lejiauser.controller;
 
+import com.jifenke.lepluslive.global.service.MessageService;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MD5Util;
 import com.jifenke.lepluslive.global.util.MvUtil;
@@ -22,7 +23,9 @@ import com.jifenke.lepluslive.weixin.service.WeiXinUserService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 
+
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -31,6 +34,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.io.IOException;
 import java.util.HashMap;
+
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -67,6 +71,9 @@ public class LeJiaUserController {
   @Inject
   private ValidateCodeService validateCodeService;
 
+  @Inject
+  private MessageService messageUtil;
+
   /**
    * @param type 1=注册  2=找回 3=绑定手机
    */
@@ -80,15 +87,15 @@ public class LeJiaUserController {
     LeJiaUser leJiaUser = leJiaUserService.findUserByPhoneNumber(phoneNumber);  //是否已注册
     if (type == 1) {
       if (leJiaUser != null) {
-        return LejiaResult.build(201, "该手机号已注册,请直接登录");
+        return LejiaResult.build(2007, "该手机号已注册,请直接登录");
       }
     } else if (type == 2) {
       if (leJiaUser == null) {
-        return LejiaResult.build(205, "该手机号未注册");
+        return LejiaResult.build(2005, "该手机号未注册");
       }
     } else if (type == 3) {
       if (leJiaUser != null) {
-        return LejiaResult.build(206, "该手机号已注册");
+        return LejiaResult.build(2006, "该手机号已注册");
       }
     }
 
@@ -96,7 +103,7 @@ public class LeJiaUserController {
     if (boo == 1) {
       return LejiaResult.build(200, "发送成功");
     } else {
-      return LejiaResult.build(208, "发送过于频繁，请稍后再试");
+      return LejiaResult.build(3002, "发送过于频繁，请稍后再试");
     }
   }
 
@@ -114,11 +121,11 @@ public class LeJiaUserController {
                        @RequestParam(required = false) String token) throws IOException {
     LeJiaUser leJiaUser = leJiaUserService.findUserByPhoneNumber(phoneNumber);  //是否已注册
     if (leJiaUser != null) {
-      return LejiaResult.build(201, "该手机号已注册");
+      return LejiaResult.build(2006, "该手机号已注册");
     }
     Boolean b = validateCodeService.findByPhoneNumberAndCode(phoneNumber, code); //验证码是否正确
     if (!b) {
-      return LejiaResult.build(202, "验证码错误");
+      return LejiaResult.build(3001, "验证码错误");
     }
 
     LeJiaUserDto leJiaUserDto = leJiaUserService.register(phoneNumber, token);
@@ -145,13 +152,13 @@ public class LeJiaUserController {
         leJiaUserService.setPwd(leJiaUser, pwd);
       } else {
         if (!leJiaUser.getPwd().equals(MD5Util.MD5Encode(oldPwd, null))) {
-          return LejiaResult.build(204, "密码错误");
+          return LejiaResult.build(2004, "密码错误");
         }
         leJiaUserService.setPwd(leJiaUser, pwd);
       }
       return LejiaResult.build(200, "设置密码成功");
     } else {
-      return LejiaResult.build(206, "未找到用户");
+      return LejiaResult.build(2002, "未找到用户");
     }
 
   }
@@ -168,11 +175,11 @@ public class LeJiaUserController {
                     @ApiParam(value = "推送token") @RequestParam(required = false) String token) {
     LeJiaUser leJiaUser = leJiaUserService.findUserByPhoneNumber(phoneNumber);
     if (leJiaUser == null) {
-      return LejiaResult.build(205, "该手机号未注册");
+      return LejiaResult.build(2005, "该手机号未注册");
     }
     leJiaUser = leJiaUserService.login(leJiaUser, pwd, token);
     if (leJiaUser == null) {
-      return LejiaResult.build(204, "密码错误");
+      return LejiaResult.build(2004, "密码错误");
     }
     ScoreA scoreA = scoreAService.findScoreAByLeJiaUser(leJiaUser);
     ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(leJiaUser);
@@ -192,7 +199,7 @@ public class LeJiaUserController {
                        @RequestParam(required = false) String code) {
     Boolean b = validateCodeService.findByPhoneNumberAndCode(phoneNumber, code); //验证码是否正确
     if (!b) {
-      return LejiaResult.build(202, "验证码错误");
+      return LejiaResult.build(3001, "验证码错误");
     }
     return LejiaResult.build(200, "验证码正确");
   }
@@ -210,7 +217,7 @@ public class LeJiaUserController {
       Map map = orderService.getOrdersCount(leJiaUser.getId());
       return LejiaResult.ok(map);
     }
-    return LejiaResult.build(201, "未登录");
+    return LejiaResult.build(2001, "未登录");
   }
 
   /**
@@ -226,7 +233,7 @@ public class LeJiaUserController {
       if (map != null) {
         return LejiaResult.ok(map);
       }
-      return LejiaResult.build(202, "token无效");
+      return LejiaResult.build(2003, "token无效");
     }
     return LejiaResult.ok();
   }
@@ -269,7 +276,7 @@ public class LeJiaUserController {
                                                              nickname,
                                                              leJiaUser.getPhoneNumber()));
     } else {
-      return LejiaResult.build(404, "服务器异常");
+      return LejiaResult.build(500, "服务器异常");
     }
   }
 
@@ -297,8 +304,27 @@ public class LeJiaUserController {
 
   }
 
+  /**
+   * 判断登录方式(1=无手机号登录) 16/10/9
+   */
+  @ApiOperation(value = "判断登录方式(1=无手机号登录)")
+  @RequestMapping(value = "/checkLogin", method = RequestMethod.GET)
+  public
+  @ResponseBody
+  LejiaResult checkLogin() {
+    String checkLogin = dictionaryService.findDictionaryById(40L).getValue();
+    return LejiaResult.build(200, "", checkLogin);
+  }
+
   @RequestMapping(value = "/test", method = RequestMethod.GET)
-  public ModelAndView gotest() {
+  public ModelAndView gotest(Model model) {
+    String msg = messageUtil.getMsg("email.ttt");
+    String[] o = {"测试商品"};
+    String msg2 = messageUtil.getMsg("5005", o);
+    System.out.println(msg);
+    System.out.println(msg2);
+    model.addAttribute("test", msg);
+    model.addAttribute("test2", msg2);
     return MvUtil.go("/test/test");
   }
 

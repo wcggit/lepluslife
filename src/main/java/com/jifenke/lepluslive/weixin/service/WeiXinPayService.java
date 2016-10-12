@@ -62,7 +62,7 @@ public class WeiXinPayService {
   private DictionaryService dictionaryService;
 
   /**
-   * 获取支付页面的配置参数wxconfig
+   * 获取公众号支付页面的配置参数wxconfig
    */
   public Map getWeiXinPayConfig(HttpServletRequest request) {
     Long timestamp = new Date().getTime() / 1000;

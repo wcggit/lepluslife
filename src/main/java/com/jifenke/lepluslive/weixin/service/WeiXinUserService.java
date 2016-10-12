@@ -114,9 +114,11 @@ public class WeiXinUserService {
     WeiXinUser weiXinUser = weiXinUserRepository.findByUnionId(unionId);
     ScoreA scoreA = null;
     ScoreB scoreB = null;
+    Date date = new Date();
     if (weiXinUser == null) {
       weiXinUser = new WeiXinUser();
-      weiXinUser.setLastUpdated(new Date());
+      weiXinUser.setLastUpdated(date);
+      weiXinUser.setDateCreated(date);
       LeJiaUser leJiaUser = new LeJiaUser();
       leJiaUser.setHeadImageUrl(userDetail.get("headimgurl").toString());
       leJiaUser.setWeiXinUser(weiXinUser);
@@ -148,18 +150,18 @@ public class WeiXinUserService {
     weiXinUser.setProvince(userDetail.get("province").toString());
     weiXinUser.setAccessToken(map.get("access_token").toString());
     weiXinUser.setRefreshToken(map.get("refresh_token").toString());
-    weiXinUser.setLastUserInfoDate(new Date());
+    weiXinUser.setLastUserInfoDate(date);
     weiXinUserRepository.save(weiXinUser);
   }
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public WeiXinUser saveWeiXinUserBySubscribe(Map<String, Object> userDetail, WeiXinUser weiXinUser)
+  public WeiXinUser saveWeiXinUserBySubscribe(Map<String, Object> userDetail)
       throws IOException {
     String openid = userDetail.get("openid").toString();
     String
         unionId =
         userDetail.get("unionid") != null ? userDetail.get("unionid").toString() : null;
-    //  WeiXinUser weiXinUser = weiXinUserRepository.findByOpenId(openid);
+    WeiXinUser weiXinUser = weiXinUserRepository.findByUnionId(unionId);
 
     LeJiaUser leJiaUser = null;
     Date date = new Date();
@@ -199,7 +201,6 @@ public class WeiXinUserService {
     weiXinUser.setHeadImageUrl(userDetail.get("headimgurl").toString());
     weiXinUser.setProvince(userDetail.get("province").toString());
     weiXinUser.setLastUserInfoDate(date);
-    // weiXinUser.setState(1);
     weiXinUser.setSubState(1);
     if (weiXinUser.getSubDate() == null) {
       weiXinUser.setSubDate(date);

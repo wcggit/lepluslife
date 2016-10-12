@@ -21,7 +21,7 @@ public interface MerchantRepository extends JpaRepository<Merchant, Long> {
   int getMerchantSid(String location);
 
   //商家详情
-  @Query(value = "SELECT m.id,m.`name` AS mName,m.location,m.phone_number,m.lng,m.lat,t.`name` AS tName,a.`name` AS aName,i.star,i.card,i.park,i.per_sale,i.wifi from merchant m,merchant_info i,merchant_type t,area a WHERE m.merchant_info_id=i.id AND m.merchant_type_id=t.id AND m.area_id=a.id AND m.id=?1", nativeQuery = true)
+  @Query(value = "SELECT m.id,m.`name` AS mName,m.location,m.phone_number,m.lng,m.lat,t.`name` AS tName,a.`name` AS aName,i.star,i.card,i.park,i.per_sale,i.wifi,i.description,i.discount,i.feature,i.reason,i.vip_picture from merchant m,merchant_info i,merchant_type t,area a WHERE m.merchant_info_id=i.id AND m.merchant_type_id=t.id AND m.area_id=a.id AND m.id=?1", nativeQuery = true)
   List<Object[]> findMerchantById(Long id);
 
   List<Merchant> findByPartnerAndPartnership(Partner partner, int i);

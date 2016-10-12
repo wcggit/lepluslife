@@ -2,6 +2,7 @@ package com.jifenke.lepluslive.order.controller;
 
 import com.jifenke.lepluslive.Address.domain.entities.Address;
 import com.jifenke.lepluslive.Address.service.AddressService;
+import com.jifenke.lepluslive.global.service.MessageService;
 import com.jifenke.lepluslive.global.util.JsonUtils;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
@@ -12,13 +13,11 @@ import com.jifenke.lepluslive.order.controller.dto.OnLineOrderDto;
 import com.jifenke.lepluslive.order.domain.entities.ExpressInfo;
 import com.jifenke.lepluslive.order.domain.entities.OnLineOrder;
 import com.jifenke.lepluslive.order.service.ExpressInfoService;
+import com.jifenke.lepluslive.order.service.OnlineOrderService;
 import com.jifenke.lepluslive.order.service.OrderService;
 import com.jifenke.lepluslive.product.domain.entities.Product;
 import com.jifenke.lepluslive.product.domain.entities.ProductSpec;
-import com.jifenke.lepluslive.score.domain.entities.ScoreA;
-import com.jifenke.lepluslive.score.domain.entities.ScoreADetail;
 import com.jifenke.lepluslive.score.domain.entities.ScoreB;
-import com.jifenke.lepluslive.score.service.ScoreAService;
 import com.jifenke.lepluslive.score.service.ScoreBService;
 import com.jifenke.lepluslive.weixin.controller.dto.CartDetailDto;
 import com.jifenke.lepluslive.weixin.controller.dto.OrderDto;
@@ -45,6 +44,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.SortedMap;
 
 import javax.inject.Inject;
@@ -74,9 +74,6 @@ public class OrderController {
   private ScoreBService scoreBService;
 
   @Inject
-  private ScoreAService scoreAService;
-
-  @Inject
   private ExpressInfoService expressInfoService;
 
   @Inject
@@ -84,6 +81,12 @@ public class OrderController {
 
   @Inject
   private DictionaryService dictionaryService;
+
+  @Inject
+  private OnlineOrderService onlineOrderService;
+
+  @Inject
+  private MessageService messageService;
 
   @ApiOperation("获取用户的订单")
   @RequestMapping(value = "/orderList", method = RequestMethod.POST)
@@ -94,7 +97,7 @@ public class OrderController {
                         @RequestParam(required = true) Integer status) {
     LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);
     if (leJiaUser == null) {
-      return LejiaResult.build(206, "未找到用户");
+      return LejiaResult.build(2002, messageService.getMsg("2002"));
     }
     List<OnLineOrder>
         onLineOrders =
@@ -107,18 +110,16 @@ public class OrderController {
   public
   @ResponseBody
   LejiaResult createCartOrder(
-      @ApiParam(value = "用户身份标识token") @RequestParam(required = false) String token,
+      @ApiParam(value = "用户身份标识token") @RequestParam(required = true) String token,
       @ApiParam(value = "商品id_商品规格id_数量,") @RequestParam(required = false) String cartDetailDtos) {
-    if (token == null) {
-      return LejiaResult.build(207, "请先登录");
-    }
+
     LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);
     if (leJiaUser == null) {
-      return LejiaResult.build(206, "未找到用户");
+      return LejiaResult.build(2002, messageService.getMsg("2002"));
     }
     Long count = orderService.getCurrentUserObligationOrdersCount(leJiaUser);
     if (count >= 4) {
-      return LejiaResult.build(401, "未支付订单过多,请支付后再下单");
+      return LejiaResult.build(5001, messageService.getMsg("5001"));
     }
     List<CartDetailDto> cartDetailDtoList = stringToList(cartDetailDtos);
     Address address = addressService.findAddressByLeJiaUserAndState(leJiaUser);
@@ -127,10 +128,15 @@ public class OrderController {
     Integer
         FREIGHT_FREE_PRICE =
         Integer.parseInt(dictionaryService.findDictionaryById(1L).getValue());
-    OnLineOrder
-        onLineOrder =
-        orderService.createCartOrder(cartDetailDtoList, leJiaUser, address, FREIGHT_FREE_PRICE);
+    Map<String, Object>
+        result =
+        orderService.createCartOrder(cartDetailDtoList, leJiaUser, address, 1L);
+    if (!"200".equals(result.get("status").toString())) {
+      return LejiaResult.build((Integer) result.get("status"),
+                               messageService.getMsg((String) result.get("status")));
+    }
     OnLineOrderDto orderDto = new OnLineOrderDto();
+    OnLineOrder onLineOrder = (OnLineOrder) result.get("data");
     try {
       BeanUtils.copyProperties(orderDto, onLineOrder);
       orderDto.setMinPrice(FREIGHT_FREE_PRICE);
@@ -140,7 +146,6 @@ public class OrderController {
       e.printStackTrace();
     }
     orderDto.setScoreB(scoreB.getScore());
-
     return LejiaResult.build(200, "ok", orderDto);
   }
 
@@ -149,14 +154,11 @@ public class OrderController {
   public
   @ResponseBody
   LejiaResult orderDetail(
-      @ApiParam(value = "用户身份标识token") @RequestParam(required = false) String token,
-      @ApiParam(value = "订单id") @RequestParam(required = false) Long orderId) {
-    if (token == null) {
-      return LejiaResult.build(207, "请先登录");
-    }
+      @ApiParam(value = "用户身份标识token") @RequestParam(required = true) String token,
+      @ApiParam(value = "订单id") @RequestParam(required = true) Long orderId) {
     LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);
     if (leJiaUser == null) {
-      return LejiaResult.build(206, "未找到用户");
+      return LejiaResult.build(2002, messageService.getMsg("2002"));
     }
     ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(leJiaUser);
     OnLineOrder onLineOrder = orderService.findOnLineOrderById(orderId);
@@ -181,12 +183,9 @@ public class OrderController {
       @RequestParam(required = true) Long productId,
       @RequestParam(required = true) Integer productNum,
       @RequestParam(required = true) Long productSpecId) {
-    if (token == null) {
-      return LejiaResult.build(207, "请先登录");
-    }
     LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);
     if (leJiaUser == null) {
-      return LejiaResult.build(206, "未找到用户");
+      return LejiaResult.build(2002, messageService.getMsg("2002"));
     }
     OrderDto orderDto = new OrderDto();
     orderDto.setProductId(productId);
@@ -197,9 +196,21 @@ public class OrderController {
     Integer
         FREIGHT_FREE_PRICE =
         Integer.parseInt(dictionaryService.findDictionaryById(1L).getValue());
-    OnLineOrder
-        onLineOrder =
-        orderService.createOrder(orderDto, leJiaUser, address, 1L, FREIGHT_FREE_PRICE);
+    //创建商品的待支付订单
+    OnLineOrder onLineOrder = null;
+    try {
+      Map
+          result =
+          orderService.createBuyOrder(productId, productSpecId, productNum, leJiaUser, address, 1L);
+      if (!"200".equals(result.get("status").toString())) {
+        return LejiaResult.build((Integer) result.get("status"),
+                                 messageService.getMsg((String) result.get("status")));
+      }
+      onLineOrder = (OnLineOrder) result.get("data");
+    } catch (Exception e) {
+      e.printStackTrace();
+      return LejiaResult.build(500, "服务器异常");
+    }
     ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(leJiaUser);
     OnLineOrderDto onLineOrderDto = new OnLineOrderDto();
     try {
@@ -220,11 +231,15 @@ public class OrderController {
   @ResponseBody
   LejiaResult weixinPay(@RequestParam Long orderId, @RequestParam Long truePrice,
                         @RequestParam Long trueScore, HttpServletRequest request) {
+    if (orderId == null || truePrice == null || trueScore == null) {
+      return LejiaResult.build(5010, messageService.getMsg("5010"));
+    }
     Map<Object, Object>
         result =
         orderService.setPriceScoreForOrder(orderId, truePrice, trueScore, 2);
-    if (!"200".equals(result.get("status").toString())) {
-      return LejiaResult.build(Integer.valueOf(result.get("status").toString()), "库存不足");
+    String status = result.get("status").toString();
+    if (!"200".equals(status)) {
+      return LejiaResult.build(Integer.valueOf(status), messageService.getMsg(status));
     }
 
     //封装订单参数
@@ -238,7 +253,27 @@ public class OrderController {
           unifiedOrder.get("prepay_id").toString());
       return LejiaResult.build(200, "ok", sortedMap);
     } else {
-      return LejiaResult.build(404, "支付异常");
+      return LejiaResult.build(4001, messageService.getMsg("4001"));
+    }
+  }
+
+
+  @ApiOperation("全积分支付接口")
+  @RequestMapping(value = "/payByScore", method = RequestMethod.POST)
+  public
+  @ResponseBody
+  LejiaResult payByScore(@RequestParam Long orderId, @RequestParam Long trueScore) {
+    if (orderId == null || trueScore == null) {
+      return LejiaResult.build(5010, messageService.getMsg("5010"));
+    }
+    try {
+      Map map = onlineOrderService.orderPayByScoreB(orderId, trueScore, 2, 10L);
+      if ((Integer) map.get("status") != 200) {
+        return LejiaResult.build((Integer) map.get("status"), "");
+      }
+      return LejiaResult.build((Integer) map.get("status"), "", map.get("data"));
+    } catch (Exception e) {
+      return LejiaResult.build(500, messageService.getMsg("500"));
     }
   }
 
@@ -254,26 +289,15 @@ public class OrderController {
       map.put("sid", order.getOrderSid());
       map.put("truePrice", order.getTruePrice());
       map.put("trueScore", order.getTrueScore());
-//      ScoreADetail aDetail = scoreAService.findScoreADetailByOrderSid(order.getOrderSid());
-//      if (aDetail != null) {
-//        ScoreA scoreA = aDetail.getScoreA();
-//        if (scoreA != null) {
-//          map.put("payBackScore", aDetail.getNumber());
-//          map.put("totalScore", scoreA.getTotalScore());
-//          return LejiaResult.build(200, "ok", map);
-//        }
-//      }
       //为了防止微信处理失败或者慢导致未找到信息，使用计算数据
       Integer
           PAY_BACK_SCALE =
           Integer.parseInt(dictionaryService.findDictionaryById(3L).getValue());
       map.put("payBackScore",
               (long) Math.ceil((double) (order.getTruePrice() * PAY_BACK_SCALE) / 100));
-//      map.put("totalScore",
-//              scoreAService.findScoreAByLeJiaUser(order.getLeJiaUser()).getTotalScore());
       return LejiaResult.build(200, "ok", map);
     }
-    return LejiaResult.build(405, "未找到订单信息");
+    return LejiaResult.build(5006, messageService.getMsg("5006"));
   }
 
   @ApiOperation("修改订单的收货地址")
@@ -281,14 +305,18 @@ public class OrderController {
   public
   @ResponseBody
   LejiaResult editAddress(@RequestParam(required = true) Long orderId,
-                          @RequestParam(required = false) Long addrId) {
-    OnLineOrder onLineOrder = orderService.findOrderById(orderId, false);
+                          @RequestParam(required = true) Long addrId) {
+    OnLineOrder onLineOrder = orderService.findOnLineOrderById(orderId);
     Address address = addressService.findOneAddress(addrId);
     if (onLineOrder != null && address != null) {
       addressService.editOrderAddress(address, onLineOrder);
       return LejiaResult.build(200, "ok");
     } else {
-      return LejiaResult.build(402, "未找到订单或地址数据");
+      if (onLineOrder == null) {
+        return LejiaResult.build(5006, messageService.getMsg("5006"));
+      } else {
+        return LejiaResult.build(7001, messageService.getMsg("7001"));
+      }
     }
   }
 

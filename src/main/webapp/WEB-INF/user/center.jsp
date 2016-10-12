@@ -324,7 +324,8 @@
         showPhoneModel();
     }
     function goPage(page) {
-        location.href = "${wxRootUrl}/" + page;
+        //  location.href = "${wxRootUrl}/" + page;
+        location.href = "/" + page;
     }
 
     function clickPic(o) {

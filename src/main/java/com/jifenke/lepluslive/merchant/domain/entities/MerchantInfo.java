@@ -35,6 +35,17 @@ public class MerchantInfo {
 
   private String ticket;      //获取的二维码ticket，凭借此ticket可以在有效时间内换取二维码
 
+  private Integer discount = 100; //乐加专享折扣 单位%  88表示88折
+
+  //1=乐加联盟|2=消费获礼|3=优先体验|4=双重优惠|5=会员积分
+  private String feature;  //店铺特色，最多三个 例：1_3_5
+
+  private String vipPicture; //专享活动图
+
+  private String reason; //推荐理由，多条以“+=”分隔
+
+  private String description; //服务说明，多条以“+=”分隔
+
 
   public Long getId() {
     return id;
@@ -98,6 +109,46 @@ public class MerchantInfo {
 
   public void setTicket(String ticket) {
     this.ticket = ticket;
+  }
+
+  public Integer getDiscount() {
+    return discount;
+  }
+
+  public void setDiscount(Integer discount) {
+    this.discount = discount;
+  }
+
+  public String getFeature() {
+    return feature;
+  }
+
+  public void setFeature(String feature) {
+    this.feature = feature;
+  }
+
+  public String getVipPicture() {
+    return vipPicture;
+  }
+
+  public void setVipPicture(String vipPicture) {
+    this.vipPicture = vipPicture;
+  }
+
+  public String getReason() {
+    return reason;
+  }
+
+  public void setReason(String reason) {
+    this.reason = reason;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
   }
 
   public Integer getCard() {

@@ -1,5 +1,6 @@
 package com.jifenke.lepluslive.weixin.controller;
 
+import com.jifenke.lepluslive.global.service.MessageService;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.global.util.WeixinPayUtil;
@@ -72,10 +73,10 @@ public class WeixinPayController {
   private DictionaryService dictionaryService;
 
   @Inject
-  private WeixinPayLogService weixinPayLogService;
+  private OnlineOrderService onlineOrderService;
 
   @Inject
-  private OnlineOrderService onlineOrderService;
+  private MessageService messageService;
 
   //微信支付接口
   @RequestMapping(value = "/weixinpay")
@@ -99,6 +100,7 @@ public class WeixinPayController {
         result =
         orderService.setPriceScoreForOrder(orderId, newTruePrice, trueScore, transmitWay);
     if (!"200".equals(result.get("status").toString())) {
+      result.put("msg", messageService.getMsg(result.get("status").toString()));
       return result;
     }
 
