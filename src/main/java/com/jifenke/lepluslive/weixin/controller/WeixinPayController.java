@@ -100,7 +100,7 @@ public class WeixinPayController {
         result =
         orderService.setPriceScoreForOrder(orderId, newTruePrice, trueScore, transmitWay);
     if (!"200".equals(result.get("status").toString())) {
-      result.put("msg", messageService.getMsg(result.get("status").toString()));
+      result.put("msg", messageService.getMsg("" + result.get("status")));
       return result;
     }
 
