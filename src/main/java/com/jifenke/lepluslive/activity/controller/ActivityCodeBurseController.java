@@ -89,7 +89,7 @@ public class ActivityCodeBurseController {
     } else {
       model.addAttribute("status", 0);
     }
-    return MvUtil.go("/activity/share2");
+    return MvUtil.go("/activity/share");
   }
 
   /**

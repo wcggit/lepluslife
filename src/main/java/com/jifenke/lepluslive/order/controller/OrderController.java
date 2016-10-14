@@ -133,7 +133,7 @@ public class OrderController {
         orderService.createCartOrder(cartDetailDtoList, leJiaUser, address, 1L);
     if (!"200".equals(result.get("status").toString())) {
       return LejiaResult.build((Integer) result.get("status"),
-                               messageService.getMsg((String) result.get("status")));
+                               messageService.getMsg("" + result.get("status")));
     }
     OnLineOrderDto orderDto = new OnLineOrderDto();
     OnLineOrder onLineOrder = (OnLineOrder) result.get("data");
@@ -204,7 +204,7 @@ public class OrderController {
           orderService.createBuyOrder(productId, productSpecId, productNum, leJiaUser, address, 1L);
       if (!"200".equals(result.get("status").toString())) {
         return LejiaResult.build((Integer) result.get("status"),
-                                 messageService.getMsg((String) result.get("status")));
+                                 messageService.getMsg("" + result.get("status")));
       }
       onLineOrder = (OnLineOrder) result.get("data");
     } catch (Exception e) {

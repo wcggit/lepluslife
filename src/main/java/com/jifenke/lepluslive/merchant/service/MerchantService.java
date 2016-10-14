@@ -86,20 +86,25 @@ public class MerchantService {
       map.put("wifi", o[12]);
       map.put("description", o[13] == null ? "" : o[13]);
       map.put("discount", o[14] == null ? 100 : o[14]);
+      List<Map> l = new ArrayList<>();
+      String path = "http://www.lepluslife.com/resource/frontRes/merchant/icon/";
+      String suffix = ".png";
+      String feature;
       if (o[15] != null && (!"".equals(o[15].toString()))) {
-        List<Map> l = new ArrayList<>();
-        String path = "http://www.lepluslife.com/resource/frontRes/merchant/icon/";
-        String suffix = ".png";
-        String[] str = o[15].toString().split("_");
-        String[] details = dictionaryService.findDictionaryById(41L).getValue().split("_");
-        for (String s : str) {
-          Map<Object, Object> m = new HashMap<>();
-          m.put("name", details[Integer.valueOf(s) - 1]);
-          m.put("path", path + s + suffix);
-          l.add(m);
-        }
-        map.put("feature", l);
+        feature = o[15].toString();
+      } else {
+        feature = "1_2_3";
       }
+      String[] str = feature.split("_");
+      String[] details = dictionaryService.findDictionaryById(41L).getValue().split("_");
+      for (String s : str) {
+        Map<Object, Object> m = new HashMap<>();
+        m.put("name", details[Integer.valueOf(s) - 1]);
+        m.put("path", path + s + suffix);
+        l.add(m);
+      }
+      map.put("feature", l);
+
       map.put("reason", o[16] == null ? "" : o[16]);
       map.put("vipPicture", o[17] == null ? "" : o[17]);
     }
