@@ -193,7 +193,7 @@ public class OnlineOrderService {
       return result;
     }
     PayOrigin payWay = new PayOrigin(payOrigin);
-    //暂定不反A积分
+    //暂定不返A积分
     if (order.getState() == 4) {
       result.put("status", 5008);
       return result;
@@ -208,7 +208,7 @@ public class OnlineOrderService {
     try {
       //订单状态处理
       order.setPayOrigin(payWay);
-      order.setState(3);
+      order.setState(1);
       order.setPayState(1);
       order.setTrueScore(trueScore);
       order.setTruePrice(0L);
@@ -216,6 +216,7 @@ public class OnlineOrderService {
       if (transmitWay == 1) {
         order.setDeliveryDate(date);
         order.setConfirmDate(date);
+        order.setState(3);
       }
       order.setTransmitWay(transmitWay);
       //订单相关product的销量等数据处理

@@ -1,6 +1,7 @@
 package com.jifenke.lepluslive.activity.repository;
 
 import com.jifenke.lepluslive.activity.domain.entities.ActivityJoinLog;
+import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,4 +20,10 @@ public interface ActivityJoinLogRepository extends JpaRepository<ActivityJoinLog
 
   //查找是否参加过永久或分享裂变活动
   List<ActivityJoinLog> findByTypeAndOpenId(Integer type, String openId);
+
+  /**
+   * 查找是否参加过某个临时页面活动 16/10/18
+   */
+  List<ActivityJoinLog> findByTypeAndActivityIdAndUser(Integer type, Long activityId,
+                                                       WeiXinUser user);
 }

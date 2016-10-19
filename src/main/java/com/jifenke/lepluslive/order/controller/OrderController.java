@@ -44,7 +44,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.ResourceBundle;
 import java.util.SortedMap;
 
 import javax.inject.Inject;
@@ -131,9 +130,9 @@ public class OrderController {
     Map<String, Object>
         result =
         orderService.createCartOrder(cartDetailDtoList, leJiaUser, address, 1L);
-    if (!"200".equals(result.get("status").toString())) {
-      return LejiaResult.build((Integer) result.get("status"),
-                               messageService.getMsg("" + result.get("status")));
+    String status = "" + result.get("status");
+    if (!"200".equals(status)) {
+      return LejiaResult.build(Integer.valueOf(status), messageService.getMsg(status));
     }
     OnLineOrderDto orderDto = new OnLineOrderDto();
     OnLineOrder onLineOrder = (OnLineOrder) result.get("data");
@@ -202,9 +201,9 @@ public class OrderController {
       Map
           result =
           orderService.createBuyOrder(productId, productSpecId, productNum, leJiaUser, address, 1L);
-      if (!"200".equals(result.get("status").toString())) {
-        return LejiaResult.build((Integer) result.get("status"),
-                                 messageService.getMsg("" + result.get("status")));
+      String status = "" + result.get("status");
+      if (!"200".equals(status)) {
+        return LejiaResult.build(Integer.valueOf(status), messageService.getMsg(status));
       }
       onLineOrder = (OnLineOrder) result.get("data");
     } catch (Exception e) {
@@ -237,7 +236,7 @@ public class OrderController {
     Map<Object, Object>
         result =
         orderService.setPriceScoreForOrder(orderId, truePrice, trueScore, 2);
-    String status = result.get("status").toString();
+    String status = "" + result.get("status");
     if (!"200".equals(status)) {
       return LejiaResult.build(Integer.valueOf(status), messageService.getMsg(status));
     }
@@ -267,9 +266,10 @@ public class OrderController {
       return LejiaResult.build(5010, messageService.getMsg("5010"));
     }
     try {
-      Map map = onlineOrderService.orderPayByScoreB(orderId, trueScore, 2, 10L);
-      if ((Integer) map.get("status") != 200) {
-        return LejiaResult.build((Integer) map.get("status"), "");
+      Map map = onlineOrderService.orderPayByScoreB(orderId, trueScore, 2, 9L);
+      String status = "" + map.get("status");
+      if (!"200".equals(status)) {
+        return LejiaResult.build(Integer.valueOf(status), messageService.getMsg(status));
       }
       return LejiaResult.build((Integer) map.get("status"), "", map.get("data"));
     } catch (Exception e) {
