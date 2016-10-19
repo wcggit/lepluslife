@@ -1,6 +1,5 @@
 package com.jifenke.lepluslive.partner.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.lejiauser.repository.LeJiaUserRepository;
 import com.jifenke.lepluslive.merchant.domain.entities.Merchant;
@@ -21,7 +20,6 @@ import com.jifenke.lepluslive.score.repository.ScoreADetailRepository;
 import com.jifenke.lepluslive.score.repository.ScoreARepository;
 import com.jifenke.lepluslive.score.repository.ScoreBDetailRepository;
 import com.jifenke.lepluslive.score.repository.ScoreBRepository;
-import com.jifenke.lepluslive.weixin.domain.entities.AccessToken;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 
 import org.apache.http.HttpEntity;
@@ -34,9 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -51,7 +47,6 @@ import javax.inject.Inject;
  * Created by wcg on 16/6/3.
  */
 @Service
-@Transactional(readOnly = true)
 public class PartnerService {
 
   @Inject
@@ -127,6 +122,7 @@ public class PartnerService {
         scoreALog.setNumber(-(long) valueA);
         scoreALog.setType(1);
         scoreALog.setCreateDate(date);
+        scoreALog.setPartnerId(partner.getId());
         partnerScoreLogRepository.save(scoreALog);
         ScoreA scoreA = scoreARepository.findByLeJiaUser(leJiaUser).get(0);
         scoreA.setScore(scoreA.getScore() + valueA);
@@ -144,6 +140,7 @@ public class PartnerService {
       if (valueB > 0) {
         partnerWallet.setAvailableScoreB(partnerWallet.getTotalScoreB() - valueB);
         PartnerScoreLog scoreBLog = new PartnerScoreLog();
+        scoreBLog.setPartnerId(partner.getId());
         scoreBLog.setType(0);
         scoreBLog.setNumber(-(long) valueB);
         scoreBLog.setDescription("邀请会员送积分");

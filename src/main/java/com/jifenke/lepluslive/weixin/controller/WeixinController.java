@@ -230,7 +230,7 @@ public class WeixinController {
         if (bindPartner != null && bindPartner.getId().equals(partner.getId())) {//已经绑上无须在考虑绑定
           model.addAttribute("code", "4");
         } else {
-          if (partner.getUserLimit() > partnerUserLimit) {
+          if (partner.getUserLimit() <= partnerUserLimit) {
             model.addAttribute("code", "2"); //名额不足
           } else {
             model.addAttribute("code", "4");//正常绑定
