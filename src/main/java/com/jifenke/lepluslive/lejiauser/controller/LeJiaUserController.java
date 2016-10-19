@@ -290,13 +290,15 @@ public class LeJiaUserController {
   public
   @ResponseBody
   LejiaResult check(@RequestParam(required = true) String version) {
-    String newVersion = dictionaryService.findDictionaryById(30L).getValue();
+    String[] newVersion = dictionaryService.findDictionaryById(30L).getValue().split("_");
     Map<String, String> map = new HashMap<>();
-    if (newVersion.equals(version)) {
+
+    if (newVersion[0].equals(version)) {
       map.put("status", "0"); //无需更新
       return LejiaResult.ok(map);
     } else {
       map.put("status", "1"); //有新版本
+      map.put("force", newVersion[1]); //是否强制更新
       map.put("content", dictionaryService.findDictionaryById(31L).getValue()); //更新内容
       map.put("downUrl", dictionaryService.findDictionaryById(32L).getValue()); //下载地址
       return LejiaResult.ok(map);

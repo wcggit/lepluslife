@@ -112,6 +112,9 @@ public class OrderService {
       result.put("status", 500);  //异常
       return result;
     }
+    if (buyNumber == null || buyNumber < 1) {
+      buyNumber = 1;
+    }
     ProductSpec productSpec = productService.editProductSpecRepository(specId, buyNumber);
     if (productSpec == null) {
       result.put("status", 5003); //无库存了

@@ -313,7 +313,7 @@
                            typeCurrLength[typeId] = list.length;
                            for (i; i < list.length; i++) {
                                var currP = '<div onclick="goProductDetail(' + list[i].id
-                                           + ')"><div><img src="' + list[i].picture
+                                           + ')"><div><img height="125px" src="' + list[i].picture
                                            + '" alt=""></div><div>' + list[i].name
                                            + '</div><div><span style="font-size: 14px;color:#333;margin-right: -3px;">'
                                            + toDecimal(list[i].minPrice / 100)

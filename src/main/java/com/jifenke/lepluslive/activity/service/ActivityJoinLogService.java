@@ -35,6 +35,20 @@ public class ActivityJoinLogService {
     return null;
   }
 
+  /**
+   * 查找是否参加过某个临时页面活动 16/10/18
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+  public ActivityJoinLog findLogByTypeAndUser(Integer type, Long activityId, WeiXinUser user) {
+    List<ActivityJoinLog>
+        list =
+        activityJoinLogRepository.findByTypeAndActivityIdAndUser(type, activityId, user);
+    if (list.size() > 0) {
+      return list.get(0);
+    }
+    return null;
+  }
+
   //添加永久关注二维码活动记录
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public void addCodeBurseLog(ActivityCodeBurse codeBurse, WeiXinUser user) {
@@ -55,6 +69,30 @@ public class ActivityJoinLogService {
     joinLog.setDetail(defaultScoreA + "");
     joinLog.setOpenId(user.getOpenId());
     joinLog.setType(0);
+    joinLog.setUser(user);
+    activityJoinLogRepository.save(joinLog);
+  }
+
+  /**
+   * 添加参与记录  16/10/18
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  public void addLog(WeiXinUser user, Integer scoreA, Integer scoreB, Long activityId,
+                     Integer type) {
+    ActivityJoinLog joinLog = new ActivityJoinLog();
+    joinLog.setActivityId(activityId);
+    String detail = "";
+    if (scoreA != null) {
+      detail += scoreA;
+    } else {
+      detail += "0";
+    }
+    if (scoreB != null) {
+      detail += "_" + scoreB;
+    }
+    joinLog.setDetail(detail);
+    joinLog.setOpenId(user.getOpenId());
+    joinLog.setType(type);
     joinLog.setUser(user);
     activityJoinLogRepository.save(joinLog);
   }

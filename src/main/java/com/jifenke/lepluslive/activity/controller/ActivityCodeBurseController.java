@@ -11,8 +11,6 @@ import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.lejiauser.service.LeJiaUserService;
 import com.jifenke.lepluslive.merchant.domain.entities.Merchant;
-import com.jifenke.lepluslive.merchant.service.MerchantService;
-import com.jifenke.lepluslive.partner.domain.entities.Partner;
 import com.jifenke.lepluslive.partner.service.PartnerService;
 import com.jifenke.lepluslive.score.service.ScoreAService;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
@@ -30,12 +28,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * 活动 Created by zhangwen on 16/9/2.
@@ -191,7 +191,10 @@ public class ActivityCodeBurseController {
       int defaultScoreA = Integer.valueOf(dictionaryService.findDictionaryById(18L).getValue());
       if (joinLog == null) {//未参与
         //派发红包,获取默认派发红包金额
-        int status = scoreAService.giveScoreAByDefault(weiXinUser, defaultScoreA);
+        int
+            status =
+            scoreAService
+                .giveScoreAByDefault(weiXinUser, defaultScoreA, "关注送红包", 0, "0_" + defaultScoreA);
         //添加参加记录
         if (status == 1) {
           activityJoinLogService.addCodeBurseLogByDefault(weiXinUser, defaultScoreA);
@@ -236,5 +239,74 @@ public class ActivityCodeBurseController {
     return MvUtil.go("/activity/codeBurse");
   }
 
+  /**
+   * 跳转到当前临时活动页面  16/10/18
+   *
+   * @param id 活动版本
+   */
+  @RequestMapping(value = "/activity/short/{id}", method = RequestMethod.GET)
+  public void shortPage(HttpServletResponse response, @PathVariable String id) {
+    try {
+      response.sendRedirect("/resource/frontRes/activity/short/version" + id + "/index.html");
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  /**
+   * 临时活动页面加载访问  16/10/18
+   *
+   * @param version 活动对应的版本
+   */
+  @RequestMapping(value = "/activity", method = RequestMethod.POST)
+  public
+  @ResponseBody
+  LejiaResult activityPage(@RequestParam Long version, HttpServletRequest request) {
+    WeiXinUser user = weiXinService.getCurrentWeiXinUser(request);
+    ActivityJoinLog joinLog = activityJoinLogService.findLogByTypeAndUser(4, version, user);
+    Map<Object, Object> result = new HashMap<>();
+    result.put("user", user);
+    if (joinLog != null) {
+      result.put("status", 1);
+    } else {
+      result.put("status", 0);
+    }
+    return LejiaResult.ok(result);
+  }
+
+  /**
+   * 临时活动页面加载访问  16/10/18
+   *
+   * @param version 活动对应的版本
+   * @param scoreA  发放的红包
+   * @param scoreB  发放的积分
+   */
+  @RequestMapping(value = "/short/submit", method = RequestMethod.POST)
+  public
+  @ResponseBody
+  LejiaResult activitySubmit(@RequestParam Long version, @RequestParam Integer scoreA,
+                             @RequestParam Integer scoreB, @RequestParam String aInfo,
+                             @RequestParam String bInfo, HttpServletRequest request) {
+    WeiXinUser user = weiXinService.getCurrentWeiXinUser(request);
+    ActivityJoinLog joinLog = activityJoinLogService.findLogByTypeAndUser(4, version, user);
+    Map<Object, Object> result = new HashMap<>();
+    result.put("user", user.getLeJiaUser());
+    if (joinLog != null) {
+      result.put("status", 1);
+    } else {
+      //给红包和积分，并添加领取记录
+      try {
+        Map<Object, Object> map = weiXinUserService
+            .shortActivitySubmit(user, scoreA, scoreB, aInfo, bInfo, 10, 4 + "_" + version, version,
+                                 4);
+        result.put("map", map);
+
+      } catch (Exception e) {
+        e.printStackTrace();
+        return LejiaResult.build(500, "服务器异常");
+      }
+    }
+    return LejiaResult.ok(result);
+  }
 
 }

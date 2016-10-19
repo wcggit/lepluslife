@@ -1,15 +1,12 @@
 package com.jifenke.lepluslive.weixin.service;
 
+import com.jifenke.lepluslive.activity.service.ActivityJoinLogService;
 import com.jifenke.lepluslive.lejiauser.BarcodeConfig;
 import com.jifenke.lepluslive.lejiauser.domain.entities.RegisterOrigin;
 import com.jifenke.lepluslive.lejiauser.service.BarcodeService;
 import com.jifenke.lepluslive.filemanage.service.FileImageService;
 import com.jifenke.lepluslive.global.config.Constants;
 import com.jifenke.lepluslive.global.util.MvUtil;
-import com.jifenke.lepluslive.merchant.domain.entities.Merchant;
-import com.jifenke.lepluslive.merchant.service.MerchantService;
-import com.jifenke.lepluslive.partner.domain.entities.Partner;
-import com.jifenke.lepluslive.partner.service.PartnerService;
 import com.jifenke.lepluslive.score.domain.entities.ScoreA;
 import com.jifenke.lepluslive.score.domain.entities.ScoreADetail;
 import com.jifenke.lepluslive.score.domain.entities.ScoreB;
@@ -31,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -73,10 +71,17 @@ public class WeiXinUserService {
   @Inject
   private ScoreBDetailRepository scoreBDetailRepository;
 
+  @Inject
+  private ActivityJoinLogService joinLogService;
+
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public WeiXinUser findWeiXinUserByOpenId(String openId) {
-    return weiXinUserRepository.findByOpenId(openId);
+    List<WeiXinUser> list = weiXinUserRepository.findByOpenId(openId);
+    if (list != null && list.size() > 0) {
+      return list.get(0);
+    }
+    return null;
   }
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
@@ -269,34 +274,6 @@ public class WeiXinUserService {
     return leJiaUser;
   }
 
-  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public void openHongBao(WeiXinUser weiXinUser, String phoneNumber) {
-    LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
-    leJiaUser.setPhoneNumber(phoneNumber);
-    //  leJiaUser.setUserName(realName);
-    leJiaUserRepository.save(leJiaUser);
-
-    ScoreA scoreA = scoreARepository.findByLeJiaUser(leJiaUser).get(0);
-
-    scoreA.setScore(scoreA.getScore() + 1000);
-    scoreA.setTotalScore(scoreA.getTotalScore() + 1000);
-    Date date = new Date();
-    scoreA.setLastUpdateDate(date);
-
-    scoreARepository.save(scoreA);
-
-    ScoreADetail scoreADetail = new ScoreADetail();
-    scoreADetail.setNumber(1000L);
-    scoreADetail.setScoreA(scoreA);
-    scoreADetail.setOperate("关注送红包");
-    scoreADetail.setOrigin(0);
-    scoreADetailRepository.save(scoreADetail);
-
-    weiXinUser.setHongBaoState(1);
-    weiXinUser.setState(1);
-    weiXinUserRepository.save(weiXinUser);
-  }
-
   /**
    * 填充手机号送红包 16/09/20
    */
@@ -365,6 +342,64 @@ public class WeiXinUserService {
       weiXinUser.setState(1);
       weiXinUser.setStateDate(date);
       weiXinUserRepository.save(weiXinUser);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    map.put("scoreA", valueA);
+    map.put("scoreB", valueB);
+    return map;
+  }
+
+  /**
+   * 临时活动送红包和积分 16/10/18
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  public Map<Object, Object> shortActivitySubmit(WeiXinUser weiXinUser, Integer valueA,
+                                                 Integer valueB, String aInfo, String bInfo,
+                                                 Integer origin, String orderSid, Long activityId,
+                                                 Integer type)
+      throws Exception {
+    LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
+    ScoreA scoreA = scoreARepository.findByLeJiaUser(leJiaUser).get(0);
+    ScoreB scoreB = scoreBRepository.findByLeJiaUser(leJiaUser);
+    Date date = new Date();
+    Map<Object, Object> map = new HashMap<>();
+    try {
+      //是否返红包
+      if (valueA != null && valueA > 0) {      //发红包
+        scoreA.setScore(scoreA.getScore() + valueA);
+        scoreA.setTotalScore(scoreA.getTotalScore() + valueA);
+        scoreA.setLastUpdateDate(date);
+        scoreARepository.save(scoreA);
+        ScoreADetail scoreADetail = new ScoreADetail();
+        scoreADetail.setNumber(Long.valueOf(String.valueOf(valueA)));
+        scoreADetail.setScoreA(scoreA);
+        scoreADetail.setOperate(aInfo);
+        scoreADetail.setOrigin(origin);
+        scoreADetail.setOrderSid(orderSid);
+        scoreADetailRepository.save(scoreADetail);
+      }
+
+      //是否返积分
+      if (valueB != null && valueB > 0) {      //发积分
+        scoreB.setLastUpdateDate(date);
+        scoreB.setScore(scoreB.getScore() + valueB);
+        scoreB.setTotalScore(scoreB.getTotalScore() + valueB);
+        scoreBRepository.save(scoreB);
+        ScoreBDetail scoreBDetail = new ScoreBDetail();
+        scoreBDetail.setNumber((long) valueB);
+        scoreBDetail.setScoreB(scoreB);
+        scoreBDetail.setOperate(bInfo);
+        scoreBDetail.setOrigin(origin);
+        scoreBDetail.setOrderSid(orderSid);
+        scoreBDetailRepository.save(scoreBDetail);
+      }
+      weiXinUser.setState(1);
+      weiXinUser.setStateDate(date);
+      weiXinUserRepository.save(weiXinUser);
+
+      //添加活动记录
+      joinLogService.addLog(weiXinUser, valueA, valueB, activityId, type);
     } catch (Exception e) {
       e.printStackTrace();
     }

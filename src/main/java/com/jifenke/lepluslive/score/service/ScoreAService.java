@@ -8,7 +8,6 @@ import com.jifenke.lepluslive.score.domain.entities.ScoreADetail;
 import com.jifenke.lepluslive.score.repository.ScoreADetailRepository;
 import com.jifenke.lepluslive.score.repository.ScoreARepository;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
-import com.jifenke.lepluslive.weixin.repository.DictionaryRepository;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -31,9 +30,6 @@ public class ScoreAService {
 
   @Inject
   private ScoreADetailRepository scoreADetailRepository;
-
-  @Inject
-  private DictionaryRepository dictionaryRepository;
 
   @Inject
   private ActivityCodeBurseRepository activityCodeBurseRepository;
@@ -108,9 +104,12 @@ public class ScoreAService {
     return 1;
   }
 
-  //普通关注送红包
+  /**
+   * 添加红包 16/10/18
+   */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public int giveScoreAByDefault(WeiXinUser weiXinUser, int defaultScoreA) {
+  public int giveScoreAByDefault(WeiXinUser weiXinUser, int defaultScoreA, String operate,
+                                 Integer origin, String orderSid) {
     LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
     ScoreA scoreA = scoreARepository.findByLeJiaUser(leJiaUser).get(0);
     try {
@@ -123,9 +122,9 @@ public class ScoreAService {
       ScoreADetail scoreADetail = new ScoreADetail();
       scoreADetail.setNumber(Long.valueOf(String.valueOf(defaultScoreA)));
       scoreADetail.setScoreA(scoreA);
-      scoreADetail.setOperate("关注送红包");
-      scoreADetail.setOrigin(0);
-      scoreADetail.setOrderSid("0_" + defaultScoreA);
+      scoreADetail.setOperate(operate);
+      scoreADetail.setOrigin(origin);
+      scoreADetail.setOrderSid(orderSid);
       scoreADetailRepository.save(scoreADetail);
     } catch (Exception e) {
       e.printStackTrace();
