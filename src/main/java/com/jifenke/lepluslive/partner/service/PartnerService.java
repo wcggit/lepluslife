@@ -218,7 +218,7 @@ public class PartnerService {
       new Thread(() -> {
         String
             getUrl =
-            "http://www.lepluspay.com/partner/bind_wx_user/" + partner.getPartnerSid();
+            "http://www.lepluspay.com/api/partner/bind_wx_user/" + partner.getPartnerSid();
         CloseableHttpClient httpclient = HttpClients.createDefault();
         HttpGet httpGet = new HttpGet(getUrl);
         httpGet.addHeader("Content-Type", "text/html;charset=UTF-8");
@@ -232,7 +232,6 @@ public class PartnerService {
           e.printStackTrace();
         }
       }).start();
-
     }
     return flag;
   }

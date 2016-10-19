@@ -31,7 +31,9 @@ public class ScoreADetail {
   private String operate;
   private Date dateCreated = new Date();
 
-  private Integer origin;  //1=线上返还  2=线上消费  3=线下消费  4=线下返还   5=活动返还   6=运动   7=摇一摇  8=APP分享  9=线下支付完成页注册会员  10=临时活动
+  private Integer
+      origin;
+      //1=线上返还  2=线上消费  3=线下消费  4=线下返还   5=活动返还   6=运动   7=摇一摇  8=APP分享  9=线下支付完成页注册会员 10=合伙人发福利  11=临时活动
 
   private String orderSid;  //对应的订单号或对应的活动类型和id或对应的邀请人token
 

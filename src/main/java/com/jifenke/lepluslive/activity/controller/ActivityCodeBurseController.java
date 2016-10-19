@@ -297,7 +297,7 @@ public class ActivityCodeBurseController {
       //给红包和积分，并添加领取记录
       try {
         Map<Object, Object> map = weiXinUserService
-            .shortActivitySubmit(user, scoreA, scoreB, aInfo, bInfo, 10, 4 + "_" + version, version,
+            .shortActivitySubmit(user, scoreA, scoreB, aInfo, bInfo, 11, 4 + "_" + version, version,
                                  4);
         result.put("map", map);
 
