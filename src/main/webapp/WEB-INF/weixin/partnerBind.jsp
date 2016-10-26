@@ -7,19 +7,6 @@
 --%>
 <%@ page language="java" pageEncoding="UTF-8" %>
 <%@include file="/WEB-INF/commen.jsp" %>
-<style>
-    #main .top3 img{
-        width: 90.667vw;
-        height: 60.333vw;
-        text-align: center;
-        line-height: 13.333vw;
-        color: #fff;
-        font-size: 4.267vw;
-        background: #333;
-        border-radius: 5px;
-    }
-</style>
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -59,11 +46,25 @@
     <!--第4种情况 成功-->
     <div class="top top3">
         <p>确定要将该微信号和合伙人<br><font>${partner.partnerName}</font> 绑定吗？</p>
+
         <div onclick="bindPartner()">确认绑定</div>
     </div>
 </div>
 </body>
 </html>
+<!DOCTYPE html>
+<style>
+    #main .top3 img {
+        width: 90.667vw;
+        height: 60.333vw;
+        text-align: center;
+        line-height: 13.333vw;
+        color: #fff;
+        font-size: 4.267vw;
+        background: #333;
+        border-radius: 5px;
+    }
+</style>
 <script>
     if (${code==1}) {
         $(".top1")[0].style.display = "block";
@@ -74,22 +75,24 @@
     } else if (${code==3}) {
         $(".top2")[1].style.display = "block";
         $(".top3")[0].style.display = "none";
-    }else if (${code==5}) {
+    } else if (${code==5}) {
         $(".top2")[2].style.display = "block";
         $(".top3")[0].style.display = "none";
     }
     function bindPartner() {
-        $.get("/weixin/partner/bind/"+${partner.partnerSid},function(result){
-            if(result.status==200){
-              var content =   $(".top3")[0];
+        $.get("/weixin/partner/bind/${partnerSid}", function (result) {
+            if (result.status == 200) {
+                var content = $(".top3")[0];
                 content.innerHTML = "";
-                content.innerHTML+="<img class='contentImg' src='${resourceUrl}/images/bindSuccess.png'>"
-            }else{
+                content.innerHTML +=
+                "<img class='contentImg' src='${resourceUrl}/images/bindSuccess.png'>"
+            } else {
                 alert(result.msg);
-                var content =   $(".top3")[0];
+                var content = $(".top3")[0];
                 content.innerHTML = "";
-                content.innerHTML+="<img class='contentImg' src='${resourceUrl}/images/bindFaild.png'>"
+                content.innerHTML +=
+                "<img class='contentImg' src='${resourceUrl}/images/bindFaild.png'>"
             }
-                });
+        });
     }
 </script>
