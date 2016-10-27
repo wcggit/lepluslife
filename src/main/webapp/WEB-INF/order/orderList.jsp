@@ -195,8 +195,14 @@
             + '</p><p>￥'
             + toDecimal(orderDetails[i].productSpec.minPrice
                         / 100) + '+<span>'
-            + (orderDetails[i].productSpec.minScore == null ? 0
-                    : orderDetails[i].productSpec.minScore) + '积分</span></p></div></div>';
+            + (orderDetails[i].product.type == 1 ? Math.floor(((orderDetails[i].productSpec.price
+                                                                - orderDetails[i].productSpec.minPrice)
+                                                               - (orderDetails[i].productSpec.price
+                                                                  - orderDetails[i].productSpec.minPrice)
+                                                                 % 100) / 100)
+                    : (orderDetails[i].productSpec.minScore
+                       == null ? 0
+                    : orderDetails[i].productSpec.minScore)) + '积分</span></p></div></div>';
         }
         divStr += '</div>';
         return divStr;

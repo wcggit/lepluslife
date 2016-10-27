@@ -93,11 +93,12 @@ public class LeJiaUserController {
       if (leJiaUser == null) {
         return LejiaResult.build(2005, "该手机号未注册");
       }
-    } else if (type == 3) {
-      if (leJiaUser != null) {
-        return LejiaResult.build(2006, "该手机号已注册");
-      }
     }
+//    else if (type == 3) {
+//      if (leJiaUser != null) {
+//        return LejiaResult.build(2006, "该手机号已注册");
+//      }
+//    }
 
     Integer boo = smsService.saveValidateCode(phoneNumber, request, type);
     if (boo == 1) {
@@ -255,6 +256,9 @@ public class LeJiaUserController {
                       @RequestParam(required = false) String headimgurl,
                       @RequestParam(required = false) Long sex,
                       @ApiParam(value = "推送token") @RequestParam(required = false) String token) {
+    if (unionid == null || "null".equals(unionid) || "".equals(unionid)) {
+      return LejiaResult.build(2008, messageUtil.getMsg("2008"));
+    }
     WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByUnionId(unionid);  //是否已注册
     LeJiaUser leJiaUser = null;
     try {

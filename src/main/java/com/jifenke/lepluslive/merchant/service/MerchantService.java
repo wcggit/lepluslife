@@ -219,11 +219,9 @@ public class MerchantService {
                                                                Integer page, Long type,
                                                                String cityName, Integer condition,
                                                                Integer partnership) {
-
-//    EntityManager em = entityManagerFactory.createEntityManager();
     //定义SQL
     String sql = null;
-    if (status == 1) {
+    if (status != null && status == 1) {
       sql =
           "SELECT m.id,m.sid,m.location,m.phone_number,m.`name`,m.picture,m.lng,m.lat,t.`name` AS tName,ci.`name` AS cName,mi.star,area.`name` AS aName,ROUND( 6378.138 * 2 * ASIN(SQRT(POW(SIN(("
           + latitude + " * PI() / 180 - m.lat * PI() / 180) / 2),2) + COS(" + latitude
@@ -260,7 +258,7 @@ public class MerchantService {
       }
     }
 
-    if (status == 1) {
+    if (status != null && status == 1) {
       if (condition != null) {
         if (condition != 0) {  //先其他 后离我最近
           sql += " ,distance ASC ";

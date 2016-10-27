@@ -104,7 +104,7 @@ public class WeiXinUserService {
   }
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public void saveWeiXinUserByUnSubscribe(WeiXinUser weiXinUser) throws Exception {
+  public void saveWeiXinUser(WeiXinUser weiXinUser) throws Exception {
     weiXinUserRepository.save(weiXinUser);
   }
 
@@ -301,7 +301,7 @@ public class WeiXinUserService {
           valueA = maxA;
         } else {//随机红包
           int minA = Integer.valueOf(aRules[0]);
-          valueA = new Random().nextInt(maxA - minA) + minA;
+          valueA = new Random().nextInt((maxA - minA) / 10) * 10 + minA;
         }
         scoreA.setScore(scoreA.getScore() + valueA);
         scoreA.setTotalScore(scoreA.getTotalScore() + valueA);
@@ -338,7 +338,6 @@ public class WeiXinUserService {
         scoreBDetail.setOrderSid("0_" + valueB);
         scoreBDetailRepository.save(scoreBDetail);
       }
-      weiXinUser.setHongBaoState(1);
       weiXinUser.setState(1);
       weiXinUser.setStateDate(date);
       weiXinUserRepository.save(weiXinUser);

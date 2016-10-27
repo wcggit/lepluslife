@@ -182,7 +182,7 @@ public class WeixinReplyService {
                   ActivityJoinLog
                       joinLog =
                       activityJoinLogService
-                          .findLogBySubActivityAndOpenId(codeBurse.getType(), user.getOpenId());
+                          .findLogBySubActivityAndOpenId(codeBurse.getType(), user);
                   if (joinLog == null) {//未参与
                     buildMap.put("title", "点击领取红包，鞍山56店通用，花多少都能用");
                     buildMap.put("description", "↑↑↑戳这里，累计5000人领取");
@@ -365,7 +365,7 @@ public class WeixinReplyService {
     if (weiXinUser != null) {
       weiXinUser.setSubState(2);
       try {
-        weiXinUserService.saveWeiXinUserByUnSubscribe(weiXinUser);
+        weiXinUserService.saveWeiXinUser(weiXinUser);
       } catch (Exception e) {
         e.printStackTrace();
       }

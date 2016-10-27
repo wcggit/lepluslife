@@ -24,9 +24,6 @@
     <c:set var="wxRootUrl" value="http://www.lepluslife.com"></c:set>
     <link rel="stylesheet" href="${resourceUrl}/frontRes/css/reset.css">
     <link rel="stylesheet" href="${resourceUrl}/frontRes/product/hotIndex/css/main.css">
-    <script>
-
-    </script>
 </head>
 <body class="body">
 <section class="top">

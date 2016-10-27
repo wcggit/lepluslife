@@ -184,7 +184,7 @@
         </div>
     </div>
 </section>
-<section class="shade-layer">
+<section class="shade-layer" style="display: none">
     <div class="logo">
         <img src="${resourceUrl}/frontRes/product/hotIndex/img/logo.png" alt="">
     </div>
@@ -245,95 +245,12 @@
 <!--style for html-->
 <script>
     var productType = 0, typeCurrPage = [2, 1, 1, 1, 1], typeCurrLength = [0, 0, 0, 0, 0];
+    var hasFirst = [0, 0, 0, 0, 0], typeContent = ['', '', '', '', ''], firstTypeLength = [0, 0, 0,
+                                                                                           0, 0];
     $(".only").css("margin-top", -$(".only").height() - 25 + "px");
     $(".only-small").css("margin-top", -$(".only-small").height() - 12 + "px");
     $(".secondsKill").css("margin-bottom", $(".footer").height() + 13 + "px");
     $(".blank").css("height", $(".tabs").height() + "px");
-</script>
-
-<!--swiper-->
-<script>
-    //强制保留两位小数
-    function toDecimal(x) {
-        var f = parseFloat(x);
-        if (isNaN(f)) {
-            return false;
-        }
-        var f = Math.round(x * 100) / 100;
-        var s = f.toString();
-        var rs = s.indexOf('.');
-        if (rs < 0) {
-            rs = s.length;
-            s += '.';
-        }
-        while (s.length <= rs + 2) {
-            s += '0';
-        }
-        return s;
-    }
-    function bannerSwiper() {
-        var swiper = new Swiper('.swiper-banner', {
-            pagination: '.swiper-pagination',
-            paginationClickable: true,
-            spaceBetween: 30,
-            centeredSlides: true,
-            autoplay: 3500,
-            autoplayDisableOnInteraction: false
-        });
-    }
-
-    function goHotDetail(id) { //go爆品详情页
-        location.href = "/front/product/weixin/limitDetail?productId=" + id;
-    }
-    function goProductDetail(productId) { //go爆品详情页
-        location.href = "/weixin/product/" + productId;
-    }
-    function goMenu(curIndex) { //go其他菜单页
-        if (curIndex == 2) {
-            location.href = "/front/product/weixin/hotIndex";
-        } else if (curIndex == 3) {
-            location.href = "/weixin/cart";
-        } else if (curIndex == 4) {
-            location.href = "/front/order/weixin/orderList";
-        }
-    }
-
-    function hideModel(idName) {
-        $("#" + idName).css('display', 'none');
-    }
-
-    function ajaxProductList(contentId, typeId, page) {
-        $.ajax({
-                   type: "get",
-                   url: "/shop/productList?typeId=" + typeId + "&page=" + page,
-                   success: function (data) {
-                       var list = data.data, i = 0, mainContent = $("#" + contentId), content = "";
-                       typeCurrLength[typeId] = 0;
-                       if (list != null) {
-                           typeCurrLength[typeId] = list.length;
-                           for (i; i < list.length; i++) {
-                               var currP = '<div onclick="goProductDetail(' + list[i].id
-                                           + ')"><div><img height="125px" src="' + list[i].picture
-                                           + '" alt=""></div><div>' + list[i].name
-                                           + '</div><div><span style="font-size: 14px;color:#333;margin-right: -3px;">'
-                                           + toDecimal(list[i].minPrice / 100)
-                                           + '元</span> + <span style="margin-left: -3px">'
-                                           + Math.floor((list[i].price
-                                                         - list[i].minPrice)
-                                                        / 100)
-                                           + '积分</span></div> <div> <div class="line-down">市场价'
-                                           + toDecimal(list[i].price / 100)
-                                           + '元</div> <div>' + list[i].saleNumber
-                                           + '份已售</div></div></div>';
-                               content += currP;
-                           }
-                           mainContent.html(mainContent.html() + content);
-                       }
-                   }
-               });
-    }
-</script>
-<script type="text/javascript">
     window.onload = function () {
         //加载臻品轮播图
         $.ajax({
@@ -404,6 +321,100 @@
 
         });
     };
+</script>
+
+<script>
+    //强制保留两位小数
+    function toDecimal(x) {
+        var f = parseFloat(x);
+        if (isNaN(f)) {
+            return false;
+        }
+        var f = Math.round(x * 100) / 100;
+        var s = f.toString();
+        var rs = s.indexOf('.');
+        if (rs < 0) {
+            rs = s.length;
+            s += '.';
+        }
+        while (s.length <= rs + 2) {
+            s += '0';
+        }
+        return s;
+    }
+    function bannerSwiper() {
+        var swiper = new Swiper('.swiper-banner', {
+            pagination: '.swiper-pagination',
+            paginationClickable: true,
+            spaceBetween: 30,
+            centeredSlides: true,
+            autoplay: 3500,
+            autoplayDisableOnInteraction: false
+        });
+    }
+
+    function goHotDetail(id) { //go爆品详情页
+        location.href = "/front/product/weixin/limitDetail?productId=" + id;
+    }
+    function goProductDetail(productId) { //go爆品详情页
+        location.href = "/weixin/product/" + productId;
+    }
+    function goMenu(curIndex) { //go其他菜单页
+        if (curIndex == 2) {
+            location.href = "/front/product/weixin/hotIndex";
+        } else if (curIndex == 3) {
+            location.href = "/weixin/cart";
+        } else if (curIndex == 4) {
+            location.href = "/front/order/weixin/orderList";
+        }
+    }
+
+    function hideModel(idName) {
+        $("#" + idName).css('display', 'none');
+    }
+
+    function ajaxProductList(contentId, typeId, page) {
+        var mainContent = $("#" + contentId);
+        if (page == 1 && hasFirst[typeId] == 1) {
+            mainContent.html(typeContent[typeId]);
+            typeCurrLength[typeId] = firstTypeLength[typeId];
+        } else {
+            $.ajax({
+                       type: "get",
+                       url: "/shop/productList?typeId=" + typeId + "&page=" + page,
+                       success: function (data) {
+                           var list = data.data, content = '';
+                           typeCurrLength[typeId] = 0;
+                           if (list != null) {
+                               typeCurrLength[typeId] = list.length;
+                               for (var i = 0; i < list.length; i++) {
+                                   var currP = '<div onclick="goProductDetail(' + list[i].id
+                                               + ')"><div><img height="125px" src="'
+                                               + list[i].picture
+                                               + '" alt=""></div><div>' + list[i].name
+                                               + '</div><div><span style="font-size: 14px;color:#333;margin-right: -3px;">'
+                                               + toDecimal(list[i].minPrice / 100)
+                                               + '元</span> + <span style="margin-left: -3px">'
+                                               + Math.floor((list[i].price
+                                                             - list[i].minPrice)
+                                                            / 100)
+                                               + '积分</span></div> <div> <div class="line-down">市场价'
+                                               + toDecimal(list[i].price / 100)
+                                               + '元</div> <div>' + list[i].saleNumber
+                                               + '份已售</div></div></div>';
+                                   content += currP;
+                               }
+                               mainContent.html(mainContent.html() + content);
+                           }
+                           if (page == 1) {
+                               hasFirst[typeId] = 1;
+                               firstTypeLength[typeId] = list != null ? list.length : 0;
+                               typeContent[typeId] = content;
+                           }
+                       }
+                   });
+        }
+    }
     function clickPic(o) {
         var afterType = $(o).prev().val();
         if (afterType == 1) {
@@ -420,7 +431,6 @@
 </script>
 <!--layer-->
 <script>
-    $(".shade-layer").hide();
     $(".helpForJf").click(function (e) {
         $(".shade-layer").show();
         layer.open({

@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -67,9 +66,7 @@ public class MerchantController {
 
   //分页
   @RequestMapping(value = "/list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-  public
-  @ResponseBody
-  List<MerchantDto> findPageMerchant(
+  public List<MerchantDto> findPageMerchant(
       @RequestParam(value = "page", required = false) Integer offset,
       @RequestParam(required = false) String cityName,
       @RequestParam(required = false) Integer status, @RequestParam(required = false) Long type,
@@ -111,9 +108,7 @@ public class MerchantController {
 
   @ApiOperation(value = "APP商家列表")
   @RequestMapping(value = "/reload", method = RequestMethod.POST)
-  public
-  @ResponseBody
-  LejiaResult merchantList(
+  public LejiaResult merchantList(
       @ApiParam(value = "是否获取到经纬度1=是,0=否") @RequestParam(required = true) Integer status,
       @ApiParam(value = "经度(保留六位小数)") @RequestParam(required = false) Double longitude,
       @ApiParam(value = "纬度(保留六位小数)") @RequestParam(required = false) Double latitude,
@@ -133,9 +128,7 @@ public class MerchantController {
 
   @ApiOperation(value = "进入商家详情页")
   @RequestMapping(value = "/detail/{id}", method = RequestMethod.GET)
-  public
-  @ResponseBody
-  LejiaResult detail(@ApiParam(value = "商家Id") @PathVariable Long id) {
+  public LejiaResult detail(@ApiParam(value = "商家Id") @PathVariable Long id) {
     Map map = merchantService.findMerchant(id);
     return LejiaResult.build(200, "ok", map);
   }
@@ -146,9 +139,7 @@ public class MerchantController {
    * @param id 商家ID
    */
   @RequestMapping(value = "/payList/{id}", method = RequestMethod.GET)
-  public
-  @ResponseBody
-  LejiaResult payPageInfo(@PathVariable Long id) {
+  public LejiaResult payPageInfo(@PathVariable Long id) {
     Merchant merchant = merchantService.findMerchantById(id);
     List<Map> list = merchantService.findPaySuccessMerchantList(merchant);
     String status = "0";

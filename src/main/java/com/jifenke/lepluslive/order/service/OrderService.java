@@ -15,10 +15,12 @@ import com.jifenke.lepluslive.order.repository.OrderRepository;
 import com.jifenke.lepluslive.Address.service.AddressService;
 import com.jifenke.lepluslive.score.service.ScoreAService;
 import com.jifenke.lepluslive.score.service.ScoreBService;
+import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.repository.DictionaryRepository;
 import com.jifenke.lepluslive.weixin.service.DictionaryService;
 import com.jifenke.lepluslive.weixin.service.JobThread;
 import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
+import com.jifenke.lepluslive.weixin.service.WeiXinUserService;
 import com.jifenke.lepluslive.weixin.service.WeixinPayLogService;
 
 import org.quartz.Scheduler;
@@ -70,6 +72,9 @@ public class OrderService {
 
   @Inject
   private WeixinPayLogService weixinPayLogService;
+
+  @Inject
+  private WeiXinUserService weiXinUserService;
 
   /**
    * 我的 获取用户不同状态订单数  16/09/05
@@ -291,15 +296,15 @@ public class OrderService {
       onLineOrder.setPayState(1);
       onLineOrder.setPayDate(new Date());
       onLineOrder.setPayBackA(payBackScore);
-      scoreAService.paySuccess(onLineOrder.getLeJiaUser(), payBackScore, onLineOrder.getOrderSid());
+      LeJiaUser user = onLineOrder.getLeJiaUser();
+      scoreAService.paySuccess(user, payBackScore, onLineOrder.getOrderSid());
       if (onLineOrder.getTrueScore() != 0) {
         if (payOrigin.getId() == 1) {
           payWay.setId(4L);
         } else {
           payWay.setId(8L);
         }
-        scoreBService.paySuccess(onLineOrder.getLeJiaUser(), onLineOrder.getTrueScore(),
-                                 onLineOrder.getOrderSid());
+        scoreBService.paySuccess(user, onLineOrder.getTrueScore(), onLineOrder.getOrderSid());
       } else {
         if (payOrigin.getId() == 1) {
           payWay.setId(2L);
@@ -311,9 +316,18 @@ public class OrderService {
       //订单相关product的销量等数据处理
       try {
         productService.editProductSaleByPayOrder(onLineOrder);
+        //如果返还A红包不为0,改变会员状态
+        if (payBackScore > 0) {
+          WeiXinUser w = user.getWeiXinUser();
+          if (w != null) {
+            w.setState(1);
+            weiXinUserService.saveWeiXinUser(w);
+          }
+        }
       } catch (Exception e) {
         e.printStackTrace();
       }
+
       System.out.println(onLineOrder.getState() + "之后");
       orderRepository.save(onLineOrder);
     }

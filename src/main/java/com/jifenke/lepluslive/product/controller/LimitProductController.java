@@ -31,7 +31,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -140,9 +139,7 @@ public class LimitProductController {
    * @param page 当前页码
    */
   @RequestMapping(value = "/hotList", method = RequestMethod.GET)
-  public
-  @ResponseBody
-  LejiaResult productList(@RequestParam(required = true) Integer page) {
+  public LejiaResult productList(@RequestParam(required = true) Integer page) {
     if (page == null || page < 1) {
       page = 1;
     }
