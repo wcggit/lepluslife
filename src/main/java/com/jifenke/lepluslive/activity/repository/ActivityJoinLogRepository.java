@@ -19,7 +19,7 @@ public interface ActivityJoinLogRepository extends JpaRepository<ActivityJoinLog
   Page findAll(Specification<ActivityJoinLog> whereClause, Pageable pageRequest);
 
   //查找是否参加过永久或分享裂变活动
-  List<ActivityJoinLog> findByTypeAndOpenId(Integer type, String openId);
+  List<ActivityJoinLog> findByTypeAndUser(Integer type, WeiXinUser user);
 
   /**
    * 查找是否参加过某个临时页面活动 16/10/18

@@ -58,10 +58,10 @@ public class LeJiaUser {
   @ManyToOne(fetch = FetchType.LAZY)
   private RegisterOrigin registerOrigin;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   private Merchant bindMerchant;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   private Partner bindPartner;
 
 

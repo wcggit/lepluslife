@@ -25,10 +25,10 @@ public class ActivityJoinLogService {
 
   //查找是否参加过永久或分享活动
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
-  public ActivityJoinLog findLogBySubActivityAndOpenId(Integer type, String openId) {
+  public ActivityJoinLog findLogBySubActivityAndOpenId(Integer type, WeiXinUser user) {
     List<ActivityJoinLog>
         list =
-        activityJoinLogRepository.findByTypeAndOpenId(type, openId);
+        activityJoinLogRepository.findByTypeAndUser(type, user);
     if (list.size() > 0) {
       return list.get(0);
     }

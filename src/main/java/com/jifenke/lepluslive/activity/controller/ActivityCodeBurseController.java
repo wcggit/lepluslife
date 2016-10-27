@@ -5,6 +5,7 @@ import com.jifenke.lepluslive.activity.domain.entities.ActivityJoinLog;
 import com.jifenke.lepluslive.activity.service.ActivityCodeBurseService;
 import com.jifenke.lepluslive.activity.service.ActivityJoinLogService;
 import com.jifenke.lepluslive.activity.service.ActivityShareLogService;
+import com.jifenke.lepluslive.global.service.MessageService;
 import com.jifenke.lepluslive.global.util.CookieUtils;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
@@ -24,7 +25,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -71,12 +71,14 @@ public class ActivityCodeBurseController {
   @Inject
   private ActivityShareLogService activityShareLogService;
 
+  @Inject
+  private MessageService messageService;
+
   //分享页面 06/09/02
   @RequestMapping(value = "/share/{id}", method = RequestMethod.GET)
   public ModelAndView sharePage(@PathVariable String id, HttpServletRequest request,
                                 Model model) {
-    String openId = CookieUtils.getCookieValue(request, appId + "-user-open-id");
-    WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByOpenId(openId);
+    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
     model.addAttribute("token", id); //记录邀请人的token
     //判断是否有手机号码
     LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
@@ -101,10 +103,8 @@ public class ActivityCodeBurseController {
    * @return 状态
    */
   @RequestMapping(value = "/share/submit", method = RequestMethod.GET)
-  public
-  @ResponseBody
-  LejiaResult shareSubmit(@RequestParam String phoneNumber, @RequestParam String token,
-                          HttpServletRequest request) {
+  public LejiaResult shareSubmit(@RequestParam String phoneNumber, @RequestParam String token,
+                                 HttpServletRequest request) {
     WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
     LeJiaUser leJiaUser = leJiaUserService.findUserByPhoneNumber(phoneNumber);
     if (leJiaUser == null) { //手机号是否已注册
@@ -127,8 +127,7 @@ public class ActivityCodeBurseController {
     WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByOpenId(openId);
     model.addAttribute("wxConfig", weiXinService.getWeiXinConfig(request));
     //判断是否获得过红包
-    ActivityJoinLog joinLog = activityJoinLogService.findLogBySubActivityAndOpenId(0, weiXinUser
-        .getOpenId());
+    ActivityJoinLog joinLog = activityJoinLogService.findLogBySubActivityAndOpenId(0, weiXinUser);
     if (joinLog == null) {//未参与
       model.addAttribute("status", 0);
     } else {
@@ -144,14 +143,15 @@ public class ActivityCodeBurseController {
    * @param phoneNumber 手机号
    */
   @RequestMapping(value = "/subPage/open")
-  public
-  @ResponseBody
-  LejiaResult subPageOpen(@RequestParam String phoneNumber, HttpServletRequest request) {
+  public LejiaResult subPageOpen(@RequestParam String phoneNumber, HttpServletRequest request) {
     WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
     LeJiaUser leJiaUser = leJiaUserService.findUserByPhoneNumber(phoneNumber);  //是否已注册
-    ActivityJoinLog joinLog = activityJoinLogService.findLogBySubActivityAndOpenId(0, weiXinUser
-        .getOpenId());
-    if (leJiaUser == null && joinLog == null) {
+    ActivityJoinLog joinLog = activityJoinLogService.findLogBySubActivityAndOpenId(0, weiXinUser);
+    if (leJiaUser != null && !weiXinUser.getLeJiaUser().getId().equals(leJiaUser.getId())) {
+      leJiaUser.setPhoneNumber(null);
+      leJiaUserService.saveUser(leJiaUser);
+    }
+    if (joinLog == null) {
       //判断是否需要绑定商户 4_0_123
       Merchant merchant = leJiaUserService.checkUserBindMerchant(weiXinUser);
 
@@ -168,13 +168,13 @@ public class ActivityCodeBurseController {
         }
         //添加参加记录
         activityJoinLogService.addCodeBurseLogByDefault(weiXinUser, map.get("scoreA"));
-        return LejiaResult.build(200, "" + map.get("scoreA"));
+        return LejiaResult.ok(map);
       } catch (Exception e) {
         e.printStackTrace();
         return LejiaResult.build(500, "服务器异常");
       }
     }
-    return LejiaResult.build(201, "手机号已被使用或已领取红包");
+    return LejiaResult.build(6005, messageService.getMsg("6005"));
   }
 
   //关注永久二维码领取红包
@@ -186,8 +186,7 @@ public class ActivityCodeBurseController {
     String[] str = id.split("_");
     if ("0".equals(str[0])) { //普通关注
       //判断是否获得过红包
-      ActivityJoinLog joinLog = activityJoinLogService.findLogBySubActivityAndOpenId(0, weiXinUser
-          .getOpenId());
+      ActivityJoinLog joinLog = activityJoinLogService.findLogBySubActivityAndOpenId(0, weiXinUser);
       int defaultScoreA = Integer.valueOf(dictionaryService.findDictionaryById(18L).getValue());
       if (joinLog == null) {//未参与
         //派发红包,获取默认派发红包金额
@@ -218,7 +217,7 @@ public class ActivityCodeBurseController {
           ActivityJoinLog
               joinLog =
               activityJoinLogService
-                  .findLogBySubActivityAndOpenId(codeBurse.getType(), weiXinUser.getOpenId());
+                  .findLogBySubActivityAndOpenId(codeBurse.getType(), weiXinUser);
           if (joinLog == null) {//未参与
             int status = scoreAService.giveScoreAByActivity(codeBurse, weiXinUser.getLeJiaUser());
             //添加参加记录
@@ -259,9 +258,7 @@ public class ActivityCodeBurseController {
    * @param version 活动对应的版本
    */
   @RequestMapping(value = "/activity", method = RequestMethod.POST)
-  public
-  @ResponseBody
-  LejiaResult activityPage(@RequestParam Long version, HttpServletRequest request) {
+  public LejiaResult activityPage(@RequestParam Long version, HttpServletRequest request) {
     WeiXinUser user = weiXinService.getCurrentWeiXinUser(request);
     ActivityJoinLog joinLog = activityJoinLogService.findLogByTypeAndUser(4, version, user);
     Map<Object, Object> result = new HashMap<>();
@@ -282,11 +279,9 @@ public class ActivityCodeBurseController {
    * @param scoreB  发放的积分
    */
   @RequestMapping(value = "/short/submit", method = RequestMethod.POST)
-  public
-  @ResponseBody
-  LejiaResult activitySubmit(@RequestParam Long version, @RequestParam Integer scoreA,
-                             @RequestParam Integer scoreB, @RequestParam String aInfo,
-                             @RequestParam String bInfo, HttpServletRequest request) {
+  public LejiaResult activitySubmit(@RequestParam Long version, @RequestParam Integer scoreA,
+                                    @RequestParam Integer scoreB, @RequestParam String aInfo,
+                                    @RequestParam String bInfo, HttpServletRequest request) {
     WeiXinUser user = weiXinService.getCurrentWeiXinUser(request);
     ActivityJoinLog joinLog = activityJoinLogService.findLogByTypeAndUser(4, version, user);
     Map<Object, Object> result = new HashMap<>();

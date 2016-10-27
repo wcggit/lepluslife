@@ -79,6 +79,17 @@ public class LeJiaUserService {
     return leJiaUserRepository.findByUserSid(userSid);
   }
 
+  //保存用户信息 16/10/24
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  public void saveUser(LeJiaUser leJiaUser) {
+    try {
+      leJiaUserRepository.save(leJiaUser);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+  }
+
   /**
    * 判断该手机号是否已经注册
    */
