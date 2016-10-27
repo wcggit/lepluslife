@@ -342,18 +342,17 @@
             alert('请输入正确的手机号！');
             return true
         }
-//        $.post("/user/sendCode", {
-//            phoneNumber: phoneNumber,
-//            type: 3
-//        }, function (res) {
-//            if (res.status == 200) {
-//
-//                f_timeout();
-//            } else {
-//                alert(res.msg);
-//            }
-//        });
-        $("#sendCode").addClass("disClick");
+        $.post("/user/sendCode", {
+            phoneNumber: phoneNumber,
+            type: 3
+        }, function (res) {
+            if (res.status == 200) {
+                $("#sendCode").addClass("disClick");
+                f_timeout();
+            } else {
+                alert(res.msg);
+            }
+        });
 
         f_timeout()
     }
