@@ -1,5 +1,8 @@
 package com.jifenke.lepluslive.weixin.controller;
 
+import com.jifenke.lepluslive.activity.domain.entities.ActivityPhoneOrder;
+import com.jifenke.lepluslive.activity.service.ActivityPhoneOrderService;
+import com.jifenke.lepluslive.global.config.Constants;
 import com.jifenke.lepluslive.global.service.MessageService;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
@@ -16,7 +19,6 @@ import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.service.DictionaryService;
 import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
 import com.jifenke.lepluslive.weixin.service.WeiXinService;
-import com.jifenke.lepluslive.weixin.service.WeixinPayLogService;
 
 import org.jdom.JDOMException;
 import org.slf4j.Logger;
@@ -25,6 +27,7 @@ import org.springframework.http.MediaType;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -78,6 +81,49 @@ public class WeixinPayController {
   @Inject
   private MessageService messageService;
 
+  @Inject
+  private ActivityPhoneOrderService phoneOrderService;
+
+  /**
+   * 话费订单生成 生成支付参数  16/10/28
+   *
+   * @param ruleId 话费产品ID
+   * @param phone  充值手机号
+   */
+  @RequestMapping(value = "/phonePay", method = RequestMethod.POST)
+  public LejiaResult phoneOrderPay(@RequestParam Long ruleId, @RequestParam String phone,
+                                   HttpServletRequest request) {
+    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
+    Map<Object, Object> result = null;
+    try {
+      result = phoneOrderService.createPhoneOrder(ruleId, weiXinUser, phone);
+    } catch (Exception e) {
+      e.printStackTrace();
+      return LejiaResult.build(500, "出现未知错误,请联系管理员或稍后重试");
+    }
+    if (!"200".equals("" + result.get("status"))) {
+      return LejiaResult
+          .build((Integer) result.get("status"), messageService.getMsg("" + result.get("status")));
+    }
+    ActivityPhoneOrder order = (ActivityPhoneOrder) result.get("data");
+    //封装订单参数
+    SortedMap<Object, Object>
+        map =
+        weiXinPayService
+            .buildOrderParams(request, "话费充值", order.getOrderSid(), "" + order.getTruePrice(),
+                              Constants.PHONEORDER_NOTIFY_URL);
+    //获取预支付id
+    Map unifiedOrder = weiXinPayService.createUnifiedOrder(map);
+    if (unifiedOrder.get("prepay_id") != null) {
+      //返回前端页面
+      SortedMap
+          params =
+          weiXinPayService.buildJsapiParams(unifiedOrder.get("prepay_id").toString());
+      return LejiaResult.ok(params);
+    }
+    return LejiaResult.build(500, "出现未知错误,请联系管理员或稍后重试");
+  }
+
   //微信支付接口
   @RequestMapping(value = "/weixinpay")
   public
@@ -104,10 +150,13 @@ public class WeixinPayController {
       return result;
     }
 
+    OnLineOrder order = (OnLineOrder) result.get("data");
     //封装订单参数
     SortedMap<Object, Object>
         map =
-        weiXinPayService.buildOrderParams(request, (OnLineOrder) result.get("data"));
+        weiXinPayService
+            .buildOrderParams(request, "乐加商城消费", order.getOrderSid(), "" + order.getTruePrice(),
+                              Constants.ONLINEORDER_NOTIFY_URL);
     //获取预支付id
     Map unifiedOrder = weiXinPayService.createUnifiedOrder(map);
     if (unifiedOrder.get("prepay_id") != null) {

@@ -43,6 +43,15 @@ public final class Constants {
 //    public static final Integer FREIGHT_PRICE = 1000;  //运费
 //    public static final Integer FREIGHT_FREE_PRICE = 4800;  //免运费最低价格
 
+  public static final String PHONE_CHECK = "http://api.huafeiduo.com/gateway.cgi?mod=order.phone.check&";  //充值前查询是否可充接口
+  public static final String PHONE_BALANCE = "http://api.huafeiduo.com/gateway.cgi?mod=account.balance&";  //查询账户余额接口
+  public static final String PHONE_SUBMIT = "http://api.huafeiduo.com/gateway.cgi?mod=order.phone.submit&";  //手机号充值接口
+  //public static final String PHONE_NOTIFY_URL = "http://www.lepluslife.com/front/phone/afterPay";  //充值回调
+  public static final String PHONE_NOTIFY_URL = "http://www.tiegancrm.com/front/phone/afterPay";  //充值回调
+
+  public static final String PHONEORDER_NOTIFY_URL = "http://www.lepluslife.com/weixin/pay/afterPhonePay";  //商城订单微信回调
+  public static final String ONLINEORDER_NOTIFY_URL = "http://www.lepluslife.com/weixin/pay/afterPay";  //商城订单微信回调
+
     private Constants() {
     }
 }

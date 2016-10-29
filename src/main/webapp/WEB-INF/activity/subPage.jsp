@@ -353,8 +353,6 @@
                 alert(res.msg);
             }
         });
-
-        f_timeout()
     }
     function f_timeout() {
         $('#sendCode').attr('onclick', '');

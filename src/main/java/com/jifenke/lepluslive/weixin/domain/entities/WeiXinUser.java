@@ -66,6 +66,7 @@ public class WeiXinUser {
   // 0_0_0表示表示默认关注
   // 3_4_1表示其他活动,活动id为4,1无意义
   // 4_0_123表示商家邀请码，商家Id为123
+  // 5_0_0表示充值送话费来源
   private String subSource;   //关注来源
 
   private Integer massRemain = 4;  //本月群发余数
