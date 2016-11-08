@@ -48,7 +48,7 @@ public class Merchant {
   @ManyToOne
   private MerchantType merchantType;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne
   private Partner partner;
 
   private String location;
