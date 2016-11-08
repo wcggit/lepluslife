@@ -100,11 +100,17 @@ public class LeJiaUserController {
 //      }
 //    }
 
-    Integer boo = smsService.saveValidateCode(phoneNumber, request, type);
-    if (boo == 1) {
-      return LejiaResult.build(200, "发送成功");
-    } else {
-      return LejiaResult.build(3002, "发送过于频繁，请稍后再试");
+    try {
+      Map<Object, Object> result = smsService.saveValidateCode(phoneNumber, request, type);
+      String status = "" + result.get("status");
+      if ("200".equals(status)) {
+        return LejiaResult.build(200, "发送成功");
+      } else {
+        return LejiaResult.build(Integer.valueOf(status), "" + result.get("msg"));
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+      return LejiaResult.build(500, "服务器异常");
     }
   }
 
@@ -320,18 +326,6 @@ public class LeJiaUserController {
   LejiaResult checkLogin() {
     String checkLogin = dictionaryService.findDictionaryById(40L).getValue();
     return LejiaResult.build(200, "", checkLogin);
-  }
-
-  @RequestMapping(value = "/test", method = RequestMethod.GET)
-  public ModelAndView gotest(Model model) {
-    String msg = messageUtil.getMsg("email.ttt");
-    String[] o = {"测试商品"};
-    String msg2 = messageUtil.getMsg("5005", o);
-    System.out.println(msg);
-    System.out.println(msg2);
-    model.addAttribute("test", msg);
-    model.addAttribute("test2", msg2);
-    return MvUtil.go("/test/test");
   }
 
 }

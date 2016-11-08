@@ -7,7 +7,6 @@ import com.jifenke.lepluslive.score.domain.entities.ScoreA;
 import com.jifenke.lepluslive.score.domain.entities.ScoreADetail;
 import com.jifenke.lepluslive.score.repository.ScoreADetailRepository;
 import com.jifenke.lepluslive.score.repository.ScoreARepository;
-import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -108,9 +107,8 @@ public class ScoreAService {
    * 添加红包 16/10/18
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public int giveScoreAByDefault(WeiXinUser weiXinUser, int defaultScoreA, String operate,
+  public int giveScoreAByDefault(LeJiaUser leJiaUser, int defaultScoreA, String operate,
                                  Integer origin, String orderSid) {
-    LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
     ScoreA scoreA = scoreARepository.findByLeJiaUser(leJiaUser).get(0);
     try {
       scoreA.setScore(scoreA.getScore() + defaultScoreA);

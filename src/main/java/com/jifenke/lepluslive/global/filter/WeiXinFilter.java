@@ -2,8 +2,6 @@ package com.jifenke.lepluslive.global.filter;
 
 import com.jifenke.lepluslive.global.config.Constants;
 import com.jifenke.lepluslive.global.util.CookieUtils;
-import com.jifenke.lepluslive.global.util.MvUtil;
-import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.service.WeiXinUserService;
 
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -33,7 +31,7 @@ public class WeiXinFilter implements HandlerInterceptor {
                            HttpServletResponse httpServletResponse, Object o) throws Exception {
     String action = request.getRequestURI();
     if (action.equals("/weixin/weixinReply") || action.equals("/weixin/load") || action
-        .equals("/weixin/userRegister") || action.equals("/weixin/pay/afterPay")) {
+        .equals("/weixin/userRegister") || action.equals("/weixin/pay/afterPay")|| action.equals("/weixin/pay/afterPhonePay")) {
       return true;
     }
     String openId = CookieUtils.getCookieValue(request, appId + "-user-open-id");
@@ -51,6 +49,7 @@ public class WeiXinFilter implements HandlerInterceptor {
           "https://open.weixin.qq.com/connect/oauth2/authorize?appid=" + appId + "&redirect_uri=" +
           URLEncoder.encode(callbackUrl, "UTF-8")
           + "&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect";
+//      httpServletResponse.sendRedirect(redirectUrl);
       HttpSession seesion = request.getSession();
       seesion.setAttribute("redirectUrl", redirectUrl);
       request.getRequestDispatcher("/weixin/load").forward(request, httpServletResponse);

@@ -342,19 +342,21 @@
             alert('请输入正确的手机号！');
             return true
         }
+        $("#sendCode").addClass("disClick");
+        f_timeout();
         $.post("/user/sendCode", {
             phoneNumber: phoneNumber,
             type: 3
         }, function (res) {
-            if (res.status == 200) {
-                $("#sendCode").addClass("disClick");
-                f_timeout();
-            } else {
+            if (res.status != 200) {
                 alert(res.msg);
+                window.clearInterval(timer);
+                $("#sendCode").removeClass("disClick");
+                $('#sendCode').html('<span id="timeb2"></span>重获验证码');
+                $('#sendCode').attr({disabled: false});
+                $('#sendCode').attr('onclick', 'getVerify()');
             }
         });
-
-        f_timeout()
     }
     function f_timeout() {
         $('#sendCode').attr('onclick', '');
@@ -371,7 +373,7 @@
             $("#sendCode").removeClass("disClick");
             $('#sendCode').html('<span id="timeb2"></span>重获验证码');
             $('#sendCode').attr({disabled: false});
-            $('#sendCode').attr('onclick', 'getVerify()')
+            $('#sendCode').attr('onclick', 'getVerify()');
         }
     }
 </script>

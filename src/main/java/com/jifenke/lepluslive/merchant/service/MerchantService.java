@@ -5,15 +5,12 @@ import com.jifenke.lepluslive.merchant.domain.entities.City;
 import com.jifenke.lepluslive.merchant.domain.entities.Merchant;
 import com.jifenke.lepluslive.merchant.domain.entities.MerchantInfo;
 import com.jifenke.lepluslive.merchant.domain.entities.MerchantScroll;
-import com.jifenke.lepluslive.merchant.repository.MerchantDetailRepository;
 import com.jifenke.lepluslive.merchant.repository.MerchantInfoRepository;
 import com.jifenke.lepluslive.merchant.repository.MerchantRepository;
 import com.jifenke.lepluslive.merchant.repository.MerchantScrollRepository;
 import com.jifenke.lepluslive.partner.domain.entities.Partner;
 import com.jifenke.lepluslive.weixin.service.DictionaryService;
 
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -139,13 +136,13 @@ public class MerchantService {
     String sql = null;
     if (status == 1) {
       sql =
-          "SELECT m.id,m.sid,m.location,m.`name`,m.picture,t.`name` AS tName,mi.star,area.`name` AS aName,m.lj_commission,m.scorearebate,m.partnership,ROUND( 6378.138 * 2 * ASIN(SQRT(POW(SIN(("
+          "SELECT m.id,m.sid,m.location,m.`name`,m.picture,t.`name` AS tName,mi.star,area.`name` AS aName,m.lj_commission,m.scorearebate,m.partnership,mi.door_picture,ROUND( 6378.138 * 2 * ASIN(SQRT(POW(SIN(("
           + latitude + " * PI() / 180 - m.lat * PI() / 180) / 2),2) + COS(" + latitude
           + " * PI() / 180) * COS(m.lat * PI() / 180) * POW(SIN((" + longitude
           + " * PI() / 180 - m.lng * PI() / 180) / 2),2))) * 1000) AS distance FROM merchant m,merchant_type t,city ci,merchant_info mi,area WHERE m.merchant_type_id = t.id AND m.city_id = ci.id AND m.merchant_info_id=mi.id AND m.area_id=area.id";
     } else {
       sql =
-          "SELECT m.id,m.sid,m.location,m.`name`,m.picture,t.`name` AS tName,mi.star,area.`name` AS aName,m.lj_commission,m.scorearebate,m.partnership FROM merchant m,merchant_type t,city ci,merchant_info mi,area WHERE m.merchant_type_id = t.id AND m.city_id = ci.id AND m.merchant_info_id=mi.id AND m.area_id=area.id";
+          "SELECT m.id,m.sid,m.location,m.`name`,m.picture,t.`name` AS tName,mi.star,area.`name` AS aName,m.lj_commission,m.scorearebate,m.partnership,mi.door_picture FROM merchant m,merchant_type t,city ci,merchant_info mi,area WHERE m.merchant_type_id = t.id AND m.city_id = ci.id AND m.merchant_info_id=mi.id AND m.area_id=area.id";
     }
 
     sql += " AND m.state = 1";
@@ -203,8 +200,9 @@ public class MerchantService {
       map.put("commission", o[8]);
       map.put("aRebate", o[9]);
       map.put("friend", o[10]);
-      if (o.length > 11) {
-        map.put("distance", o[11]);
+      map.put("doorPic", o[11]);
+      if (o.length > 12) {
+        map.put("distance", o[12]);
       } else {
         map.put("distance", 0);
       }
@@ -413,44 +411,4 @@ public class MerchantService {
   public List<Merchant> findMerchantByPartnerAndPartnership(Partner partner, int i) {
     return merchantRepository.findByPartnerAndPartnership(partner, i);
   }
-
-  //  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
-//  public List<Merchant> findMerchantsByPage(Integer offset) {
-//    if (offset == null) {
-//      offset = 1;
-//    }
-//    return merchantRepository.findAll(
-//        new PageRequest(offset - 1, 10, new Sort(Sort.Direction.ASC, "sid"))).getContent();
-//  }
-
-  //  /**
-//   * 按照距离远近对商家排序  以后可以被findMerchantListByCustomCondition取代 open app 暂时使用
-//   *
-//   * @param latitude  经度
-//   * @param longitude 纬度
-//   */
-//  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
-//  public List<MerchantDto> findOrderByDistance(Double latitude, Double longitude) {
-//
-//    List<MerchantDto> dtoList = new ArrayList<>();
-//    List<Object[]>
-//        list =
-//        merchantRepository.findOrderByDistance(latitude, longitude, 0, 10);
-//    for (Object[] o : list) {
-//      MerchantDto merchantDto = new MerchantDto();
-//      merchantDto.setId(Long.parseLong(o[0].toString()));
-//      merchantDto.setSid(Integer.parseInt(o[1].toString()));
-//      merchantDto.setLocation(o[2].toString());
-//      merchantDto.setPhoneNumber(o[3].toString());
-//      merchantDto.setName(o[4].toString());
-//      merchantDto.setPicture(o[5].toString());
-//      merchantDto.setLng(Double.parseDouble(o[6].toString()));
-//      merchantDto.setLat(Double.parseDouble(o[7].toString()));
-//      merchantDto.setDistance(o[8] != null ? Double.valueOf(o[8].toString()) : null);
-//      dtoList.add(merchantDto);
-//    }
-//    return dtoList;
-//  }
-
-
 }

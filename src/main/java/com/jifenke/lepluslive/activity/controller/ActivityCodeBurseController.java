@@ -193,7 +193,7 @@ public class ActivityCodeBurseController {
         int
             status =
             scoreAService
-                .giveScoreAByDefault(weiXinUser, defaultScoreA, "关注送红包", 0, "0_" + defaultScoreA);
+                .giveScoreAByDefault(weiXinUser.getLeJiaUser(), defaultScoreA, "关注送红包", 0, "0_" + defaultScoreA);
         //添加参加记录
         if (status == 1) {
           activityJoinLogService.addCodeBurseLogByDefault(weiXinUser, defaultScoreA);

@@ -1,5 +1,8 @@
 package com.jifenke.lepluslive.weixin.controller;
 
+import com.jifenke.lepluslive.activity.domain.entities.ActivityPhoneOrder;
+import com.jifenke.lepluslive.activity.service.ActivityPhoneOrderService;
+import com.jifenke.lepluslive.global.config.Constants;
 import com.jifenke.lepluslive.global.service.MessageService;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
@@ -16,7 +19,6 @@ import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.service.DictionaryService;
 import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
 import com.jifenke.lepluslive.weixin.service.WeiXinService;
-import com.jifenke.lepluslive.weixin.service.WeixinPayLogService;
 
 import org.jdom.JDOMException;
 import org.slf4j.Logger;
@@ -25,6 +27,7 @@ import org.springframework.http.MediaType;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -78,6 +81,114 @@ public class WeixinPayController {
   @Inject
   private MessageService messageService;
 
+  @Inject
+  private ActivityPhoneOrderService phoneOrderService;
+
+  /**
+   * 话费订单生成 生成支付参数  16/10/28
+   *
+   * @param ruleId 话费产品ID
+   * @param phone  充值手机号
+   */
+  @RequestMapping(value = "/phonePay", method = RequestMethod.POST)
+  public LejiaResult phoneOrderPay(@RequestParam Long ruleId, @RequestParam String phone,
+                                   HttpServletRequest request) {
+    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
+    Map<Object, Object> result = null;
+    try {
+      result = phoneOrderService.createPhoneOrder(ruleId, weiXinUser, phone, 5L);
+    } catch (Exception e) {
+      e.printStackTrace();
+      return LejiaResult.build(500, "出现未知错误,请联系管理员或稍后重试");
+    }
+    if (!"200".equals("" + result.get("status"))) {
+      return LejiaResult
+          .build((Integer) result.get("status"), messageService.getMsg("" + result.get("status")));
+    }
+
+    ActivityPhoneOrder order = (ActivityPhoneOrder) result.get("data");
+    //话费产品如果是全积分，这直接调用充话费接口
+    if (order.getPhoneRule().getPayType() == 3) {
+      try {
+        phoneOrderService.paySuccess(order.getOrderSid(), 2);
+        return LejiaResult.build(2000, "支付成功", order.getId());
+      } catch (Exception e) {
+        e.printStackTrace();
+        return LejiaResult.build(500, "出现未知错误,请联系管理员或稍后重试");
+      }
+    }
+    //封装订单参数
+    SortedMap<Object, Object>
+        map =
+        weiXinPayService
+            .buildOrderParams(request, "话费充值", order.getOrderSid(), "" + order.getTruePrice(),
+                              Constants.PHONEORDER_NOTIFY_URL);
+    //获取预支付id
+    Map unifiedOrder = weiXinPayService.createUnifiedOrder(map);
+    if (unifiedOrder.get("prepay_id") != null) {
+      //返回前端页面
+      SortedMap
+          params =
+          weiXinPayService.buildJsapiParams(unifiedOrder.get("prepay_id").toString());
+      params.put("orderId", order.getId());
+      return LejiaResult.ok(params);
+    }
+    return LejiaResult.build(500, "出现未知错误,请联系管理员或稍后重试");
+  }
+
+  /**
+   * 话费订单 微信回调函数 16/10/31
+   */
+  @RequestMapping(value = "/afterPhonePay", produces = MediaType.APPLICATION_XML_VALUE)
+  public void afterPhonePay(HttpServletRequest request, HttpServletResponse response)
+      throws IOException, JDOMException {
+    InputStreamReader inputStreamReader = new InputStreamReader(request.getInputStream(), "utf-8");
+    BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+    String str = null;
+    StringBuffer buffer = new StringBuffer();
+    while ((str = bufferedReader.readLine()) != null) {
+      buffer.append(str);
+    }
+    Map map = WeixinPayUtil.doXMLParse(buffer.toString());
+    String orderSid = (String) map.get("out_trade_no");
+    String returnCode = (String) map.get("return_code");
+    String resultCode = (String) map.get("result_code");
+    //操作订单
+    if ("SUCCESS".equals(returnCode) && "SUCCESS".equals(resultCode)) {
+      try {
+        phoneOrderService.paySuccess(orderSid, 1);
+      } catch (Exception e) {
+        log.error(e.getMessage());
+        buffer.delete(0, buffer.length());
+        buffer.append("<xml>");
+        buffer.append("<return_code>FAIL</" + "return_code" + ">");
+        buffer.append("</xml>");
+        String s = buffer.toString();
+        response.setContentType("application/xml");
+        response.getWriter().write(s);
+        return;
+      }
+    }
+
+    //返回微信的信息
+    buffer.delete(0, buffer.length());
+    buffer.append("<xml>");
+    buffer.append("<return_code>" + returnCode + "</" + "return_code" + ">");
+    buffer.append("</xml>");
+    String s = buffer.toString();
+    response.setContentType("application/xml");
+    response.getWriter().write(s);
+  }
+
+  @RequestMapping(value = "/phoneSuccess/{orderId}", method = RequestMethod.GET)
+  public ModelAndView phoneSuccessPage(@PathVariable String orderId, Model model,
+                                       HttpServletRequest request) {
+
+    model.addAttribute("order", phoneOrderService.findByOrderId(orderId));
+
+    return MvUtil.go("/activity/phone/success");
+  }
+
   //微信支付接口
   @RequestMapping(value = "/weixinpay")
   public
@@ -104,10 +215,13 @@ public class WeixinPayController {
       return result;
     }
 
+    OnLineOrder order = (OnLineOrder) result.get("data");
     //封装订单参数
     SortedMap<Object, Object>
         map =
-        weiXinPayService.buildOrderParams(request, (OnLineOrder) result.get("data"));
+        weiXinPayService
+            .buildOrderParams(request, "乐加商城消费", order.getOrderSid(), "" + order.getTruePrice(),
+                              Constants.ONLINEORDER_NOTIFY_URL);
     //获取预支付id
     Map unifiedOrder = weiXinPayService.createUnifiedOrder(map);
     if (unifiedOrder.get("prepay_id") != null) {

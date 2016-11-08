@@ -2,9 +2,6 @@ package com.jifenke.lepluslive.product.domain.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -41,7 +38,7 @@ public class ProductSpec {
   private Integer repository = 0;
 
   @Version
-  private Long version=0L;
+  private Long version = 0L;
 
   private String specDetail;
 
@@ -61,6 +58,10 @@ public class ProductSpec {
 
   @JsonIgnore
   private Integer state;
+
+  private Long toMerchant = 0L; //绑定商户返佣金额
+
+  private Long toPartner = 0L;  //绑定合伙人返佣金额
 
   public Integer getState() {
     return state;
@@ -158,6 +159,22 @@ public class ProductSpec {
     }
 
     return true;
+  }
+
+  public Long getToMerchant() {
+    return toMerchant;
+  }
+
+  public void setToMerchant(Long toMerchant) {
+    this.toMerchant = toMerchant;
+  }
+
+  public Long getToPartner() {
+    return toPartner;
+  }
+
+  public void setToPartner(Long toPartner) {
+    this.toPartner = toPartner;
   }
 
   @Override
