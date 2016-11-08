@@ -8,6 +8,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@include file="/WEB-INF/commen.jsp" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html>
 
@@ -67,15 +68,35 @@
 
                 <p class="ttl_practice">${product.description}</p>
                 <c:if test="${product.minPrice != product.price}">
-                    <p class="ttl_price">￥<font id="min_price">${product.minPrice/100}</font> ~
+                    <p class="ttl_price">￥<font id="min_price"><fmt:formatNumber type="number"
+                                                                                 value="${product.minPrice/100}"
+                                                                                 pattern="0.00"
+                                                                                 maxFractionDigits="2"/></font>
+                        ~
                         ￥<font
-                                class="total_price">${product.price/100}</font></p>
+                                class="total_price"><fmt:formatNumber type="number"
+                                                                      value="${product.price/100}"
+                                                                      pattern="0.00"
+                                                                      maxFractionDigits="2"/></font>
+                    </p>
                 </c:if>
                 <c:if test="${product.minPrice == product.price}">
-                    <p class="ttl_price">￥<font class="total_price">${product.price/100}</font></p>
+                    <p class="ttl_price">￥<font class="total_price"><fmt:formatNumber type="number"
+                                                                                      value="${product.price/100}"
+                                                                                      pattern="0.00"
+                                                                                      maxFractionDigits="2"/></font>
+                    </p>
                 </c:if>
                 <p class="ttl_main">
-                    <span>满<font>${product.freePrice/100}</font>包邮</span>
+                    <c:if test="${product.postage == 0}">
+                        <span>包邮</span>
+                    </c:if>
+                    <c:if test="${product.postage != 0}">
+                        <span>满<font><fmt:formatNumber type="number"
+                                                       value="${product.freePrice/100}"
+                                                       pattern="0.00"
+                                                       maxFractionDigits="2"/></font>包邮</span>
+                    </c:if>
                 </p>
             </div>
             <div class="page_more_btn">+规格数量选择</div>
@@ -264,7 +285,7 @@
         });
     }
 
-    function buyNow(){
+    function buyNow() {
         $("#productNum").val($(".num1").val());
         var productNum = $("#productNum").val();
         if (productNum == 0) {
@@ -323,7 +344,7 @@
 
     function showTanChuang() {
         if (warnType == 1) {
-            $("#buy").attr("onclick","buyNow()");
+            $("#buy").attr("onclick", "buyNow()");
             $("#warningInput").html('您有该商品的未支付订单！请到订单列表处理');
             $(".yes").html('查看');
         } else if (warnType == 2) {

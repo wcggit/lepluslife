@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -34,28 +33,23 @@ public class BannerController {
 
   @ApiOperation(value = "1=首页推荐,2=臻品轮播图,3=新品首发")
   @RequestMapping(value = "/home/{id}", method = RequestMethod.GET)
-  public
-  @ResponseBody
-  LejiaResult homeImage(@PathVariable Integer id) {
+  public LejiaResult homeImage(@PathVariable Integer id) {
     List<Map> list = bannerService.findByType123(id);
     return LejiaResult.ok(list);
   }
 
   @ApiOperation(value = "当期好“店”推荐")
   @RequestMapping(value = "/newShop", method = RequestMethod.GET)
-  public
-  @ResponseBody
-  LejiaResult newShop(@RequestParam(required = false) Long cityId) {
+  public LejiaResult newShop(@RequestParam(required = false) Long cityId) {
     List<Map> list = bannerService.findByNewShop(cityId);
     return LejiaResult.ok(list);
   }
 
   @ApiOperation(value = "往期好“店”推荐")
   @RequestMapping(value = "/oldShop", method = RequestMethod.GET)
-  public
-  @ResponseBody
-  LejiaResult oldShopByPage(@ApiParam(value = "第几页，从1开始") @RequestParam(required = true) Integer page,
-                            @ApiParam(value = "城市id") @RequestParam(required = false) Long cityId) {
+  public LejiaResult oldShopByPage(
+      @ApiParam(value = "第几页，从1开始") @RequestParam(required = true) Integer page,
+      @ApiParam(value = "城市id") @RequestParam(required = false) Long cityId) {
     if (page == null || page < 1) {
       page = 1;
     }
@@ -65,18 +59,14 @@ public class BannerController {
 
   @ApiOperation(value = "当期好“货”推荐")
   @RequestMapping(value = "/newProduct", method = RequestMethod.GET)
-  public
-  @ResponseBody
-  LejiaResult newProduct() {
+  public LejiaResult newProduct() {
     List<Map> list = bannerService.findByNewProduct();
     return LejiaResult.ok(list);
   }
 
   @ApiOperation(value = "往期好“货”推荐")
   @RequestMapping(value = "/oldProduct/{id}", method = RequestMethod.GET)
-  public
-  @ResponseBody
-  LejiaResult oldProductByPage(@ApiParam(value = "第几页，从1开始") @PathVariable Integer id) {
+  public LejiaResult oldProductByPage(@ApiParam(value = "第几页，从1开始") @PathVariable Integer id) {
     if (id == null || id < 1) {
       id = 1;
     }
@@ -86,26 +76,26 @@ public class BannerController {
 
   @ApiOperation(value = "公告")
   @RequestMapping(value = "/notice", method = RequestMethod.GET)
-  public
-  @ResponseBody
-  LejiaResult notice() {
+  public LejiaResult notice() {
     return LejiaResult.ok(dictionaryService.findDictionaryById(21L).getValue());
   }
 
   @ApiOperation(value = "热门关键词")
   @RequestMapping(value = "/hot/{id}", method = RequestMethod.GET)
-  public
-  @ResponseBody
-  LejiaResult hotWord(@ApiParam(value = "城市Id") @PathVariable Long id) {
+  public LejiaResult hotWord(@ApiParam(value = "城市Id") @PathVariable Long id) {
     String hotWord = bannerService.hotWord(id);
     return LejiaResult.ok(hotWord);
   }
 
   @ApiOperation(value = "好店推荐页顶部图片")
   @RequestMapping(value = "/niceShopImage", method = RequestMethod.GET)
-  public
-  @ResponseBody
-  LejiaResult findNiceShopImage() {
+  public LejiaResult findNiceShopImage() {
     return LejiaResult.ok(dictionaryService.findDictionaryById(26L).getValue());
+  }
+
+  @ApiOperation(value = "通用获取数据接口")
+  @RequestMapping(value = "/common/{id}", method = RequestMethod.GET)
+  public LejiaResult common(@PathVariable Long id) {
+    return LejiaResult.ok(dictionaryService.findDictionaryById(id).getValue());
   }
 }

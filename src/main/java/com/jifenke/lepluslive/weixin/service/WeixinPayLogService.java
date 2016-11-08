@@ -1,6 +1,5 @@
 package com.jifenke.lepluslive.weixin.service;
 
-import com.jifenke.lepluslive.order.domain.entities.OnLineOrder;
 import com.jifenke.lepluslive.weixin.domain.entities.WeixinPayLog;
 import com.jifenke.lepluslive.weixin.repository.WeixinPayLogRepository;
 
@@ -36,16 +35,12 @@ public class WeixinPayLogService {
    * 支付成功回调时保存日志 16/09/29
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public void savePayLog(OnLineOrder onLineOrder) {
+  public void savePayLog(String orderSid, String orderType) {
     String currState = "SUCCESS";
-    Long payOrigin = onLineOrder.getPayOrigin().getId();
-    String orderType = "onLineOrder";
-    if (payOrigin == 1) {
-      orderType = "APPOnLineOrder";
-    }
+
     WeixinPayLog
         weixinPayLog =
-        new WeixinPayLog(onLineOrder.getOrderSid(), currState, currState, 1, orderType);
+        new WeixinPayLog(orderSid, currState, currState, 1, orderType);
     weixinPayLogRepository.save(weixinPayLog);
   }
 

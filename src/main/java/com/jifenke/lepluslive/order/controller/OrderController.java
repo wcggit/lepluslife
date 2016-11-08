@@ -132,6 +132,10 @@ public class OrderController {
         orderService.createCartOrder(cartDetailDtoList, leJiaUser, address, 1L);
     String status = "" + result.get("status");
     if (!"200".equals(status)) {
+      if (result.get("arrays") != null) {
+        return LejiaResult.build(Integer.valueOf(status),
+                                 messageService.getMsg(status, (String[]) result.get("arrays")));
+      }
       return LejiaResult.build(Integer.valueOf(status), messageService.getMsg(status));
     }
     OnLineOrderDto orderDto = new OnLineOrderDto();
@@ -346,7 +350,7 @@ public class OrderController {
 
     OnLineOrder order = orderService.findOnLineOrderById(id);
 
-    if (order.getExpressNumber() == null) {
+    if (order.getExpressNumber() == null || "".equals(order.getExpressNumber())) {
       return MvUtil.go("/weixin/expressDetail");
     }
     //调接口获取物流信息，存入数据库
@@ -375,7 +379,7 @@ public class OrderController {
     OnLineOrder order = orderService.findOnLineOrderById(id);
 
     model.addAttribute("order", order);
-    model.addAttribute("wxUser", order.getLeJiaUser().getWeiXinUser());
+
     model.addAttribute("address", order.getAddress());
     model.addAttribute("backA", dictionaryService.findDictionaryById(3L).getValue());
 

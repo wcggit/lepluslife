@@ -1,5 +1,7 @@
 package com.jifenke.lepluslive.product.domain.entities;
 
+import com.jifenke.lepluslive.weixin.domain.entities.Category;
+
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -18,7 +20,8 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 /**
- * Created by wcg on 16/3/9.
+ * 线上商品
+ * Created by zhangwen on 16/3/9.
  */
 @Entity
 @Table(name = "PRODUCT")
@@ -53,19 +56,17 @@ public class Product implements Serializable {
 
   private Integer customSale = 0;  //自定义起始销售量
 
-  @Column(name = "points_count")
-  private Long pointsCount = 0L;    // 该商品的所有订单使用的积分加和
-
-  @Column(name = "packet_count")
-  private Long packetCount = 0L;  //该商品的所有订单发放的红包加和
-
   private String description;
 
   private Integer state;
 
   private String thumb;//缩略图,显示在订单里
 
-  private Integer postage = 0;   //该商品所需邮费
+  private String qrCodePicture;
+
+  private Integer postage = 0;   //该商品所需邮费 0=包邮
+
+  private Integer freePrice = 0;  //不包邮时，满此价格包邮，针对普通商品
 
   private Integer buyLimit = 1;  //每个用户限购数量 0=无限制
 
@@ -74,6 +75,9 @@ public class Product implements Serializable {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "product_type_id")
   private ProductType productType;
+
+  @ManyToOne
+  private Category mark; //商品角标  为null时无角标
 
   public String getThumb() {
     return thumb;
@@ -155,20 +159,28 @@ public class Product implements Serializable {
     this.saleNumber = saleNumber;
   }
 
-  public Long getPointsCount() {
-    return pointsCount;
+  public String getQrCodePicture() {
+    return qrCodePicture;
   }
 
-  public void setPointsCount(Long pointsCount) {
-    this.pointsCount = pointsCount;
+  public void setQrCodePicture(String qrCodePicture) {
+    this.qrCodePicture = qrCodePicture;
   }
 
-  public Long getPacketCount() {
-    return packetCount;
+  public Integer getFreePrice() {
+    return freePrice;
   }
 
-  public void setPacketCount(Long packetCount) {
-    this.packetCount = packetCount;
+  public void setFreePrice(Integer freePrice) {
+    this.freePrice = freePrice;
+  }
+
+  public Category getMark() {
+    return mark;
+  }
+
+  public void setMark(Category mark) {
+    this.mark = mark;
   }
 
   public Integer getType() {

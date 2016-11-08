@@ -34,18 +34,21 @@ public class ActivityPhoneRule {
 
   private Integer score = 0;  //所需积分 type!=2时使用
 
+  private Integer cheap = 0;  //是否是特惠活动（是的话没有下面两个购买限制，属于全局限购）
+
+  private Integer repository = 0;  //特惠时有库存限制
+
   private Integer totalLimit = 0;  //累计购买限制  0=无限制
 
-  private Integer limitType = 1;  //分类限购(和totalLimit联合限制，无冲突)  1=每日限购|2=每周限购|3=每月限购
+  private Integer limitType = 1;  //分类限购(和totalLimit联合限制，无冲突)  0=无分类限制|1=每日限购|2=每周限购|3=每月限购
 
-  private Integer limit = 0;  //分类限购数量   0=无限制
+  private Integer buyLimit = 0;  //分类限购数量   0=无限制
 
   private Integer rebateType = 0;  //红包返利方式    0=固定返利|1=随机返利
 
   private Integer rebate = 0;   //分为单位  返红包金额 固定返利金额或随机返利金额最大值
 
   private Integer minRebate = 0;  //随机返利金额最小值
-
 
   public Long getId() {
     return id;
@@ -127,16 +130,32 @@ public class ActivityPhoneRule {
     this.limitType = limitType;
   }
 
-  public Integer getLimit() {
-    return limit;
+  public Integer getBuyLimit() {
+    return buyLimit;
   }
 
-  public void setLimit(Integer limit) {
-    this.limit = limit;
+  public void setBuyLimit(Integer buyLimit) {
+    this.buyLimit = buyLimit;
   }
 
   public Integer getRebateType() {
     return rebateType;
+  }
+
+  public Integer getCheap() {
+    return cheap;
+  }
+
+  public void setCheap(Integer cheap) {
+    this.cheap = cheap;
+  }
+
+  public Integer getRepository() {
+    return repository;
+  }
+
+  public void setRepository(Integer repository) {
+    this.repository = repository;
   }
 
   public void setRebateType(Integer rebateType) {

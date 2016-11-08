@@ -76,6 +76,9 @@ public class OrderService {
   @Inject
   private WeiXinUserService weiXinUserService;
 
+  @Inject
+  private OnLineOrderShareService orderShareService;
+
   /**
    * 我的 获取用户不同状态订单数  16/09/05
    *
@@ -131,17 +134,21 @@ public class OrderService {
     try {
       Long orderPrice = productSpec.getPrice() * buyNumber;
       Long totalPrice = productSpec.getMinPrice() * buyNumber;    //订单共需付款金额(以后不变)
-      Long totalScore = orderPrice - totalPrice;//订单最高可使用积分(以后不变)
+      Long totalScore = productSpec.getMinScore() * buyNumber.longValue();//订单最高可使用积分(以后不变)
       Long truePrice = productSpec.getMinPrice() * buyNumber;  //该订单最低需使用金额>=totalPrice
       Long freightPrice = 0L;
       //免运费最低价格
       Integer FREIGHT_FREE_PRICE = Integer.parseInt(dictionaryRepository.findOne(1L).getValue());
       //判断是否包邮
-      if (orderPrice.intValue() < FREIGHT_FREE_PRICE) {
-        Long FREIGHT_PRICE = Long.parseLong(dictionaryRepository.findOne(2L).getValue());
-        freightPrice = FREIGHT_PRICE;
-        totalPrice += FREIGHT_PRICE;
-        truePrice += FREIGHT_PRICE;
+      if (orderPrice.intValue() < FREIGHT_FREE_PRICE) { //不满足全场包邮条件
+        if (product.getPostage() != 0) { //该产品不包邮
+          if (orderPrice.intValue() < product.getFreePrice()) {//不满足此商品包邮最低价
+            Long FREIGHT_PRICE = product.getPostage().longValue(); //使用该产品的邮费
+            freightPrice = FREIGHT_PRICE;
+            totalPrice += FREIGHT_PRICE;
+            truePrice += FREIGHT_PRICE;
+          }
+        }
       }
 
       onLineOrder.setLeJiaUser(leJiaUser);
@@ -150,8 +157,7 @@ public class OrderService {
       }
       onLineOrder.setFreightPrice(freightPrice);
       onLineOrder.setTotalPrice(totalPrice);
-      onLineOrder.setTotalScore(
-          (long) Math.floor(Double.parseDouble(totalScore.toString()) / 100));
+      onLineOrder.setTotalScore(totalScore);
       onLineOrder.setTruePrice(truePrice);  //最少需要money
 
       onLineOrder.setState(0);
@@ -201,6 +207,12 @@ public class OrderService {
     Long totalScore = 0L;//订单最高可使用积分(以后不变)
     Long totalPrice = 0L;    //订单共需付款金额(以后不变)
     Long truePrice = 0L;  //该订单最低需使用金额>=totalPrice
+    //免运费最低价格
+    Integer FREIGHT_FREE_PRICE = Integer.parseInt(dictionaryRepository.findOne(1L).getValue());
+    Long FREIGHT_PRICE = 0L;//邮费
+    int free = 0; //是否包邮 1=是
+    Long singleSpecTotalPrice = 0L; //某种产品的邮费
+    Map<Object, Long[]> postageList = new HashMap<>();
     for (CartDetailDto cartDetailDto : cartDetailDtos) {
       OrderDetail orderDetail = new OrderDetail();
       Product product = productService.findOneProduct(cartDetailDto.getProduct().getId());
@@ -211,13 +223,45 @@ public class OrderService {
         orderPrice += productSpec.getPrice() * cartDetailDto.getProductNumber();
         totalPrice += productSpec.getMinPrice() * cartDetailDto.getProductNumber();
         truePrice += productSpec.getMinPrice() * cartDetailDto.getProductNumber();
-        totalScore +=
-            (productSpec.getPrice() - productSpec.getMinPrice()) * cartDetailDto.getProductNumber();
+        totalScore += productSpec.getMinScore() * cartDetailDto.getProductNumber();
+        singleSpecTotalPrice = productSpec.getPrice() * cartDetailDto.getProductNumber();
       } else {
         result.put("status", 5005); //某件商品的某种规格无库存了
+        String[] o = new String[1];
+        o[0] = product.getName();
+        result.put("arrays", o); //某件商品的某种规格无库存了
         result.put("data", product.getName() + "_" + cartDetailDto.getProductNumber());
         break;
       }
+      //判断是否包邮
+      if (free == 0) {
+        if (orderPrice.intValue() < FREIGHT_FREE_PRICE) { //不满足全场包邮条件
+          if (product.getPostage() != 0) { //该产品不包邮
+            //判断Map中是否有该产品的总价
+            if (postageList.get(product.getId()) == null) {
+              if (singleSpecTotalPrice < product.getFreePrice()) {//不满足此商品包邮最低价
+                Long[] longs = new Long[2];
+                longs[0] = singleSpecTotalPrice;
+                longs[1] = product.getPostage().longValue();
+                postageList.put(product.getId(), longs);
+              } else {
+                free = 1;
+              }
+            } else {
+              Long[] longs = postageList.get(product.getId());
+              longs[0] += singleSpecTotalPrice;
+              if (longs[0] >= product.getFreePrice()) {
+                free = 1;
+              }
+            }
+          } else {
+            free = 1;
+          }
+        } else {
+          free = 1;
+        }
+      }
+
       orderDetail.setState(1);
       orderDetail.setProduct(product);
       orderDetail.setProductNumber(cartDetailDto.getProductNumber());
@@ -229,15 +273,20 @@ public class OrderService {
     if (result.get("status") != null) {
       return result;
     }
-    //免运费最低价格
-    Integer FREIGHT_FREE_PRICE = Integer.parseInt(dictionaryRepository.findOne(1L).getValue());
-    //判断是否包邮
-    if (orderPrice.intValue() < FREIGHT_FREE_PRICE) {
-      Long FREIGHT_PRICE = Long.parseLong(dictionaryRepository.findOne(2L).getValue());
-      freightPrice = FREIGHT_PRICE;
-      totalPrice += FREIGHT_PRICE;
-      truePrice += FREIGHT_PRICE;
+
+    //获取邮费
+    if (free == 0) {
+      for (Map.Entry<Object, Long[]> entry : postageList.entrySet()) {
+        Long[] longs = entry.getValue();
+        if (longs[1] > FREIGHT_PRICE) {
+          FREIGHT_PRICE = longs[1];
+        }
+      }
     }
+    freightPrice = FREIGHT_PRICE;
+    totalPrice += FREIGHT_PRICE;
+    truePrice += FREIGHT_PRICE;
+
     onLineOrder.setLeJiaUser(leJiaUser);
     if (address != null) {
       onLineOrder.setAddress(address);
@@ -248,7 +297,7 @@ public class OrderService {
     onLineOrder.setOrderPrice(orderPrice);
     onLineOrder.setTotalPrice(totalPrice);
     onLineOrder.setTruePrice(truePrice);
-    onLineOrder.setTotalScore((long) Math.floor(Double.parseDouble(totalScore.toString()) / 100));
+    onLineOrder.setTotalScore(totalScore);
     onLineOrder.setFreightPrice(freightPrice);
     PayOrigin payOrigin = new PayOrigin(payWayId); //设置支付来源
     onLineOrder.setPayOrigin(payOrigin);
@@ -277,14 +326,18 @@ public class OrderService {
   }
 
   /**
-   * @param orderSid 支付成功后,a积分加,b积分减,修改订单状态为已支付
+   * @param orderSid 支付成功后,a积分加,b积分减,修改订单状态为已支付  并分润  16/11/05
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public void paySuccess(String orderSid) {
     OnLineOrder onLineOrder = orderRepository.findByOrderSid(orderSid);
     //保存微信支付日志
-    weixinPayLogService.savePayLog(onLineOrder);
     PayOrigin payOrigin = onLineOrder.getPayOrigin();
+    String orderType = "onLineOrder";
+    if (payOrigin.getId() == 1) {
+      orderType = "APPOnLineOrder";
+    }
+    weixinPayLogService.savePayLog(onLineOrder.getOrderSid(), orderType);
     PayOrigin payWay = new PayOrigin();
     System.out.println(onLineOrder.getState() + "之前");
     if (onLineOrder.getState() == 0) {
@@ -304,7 +357,8 @@ public class OrderService {
         } else {
           payWay.setId(8L);
         }
-        scoreBService.paySuccess(user, onLineOrder.getTrueScore(), onLineOrder.getOrderSid());
+        scoreBService
+            .paySuccess(user, onLineOrder.getTrueScore(), 2, "乐+商城消费", onLineOrder.getOrderSid());
       } else {
         if (payOrigin.getId() == 1) {
           payWay.setId(2L);
@@ -312,21 +366,27 @@ public class OrderService {
           payWay.setId(6L);
         }
       }
+      payWay.setPayFrom(payOrigin.getPayFrom());
       onLineOrder.setPayOrigin(payWay);
       //订单相关product的销量等数据处理
       try {
         productService.editProductSaleByPayOrder(onLineOrder);
         //如果返还A红包不为0,改变会员状态
         if (payBackScore > 0) {
-          WeiXinUser w = user.getWeiXinUser();
+          WeiXinUser w = weiXinUserService.findWeiXinUserByLeJiaUser(user);
           if (w != null) {
-            w.setState(1);
-            weiXinUserService.saveWeiXinUser(w);
+            if (w.getState() == 0) {
+              w.setState(1);
+              weiXinUserService.saveWeiXinUser(w);
+            }
           }
         }
       } catch (Exception e) {
         e.printStackTrace();
       }
+      new Thread(() -> { //合伙人和商家分润
+        orderShareService.onLineOrderShare(onLineOrder);
+      }).start();
 
       System.out.println(onLineOrder.getState() + "之后");
       orderRepository.save(onLineOrder);
@@ -349,6 +409,7 @@ public class OrderService {
       onLineOrder.setPayState(1);
       onLineOrder.setPayDate(new Date());
       onLineOrder.setPayBackA(payBackScore);
+      LeJiaUser user = onLineOrder.getLeJiaUser();
       scoreAService.paySuccess(onLineOrder.getLeJiaUser(), payBackScore, onLineOrder.getOrderSid());
       if (onLineOrder.getTrueScore() != 0) {
         if (payOrigin.getId() == 1) {
@@ -356,8 +417,9 @@ public class OrderService {
         } else {
           payWay.setId(8L);
         }
-        scoreBService.paySuccess(onLineOrder.getLeJiaUser(), onLineOrder.getTrueScore(),
-                                 onLineOrder.getOrderSid());
+        scoreBService
+            .paySuccess(onLineOrder.getLeJiaUser(), onLineOrder.getTrueScore(), 2, "乐+商城消费",
+                        onLineOrder.getOrderSid());
       } else {
         if (payOrigin.getId() == 1) {
           payWay.setId(2L);
@@ -365,13 +427,27 @@ public class OrderService {
           payWay.setId(6L);
         }
       }
+      payWay.setPayFrom(payOrigin.getPayFrom());
       onLineOrder.setPayOrigin(payWay);
       //订单相关product的销量等数据处理
       try {
         productService.editProductSaleByPayOrder(onLineOrder);
+        //如果返还A红包不为0,改变会员状态
+        if (payBackScore > 0) {
+          WeiXinUser w = weiXinUserService.findWeiXinUserByLeJiaUser(user);
+          if (w != null) {
+            if (w.getState() == 0) {
+              w.setState(1);
+              weiXinUserService.saveWeiXinUser(w);
+            }
+          }
+        }
       } catch (Exception e) {
         e.printStackTrace();
       }
+      new Thread(() -> { //合伙人和商家分润
+        orderShareService.onLineOrderShare(onLineOrder);
+      }).start();
       orderRepository.save(onLineOrder);
     }
   }

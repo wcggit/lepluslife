@@ -26,7 +26,7 @@ public class WeixinPayLog {
 
   private Integer logType;    //1=支付后微信回调日志|2=掉单查询订单日志
 
-  private String orderType;   //onLineOrder=公众号线上订单|APPOnLineOrder|offLineOrder|APPOffLineOrder
+  private String orderType;   //onLineOrder=公众号线上订单|APPOnLineOrder|offLineOrder|APPOffLineOrder|PhoneOrder话费订单
 
   private Date createDate = new Date();
 

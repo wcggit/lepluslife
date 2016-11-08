@@ -19,7 +19,7 @@ import java.util.Map;
  */
 public class HttpUtils {
 
-  public static Map get(String getUrl) {
+  public static Map<Object, Object> get(String getUrl) {
 
     CloseableHttpClient client = HttpClients.createDefault();
     HttpGet httpGet = new HttpGet(getUrl);
@@ -29,7 +29,7 @@ public class HttpUtils {
       response = client.execute(httpGet);
       HttpEntity entity = response.getEntity();
       ObjectMapper mapper = new ObjectMapper();
-      Map
+      Map<Object, Object>
           map =
           mapper.readValue(new BufferedReader(new InputStreamReader(entity.getContent(), "utf-8")),
                            Map.class);
@@ -41,7 +41,6 @@ public class HttpUtils {
     }
     return null;
   }
-
 
 
 }

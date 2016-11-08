@@ -122,7 +122,8 @@
                                 <div>
                                     <img src="${product.thumb}" alt="">
                                 </div>
-                                <div class="only">仅剩${product.repository}份</div>
+
+                                <div></div>
                                 <div>${product.name}</div>
                                 <div><span
                                         style="color:#333;font-size: 15px;margin-right: -2px"><fmt:formatNumber
@@ -130,11 +131,21 @@
                                         value="${product.minPrice/100}"
                                         pattern="0.00"
                                         maxFractionDigits="2"/>元</span> + <span
-                                        style="margin-left: -2px;">${product.minScore}积分</span><span
-                                        class="line-down">市场价<fmt:formatNumber type="number"
-                                                                               value="${product.price/100}"
-                                                                               pattern="0.00"
-                                                                               maxFractionDigits="2"/>元</span>
+                                        style="margin-left: -2px;font-size: 14px;color: #fb991a;">${product.minScore}积分</span>
+                                </div>
+                                <div>
+                                    <span class="line-down"
+                                          style="margin-top: -5px;font-size: 12px;color: #999;">市场价<fmt:formatNumber
+                                            type="number"
+                                            value="${product.price/100}"
+                                            pattern="0.00"
+                                            maxFractionDigits="2"/>元</span>
+                                </div>
+                                <div class="w-buyNow">
+                                    <img src="${resourceUrl}/frontRes/product/hotIndex/img/buyNow.png"
+                                         alt="">
+
+                                    <p>仅剩${product.repository}份</p>
                                 </div>
                             </section>
                         </c:if>
@@ -398,10 +409,11 @@
                                                + Math.floor((list[i].price
                                                              - list[i].minPrice)
                                                             / 100)
-                                               + '积分</span></div> <div> <div class="line-down">市场价'
+                                               + '积分</span></div><div class="line-down" style="padding-left: 7%;color: #999;">市场价'
                                                + toDecimal(list[i].price / 100)
-                                               + '元</div> <div>' + list[i].saleNumber
-                                               + '份已售</div></div></div>';
+                                               + '元</div> <div> <div>' + list[i].saleNumber
+                                               + '份已售</div><div>' + (list[i].postage == 0
+                                                   ? '包邮' : '') + '</div></div></div>';
                                    content += currP;
                                }
                                mainContent.html(mainContent.html() + content);

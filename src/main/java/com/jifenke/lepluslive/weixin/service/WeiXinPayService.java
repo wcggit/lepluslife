@@ -283,4 +283,28 @@ public class WeiXinPayService {
                (request.getQueryString() != null ? "?" + request.getQueryString() : "");
     return s;
   }
+
+  /**
+   * 封装订单参数
+   */
+  @Transactional(readOnly = true)
+  public SortedMap<Object, Object> test(String body, String orderSid, String truePrice,
+                                        String notifyUrl, String openId) {
+    SortedMap<Object, Object> orderParams = new TreeMap<>();
+    orderParams.put("appid", appId);
+    orderParams.put("mch_id", mchId);
+    orderParams.put("nonce_str", MvUtil.getRandomStr());
+    orderParams.put("body", body);
+    orderParams.put("out_trade_no", orderSid);
+    orderParams.put("fee_type", "CNY");
+    orderParams.put("total_fee", truePrice);
+    orderParams.put("spbill_create_ip", "127.0.0.1");
+    orderParams.put("notify_url", notifyUrl);
+    orderParams.put("trade_type", "JSAPI");
+    orderParams.put("input_charset", "UTF-8");
+    orderParams.put("openid", openId);
+    String sign = createSign("UTF-8", orderParams, mchKey);
+    orderParams.put("sign", sign);
+    return orderParams;
+  }
 }

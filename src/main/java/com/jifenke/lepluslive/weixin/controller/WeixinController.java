@@ -84,9 +84,6 @@ public class WeixinController {
   private LeJiaUserService leJiaUserService;
 
   @Inject
-  private DictionaryService dictionaryService;
-
-  @Inject
   private WeiXinUserInfoService weiXinUserInfoService;
 
   @Inject
@@ -119,10 +116,7 @@ public class WeixinController {
         productService.findAllProductDetailsByProduct(product);
     ProductDto productDto = new ProductDto();
     productDto.setProductSpecs(productService.findAllProductSpec(product));
-    Integer
-        FREIGHT_FREE_PRICE =
-        Integer.parseInt(dictionaryService.findDictionaryById(1L).getValue());
-    productDto.setFreePrice(FREIGHT_FREE_PRICE);
+
     try {
       BeanUtils.copyProperties(productDto, product);
       productDto.setScrollPictures(scrollPictureList.stream().map(scrollPicture -> {
@@ -155,7 +149,7 @@ public class WeixinController {
     }
     Map<String, Object> map = weiXinService.getSnsAccessToken(code);
     String openid = map.get("openid").toString();
-    new Thread(() -> {
+//    new Thread(() -> {
       //获取accessToken与openid
       if (map.get("errcode") != null) {
         log.error(map.get("errcode").toString() + map.get("errmsg").toString());
@@ -163,7 +157,7 @@ public class WeixinController {
       WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByOpenId(openid);
       String accessToken = map.get("access_token").toString();
       //2种情况 当用户不存在时,当上次登录距离此次已经经过了3天
-      if (weiXinUser == null || weiXinUser.getState() == 0 || new Date(
+      if (weiXinUser == null || new Date(
           weiXinUser.getLastUserInfoDate().getTime() + 3 * 24 * 60 * 60 * 1000)
           .before(new Date())) {
         Map<String, Object> userDetail = weiXinService.getDetailWeiXinUser(accessToken, openid);
@@ -176,7 +170,7 @@ public class WeixinController {
           e.printStackTrace();
         }
       }
-    }).start();
+//    }).start();
     try {
       CookieUtils.setCookie(request, response, appId + "-user-open-id", openid,
                             Constants.COOKIE_DISABLE_TIME);

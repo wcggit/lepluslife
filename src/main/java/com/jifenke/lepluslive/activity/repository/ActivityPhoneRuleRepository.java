@@ -11,4 +11,11 @@ import java.util.List;
  */
 public interface ActivityPhoneRuleRepository extends JpaRepository<ActivityPhoneRule, Long> {
 
+  /**
+   * 获取所有上线话费产品  16/11/01
+   *
+   * @param state 产品状态
+   */
+  List<ActivityPhoneRule> findByState(Integer state);
+
 }

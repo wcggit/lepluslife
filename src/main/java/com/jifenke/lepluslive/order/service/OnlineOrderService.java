@@ -58,6 +58,9 @@ public class OnlineOrderService {
   @Inject
   private Scheduler scheduler;
 
+  @Inject
+  private OnLineOrderShareService orderShareService;
+
   /**
    * 创建爆品的待支付订单 16/09/22
    *
@@ -193,6 +196,11 @@ public class OnlineOrderService {
       return result;
     }
     PayOrigin payWay = new PayOrigin(payOrigin);
+    if (payOrigin == 9) {
+      payWay.setPayFrom(1);
+    } else {
+      payWay.setPayFrom(2);
+    }
     //暂定不返A积分
     if (order.getState() == 4) {
       result.put("status", 5008);
@@ -232,6 +240,9 @@ public class OnlineOrderService {
       scoreBDetailRepository.save(scoreBDetail);
       scoreBRepository.save(scoreB);
       orderRepository.save(order);
+      new Thread(() -> { //合伙人和商家分润
+        orderShareService.onLineOrderShare(order);
+      }).start();
       result.put("status", 200);
       result.put("data", order.getId());
       return result;

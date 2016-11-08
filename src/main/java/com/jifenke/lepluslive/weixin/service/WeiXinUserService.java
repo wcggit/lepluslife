@@ -89,6 +89,11 @@ public class WeiXinUserService {
     return weiXinUserRepository.findByUnionId(unionId);
   }
 
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+  public WeiXinUser findWeiXinUserByLeJiaUser(LeJiaUser leJiaUser) {
+    return weiXinUserRepository.findByLeJiaUser(leJiaUser);
+  }
+
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public WeiXinUser saveBarCodeForUser(WeiXinUser weiXinUser) throws IOException {
     LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();

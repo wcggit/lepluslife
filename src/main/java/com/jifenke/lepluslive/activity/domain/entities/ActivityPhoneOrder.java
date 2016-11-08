@@ -1,7 +1,9 @@
 package com.jifenke.lepluslive.activity.domain.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
+import com.jifenke.lepluslive.order.domain.entities.PayOrigin;
 
 import org.hibernate.annotations.GenericGenerator;
 
@@ -27,17 +29,24 @@ public class ActivityPhoneOrder {
 
   private String orderSid = MvUtil.getOrderNumber(); //自己的订单编号
 
-  private String orderId;   //第三方支付平台的订单编号
+  private String orderId;   //第三方充值平台的订单编号
+
+  private Integer cheap = 0;  //该订单是否是特惠订单
 
   private Integer state = 0;  //订单状态  0=待支付|1=已支付待充值|2=已充值|3=已支付充值失败
 
   private Integer payState = 0;  //订单是否已支付
 
   @ManyToOne
+  @JsonIgnore
   private LeJiaUser leJiaUser;
 
   @ManyToOne
   private ActivityPhoneRule phoneRule;
+
+  @ManyToOne
+  @JsonIgnore
+  private PayOrigin payOrigin;    //支付方式及订单来源
 
   private String phone;  //实际充值手机号
 
@@ -117,6 +126,14 @@ public class ActivityPhoneOrder {
     this.phone = phone;
   }
 
+  public Integer getCheap() {
+    return cheap;
+  }
+
+  public void setCheap(Integer cheap) {
+    this.cheap = cheap;
+  }
+
   public Integer getWorth() {
     return worth;
   }
@@ -151,6 +168,14 @@ public class ActivityPhoneOrder {
 
   public Integer getPayBackScore() {
     return payBackScore;
+  }
+
+  public PayOrigin getPayOrigin() {
+    return payOrigin;
+  }
+
+  public void setPayOrigin(PayOrigin payOrigin) {
+    this.payOrigin = payOrigin;
   }
 
   public void setPayBackScore(Integer payBackScore) {

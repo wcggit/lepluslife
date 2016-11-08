@@ -131,7 +131,7 @@ public class WeixinReplyService {
     AutoReplyRule rule = autoReplyService.findByReplyType("focusReply");
     String str = "";
     ActivityCodeBurse codeBurse = null;
-    int subType = 1;  //二维码类型  1=普通|2=活动|3=商家
+    int subType = 1;  //二维码类型  1=普通|2=活动|3=充值
     String subSource = "0_0_0";
     if (rule != null) {
       WeixinReply reply = null;
@@ -143,7 +143,7 @@ public class WeixinReplyService {
         HashMap<String, String> buildMap = new HashMap<>();
         //判断是不是永久二维码
         if (map.get("Ticket") != null && (!"".equals(map.get("Ticket").toString()))) {//是永久二维码
-          //判断是活动二维码还是商家二维码
+          //判断是活动二维码还是商家二维码还是充值二维码
           String parameter;
           if (eventType == 1) {
             parameter = map.get("EventKey").toString().split("_")[1];
@@ -151,13 +151,11 @@ public class WeixinReplyService {
             parameter = map.get("EventKey").toString();
           }
           if (parameter.startsWith("M")) { //商户二维码
-            subType = 3;
             Object[]
                 o =
                 merchantService
                     .findMerchantIdByParameter(parameter);//o[0]=merchantId|o[1]=partnership
             if (o != null) { //绑定注册来源,判断绑定流程
-//
               Map result = subscribeByMerchantQrCode(map, user, Long.valueOf(o[0].toString()));
               str = reply.buildReplyXmlString(result);
               return str;
@@ -199,6 +197,14 @@ public class WeixinReplyService {
             } else {
               str = reply.buildReplyXmlString(null);
             }
+          } else if (parameter.startsWith("P")) { //充值二维码
+            subType = 3;
+            subSource = "5_0_0";
+            buildMap.put("title", "感谢您的关注，恭喜您获得乐＋红包一个");
+            buildMap.put("description", "↑↑↑戳这里，累计5000人领取");
+            buildMap.put("url",
+                         "http://www.lepluslife.com/weixin/subPage");
+            str = reply.buildReplyXmlString(buildMap);
           }
         } else {
           buildMap.put("title", "感谢您的关注，恭喜您获得乐＋红包一个");

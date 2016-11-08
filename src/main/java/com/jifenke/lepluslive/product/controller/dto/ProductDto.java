@@ -35,8 +35,6 @@ public class ProductDto {
   //该商品的所有订单发放的红包加和
   private Long packetCount;
 
-  private Integer freePrice; //免邮价格
-
   private String description;
 
   private String thumb; //商品缩略图
@@ -52,6 +50,10 @@ public class ProductDto {
 
   //轮播图
   private List<ScrollPicture> scrollPictures;
+
+  private Integer postage = 0;   //该商品所需邮费 0=包邮
+
+  private Integer freePrice = 0;  //不包邮时，满此价格包邮，针对普通商品
 
   public Integer getFreePrice() {
     return freePrice;
@@ -91,6 +93,14 @@ public class ProductDto {
 
   public void setId(Long id) {
     this.id = id;
+  }
+
+  public Integer getPostage() {
+    return postage;
+  }
+
+  public void setPostage(Integer postage) {
+    this.postage = postage;
   }
 
   public Long getSid() {
