@@ -30,8 +30,18 @@ public class PartnerInfo {
 
   private Integer scoreBType; //0固定数值 1 随机
 
+  private Integer inviteLimit;
+
   @OneToOne
   private Partner partner;
+
+  public Integer getInviteLimit() {
+    return inviteLimit;
+  }
+
+  public void setInviteLimit(Integer inviteLimit) {
+    this.inviteLimit = inviteLimit;
+  }
 
   public Partner getPartner() {
     return partner;

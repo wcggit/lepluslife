@@ -212,6 +212,7 @@ public class WeixinController {
     Partner partner = partnerService.findPartnerBySid(sid);
     String openId = CookieUtils.getCookieValue(request, appId + "-user-open-id");
     model.addAttribute("partner", partner);
+    model.addAttribute("partnerSid", sid+"?");
     model.addAttribute("openid", openId);
     WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByOpenId(openId);
     model.addAttribute("weiXinUser", weiXinUser);
