@@ -23,7 +23,7 @@
     <c:set var="resourceUrl" value="http://www.lepluslife.com/resource"></c:set>
     <c:set var="wxRootUrl" value="http://www.lepluslife.com"></c:set>
     <link rel="stylesheet" href="${resourceUrl}/frontRes/css/reset.css">
-    <link rel="stylesheet" href="${resourceUrl}/frontRes/product/hotIndex/css/bastMain.css">
+    <link rel="stylesheet" href="${resourceUrl}/frontRes/product/hotIndex/css/bastMain2.css">
     <link rel="stylesheet" href="${resourceUrl}/frontRes/css/swiper.min.css">
     <link rel="stylesheet" href="${resourceUrl}/css/paySuccess.css">
     <link rel="stylesheet" href="${resourceUrl}/css/payFailed.css">
@@ -118,7 +118,7 @@
                             </div>
                         </section>
                         <c:if test="${product != null}">
-                            <section class="hotGoods" onclick="goHotDetail(${product.id})">
+                            <section class="hotGoods" style="margin-top: -2px;" onclick="goHotDetail(${product.id})">
                                 <div>
                                     <img src="${product.thumb}" alt="">
                                 </div>
@@ -150,7 +150,7 @@
                             </section>
                         </c:if>
 
-                        <section class="top" style="margin-bottom: 2px;">
+                        <section class="top" style="margin-bottom: 10px;">
                             <img src="${resourceUrl}/frontRes/product/hotIndex/img/line.png" alt="">
 
                             <p>臻品推荐</p>
@@ -163,7 +163,7 @@
             <div class="swiper-slide">
                 <div class="content-slide">
                     <div class="news-list p1">
-                        <section class="secondsKill" style="margin-top: 1px" id="typeContent1">
+                        <section class="secondsKill" style="margin-top: 10px" id="typeContent1">
                         </section>
                     </div>
                 </div>
@@ -171,7 +171,7 @@
             <div class="swiper-slide">
                 <div class="content-slide">
                     <div class="news-list p1">
-                        <section class="secondsKill" style="margin-top: 1px" id="typeContent2">
+                        <section class="secondsKill" style="margin-top: 10px" id="typeContent2">
                         </section>
                     </div>
                 </div>
@@ -179,7 +179,7 @@
             <div class="swiper-slide">
                 <div class="content-slide">
                     <div class="news-list p2">
-                        <section class="secondsKill" style="margin-top: 1px" id="typeContent3">
+                        <section class="secondsKill" style="margin-top: 10px" id="typeContent3">
                         </section>
                     </div>
                 </div>
@@ -187,7 +187,7 @@
             <div class="swiper-slide">
                 <div class="content-slide">
                     <div class="news-list p3">
-                        <section class="secondsKill" style="margin-top: 1px" id="typeContent4">
+                        <section class="secondsKill" style="margin-top: 10px" id="typeContent4">
                         </section>
                     </div>
                 </div>
@@ -403,13 +403,13 @@
                                                + ')"><div><img height="125px" src="'
                                                + list[i].picture
                                                + '" alt=""></div><div>' + list[i].name
-                                               + '</div><div><span style="font-size: 14px;color:#333;margin-right: -3px;">'
+                                               + '</div><div><span style="font-size: 16px;color:#333;margin-right: -3px;">'
                                                + toDecimal(list[i].minPrice / 100)
                                                + '元</span> + <span style="margin-left: -3px">'
                                                + Math.floor((list[i].price
                                                              - list[i].minPrice)
                                                             / 100)
-                                               + '积分</span></div><div class="line-down" style="padding-left: 7%;color: #999;">市场价'
+                                               + '积分</span></div><div class="line-down" style="padding-left: 7%;color: #bebebe;">市场价'
                                                + toDecimal(list[i].price / 100)
                                                + '元</div> <div> <div>' + list[i].saleNumber
                                                + '份已售</div><div>' + (list[i].postage == 0

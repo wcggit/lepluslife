@@ -68,13 +68,12 @@ public class ActivityShareLogService {
   /**
    * 判断是否被邀请过 16/09/08
    *
-   * @param id    被邀请人id
-   * @param token 邀请人token
+   * @param id 被邀请人id
    * @return 1=已被邀请过|0=未被邀请过
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
-  public int findLogByLeJiaUserAndToken(Long id, String token) {
-    List<Object[]> list = activityShareLogRepository.findLogByLeJiaUserAndToken(token, id);
+  public int findLogByLeJiaUser(Long id) {
+    List<Object[]> list = activityShareLogRepository.findLogByLeJiaUser(id);
     if (list != null && list.size() > 0) {
       return 1;
     }

@@ -32,11 +32,6 @@ public class ScoreBService {
     return scoreBRepository.findByLeJiaUser(leJiaUser);
   }
 
-  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
-  public List<ScoreBDetail> findAllScoreBDetail(ScoreB scoreB) {
-    return scoreBDetailRepository.findAllByScoreBOrderByDateCreatedDesc(scoreB);
-  }
-
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public void paySuccess(LeJiaUser leJiaUser, Long totalScore, Integer origin, String operate,
                          String orderSid) {
@@ -63,6 +58,6 @@ public class ScoreBService {
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public List<ScoreBDetail> findAllScoreBDetailByScoreB(ScoreB scoreB) {
-    return scoreBDetailRepository.findAllByScoreBOrderByDateCreatedDesc(scoreB);
+    return scoreBDetailRepository.findAllByScoreBOrderByIdDesc(scoreB);
   }
 }

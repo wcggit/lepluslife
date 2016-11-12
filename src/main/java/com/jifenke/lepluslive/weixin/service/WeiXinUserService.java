@@ -161,6 +161,7 @@ public class WeiXinUserService {
     weiXinUser.setAccessToken(map.get("access_token").toString());
     weiXinUser.setRefreshToken(map.get("refresh_token").toString());
     weiXinUser.setLastUserInfoDate(date);
+    weiXinUser.setLastUpdated(date);
     weiXinUserRepository.save(weiXinUser);
   }
 
@@ -211,6 +212,7 @@ public class WeiXinUserService {
     weiXinUser.setHeadImageUrl(userDetail.get("headimgurl").toString());
     weiXinUser.setProvince(userDetail.get("province").toString());
     weiXinUser.setLastUserInfoDate(date);
+    weiXinUser.setLastUpdated(date);
     weiXinUser.setSubState(1);
     if (weiXinUser.getSubDate() == null) {
       weiXinUser.setSubDate(date);
@@ -273,6 +275,7 @@ public class WeiXinUserService {
     weiXinUser.setHeadImageUrl(headImgUrl);
     weiXinUser.setProvince(province);
     weiXinUser.setLastUserInfoDate(date);
+    weiXinUser.setLastUpdated(date);
     weiXinUser.setState(1);
     weiXinUserRepository.save(weiXinUser);
 

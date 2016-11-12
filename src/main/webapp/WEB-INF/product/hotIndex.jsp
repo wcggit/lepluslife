@@ -23,7 +23,8 @@
     <c:set var="resourceUrl" value="http://www.lepluslife.com/resource"></c:set>
     <c:set var="wxRootUrl" value="http://www.lepluslife.com"></c:set>
     <link rel="stylesheet" href="${resourceUrl}/frontRes/css/reset.css">
-    <link rel="stylesheet" href="${resourceUrl}/frontRes/product/hotIndex/css/main.css">
+
+    <link rel="stylesheet" href="${resourceUrl}/frontRes/product/hotIndex/css/main2.css">
 </head>
 <body class="body">
 <section class="top">
@@ -36,14 +37,24 @@
         <div>
             <img src="${product.thumb}" alt="">
         </div>
-        <div class="only">仅剩${product.repository}份</div>
-        <div>${product.name}</div>
-        <div><span style="color:#333;font-size: 15px;margin-right: -2px"><fmt:formatNumber
-                type="number" value="${product.minPrice/100}" pattern="0.00"
-                maxFractionDigits="2"/>元</span> +
-            <span style="margin-left: -2px;">${product.minScore}积分</span>
-        <span class="line-down">市场价<fmt:formatNumber type="number" value="${product.price/100}"
-                                                     pattern="0.00" maxFractionDigits="2"/>元</span>
+        <div class="only">
+            <div>
+                <img src="${resourceUrl}/frontRes/product/hotIndex/img/w-zdbk.png" alt=""/>
+            </div>
+            <div>
+                <div>${product.name}</div>
+                <div style="margin-top: 3px;"><span style="color:#f54339;font-size: 20px;"><fmt:formatNumber
+                        type="number" value="${product.minPrice/100}" pattern="0.00"
+                        maxFractionDigits="2"/>元</span> +
+                    <span style="color:#fb991a;font-size:20px;margin-left: -2px;">${product.minScore}积分</span>
+                        <%--<span class="line-down">市场价<fmt:formatNumber type="number" value="${product.price/100}"--%>
+                        <%--pattern="0.00" maxFractionDigits="2"/>元</span>--%>
+                </div>
+            </div>
+            <p class="lll">
+                <img width="14" height="14" style="padding-top: 1px" src="${resourceUrl}/frontRes/activity/subPage/img/lightning.png" alt=""/>
+                <span style="margin-top: -1px;">仅剩${product.repository}份</span>
+            </p>
         </div>
     </section>
 </c:if>
@@ -53,7 +64,7 @@
 
     <p>全部秒杀</p>
 </section>
-<section class="secondsKill" id="hotContent">
+<section class="list" id="hotContent">
 
 </section>
 <section class="footer">
@@ -103,10 +114,10 @@
         }
         return s;
     }
-    var currPage = 2, currLength = 0;
-    $(".only").css("margin-top", -$(".only").height() - 25 + "px");
+    var currPage = 2, currLength = 0, pic = '${resourceUrl}/frontRes/activity/subPage/img/lightning.png';
+    $(".only").css("margin-top", -$(".only").height() - 10 + "px");
     $(".only-small").css("margin-top", -$(".only-small").height() - 12 + "px");
-    $(".secondsKill").css("margin-bottom", $(".footer").height() + 13 + "px");
+    $(".list").css("margin-bottom", $(".footer").height() + 13 + "px");
     function ajaxHotProductList(page) {
         $.ajax({
                    type: "get",
@@ -118,18 +129,17 @@
                        if (list != null) {
                            currLength = list.length;
                            for (i; i < list.length; i++) {
-                               var currP = ' <div onclick="goHotDetail(' + list[i].id
-                                           + ')"><div><img src="' + list[i].picture
-                                           + '" alt=""> </div><div class="only-small">仅剩'
-                                           + list[i].repository
-                                           + '份</div><div>' + list[i].name
-                                           + '</div><div><span style="font-size: 14px;color:#333;margin-right: -3px;">'
-                                           + toDecimal(list[i].minPrice / 100)
-                                           + '元</span> + <span style="margin-left: -3px">'
-                                           + list[i].minScore
-                                           + '积分</span></div> <div class="line-down">市场价'
-                                           + toDecimal(list[i].price / 100) + '元</div></div>';
-                               content += currP;
+                               content +=
+                               '<div  onclick="goHotDetail(' + list[i].id
+                               + ')"><div><img class="w-imgSize" src="' + list[i].picture
+                               + '" alt=""></div><div class="information"><p>' + list[i].name
+                               + '</p><div>' + toDecimal(list[i].minPrice / 100)
+                               + '<span style="font-size: 12px;">元</span>+<span style="color: #fb991a;">'
+                               + list[i].minScore
+                               + '<span style="font-size: 12px;">积分</span></span><span style ="font-size: 11px;color: #AEAEAE;margin-left: 6%;text-decoration:line-through;">市场价'
+                               + toDecimal(list[i].price / 100)
+                               + '元</span></div><div><div><img src = "' + pic + '"></div><div>还剩'
+                               + list[i].repository + '份</div><div>马上抢</div></div></div></div>';
                            }
                            mainContent.html(mainContent.html() + content);
                            $(".secondsKill img").css("height", 105 + "px");

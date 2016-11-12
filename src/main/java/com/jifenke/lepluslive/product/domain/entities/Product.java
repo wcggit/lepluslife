@@ -79,6 +79,12 @@ public class Product implements Serializable {
   @ManyToOne
   private Category mark; //商品角标  为null时无角标
 
+  @Column(name = "points_count")
+  private Long pointsCount = 0L;   // 该商品的所有订单使用的积分加和  不再使用
+
+  @Column(name = "packet_count")
+  private Long packetCount = 0L; //该商品的所有订单发放的红包加和    不再使用
+
   public String getThumb() {
     return thumb;
   }
@@ -181,6 +187,22 @@ public class Product implements Serializable {
 
   public void setMark(Category mark) {
     this.mark = mark;
+  }
+
+  public Long getPointsCount() {
+    return pointsCount;
+  }
+
+  public void setPointsCount(Long pointsCount) {
+    this.pointsCount = pointsCount;
+  }
+
+  public Long getPacketCount() {
+    return packetCount;
+  }
+
+  public void setPacketCount(Long packetCount) {
+    this.packetCount = packetCount;
   }
 
   public Integer getType() {

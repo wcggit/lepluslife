@@ -139,7 +139,6 @@ public class WeixinController {
     return MvUtil.go("/weixin/productDetail");
   }
 
-
   @RequestMapping("/userRegister")
   public String userRegister(@RequestParam String action, @RequestParam String code,
                              HttpServletRequest request, HttpServletResponse response)
@@ -148,36 +147,40 @@ public class WeixinController {
       return "禁止授权无法访问app";
     }
     Map<String, Object> map = weiXinService.getSnsAccessToken(code);
-    String openid = map.get("openid").toString();
-//    new Thread(() -> {
-      //获取accessToken与openid
-      if (map.get("errcode") != null) {
-        log.error(map.get("errcode").toString() + map.get("errmsg").toString());
-      }
+
+    //获取accessToken与openid
+    if (map.get("errcode") != null) {
+      log.error(map.get("errcode").toString() + map.get("errmsg").toString());
+    }
+
+    if (map.get("openid") != null) {
+      String openid = "" + map.get("openid");
       WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByOpenId(openid);
-      String accessToken = map.get("access_token").toString();
       //2种情况 当用户不存在时,当上次登录距离此次已经经过了3天
       if (weiXinUser == null || new Date(
-          weiXinUser.getLastUserInfoDate().getTime() + 3 * 24 * 60 * 60 * 1000)
+          weiXinUser.getLastUpdated().getTime() + 3 * 24 * 60 * 60 * 1000)
           .before(new Date())) {
+        String accessToken = "" + map.get("access_token");
         Map<String, Object> userDetail = weiXinService.getDetailWeiXinUser(accessToken, openid);
         if (userDetail.get("errcode") != null) {
           log.error(userDetail.get("errcode").toString() + userDetail.get("errmsg").toString());
-        }
-        try {
-          weiXinUserService.saveWeiXinUser(userDetail, map);
-        } catch (IOException e) {
-          e.printStackTrace();
+        } else {
+          try {
+            weiXinUserService.saveWeiXinUser(userDetail, map);
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
         }
       }
-//    }).start();
-    try {
-      CookieUtils.setCookie(request, response, appId + "-user-open-id", openid,
-                            Constants.COOKIE_DISABLE_TIME);
-      response.sendRedirect(action);
-    } catch (IOException e) {
-      e.printStackTrace();
+      try {
+        CookieUtils.setCookie(request, response, appId + "-user-open-id", openid,
+                              Constants.COOKIE_DISABLE_TIME);
+        response.sendRedirect(action);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
     }
+
     return null;
   }
 
@@ -212,7 +215,7 @@ public class WeixinController {
     Partner partner = partnerService.findPartnerBySid(sid);
     String openId = CookieUtils.getCookieValue(request, appId + "-user-open-id");
     model.addAttribute("partner", partner);
-    model.addAttribute("partnerSid", sid+"?");
+    model.addAttribute("partnerSid", sid + "?");
     model.addAttribute("openid", openId);
     WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByOpenId(openId);
     model.addAttribute("weiXinUser", weiXinUser);

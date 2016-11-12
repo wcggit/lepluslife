@@ -52,15 +52,15 @@ public class SmsService {
   public Map<Object, Object> saveValidateCode(String phoneNumber, HttpServletRequest request,
                                               Integer type) throws Exception {
     Map<Object, Object> result = new HashMap<>();
-    //获取ip地址，判断这个地址发送过几个验证码，防止短信轰炸
-    String ipAddr = weiXinPayService.getIpAddr(request);
-    Integer count = validateCodeRepository.countByIpAddrAndStatus(ipAddr, 0);
+    //某个手机号5分钟内不能发生超过5条
+    Integer count = validateCodeRepository.countByPhoneNumberAndStatus(phoneNumber, 0);
     if (count > 5) {
-      result.put("status", 3002);//中文错误原因
+      result.put("status", 3002);
       result.put("msg", "发送过于频繁，请稍后再试");//中文错误原因
       return result;
     }
-
+    //防止ip攻击，待完善(使用页面随机码，防止接口恶意调用，由服务器生成并校验)
+    String ipAddr = weiXinPayService.getIpAddr(request);
     String code = MvUtil.getRandomNumber();
     ValidateCode validateCode = new ValidateCode();
     validateCode.setPhoneNumber(phoneNumber);

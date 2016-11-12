@@ -43,10 +43,6 @@ public class ScoreAService {
     return null;
   }
 
-  public List<ScoreADetail> findAllScoreADetail(ScoreA scoreA) {
-    return scoreADetailRepository.findAllByScoreAOrderByDateCreatedDesc(scoreA);
-  }
-
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public void paySuccess(LeJiaUser leJiaUser, Long payBackScore, String orderSid) {
     ScoreA scoreA = findScoreAByLeJiaUser(leJiaUser);
@@ -72,7 +68,7 @@ public class ScoreAService {
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public List<ScoreADetail> findAllScoreADetailByScoreA(ScoreA scoreA) {
-    return scoreADetailRepository.findAllByScoreAOrderByDateCreatedDesc(scoreA);
+    return scoreADetailRepository.findAllByScoreAOrderByIdDesc(scoreA);
   }
 
   //活动派发红包

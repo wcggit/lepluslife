@@ -1,7 +1,5 @@
 package com.jifenke.lepluslive.score.repository;
 
-import com.jifenke.lepluslive.score.domain.entities.ScoreA;
-import com.jifenke.lepluslive.score.domain.entities.ScoreADetail;
 import com.jifenke.lepluslive.score.domain.entities.ScoreB;
 import com.jifenke.lepluslive.score.domain.entities.ScoreBDetail;
 
@@ -14,6 +12,6 @@ import java.util.List;
  */
 public interface ScoreBDetailRepository extends JpaRepository<ScoreBDetail,Long>{
 
-  List<ScoreBDetail> findAllByScoreBOrderByDateCreatedDesc(ScoreB scoreB);
+  List<ScoreBDetail> findAllByScoreBOrderByIdDesc(ScoreB scoreB);
 
 }
