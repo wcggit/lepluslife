@@ -36,6 +36,7 @@
         padding: 9px 0 2px 0;
         z-index: 999;
     }
+
     .footer > div {
         float: left;
         width: 25%;
@@ -43,22 +44,26 @@
         font-size: 10px !important;
         color: #666;
     }
+
     .footer > div > div {
         width: 20%;
         margin: 0 auto;
     }
+
     .footer > div:last-child > div {
         width: 17%;
         margin: 0 auto;
     }
+
     .footer img {
         width: 100%;
     }
+
     .footer p {
         margin-top: -4px;
         margin-bottom: -2px !important;
         font-size: 10px !important;
-        color:#666 !important;
+        color: #666 !important;
         font-family: "Microsoft YaHei", tahoma, arial, "Hiragino Sans GB", "\5b8b\4f53", sans-serif !important;
     }
 </style>
@@ -68,7 +73,7 @@
 <div class="mui-content">
     <div class="empty" id="empty" style="display: none">
         <div class="empty-icon"></div>
-        <p class="empty-ttl">您的购物车中没有商品，快去选购吧！</p>
+        <p class="empty-ttl">您的购物车空空如也</p>
         <a class="empty-btn" href="/front/product/weixin/productIndex">去逛逛</a>
     </div>
 
@@ -79,11 +84,15 @@
         <input name="checkbox" value="Item 1" type="checkbox" id="checkboxAll">
 
         <div class="mui-table mui-pull-right">
-            <div class="mui-table-cell mui-col-xs-6">
-                合计：￥<font class="priceSum">0</font>
+            <div class="mui-table-cell mui-col-xs-3" style="font-size: 15px;color:#666;">
+                已选（<font class="orderNum">0</font>）
             </div>
-            <div class="mui-table-cell mui-col-xs-6" id="buy">
-                去下单（<font class="orderNum">0</font>）
+            <div class="mui-table-cell mui-col-xs-5">
+                ￥<font class="priceSum">0</font><span class="minScore"
+                                                      style="font-size: 17px;color:#fb991a;">+<font id="totalScore">0</font>积分</span>
+            </div>
+            <div class="mui-table-cell mui-col-xs-4" id="buy" style="font-size: 15px;">
+                下单
             </div>
         </div>
     </div>
@@ -198,18 +207,21 @@
                     liHtmlStr +=
                     '</div><div class="mui-table-cell mui-col-xs-11 mui-text-left mui-pull-right">';
                     liHtmlStr +=
-                    '<h5 class="mui-ellipsis">' + data[i].product.name + '</h5><h6>规格：<font>'
+                    '<h5 class="mui-ellipsis" style="margin-top: 10px;">' + data[i].product.name
+                    + '</h5><h6 style="color:#999 !important;margin: 8px 0;">规格：<font>'
                     + data[i].productSpec.specDetail + '</font></h6>';
                     liHtmlStr +=
-                    '<p class="chose_right right_all"><button class="btnCut"></button>';
+                    '<p class="chose_right right_all"><span class="order-price mui-pull-left" style="width: 32vw;margin-left: -2%;font-size: 15px">￥<font class="price">'
+                    + toDecimal(data[i].productSpec.minPrice
+                                / 100)
+                    + '</font><span style="font-size: 15px;color:#fb991a;">+<font class="minScore">'
+                    + data[i].productSpec.minScore + '</font>积分</span></span>';
                     liHtmlStr +=
-                    '<input type="number" value="' + data[i].productNumber
+                    '<button class="btnCut"></button><input type="number" value="'
+                    + data[i].productNumber
                     + '" class="num"/><button class="btnAdd"></button>';
                     liHtmlStr +=
-                    '<span class="order-price mui-pull-right">￥<font class="price">'
-                    + toDecimal(data[i].productSpec.price
-                                / 100)
-                    + '<font></span></p><p class="repository">' + data[i].productSpec.repository
+                    '</p><p class="repository">' + data[i].productSpec.repository
                     + '</p>';
                     liHtmlStr += '</div></div></div></div></li>';
                     li.innerHTML = liHtmlStr;
@@ -371,11 +383,12 @@
         }
     }
     var count = 0;
-    var totalPrice = 0;
+    var totalPrice = 0,totalScore = 0;
     var totalProduct = 0;
     function getTotalPrice() {
         count = 0;
         totalPrice = 0;
+        totalScore = 0;
         totalProduct = 0;
         $(".num").each(function () {
             totalProduct += eval($(this).val());
@@ -383,11 +396,14 @@
         $("#cart-number").text(totalProduct);
         $(".checboxOne:checked").each(function (i) {
             var price = $(this).parents('li').find(".price").text();
+            var score = $(this).parents('li').find(".minScore").text();
             var number = $(this).parents('li').find(".num").val();
             totalPrice += toDecimal(price) * number;
+            totalScore += score * number;
             count++;
         });
         $('.priceSum').text(toDecimal(totalPrice));
+        $('#totalScore').text(totalScore);
         $('.orderNum').text(count);
     }
 
@@ -493,7 +509,7 @@
         $(".shade-layer").hide();
         if (warnType == 1) {
             location.href = "/front/order/weixin/orderList";
-        } else if(warnType == 2) {
+        } else if (warnType == 2) {
             location.reload(true);
         }
     });

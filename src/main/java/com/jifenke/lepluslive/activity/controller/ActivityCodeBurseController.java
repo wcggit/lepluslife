@@ -77,21 +77,35 @@ public class ActivityCodeBurseController {
   //分享页面 06/09/02
   @RequestMapping(value = "/share/{id}", method = RequestMethod.GET)
   public ModelAndView sharePage(@PathVariable String id, HttpServletRequest request,
+                                HttpServletResponse response,
                                 Model model) {
     WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
     model.addAttribute("token", id); //记录邀请人的token
     //判断是否有手机号码
     LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
+    int flag = 0;
     if (leJiaUser != null) {
       if (leJiaUser.getPhoneNumber() == null || leJiaUser.getPhoneNumber().equals("")) {
-        model.addAttribute("status", 0);
+        //判断是否被邀请过，防止手机号互相挤掉刷红包
+        flag = activityShareLogService.findLogByLeJiaUser(leJiaUser.getId());
       } else {
-        model.addAttribute("status", 1);
+        flag = 1;
       }
-    } else {
-      model.addAttribute("status", 0);
+      if (flag == 1) {
+        //已被邀请过或有手机号
+        try {
+          response.sendRedirect("/resource/frontRes/activity/share2/register.html");
+          return null;
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
+      //判断是否是自己打开的自己的分享页面
+      if (leJiaUser.getUserSid().equals(id)) {
+        model.addAttribute("self", 1);
+      }
     }
-    return MvUtil.go("/activity/share");
+    return MvUtil.go("/activity/share2");
   }
 
   /**
@@ -106,17 +120,13 @@ public class ActivityCodeBurseController {
   public LejiaResult shareSubmit(@RequestParam String phoneNumber, @RequestParam String token,
                                  HttpServletRequest request) {
     WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
-    LeJiaUser leJiaUser = leJiaUserService.findUserByPhoneNumber(phoneNumber);
-    if (leJiaUser == null) { //手机号是否已注册
-      //给双方派发红包和积分,填充手机号码成为会员，修改邀请人邀请记录(info)并记录shareLog
-      try {
-        activityShareLogService.giveScoreByShare(weiXinUser, token, phoneNumber);
-        return LejiaResult.ok();
-      } catch (Exception e) {
-        return LejiaResult.build(202, "服务器异常");
-      }
-    } else {
-      return LejiaResult.build(201, "手机号已被使用");
+
+    //给双方派发红包和积分,填充手机号码成为会员，修改邀请人邀请记录(info)并记录shareLog
+    try {
+      activityShareLogService.giveScoreByShare(weiXinUser, token, phoneNumber);
+      return LejiaResult.ok();
+    } catch (Exception e) {
+      return LejiaResult.build(202, "服务器异常");
     }
   }
 
@@ -193,7 +203,8 @@ public class ActivityCodeBurseController {
         int
             status =
             scoreAService
-                .giveScoreAByDefault(weiXinUser.getLeJiaUser(), defaultScoreA, "关注送红包", 0, "0_" + defaultScoreA);
+                .giveScoreAByDefault(weiXinUser.getLeJiaUser(), defaultScoreA, "关注送红包", 0,
+                                     "0_" + defaultScoreA);
         //添加参加记录
         if (status == 1) {
           activityJoinLogService.addCodeBurseLogByDefault(weiXinUser, defaultScoreA);

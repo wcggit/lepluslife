@@ -16,10 +16,9 @@ public interface ActivityShareLogRepository extends JpaRepository<ActivityShareL
    * 判断是否被邀请过 16/09/08
    *
    * @param id    被邀请人ID
-   * @param token 邀请人token
    * @return 1=已被邀请过|0=未被邀请过
    */
-  @Query(value = "SELECT id FROM activity_share_log WHERE token=?1 AND be_le_jia_user_id=?2", nativeQuery = true)
-  List<Object[]> findLogByLeJiaUserAndToken(String token, Long id);
+  @Query(value = "SELECT id FROM activity_share_log WHERE  be_le_jia_user_id=?1", nativeQuery = true)
+  List<Object[]> findLogByLeJiaUser(Long id);
 
 }
