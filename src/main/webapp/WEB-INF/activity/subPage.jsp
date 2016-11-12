@@ -350,11 +350,6 @@
         }, function (res) {
             if (res.status != 200) {
                 alert(res.msg);
-                window.clearInterval(timer);
-                $("#sendCode").removeClass("disClick");
-                $('#sendCode').html('<span id="timeb2"></span>重获验证码');
-                $('#sendCode').attr({disabled: false});
-                $('#sendCode').attr('onclick', 'getVerify()');
             }
         });
     }
