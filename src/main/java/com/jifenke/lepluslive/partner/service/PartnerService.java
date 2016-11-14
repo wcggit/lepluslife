@@ -21,6 +21,7 @@ import com.jifenke.lepluslive.score.repository.ScoreARepository;
 import com.jifenke.lepluslive.score.repository.ScoreBDetailRepository;
 import com.jifenke.lepluslive.score.repository.ScoreBRepository;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
+import com.jifenke.lepluslive.weixin.repository.WeiXinUserRepository;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -79,6 +80,9 @@ public class PartnerService {
   @Inject
   private MerchantService merchantService;
 
+  @Inject
+  private WeiXinUserRepository weiXinUserRepository;
+
   private static ReentrantLock lock = new ReentrantLock();
 
 
@@ -112,6 +116,9 @@ public class PartnerService {
           && partnerWallet.getAvailableScoreB() >= valueB) {
         leJiaUser.setPhoneNumber(phoneNumber);
         leJiaUserRepository.save(leJiaUser);
+        weiXinUser.setState(1);
+        weiXinUser.setStateDate(date);
+        weiXinUserRepository.save(weiXinUser);
         //合伙人减,会员加
         String sid = "0_" + partner.getPartnerSid();
         if (valueA > 0) {
@@ -119,6 +126,7 @@ public class PartnerService {
           PartnerScoreLog scoreALog = new PartnerScoreLog();
           scoreALog.setScoreAOrigin(1);
           scoreALog.setDescription("邀请会员送红包");
+          scoreALog.setCreateDate(date);
           scoreALog.setSid(leJiaUser.getUserSid());
           scoreALog.setNumber(-(long) valueA);
           scoreALog.setType(1);
@@ -146,6 +154,7 @@ public class PartnerService {
           scoreBLog.setNumber(-(long) valueB);
           scoreBLog.setDescription("邀请会员送积分");
           scoreBLog.setSid(leJiaUser.getUserSid());
+          scoreBLog.setCreateDate(date);
           scoreBLog.setScoreBOrigin(1);
           scoreBLog.setCreateDate(date);
           partnerScoreLogRepository.save(scoreBLog);
