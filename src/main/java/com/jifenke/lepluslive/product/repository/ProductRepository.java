@@ -40,7 +40,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
   /**
    * 分页获取爆款列表 16/09/21
    */
-  @Query(value = "SELECT p.id,p.name,p.price,p.min_price,p.min_score,p.picture,p.thumb,p.custom_sale,p.sale_num,p.hot_style,p.postage,p.buy_limit,SUM(s.repository) FROM product p,product_spec s WHERE s.product_id=p.id AND p.state=1 AND p.type=2 GROUP BY p.id ORDER BY p.sid ASC LIMIT ?1,?2", nativeQuery = true)
+  @Query(value = "SELECT p.id,p.name,p.price,p.min_price,p.min_score,p.picture,p.thumb,p.custom_sale,p.sale_num,p.hot_style,p.postage,p.buy_limit,SUM(IF (s.state = 1, s.repository, 0)) FROM product p,product_spec s WHERE s.product_id=p.id AND p.state=1 AND p.type=2 GROUP BY p.id ORDER BY p.sid ASC LIMIT ?1,?2", nativeQuery = true)
   List<Object[]> findHotProductListByPage(Integer startNum, Integer pageSize);
 
   @Query(value = "select count(*) from product", nativeQuery = true)

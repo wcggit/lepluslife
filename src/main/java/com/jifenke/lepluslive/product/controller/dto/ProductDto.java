@@ -26,6 +26,8 @@ public class ProductDto {
   private Integer price;
   //最低价
   private Integer minPrice;
+
+  private Integer minScore;
   //库存
   private Integer repository;
   //已售
@@ -141,6 +143,14 @@ public class ProductDto {
 
   public void setMinPrice(Integer minPrice) {
     this.minPrice = minPrice;
+  }
+
+  public Integer getMinScore() {
+    return minScore;
+  }
+
+  public void setMinScore(Integer minScore) {
+    this.minScore = minScore;
   }
 
   public Integer getRepository() {

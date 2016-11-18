@@ -128,6 +128,18 @@ public class MerchantService {
     return map;
   }
 
+  /**
+   * APP商家列表
+   *
+   * @param status    是否获取用户经纬度
+   * @param latitude  纬度
+   * @param longitude 经度
+   * @param page      第几页
+   * @param type      商家类型
+   * @param cityId    城市ID
+   * @param condition 排序方式
+   * @param value     模糊查询(地址和名称)
+   */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public List<Map> findMerchantListByCustomCondition(Integer status, Double latitude,
                                                      Double longitude,
@@ -136,16 +148,16 @@ public class MerchantService {
     String sql = null;
     if (status == 1) {
       sql =
-          "SELECT m.id,m.sid,m.location,m.`name`,m.picture,t.`name` AS tName,mi.star,area.`name` AS aName,m.lj_commission,m.scorearebate,m.partnership,mi.door_picture,ROUND( 6378.138 * 2 * ASIN(SQRT(POW(SIN(("
+          "SELECT m.id,m.sid,m.location,m.`name`,m.picture,t.`name` AS tName,mi.star,area.`name` AS aName,m.lj_commission,m.scorearebate,m.partnership,mi.door_picture,mi.discount,m.scorebrebate,re.import_scorebscale,ROUND( 6378.138 * 2 * ASIN(SQRT(POW(SIN(("
           + latitude + " * PI() / 180 - m.lat * PI() / 180) / 2),2) + COS(" + latitude
           + " * PI() / 180) * COS(m.lat * PI() / 180) * POW(SIN((" + longitude
-          + " * PI() / 180 - m.lng * PI() / 180) / 2),2))) * 1000) AS distance FROM merchant m,merchant_type t,city ci,merchant_info mi,area WHERE m.merchant_type_id = t.id AND m.city_id = ci.id AND m.merchant_info_id=mi.id AND m.area_id=area.id";
+          + " * PI() / 180 - m.lng * PI() / 180) / 2),2))) * 1000) AS distance FROM merchant m INNER JOIN merchant_type t ON m.merchant_type_id = t.id INNER JOIN city ci ON m.city_id = ci.id INNER JOIN merchant_info mi ON m.merchant_info_id = mi.id INNER JOIN area ON m.area_id = area.id LEFT OUTER JOIN merchant_rebate_policy re ON m.id = re.merchant_id";
     } else {
       sql =
-          "SELECT m.id,m.sid,m.location,m.`name`,m.picture,t.`name` AS tName,mi.star,area.`name` AS aName,m.lj_commission,m.scorearebate,m.partnership,mi.door_picture FROM merchant m,merchant_type t,city ci,merchant_info mi,area WHERE m.merchant_type_id = t.id AND m.city_id = ci.id AND m.merchant_info_id=mi.id AND m.area_id=area.id";
+          "SELECT m.id,m.sid,m.location,m.`name`,m.picture,t.`name` AS tName,mi.star,area.`name` AS aName,m.lj_commission,m.scorearebate,m.partnership,mi.door_picture,mi.discount,m.scorebrebate,re.import_scorebscale FROM merchant m INNER JOIN merchant_type t ON m.merchant_type_id = t.id INNER JOIN city ci ON m.city_id = ci.id INNER JOIN merchant_info mi ON m.merchant_info_id = mi.id INNER JOIN area ON m.area_id = area.id LEFT OUTER JOIN merchant_rebate_policy re ON m.id = re.merchant_id";
     }
 
-    sql += " AND m.state = 1";
+    sql += " WHERE m.state = 1";
 
     if (type != null) {
       sql += " AND m.merchant_type_id = " + type;
@@ -160,8 +172,8 @@ public class MerchantService {
     }
 
     if (condition != null) {
-      if (condition == 2) {  //送红包最多
-        sql += " ORDER BY m.lj_commission DESC";
+      if (condition == 2) {  //送积分最多 16/11/17
+        sql += " ORDER BY re.import_scorebscale DESC";
       } else if (condition == 3) { //评价最高
         sql += " ORDER BY mi.star DESC";
       }
@@ -201,13 +213,17 @@ public class MerchantService {
       map.put("aRebate", o[9]);
       map.put("friend", o[10]);
       map.put("doorPic", o[11]);
-      if (o.length > 12) {
-        map.put("distance", o[12]);
+      map.put("discount", o[12]);
+      map.put("normalBScale", o[13]);
+      map.put("importBScale", o[14]);
+      if (o.length > 15) {
+        map.put("distance", o[15]);
       } else {
         map.put("distance", 0);
       }
       mapList.add(map);
     }
+
     return mapList;
   }
 
@@ -272,9 +288,6 @@ public class MerchantService {
 
     Query query = em.createNativeQuery(sql);
     List<Object[]> list = query.getResultList();
-
-//    em.close();
-//    entityManagerFactory.close();
 
     List<MerchantDto> dtoList = new ArrayList<>();
     for (Object[] o : list) {
