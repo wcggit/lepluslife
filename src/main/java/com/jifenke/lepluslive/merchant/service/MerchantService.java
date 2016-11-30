@@ -302,7 +302,7 @@ public class MerchantService {
       merchantDto.setLat(Double.parseDouble(String.valueOf(o[7])));
       merchantDto.setTypeName(String.valueOf(o[8]));
       merchantDto.setCityName(String.valueOf(o[9]));
-      merchantDto.setStar(new BigDecimal(String.valueOf(o[10])));
+      merchantDto.setStar(new BigDecimal(String.valueOf(o[10] == null ? 5 : o[10])));
       merchantDto.setAreaName(String.valueOf(o[11]));
       if (o.length > 12) {
         merchantDto.setDistance(o[12] != null ? Double.valueOf(o[12].toString()) : null);

@@ -180,6 +180,7 @@ public class SwaggerConfig {
         .build()
         .apiInfo(bannerApiInfo());
   }
+
   @Bean
   public Docket inviteApi() {
     return new Docket(DocumentationType.SWAGGER_2)
@@ -192,6 +193,34 @@ public class SwaggerConfig {
         .paths(or(regex("/app/invite/.*")))
         .build()
         .apiInfo(inviteApiInfo());
+  }
+
+  @Bean
+  public Docket bankCardApi() {
+    return new Docket(DocumentationType.SWAGGER_2)
+        .groupName("用户银行卡号相关接口")
+        .genericModelSubstitutes(DeferredResult.class)
+        .useDefaultResponseMessages(false)
+        .forCodeGeneration(true)
+        .pathMapping("/")
+        .select()
+        .paths(or(regex("/front/user/.*")))
+        .build()
+        .apiInfo(bankCardApiInfo());
+  }
+
+  @Bean
+  public Docket couponApi() {
+    return new Docket(DocumentationType.SWAGGER_2)
+        .groupName("优惠券相关接口")
+        .genericModelSubstitutes(DeferredResult.class)
+        .useDefaultResponseMessages(false)
+        .forCodeGeneration(true)
+        .pathMapping("/")
+        .select()
+        .paths(or(regex("/front/coupon/.*")))
+        .build()
+        .apiInfo(couponApiInfo());
   }
 
 
@@ -348,6 +377,7 @@ public class SwaggerConfig {
 
     return apiInfo;
   }
+
   private ApiInfo inviteApiInfo() {
     ApiInfo apiInfo = new ApiInfo("各种轮播图",//大标题
                                   "EHR Platform's REST API, all the applications could access the Object model data via JSON.",
@@ -360,6 +390,28 @@ public class SwaggerConfig {
     );
 
     return apiInfo;
+  }
+
+  private ApiInfo bankCardApiInfo() {
+    return new ApiInfo("用户银行卡号相关接口",//大标题
+                       "EHR Platform's REST API, all the applications could access the Object model data via JSON.",
+                       "0.1",//版本
+                       "NO terms of service",
+                       "zhangwenit@126.com",//作者
+                       "The Apache License, Version 2.0",//链接显示文字
+                       "http://www.apache.org/licenses/LICENSE-2.0.html"//网站链接
+    );
+  }
+
+  private ApiInfo couponApiInfo() {
+    return new ApiInfo("优惠券相关接口",//大标题
+                       "EHR Platform's REST API, all the applications could access the Object model data via JSON.",
+                       "0.1",//版本
+                       "NO terms of service",
+                       "zhangwenit@126.com",//作者
+                       "The Apache License, Version 2.0",//链接显示文字
+                       "http://www.apache.org/licenses/LICENSE-2.0.html"//网站链接
+    );
   }
 
   /** * SpringBoot默认已经将classpath:/META-INF/resources/和classpath:/META-INF/resources/webjars/映射 * 所以该方法不需要重写，如果在SpringMVC中，可能需要重写定义（我没有尝试） * 重写该方法需要 extends WebMvcConfigurerAdapter * */

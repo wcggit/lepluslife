@@ -18,9 +18,7 @@ public interface WeiXinUserRepository extends JpaRepository<WeiXinUser,Long> {
   @QueryHints({ @QueryHint(name = "org.hibernate.cacheable", value ="true") })
   List<WeiXinUser> findByOpenId(String openId);
 
-  @QueryHints({ @QueryHint(name = "org.hibernate.cacheable", value ="true") })
   WeiXinUser findByUnionId(String unionId);
 
-  @QueryHints({ @QueryHint(name = "org.hibernate.cacheable", value ="true") })
   WeiXinUser findByLeJiaUser(LeJiaUser leJiaUser);
 }
