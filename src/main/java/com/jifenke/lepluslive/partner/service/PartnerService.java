@@ -208,7 +208,7 @@ public class PartnerService {
       long partnerUserLimit = leJiaUserRepository.countPartnerBindLeJiaUser(partner.getId());
       LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
       boolean flag = true;
-      if (!leJiaUser.getBindPartner().getId().equals(partner.getId())) { //未绑上
+      if (leJiaUser.getBindPartner()==null||!leJiaUser.getBindPartner().getId().equals(partner.getId())) { //未绑上
         if (partner.getUserLimit() > partnerUserLimit) {
           Merchant
               merchant =
