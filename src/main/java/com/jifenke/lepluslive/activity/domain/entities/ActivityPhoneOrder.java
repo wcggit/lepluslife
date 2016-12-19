@@ -70,6 +70,8 @@ public class ActivityPhoneOrder {
 
   private String message;   //第三方回调充值失败原因
 
+  private Integer platform = 1;  //1=正常充值|2=充值失败后补交充值|3=其他平台手动充值
+
   public String getId() {
     return id;
   }
@@ -112,6 +114,14 @@ public class ActivityPhoneOrder {
 
   public ActivityPhoneRule getPhoneRule() {
     return phoneRule;
+  }
+
+  public Integer getPlatform() {
+    return platform;
+  }
+
+  public void setPlatform(Integer platform) {
+    this.platform = platform;
   }
 
   public void setPhoneRule(ActivityPhoneRule phoneRule) {

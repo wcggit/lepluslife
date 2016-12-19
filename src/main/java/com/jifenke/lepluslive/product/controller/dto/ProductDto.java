@@ -57,6 +57,8 @@ public class ProductDto {
 
   private Integer freePrice = 0;  //不包邮时，满此价格包邮，针对普通商品
 
+  private Integer markType;  //商品角标
+
   public Integer getFreePrice() {
     return freePrice;
   }
@@ -119,6 +121,14 @@ public class ProductDto {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  public Integer getMarkType() {
+    return markType;
+  }
+
+  public void setMarkType(Integer markType) {
+    this.markType = markType;
   }
 
   public String getPicture() {

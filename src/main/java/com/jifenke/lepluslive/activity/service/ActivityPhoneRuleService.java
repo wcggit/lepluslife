@@ -38,7 +38,15 @@ public class ActivityPhoneRuleService {
   }
 
   /**
-   * 特惠产品支付成功减库存 16/10/31
+   * APP获取所有上线话费产品 16/12/07
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+  public List<ActivityPhoneRule> findAllOrderByScoreDescWorthDesc() {
+    return repository.findByStateOrderByScoreDescWorthDesc(1);
+  }
+
+  /**
+   * 特惠或非特惠限量产品支付成功减库存 16/10/31
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public synchronized void reduceRepository(ActivityPhoneRule rule) throws Exception {
