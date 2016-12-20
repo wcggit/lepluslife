@@ -181,6 +181,7 @@ public class ActivityShareLogService {
       activityShareLogRepository.save(shareLog);
     } catch (Exception e) {
       e.printStackTrace();
+      throw new RuntimeException();
     }
   }
 }

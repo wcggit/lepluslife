@@ -17,8 +17,8 @@ public interface MerchantCouponRepository extends JpaRepository<MerchantCoupon, 
    *
    * @param merchantId 商户ID
    */
-  @Query(value = "SELECT * FROM merchant_coupon WHERE merchant_id = ?1 AND state = 1 ORDER BY sid DESC", nativeQuery = true)
-  List<MerchantCoupon> findByMerchantOrderBySidDesc(Long merchantId);
+  @Query(value = "SELECT id,begin_date,end_date,describe1,describe2,title,pay_type,scoreb,merchant_name,picture FROM merchant_coupon WHERE merchant_id = ?1 AND state = 1 ORDER BY sid DESC", nativeQuery = true)
+  List<Object[]> findByMerchantOrderBySidDesc(Long merchantId);
 
   /**
    * 分页查询附近商户的有效优惠券列表  2016/11/30
@@ -29,7 +29,7 @@ public interface MerchantCouponRepository extends JpaRepository<MerchantCoupon, 
    * @param startNum 起始记录
    * @param pageSize 每页显示条数
    */
-  @Query(value = "SELECT c.* FROM merchant_coupon c INNER JOIN (SELECT id,ROUND(ASIN(SQRT(POW(SIN((?1 * PI() / 180 - m.lat * PI() / 180) / 2),2) + COS(?1 * PI() / 180) * COS(m.lat * PI() / 180) * POW(SIN((?2 * PI() / 180 - m.lng * PI() / 180) / 2),2))) * 1000000) AS distance FROM merchant m WHERE city_id = ?3) mm ON c.merchant_id = mm.id WHERE c.state = 1 ORDER BY mm.distance ASC,c.sid DESC LIMIT ?4,?5", nativeQuery = true)
-  List<MerchantCoupon> findByDistance(Double lat, Double lng, Long cityId, Integer startNum,
-                                      Integer pageSize);
+  @Query(value = "SELECT c.id,c.begin_date,c.end_date,c.describe1,c.describe2,c.title,c.pay_type,c.scoreb,c.merchant_name,c.picture FROM merchant_coupon c INNER JOIN (SELECT id,ROUND(ASIN(SQRT(POW(SIN((?1 * PI() / 180 - m.lat * PI() / 180) / 2),2) + COS(?1 * PI() / 180) * COS(m.lat * PI() / 180) * POW(SIN((?2 * PI() / 180 - m.lng * PI() / 180) / 2),2))) * 1000000) AS distance FROM merchant m WHERE city_id = ?3) mm ON c.merchant_id = mm.id WHERE c.state = 1 ORDER BY mm.distance ASC,c.sid DESC LIMIT ?4,?5", nativeQuery = true)
+  List<Object[]> findByDistance(Double lat, Double lng, Long cityId, Integer startNum,
+                                Integer pageSize);
 }

@@ -18,4 +18,11 @@ public interface ActivityPhoneRuleRepository extends JpaRepository<ActivityPhone
    */
   List<ActivityPhoneRule> findByState(Integer state);
 
+  /**
+   * APP获取所有上线话费产品  16/12/07
+   *
+   * @param state 产品状态
+   */
+  List<ActivityPhoneRule> findByStateOrderByScoreDescWorthDesc(Integer state);
+
 }

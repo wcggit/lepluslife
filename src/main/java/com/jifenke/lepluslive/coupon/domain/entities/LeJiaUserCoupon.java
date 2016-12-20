@@ -7,6 +7,7 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -26,7 +27,7 @@ public class LeJiaUserCoupon {
   private Long id;
 
   @NotNull
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JsonIgnore
   private LeJiaUser leJiaUser;
 
@@ -44,15 +45,13 @@ public class LeJiaUserCoupon {
 
   private Integer state = 1;   //状态 1=待使用|2=已使用|3=已过期
 
-  private Integer payType = 0;   //领取方式 0=免费领取|1=纯积分|2=存现金|3=积分+现金
-
-  private Integer useMoney = 0;  //领取消耗金额 单位/分
-
-  private Integer useScore = 0;  //领取消耗积分
-
   private Date createDate = new Date();   //创建及领取时间
 
   private Date useDate;  //使用时间
+
+  private Integer payType = 0;   //领取方式 0=免费领取|1=纯积分
+
+  private Integer useScore = 0;  //领取消耗积分
 
   public Long getId() {
     return id;
@@ -124,14 +123,6 @@ public class LeJiaUserCoupon {
 
   public void setPayType(Integer payType) {
     this.payType = payType;
-  }
-
-  public Integer getUseMoney() {
-    return useMoney;
-  }
-
-  public void setUseMoney(Integer useMoney) {
-    this.useMoney = useMoney;
   }
 
   public Integer getUseScore() {

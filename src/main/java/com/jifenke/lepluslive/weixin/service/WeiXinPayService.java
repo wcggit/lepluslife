@@ -102,6 +102,32 @@ public class WeiXinPayService {
   }
 
   /**
+   * 封装app订单参数  2016/12/13
+   */
+  @Transactional(readOnly = true)
+  public SortedMap<Object, Object> buildAPPOrderParams(HttpServletRequest request, String body,
+                                                       String orderSid, String truePrice,
+                                                       String notifyUrl) {
+    SortedMap<Object, Object> orderParams = new TreeMap<Object, Object>();
+    orderParams.put("appid", _appId);
+    orderParams.put("mch_id", _mchId);
+    orderParams.put("nonce_str", MvUtil.getRandomStr());
+    orderParams.put("body", body);
+    orderParams.put("out_trade_no", orderSid);
+    orderParams.put("fee_type", "CNY");
+    orderParams.put("total_fee", truePrice);
+//    orderParams.put("total_fee", "1");
+    orderParams.put("spbill_create_ip", getIpAddr(request));
+    orderParams.put("notify_url", notifyUrl);
+    orderParams.put("trade_type", "APP");
+    orderParams.put("input_charset", "UTF-8");
+    String sign = createSign("UTF-8", orderParams, _mchKey);
+    orderParams.put("sign", sign);
+    return orderParams;
+  }
+
+
+  /**
    * APP支付封装订单参数
    */
   @Transactional(readOnly = true)

@@ -73,6 +73,9 @@ public class ProductController {
           ProductDto productDto = new ProductDto();
           try {
             BeanUtils.copyProperties(productDto, product);
+
+            productDto.setMarkType(product.getMark() == null ? 0 : product.getMark().getType());
+
           } catch (IllegalAccessException e) {
             e.printStackTrace();
           } catch (InvocationTargetException e) {
