@@ -39,6 +39,8 @@ public class MerchantCoupon {
 
   private String merchantName;  //商户名称
 
+  private String picture;  //优惠券图片，暂用商家小图
+
   @Column(nullable = false)
   private Date beginDate;  //有效期起始时间 例:2016/11/24 00:00:00表示生效于2016/11/24
 
@@ -61,9 +63,7 @@ public class MerchantCoupon {
 
   private Integer getNum = 0;  //已领取人数
 
-  private Integer payType = 0;   //支付方式 0=免费领取|1=纯积分|2=存现金|3=积分+现金
-
-  private Integer price = 0;  //所需金额 单位/分
+  private Integer payType = 0;   //支付方式 0=免费领取|1=纯积分
 
   private Integer scoreB = 0;  //所需积分
 
@@ -88,6 +88,14 @@ public class MerchantCoupon {
 
   public void setMerchant(Merchant merchant) {
     this.merchant = merchant;
+  }
+
+  public String getPicture() {
+    return picture;
+  }
+
+  public void setPicture(String picture) {
+    this.picture = picture;
   }
 
   public Category getCouponType() {
@@ -176,14 +184,6 @@ public class MerchantCoupon {
 
   public void setPayType(Integer payType) {
     this.payType = payType;
-  }
-
-  public Integer getPrice() {
-    return price;
-  }
-
-  public void setPrice(Integer price) {
-    this.price = price;
   }
 
   public Integer getScoreB() {

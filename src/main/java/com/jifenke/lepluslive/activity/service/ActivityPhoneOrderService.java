@@ -7,6 +7,7 @@ import com.jifenke.lepluslive.global.util.DateUtils;
 import com.jifenke.lepluslive.global.util.MD5Util;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.order.domain.entities.PayOrigin;
+import com.jifenke.lepluslive.score.domain.entities.ScoreB;
 import com.jifenke.lepluslive.score.service.ScoreAService;
 import com.jifenke.lepluslive.score.service.ScoreBService;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
@@ -192,20 +193,21 @@ public class ActivityPhoneOrderService {
   /**
    * 生成话费订单   16/10/28
    *
-   * @param ruleId     话费产品ID
-   * @param weiXinUser 购买用户
-   * @param phone      充值手机号码
+   * @param ruleId   话费产品ID
+   * @param user     购买用户
+   * @param phone    充值手机号码
+   * @param payWayId 5=公众号|1=APP
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public Map<Object, Object> createPhoneOrder(Long ruleId, WeiXinUser weiXinUser, String phone,
+  public Map<Object, Object> createPhoneOrder(Long ruleId, LeJiaUser user, String phone,
                                               Long payWayId)
       throws Exception {
     Map<Object, Object> result = new HashMap<>();
     ActivityPhoneRule rule = ruleService.findById(ruleId);
-    if (rule == null || weiXinUser == null) {
+    ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(user);
+    if (rule == null || user == null || scoreB == null) {
       throw new RuntimeException();
     }
-    LeJiaUser user = weiXinUser.getLeJiaUser();
     //检测当前用户是否可以下单
     Map<Object, Object> check = checkCreate(rule, user);
     if (check.get("status") != null) {
@@ -218,8 +220,15 @@ public class ActivityPhoneOrderService {
       order.setPhoneRule(rule);
       order.setPhone(phone);
       order.setLeJiaUser(user);
-      order.setTruePrice(rule.getPrice());
-      order.setTrueScoreB(rule.getScore());
+      //积分不足时，以1积分=1元钱兑换
+      if (scoreB.getScore() < rule.getScore().longValue()) {
+        order.setTrueScoreB(scoreB.getScore().intValue());
+        Long extra = (rule.getScore().longValue() - scoreB.getScore()) * 100;
+        order.setTruePrice(rule.getPrice() + extra.intValue());
+      } else {
+        order.setTruePrice(rule.getPrice());
+        order.setTrueScoreB(rule.getScore());
+      }
       order.setPayOrigin(new PayOrigin(payWayId));
       if (rule.getCheap() == 1) {
         order.setCheap(1);
@@ -253,12 +262,14 @@ public class ActivityPhoneOrderService {
       return result;
     }
     String[] o = dictionaryService.findDictionaryById(48L).getValue().split("_");
-    Integer worth = Integer.valueOf(o[0]);
-    Integer todayUsedWorth = repository.todayUsedWorth();
-    if (worth < (todayUsedWorth == null ? 0 : todayUsedWorth) + rule.getWorth()) {//话费池已满
-      result.put("status", 1001);
-      return result;
-    }
+    //以下是判断当日话费池，暂不使用
+//    Integer worth = Integer.valueOf(o[0]);
+//    Integer todayUsedWorth = repository.todayUsedWorth();
+//    if (worth < (todayUsedWorth == null ? 0 : todayUsedWorth) + rule.getWorth()) {//话费池已满
+//      result.put("status", 1001);
+//      return result;
+//    }
+
     if (rule.getCheap() == 1) {//特惠
       if (rule.getRepository() < 1) {//库存不足
         result.put("status", 1002);
@@ -275,6 +286,12 @@ public class ActivityPhoneOrderService {
         return result;
       }
     } else {//非特惠
+      if (rule.getRepositoryLimit() == 1) {//有库存限制
+        if (rule.getRepository() < 1) {//库存不足
+          result.put("status", 1002);
+          return result;
+        }
+      }
       if (rule.getTotalLimit() != 0) { //有累计购买限制
         Integer totalLimit = repository.countByPhoneRuleAndLeJiaUserAndPayState(rule, user, 1);
         if (totalLimit >= rule.getTotalLimit()) { //累计购买超限
@@ -319,8 +336,8 @@ public class ActivityPhoneOrderService {
         if (way == 1) {
           payLogService.savePayLog(orderSid, "PhoneOrder");
         }
-        //如果是限购商品，减库存
-        if (order.getCheap() == 1) {
+        //如果是限购商品，或不是限购,但又库存限制，减库存
+        if (order.getCheap() == 1 || order.getPhoneRule().getRepositoryLimit() == 1) {
           ruleService.reduceRepository(order.getPhoneRule());
         }
 

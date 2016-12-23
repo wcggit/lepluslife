@@ -32,6 +32,22 @@ public class CityService {
     return cityRepository.findAll(pageable).getContent();
   }
 
+  /**
+   * 获取所有的城市列表  2016/12/21
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+  public List<City> findAllCity() {
+    return cityRepository.findAll();
+  }
+
+  /**
+   * 获取热门城市列表  2016/12/21
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+  public List<City> findHotCity() {
+    return cityRepository.findByHotOrderBySidDesc(1);
+  }
+
   public City findCityById(Long id) {
 
     City city = cityRepository.findOne(id);
@@ -46,28 +62,6 @@ public class CityService {
       return cityList.get(0);
     }
     return null;
-  }
-
-  public void createCity(City city) {
-    if (city.getId() != null) {
-      throw new RuntimeException("新建城市ID不为null");
-    }
-    cityRepository.save(city);
-  }
-
-  public void editCity(City city) {
-    City cityOri = cityRepository.findOne(city.getId());
-    if (cityOri == null) {
-      throw new RuntimeException("不存在的商户");
-    }
-    cityOri.setName(city.getName());
-    cityOri.setSid(city.getSid());
-
-    cityRepository.save(cityOri);
-  }
-
-  public void deleteCity(Long id) {
-    cityRepository.delete(id);
   }
 
   /**

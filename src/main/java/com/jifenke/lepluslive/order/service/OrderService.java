@@ -214,6 +214,11 @@ public class OrderService {
     Long singleSpecTotalPrice = 0L; //某种产品的邮费
     Map<Object, Long[]> postageList = new HashMap<>();
     for (CartDetailDto cartDetailDto : cartDetailDtos) {
+      Integer number = cartDetailDto.getProductNumber();
+      if (number == null || number < 1) {
+        result.put("status", 5011); //购买数量不能小于1
+        break;
+      }
       OrderDetail orderDetail = new OrderDetail();
       Product product = productService.findOneProduct(cartDetailDto.getProduct().getId());
       ProductSpec productSpec = productService.editProductSpecRepository(

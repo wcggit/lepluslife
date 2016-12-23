@@ -323,9 +323,17 @@ public class LeJiaUserController {
   @RequestMapping(value = "/checkLogin", method = RequestMethod.GET)
   public
   @ResponseBody
-  LejiaResult checkLogin() {
-    String checkLogin = dictionaryService.findDictionaryById(40L).getValue();
-    return LejiaResult.build(200, "", checkLogin);
+  LejiaResult checkLogin(@RequestParam(required = false) Integer state) {
+    String[] s = dictionaryService.findDictionaryById(40L).getValue().split("_");
+    if (state != null) {
+      if (state > Integer.valueOf(s[2])) { //审核中版本
+        return LejiaResult.build(200, "", s[1]);
+      } else {
+        return LejiaResult.build(200, "", s[0]);
+      }
+    } else {
+      return LejiaResult.build(200, "", s[0]);
+    }
   }
 
 }

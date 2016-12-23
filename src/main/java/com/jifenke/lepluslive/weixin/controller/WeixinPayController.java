@@ -96,7 +96,7 @@ public class WeixinPayController {
     WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
     Map<Object, Object> result = null;
     try {
-      result = phoneOrderService.createPhoneOrder(ruleId, weiXinUser, phone, 5L);
+      result = phoneOrderService.createPhoneOrder(ruleId, weiXinUser.getLeJiaUser(), phone, 5L);
     } catch (Exception e) {
       e.printStackTrace();
       return LejiaResult.build(500, "出现未知错误,请联系管理员或稍后重试");
@@ -181,8 +181,7 @@ public class WeixinPayController {
   }
 
   @RequestMapping(value = "/phoneSuccess/{orderId}", method = RequestMethod.GET)
-  public ModelAndView phoneSuccessPage(@PathVariable String orderId, Model model,
-                                       HttpServletRequest request) {
+  public ModelAndView phoneSuccessPage(@PathVariable String orderId, Model model) {
 
     model.addAttribute("order", phoneOrderService.findByOrderId(orderId));
 

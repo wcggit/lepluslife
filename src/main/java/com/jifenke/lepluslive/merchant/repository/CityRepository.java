@@ -16,4 +16,6 @@ public interface CityRepository extends JpaRepository<City, Long> {
   Page<City> findAll(Pageable pageable);
 
   List<City> findByName(String name);
+
+  List<City> findByHotOrderBySidDesc(Integer hot);
 }

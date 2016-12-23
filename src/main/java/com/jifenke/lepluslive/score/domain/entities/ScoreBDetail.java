@@ -9,7 +9,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 /**
@@ -25,16 +24,15 @@ public class ScoreBDetail {
 
 
   private Long number;
-  private String operate;
+  private String operate; //积分变动描述
   private Date dateCreated = new Date();
 
   @ManyToOne
   @JsonIgnore
   private ScoreB scoreB;
 
-
   private Integer origin;  //1=线上返还  2=线上消费  3=线下消费  4=线下返还  6=运动   7=摇一摇  8=APP分享
-  // 9=线下支付完成页注册会员  10=合伙人发福利  11=临时活动  13=充话费消耗
+  // 9=线下支付完成页注册会员  10=合伙人发福利  11=临时活动  13=充话费消耗   15001=领取优惠券消耗
 
   private String orderSid;  //对应的订单号
 
