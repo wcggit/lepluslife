@@ -64,8 +64,7 @@ public class BannerService {
   }
 
   /**
-   * 首页，臻品轮播，新品首发
-   *
+   * 9=首页轮播图,10=首页好店推荐,11=首页臻品推荐
    * @param bannerCriteria
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
@@ -80,8 +79,6 @@ public class BannerService {
     if (listb.size()>0){
       for (Banner b : listb){
         Map<String, Object> map = new HashMap<>();
-//        System.out.println(b.getBannerType()+"---"+b.getSid()+"---"+b.getPicture()+"---"+b.getAfterType());
-        map.put("bannerType", b.getBannerType());
         map.put("sid", b.getSid());
         map.put("picture", b.getPicture());
         map.put("afterType", b.getAfterType());
@@ -89,16 +86,12 @@ public class BannerService {
         map.put("urlTitle", b.getUrlTitle()==null ? "" : b.getUrlTitle());
         map.put("introduce", b.getIntroduce()==null ? "" : b.getIntroduce());
         if (b.getMerchant() != null){
-          map.put("merchantSid", b.getMerchant().getMerchantSid()==null ? "" : b.getMerchant().getMerchantSid());
+          map.put("merchantId", b.getMerchant().getId()==null ? "" : b.getMerchant().getId());
           map.put("merchantName", b.getMerchant().getName()==null ? "" : b.getMerchant().getName());
-          map.put("merchantPicture", b.getMerchant().getPicture()==null ? "" : b.getMerchant().getPicture());
         }
         if (b.getProduct() != null){
           map.put("productId", b.getProduct().getId()==null ? "" : b.getProduct().getId());
           map.put("productName", b.getProduct().getName()==null ? "" : b.getProduct().getName());
-          map.put("productDescription", b.getProduct().getDescription()==null ? "" : b.getProduct().getDescription());
-          map.put("productPicture", b.getProduct().getPicture()==null ? "" : b.getProduct().getPicture());
-          map.put("productThumb", b.getProduct().getThumb()==null ? "" : b.getProduct().getThumb());
           map.put("productPrice", b.getProduct().getPrice()==null ? "" : b.getProduct().getPrice()/100.0);
           map.put("productPriceTure", b.getProduct().getMinPrice()==null ? "" : b.getProduct().getMinPrice()/100.0);
           map.put("productScore", b.getProduct().getPrice()!=null && b.getProduct().getMinPrice()!=null ? (b.getProduct().getPrice()-b.getProduct().getMinPrice())/100.0 : "");
@@ -124,11 +117,6 @@ public class BannerService {
           predicate.getExpressions().add(
               cb.equal(r.get("status"), criteria.getStatus()));
         }
-//        if (criteria.getCity() != null) {
-//          predicate.getExpressions().add(
-//              cb.equal(r.get("merchant").get("city"),
-//                       new City(criteria.getCity())));
-//        }
         if (criteria.getStartDate() != null && (!"".equals(criteria.getStartDate()))) {
           predicate.getExpressions().add(
               cb.between(r.get("createDate"), new Date(criteria.getStartDate()),

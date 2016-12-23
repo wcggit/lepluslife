@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -42,13 +43,17 @@ public class BannerController {
   @ApiOperation(value = "9=首页轮播图,10=首页好店推荐,11=首页臻品推荐")
   @RequestMapping(value = "/homePage/{id}", method = RequestMethod.GET)
   public LejiaResult homePage(@PathVariable Integer id) {
+    List<Map> list = new ArrayList<>();
+    if (id == 9) {
+      list = bannerService.findByType123(id);
+    }else if (id==10 || id==11){
+      BannerCriteria bc = new BannerCriteria();
+      bc.setType(id);//bannerType
+      bc.setStatus(1);//状态   1=正常  0=下架
+      bc.setOffset(1);//起始页
+      list = bannerService.findHomePageByType(bc);
+    }
 
-    BannerCriteria bc = new BannerCriteria();
-    bc.setType(id);//bannerType
-    bc.setStatus(1);//状态   1=正常  0=下架
-    bc.setPageSize(3);//每页数量
-    bc.setOffset(1);//起始页
-    List<Map> list = bannerService.findHomePageByType(bc);
     return LejiaResult.ok(list);
   }
 
