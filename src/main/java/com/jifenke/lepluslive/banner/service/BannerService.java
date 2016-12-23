@@ -5,7 +5,9 @@ import com.jifenke.lepluslive.banner.domain.entities.Banner;
 import com.jifenke.lepluslive.banner.domain.entities.BannerType;
 import com.jifenke.lepluslive.banner.repository.BannerRepository;
 import com.jifenke.lepluslive.merchant.domain.entities.City;
+import com.jifenke.lepluslive.merchant.domain.entities.Merchant;
 import com.jifenke.lepluslive.merchant.service.CityService;
+import com.jifenke.lepluslive.product.domain.entities.Product;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -85,16 +87,18 @@ public class BannerService {
         map.put("url", b.getUrl()==null ? "" : b.getUrl());
         map.put("urlTitle", b.getUrlTitle()==null ? "" : b.getUrlTitle());
         map.put("introduce", b.getIntroduce()==null ? "" : b.getIntroduce());
-        if (b.getMerchant() != null){
-          map.put("merchantId", b.getMerchant().getId()==null ? "" : b.getMerchant().getId());
-          map.put("merchantName", b.getMerchant().getName()==null ? "" : b.getMerchant().getName());
+        Merchant merchant = b.getMerchant();
+        if (merchant != null){
+          map.put("merchantId", merchant.getId() == null ? "" : merchant.getId());
+          map.put("merchantName", merchant.getName()==null ? "" : merchant.getName());
         }
-        if (b.getProduct() != null){
-          map.put("productId", b.getProduct().getId()==null ? "" : b.getProduct().getId());
-          map.put("productName", b.getProduct().getName()==null ? "" : b.getProduct().getName());
-          map.put("productPrice", b.getProduct().getPrice()==null ? "" : b.getProduct().getPrice()/100.0);
-          map.put("productPriceTure", b.getProduct().getMinPrice()==null ? "" : b.getProduct().getMinPrice()/100.0);
-          map.put("productScore", b.getProduct().getPrice()!=null && b.getProduct().getMinPrice()!=null ? (b.getProduct().getPrice()-b.getProduct().getMinPrice())/100.0 : "");
+        Product product = b.getProduct();
+        if (product != null){
+          map.put("productId", product.getId()==null ? "" : product.getId());
+          map.put("productName", product.getName()==null ? "" : product.getName());
+          map.put("productPrice", product.getPrice()==null ? "" : product.getPrice()/100.0);
+          map.put("productPriceTure", product.getMinPrice()==null ? "" : product.getMinPrice()/100.0);
+          map.put("productScore", product.getPrice()!=null && product.getMinPrice()!=null ? (product.getPrice()-product.getMinPrice())/100.0 : "");
         }
         mapList.add(map);
       }
@@ -113,15 +117,8 @@ public class BannerService {
           predicate.getExpressions().add(
               cb.equal(r.<BannerType>get("bannerType").get("id"), criteria.getType()));
         }
-        if (criteria.getStatus() != null) {   //上架、下架
-          predicate.getExpressions().add(
-              cb.equal(r.get("status"), criteria.getStatus()));
-        }
-        if (criteria.getStartDate() != null && (!"".equals(criteria.getStartDate()))) {
-          predicate.getExpressions().add(
-              cb.between(r.get("createDate"), new Date(criteria.getStartDate()),
-                         new Date(criteria.getEndDate())));
-        }
+        predicate.getExpressions().add(//1上架、0下架
+              cb.equal(r.get("status"), 1));
 
         return predicate;
       }

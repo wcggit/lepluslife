@@ -49,7 +49,6 @@ public class BannerController {
     }else if (id==10 || id==11){
       BannerCriteria bc = new BannerCriteria();
       bc.setType(id);//bannerType
-      bc.setStatus(1);//状态   1=正常  0=下架
       bc.setOffset(1);//起始页
       list = bannerService.findHomePageByType(bc);
     }
