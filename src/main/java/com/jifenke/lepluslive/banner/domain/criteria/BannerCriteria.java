@@ -16,6 +16,15 @@ public class BannerCriteria {
   private String startDate;
 
   private String endDate;
+  private Integer pageSize = 10;//每页size
+
+  public Integer getPageSize() {
+    return pageSize;
+  }
+
+  public void setPageSize(Integer pageSize) {
+    this.pageSize = pageSize;
+  }
 
   public Integer getType() {
     return type;

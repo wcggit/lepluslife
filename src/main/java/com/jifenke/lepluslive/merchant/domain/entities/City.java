@@ -30,6 +30,7 @@ public class City {
   @JsonIgnore
   private Integer hot;  //是否是热门城市
 
+
   public Long getId() {
     return id;
   }
