@@ -1,20 +1,31 @@
 package com.jifenke.lepluslive.banner.service;
 
+import com.jifenke.lepluslive.banner.domain.criteria.BannerCriteria;
 import com.jifenke.lepluslive.banner.domain.entities.Banner;
+import com.jifenke.lepluslive.banner.domain.entities.BannerType;
 import com.jifenke.lepluslive.banner.repository.BannerRepository;
 import com.jifenke.lepluslive.merchant.domain.entities.City;
 import com.jifenke.lepluslive.merchant.service.CityService;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 /**
  * app广告轮播 Created by zhangwen on 16/8/26.
@@ -50,6 +61,83 @@ public class BannerService {
       mapList.add(map);
     }
     return mapList;
+  }
+
+  /**
+   * 首页，臻品轮播，新品首发
+   *
+   * @param bannerCriteria
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+  public List<Map> findHomePageByType(BannerCriteria bannerCriteria) {
+    List<Map> mapList = new ArrayList<>();
+
+    Sort sort = new Sort(Sort.Direction.ASC, "sid");
+    Page page = bannerRepository.findAll(getWhereClause(bannerCriteria),
+                                    new PageRequest(bannerCriteria.getOffset() - 1,
+                                                    bannerCriteria.getPageSize(), sort));
+    List<Banner> listb = page.getContent();
+    if (listb.size()>0){
+      for (Banner b : listb){
+        Map<String, Object> map = new HashMap<>();
+//        System.out.println(b.getBannerType()+"---"+b.getSid()+"---"+b.getPicture()+"---"+b.getAfterType());
+        map.put("bannerType", b.getBannerType());
+        map.put("sid", b.getSid());
+        map.put("picture", b.getPicture());
+        map.put("afterType", b.getAfterType());
+        map.put("url", b.getUrl()==null ? "" : b.getUrl());
+        map.put("urlTitle", b.getUrlTitle()==null ? "" : b.getUrlTitle());
+        map.put("introduce", b.getIntroduce()==null ? "" : b.getIntroduce());
+        if (b.getMerchant() != null){
+          map.put("merchantSid", b.getMerchant().getMerchantSid()==null ? "" : b.getMerchant().getMerchantSid());
+          map.put("merchantName", b.getMerchant().getName()==null ? "" : b.getMerchant().getName());
+          map.put("merchantPicture", b.getMerchant().getPicture()==null ? "" : b.getMerchant().getPicture());
+        }
+        if (b.getProduct() != null){
+          map.put("productId", b.getProduct().getId()==null ? "" : b.getProduct().getId());
+          map.put("productName", b.getProduct().getName()==null ? "" : b.getProduct().getName());
+          map.put("productDescription", b.getProduct().getDescription()==null ? "" : b.getProduct().getDescription());
+          map.put("productPicture", b.getProduct().getPicture()==null ? "" : b.getProduct().getPicture());
+          map.put("productThumb", b.getProduct().getThumb()==null ? "" : b.getProduct().getThumb());
+          map.put("productPrice", b.getProduct().getPrice()==null ? "" : b.getProduct().getPrice()/100.0);
+          map.put("productPriceTure", b.getProduct().getMinPrice()==null ? "" : b.getProduct().getMinPrice()/100.0);
+          map.put("productScore", b.getProduct().getPrice()!=null && b.getProduct().getMinPrice()!=null ? (b.getProduct().getPrice()-b.getProduct().getMinPrice())/100.0 : "");
+        }
+        mapList.add(map);
+      }
+    }
+
+    return mapList;
+
+  }
+  private static Specification<Banner> getWhereClause(BannerCriteria criteria) {
+    return new Specification<Banner>() {
+      @Override
+      public Predicate toPredicate(Root<Banner> r, CriteriaQuery<?> q,
+                                   CriteriaBuilder cb) {
+        Predicate predicate = cb.conjunction();
+        if (criteria.getType() != null) {   //banner类型
+          predicate.getExpressions().add(
+              cb.equal(r.<BannerType>get("bannerType").get("id"), criteria.getType()));
+        }
+        if (criteria.getStatus() != null) {   //上架、下架
+          predicate.getExpressions().add(
+              cb.equal(r.get("status"), criteria.getStatus()));
+        }
+//        if (criteria.getCity() != null) {
+//          predicate.getExpressions().add(
+//              cb.equal(r.get("merchant").get("city"),
+//                       new City(criteria.getCity())));
+//        }
+        if (criteria.getStartDate() != null && (!"".equals(criteria.getStartDate()))) {
+          predicate.getExpressions().add(
+              cb.between(r.get("createDate"), new Date(criteria.getStartDate()),
+                         new Date(criteria.getEndDate())));
+        }
+
+        return predicate;
+      }
+    };
   }
 
   /**

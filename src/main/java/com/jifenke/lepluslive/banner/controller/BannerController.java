@@ -1,5 +1,6 @@
 package com.jifenke.lepluslive.banner.controller;
 
+import com.jifenke.lepluslive.banner.domain.criteria.BannerCriteria;
 import com.jifenke.lepluslive.banner.service.BannerService;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.weixin.service.DictionaryService;
@@ -37,6 +38,21 @@ public class BannerController {
     List<Map> list = bannerService.findByType123(id);
     return LejiaResult.ok(list);
   }
+
+  @ApiOperation(value = "9=首页轮播图,10=首页好店推荐,11=首页臻品推荐")
+  @RequestMapping(value = "/homePage/{id}", method = RequestMethod.GET)
+  public LejiaResult homePage(@PathVariable Integer id) {
+
+    BannerCriteria bc = new BannerCriteria();
+    bc.setType(id);//bannerType
+    bc.setStatus(1);//状态   1=正常  0=下架
+    bc.setPageSize(3);//每页数量
+    bc.setOffset(1);//起始页
+    List<Map> list = bannerService.findHomePageByType(bc);
+    return LejiaResult.ok(list);
+  }
+
+
 
   @ApiOperation(value = "当期好“店”推荐")
   @RequestMapping(value = "/newShop", method = RequestMethod.GET)
@@ -98,4 +114,5 @@ public class BannerController {
   public LejiaResult common(@PathVariable Long id) {
     return LejiaResult.ok(dictionaryService.findDictionaryById(id).getValue());
   }
+
 }
