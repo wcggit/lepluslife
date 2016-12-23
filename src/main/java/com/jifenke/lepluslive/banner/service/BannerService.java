@@ -67,7 +67,6 @@ public class BannerService {
 
   /**
    * 9=首页轮播图,10=首页好店推荐,11=首页臻品推荐
-   * @param bannerCriteria
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public List<Map> findHomePageByType(BannerCriteria bannerCriteria) {
@@ -75,30 +74,30 @@ public class BannerService {
 
     Sort sort = new Sort(Sort.Direction.ASC, "sid");
     Page page = bannerRepository.findAll(getWhereClause(bannerCriteria),
-                                    new PageRequest(bannerCriteria.getOffset() - 1,
-                                                    bannerCriteria.getPageSize(), sort));
+                                         new PageRequest(bannerCriteria.getOffset() - 1,
+                                                         bannerCriteria.getPageSize(), sort));
     List<Banner> listb = page.getContent();
-    if (listb.size()>0){
-      for (Banner b : listb){
+    if (listb.size() > 0) {
+      for (Banner b : listb) {
         Map<String, Object> map = new HashMap<>();
         map.put("sid", b.getSid());
         map.put("picture", b.getPicture());
         map.put("afterType", b.getAfterType());
-        map.put("url", b.getUrl()==null ? "" : b.getUrl());
-        map.put("urlTitle", b.getUrlTitle()==null ? "" : b.getUrlTitle());
-        map.put("introduce", b.getIntroduce()==null ? "" : b.getIntroduce());
+        map.put("url", b.getUrl());
+        map.put("urlTitle", b.getUrlTitle());
+        map.put("introduce", b.getIntroduce());
         Merchant merchant = b.getMerchant();
-        if (merchant != null){
-          map.put("merchantId", merchant.getId() == null ? "" : merchant.getId());
-          map.put("merchantName", merchant.getName()==null ? "" : merchant.getName());
+        if (merchant != null) {
+          map.put("merchantId", merchant.getId());
+          map.put("merchantName", merchant.getName());
         }
         Product product = b.getProduct();
-        if (product != null){
-          map.put("productId", product.getId()==null ? "" : product.getId());
-          map.put("productName", product.getName()==null ? "" : product.getName());
-          map.put("productPrice", product.getPrice()==null ? "" : product.getPrice()/100.0);
-          map.put("productPriceTure", product.getMinPrice()==null ? "" : product.getMinPrice()/100.0);
-          map.put("productScore", product.getPrice()!=null && product.getMinPrice()!=null ? (product.getPrice()-product.getMinPrice())/100.0 : "");
+        if (product != null) {
+          map.put("productId", product.getId());
+          map.put("productName", product.getName());
+          map.put("productPrice", product.getPrice());
+          map.put("productPriceTrue", product.getMinPrice());
+          map.put("productScore", product.getMinScore());
         }
         mapList.add(map);
       }
@@ -107,6 +106,7 @@ public class BannerService {
     return mapList;
 
   }
+
   private static Specification<Banner> getWhereClause(BannerCriteria criteria) {
     return new Specification<Banner>() {
       @Override
@@ -118,7 +118,7 @@ public class BannerService {
               cb.equal(r.<BannerType>get("bannerType").get("id"), criteria.getType()));
         }
         predicate.getExpressions().add(//1上架、0下架
-              cb.equal(r.get("status"), 1));
+                                       cb.equal(r.get("status"), 1));
 
         return predicate;
       }

@@ -365,7 +365,7 @@ public class SwaggerConfig {
   }
 
   private ApiInfo bannerApiInfo() {
-    ApiInfo apiInfo = new ApiInfo("邀请及分享",//大标题
+    ApiInfo apiInfo = new ApiInfo("各种轮播图",//大标题
                                   "EHR Platform's REST API, all the applications could access the Object model data via JSON.",
 //小标题
                                   "0.1",//版本
