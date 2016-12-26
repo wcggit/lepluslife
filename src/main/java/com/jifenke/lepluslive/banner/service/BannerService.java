@@ -116,16 +116,16 @@ public class BannerService {
    * 10=首页好店推荐
    *
    * @param status    是否获取用户经纬度 1=是,0=否
-   * @param latitude  纬度
    * @param longitude 经度
+   * @param latitude  纬度
    *
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
-  public List<Map> findHomePageByType10(Integer status, Double latitude, Double longitude) {
+  public List<Map> findHomePageByType10(Integer status, Double longitude, Double latitude) {
     List<Map> mapList = new ArrayList<>();
 
     String sql = null;
-    if (status != null && status == 1 && latitude!=null && longitude!=null) {
+    if (status != null && status == 1 && longitude!=null && latitude!=null) {
       sql =
           "SELECT m.sid b_sid, m.picture b_picture, m.after_type b_after_type, m.url b_url, m.url_title b_url_title, m.introduce b_introduce, m.id merchant_id, m.merchant_name merchant_name, t.`name` AS tName, area.`name` AS aName, m.lj_commission, m.scorearebate, m.scorebrebate, re.import_scorebscale, m.partnership, ROUND( 6378.138 * 2 * ASIN(SQRT(POW(SIN(("
           + latitude + " * PI() / 180 - m.lat * PI() / 180) / 2),2) + COS(" + latitude
