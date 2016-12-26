@@ -127,19 +127,19 @@ public class BannerService {
     String sql = null;
     if (status != null && status == 1 && latitude!=null && longitude!=null) {
       sql =
-          "SELECT m.sid b_sid, m.picture b_picture, m.after_type b_after_type, m.url b_url, m.url_title b_url_title, m.introduce b_introduce, m.id merchant_id, m.merchant_name merchant_name, t.`name` AS tName, area.`name` AS aName, m.lj_commission, m.scorearebate, m.scorebrebate, re.import_scorebscale, ROUND( 6378.138 * 2 * ASIN(SQRT(POW(SIN(("
+          "SELECT m.sid b_sid, m.picture b_picture, m.after_type b_after_type, m.url b_url, m.url_title b_url_title, m.introduce b_introduce, m.id merchant_id, m.merchant_name merchant_name, t.`name` AS tName, area.`name` AS aName, m.lj_commission, m.scorearebate, m.scorebrebate, re.import_scorebscale, m.partnership, ROUND( 6378.138 * 2 * ASIN(SQRT(POW(SIN(("
           + latitude + " * PI() / 180 - m.lat * PI() / 180) / 2),2) + COS(" + latitude
           + " * PI() / 180) * COS(m.lat * PI() / 180) * POW(SIN((" + longitude
           + " * PI() / 180 - m.lng * PI() / 180) / 2),2))) * 1000) AS distance "
-          + " FROM (SELECT b1.sid sid, b1.picture picture, b1.after_type after_type, b1.url url, b1.url_title url_title, b1.introduce introduce, b1.merchant_id id, m1.name merchant_name, m1.lat lat, m1.lng lng, m1.merchant_type_id merchant_type_id, m1.area_id area_id, m1.lj_commission lj_commission, m1.scorearebate scorearebate, m1.scorebrebate scorebrebate "
+          + " FROM (SELECT b1.sid sid, b1.picture picture, b1.after_type after_type, b1.url url, b1.url_title url_title, b1.introduce introduce, b1.merchant_id id, m1.name merchant_name, m1.lat lat, m1.lng lng, m1.merchant_type_id merchant_type_id, m1.area_id area_id, m1.lj_commission lj_commission, m1.scorearebate scorearebate, m1.scorebrebate scorebrebate, m1.partnership partnership "
           + "       FROM banner b1 INNER JOIN merchant m1 ON b1.merchant_id = m1.id WHERE b1.banner_type_id = 10 AND b1.status = 1 "
 //          + " AND m1.state = 1"
           + " ) m "
           + " INNER JOIN merchant_type t ON m.merchant_type_id = t.id INNER JOIN area ON m.area_id = area.id LEFT OUTER JOIN merchant_rebate_policy re ON m.id = re.merchant_id";
     } else {
       sql =
-          "SELECT m.sid b_sid, m.picture b_picture, m.after_type b_after_type, m.url b_url, m.url_title b_url_title, m.introduce b_introduce, m.id merchant_id, m.merchant_name merchant_name, t.`name` AS tName, area.`name` AS aName, m.lj_commission, m.scorearebate, m.scorebrebate, re.import_scorebscale "
-          + " FROM (SELECT b1.sid sid, b1.picture picture, b1.after_type after_type, b1.url url, b1.url_title url_title, b1.introduce introduce, b1.merchant_id id, m1.name merchant_name, m1.lat lat, m1.lng lng, m1.merchant_type_id merchant_type_id, m1.area_id area_id, m1.lj_commission lj_commission, m1.scorearebate scorearebate, m1.scorebrebate scorebrebate "
+          "SELECT m.sid b_sid, m.picture b_picture, m.after_type b_after_type, m.url b_url, m.url_title b_url_title, m.introduce b_introduce, m.id merchant_id, m.merchant_name merchant_name, t.`name` AS tName, area.`name` AS aName, m.lj_commission, m.scorearebate, m.scorebrebate, re.import_scorebscale, m.partnership "
+          + " FROM (SELECT b1.sid sid, b1.picture picture, b1.after_type after_type, b1.url url, b1.url_title url_title, b1.introduce introduce, b1.merchant_id id, m1.name merchant_name, m1.lat lat, m1.lng lng, m1.merchant_type_id merchant_type_id, m1.area_id area_id, m1.lj_commission lj_commission, m1.scorearebate scorearebate, m1.scorebrebate scorebrebate, m1.partnership partnership "
           + "       FROM banner b1 INNER JOIN merchant m1 ON b1.merchant_id = m1.id WHERE b1.banner_type_id = 10 AND b1.status = 1 "
 //          + " AND m1.state = 1 "
           + " ) m "
@@ -167,8 +167,9 @@ public class BannerService {
       map.put("aRebate", o[11]);
       map.put("normalBScale", o[12]);
       map.put("importBScale", o[13]);
-      if (o.length > 14) {
-        map.put("distance", o[14]);
+      map.put("friend", o[14]);
+      if (o.length > 15) {
+        map.put("distance", o[15]);
       } else {
         map.put("distance", 0);
       }
