@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
@@ -41,6 +43,9 @@ public class BannerService {
 
   @Inject
   private CityService cityService;
+
+  @Inject
+  private EntityManager em;
 
   /**
    * 首页，臻品轮播，新品首发
@@ -105,6 +110,72 @@ public class BannerService {
 
     return mapList;
 
+  }
+
+  /**
+   * 10=首页好店推荐
+   *
+   * @param status    是否获取用户经纬度 1=是,0=否
+   * @param longitude 经度
+   * @param latitude  纬度
+   *
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+  public List<Map> findHomePageByType10(Integer status, Double longitude, Double latitude) {
+    List<Map> mapList = new ArrayList<>();
+
+    String sql = null;
+    if (status != null && status == 1 && longitude!=null && latitude!=null) {
+      sql =
+          "SELECT m.sid b_sid, m.picture b_picture, m.after_type b_after_type, m.url b_url, m.url_title b_url_title, m.introduce b_introduce, m.id merchant_id, m.merchant_name merchant_name, t.`name` AS tName, area.`name` AS aName, m.lj_commission, m.scorearebate, m.scorebrebate, re.import_scorebscale, m.partnership, ROUND( 6378.138 * 2 * ASIN(SQRT(POW(SIN(("
+          + latitude + " * PI() / 180 - m.lat * PI() / 180) / 2),2) + COS(" + latitude
+          + " * PI() / 180) * COS(m.lat * PI() / 180) * POW(SIN((" + longitude
+          + " * PI() / 180 - m.lng * PI() / 180) / 2),2))) * 1000) AS distance "
+          + " FROM (SELECT b1.sid sid, b1.picture picture, b1.after_type after_type, b1.url url, b1.url_title url_title, b1.introduce introduce, b1.merchant_id id, m1.name merchant_name, m1.lat lat, m1.lng lng, m1.merchant_type_id merchant_type_id, m1.area_id area_id, m1.lj_commission lj_commission, m1.scorearebate scorearebate, m1.scorebrebate scorebrebate, m1.partnership partnership "
+          + "       FROM banner b1 INNER JOIN merchant m1 ON b1.merchant_id = m1.id WHERE b1.banner_type_id = 10 AND b1.status = 1 "
+//          + " AND m1.state = 1"
+          + " ) m "
+          + " INNER JOIN merchant_type t ON m.merchant_type_id = t.id INNER JOIN area ON m.area_id = area.id LEFT OUTER JOIN merchant_rebate_policy re ON m.id = re.merchant_id";
+    } else {
+      sql =
+          "SELECT m.sid b_sid, m.picture b_picture, m.after_type b_after_type, m.url b_url, m.url_title b_url_title, m.introduce b_introduce, m.id merchant_id, m.merchant_name merchant_name, t.`name` AS tName, area.`name` AS aName, m.lj_commission, m.scorearebate, m.scorebrebate, re.import_scorebscale, m.partnership "
+          + " FROM (SELECT b1.sid sid, b1.picture picture, b1.after_type after_type, b1.url url, b1.url_title url_title, b1.introduce introduce, b1.merchant_id id, m1.name merchant_name, m1.lat lat, m1.lng lng, m1.merchant_type_id merchant_type_id, m1.area_id area_id, m1.lj_commission lj_commission, m1.scorearebate scorearebate, m1.scorebrebate scorebrebate, m1.partnership partnership "
+          + "       FROM banner b1 INNER JOIN merchant m1 ON b1.merchant_id = m1.id WHERE b1.banner_type_id = 10 AND b1.status = 1 "
+//          + " AND m1.state = 1 "
+          + " ) m "
+          + " INNER JOIN merchant_type t ON m.merchant_type_id = t.id INNER JOIN area ON m.area_id = area.id LEFT OUTER JOIN merchant_rebate_policy re ON m.id = re.merchant_id";
+    }
+    sql += " ORDER BY m.sid ASC";
+    sql += " LIMIT " + 0 + "," + 3;
+
+    Query query = em.createNativeQuery(sql);
+    List<Object[]> list = query.getResultList();
+
+    for (Object[] o : list) {
+      Map<String, Object> map = new HashMap<>();
+      map.put("sid", o[0]);
+      map.put("picture", o[1]);
+      map.put("afterType", o[2]);
+      map.put("url", o[3]);
+      map.put("urlTitle", o[4]);
+      map.put("introduce", o[5]);
+      map.put("merchantId", o[6]);
+      map.put("merchantName", o[7]);
+      map.put("typeName", o[8]);
+      map.put("area", o[9]);
+      map.put("commission", o[10]);
+      map.put("aRebate", o[11]);
+      map.put("normalBScale", o[12]);
+      map.put("importBScale", o[13]);
+      map.put("friend", o[14]);
+      if (o.length > 15) {
+        map.put("distance", o[15]);
+      } else {
+        map.put("distance", 0);
+      }
+      mapList.add(map);
+    }
+    return mapList;
   }
 
   private static Specification<Banner> getWhereClause(BannerCriteria criteria) {
