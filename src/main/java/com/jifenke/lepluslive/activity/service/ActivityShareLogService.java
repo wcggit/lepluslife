@@ -130,7 +130,7 @@ public class ActivityShareLogService {
       scoreBDetail.setOrderSid(beLeJiaUser.getUserSid());
       scoreBDetailRepository.save(scoreBDetail);
       //邀请人邀请总额和人数修改
-      LeJiaUserInfo info = leJiaUserInfoService.findByToken(token);
+      LeJiaUserInfo info = leJiaUserInfoService.findByLeJiaUser(leJiaUser);
       if (info != null) {
         info.setInviteA(info.getInviteA() + UA);
         info.setInviteB(info.getInviteB() + UB);

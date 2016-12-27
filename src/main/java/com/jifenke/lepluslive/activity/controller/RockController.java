@@ -49,9 +49,9 @@ public class RockController {
   LejiaResult openSportPage(
       @ApiParam(value = "用户标识token") @RequestParam(required = true) String token) {
 
-    LeJiaUserInfo leJiaUserInfo = leJiaUserInfoService.findByToken(token);
+    LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);
+    LeJiaUserInfo leJiaUserInfo = leJiaUserInfoService.findByLeJiaUser(leJiaUser);
     if (leJiaUserInfo == null) {  //创建新运动信息
-      LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);
       if (leJiaUser != null) {
         leJiaUserInfo = leJiaUserInfoService.createUserInfo(leJiaUser);
       }
@@ -85,9 +85,9 @@ public class RockController {
   LejiaResult submitSport(
       @ApiParam(value = "用户标识token") @RequestParam(required = true) String token) {
 
-    LeJiaUserInfo leJiaUserInfo = leJiaUserInfoService.findByToken(token);
+    LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);
+    LeJiaUserInfo leJiaUserInfo = leJiaUserInfoService.findByLeJiaUser(leJiaUser);
     if (leJiaUserInfo == null) {  //创建新摇一摇信息
-      LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);
       if (leJiaUser != null) {
         leJiaUserInfo = leJiaUserInfoService.createUserInfo(leJiaUser);
       }
