@@ -1,5 +1,7 @@
 package com.jifenke.lepluslive.merchant.domain.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -25,6 +27,10 @@ public class City {
 
   private String name;
 
+  @JsonIgnore
+  private Integer hot;  //是否是热门城市
+
+
   public Long getId() {
     return id;
   }
@@ -47,5 +53,13 @@ public class City {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  public Integer getHot() {
+    return hot;
+  }
+
+  public void setHot(Integer hot) {
+    this.hot = hot;
   }
 }

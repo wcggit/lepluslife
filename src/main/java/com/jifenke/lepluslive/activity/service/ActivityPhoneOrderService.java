@@ -240,13 +240,14 @@ public class ActivityPhoneOrderService {
       } else {
         int maxA = rule.getRebate();
         int minA = rule.getMinRebate();
-        order.setPayBackScore(new Random().nextInt((maxA - minA) / 10) * 10 + minA);
+        order.setPayBackScore(new Random().nextInt(maxA - minA) + minA);
       }
       repository.save(order);
       result.put("status", 200);
       result.put("data", order);
       return result;
     } catch (Exception e) {
+      e.printStackTrace();
       throw new RuntimeException();
     }
   }

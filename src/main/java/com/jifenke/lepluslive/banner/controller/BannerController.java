@@ -1,5 +1,6 @@
 package com.jifenke.lepluslive.banner.controller;
 
+import com.jifenke.lepluslive.banner.domain.criteria.BannerCriteria;
 import com.jifenke.lepluslive.banner.service.BannerService;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.weixin.service.DictionaryService;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +39,30 @@ public class BannerController {
     List<Map> list = bannerService.findByType123(id);
     return LejiaResult.ok(list);
   }
+
+  @ApiOperation(value = "9=首页轮播图,10=首页好店推荐,11=首页臻品推荐")
+  @RequestMapping(value = "/homePage/{id}", method = RequestMethod.GET)
+  public LejiaResult homePage(@PathVariable Integer id,
+                              @ApiParam(value = "是否获取到经纬度1=是,0=否.[id=10,好店推荐时]") @RequestParam(required = false) Integer status,
+                              @ApiParam(value = "经度(保留六位小数)[id=10时]") @RequestParam(required = false) Double longitude,
+                              @ApiParam(value = "纬度(保留六位小数)[id=10时]") @RequestParam(required = false) Double latitude) {
+    List<Map> list = new ArrayList<>();
+    if (id == 9) {
+      list = bannerService.findByType123(id);
+    }else if (id==11){
+      BannerCriteria bc = new BannerCriteria();
+      bc.setType(id);//bannerType
+      bc.setOffset(1);//起始页
+      bc.setPageSize(3);
+      list = bannerService.findHomePageByType(bc);
+    }else if (id==10){
+      list = bannerService.findHomePageByType10(status,longitude,latitude);
+    }
+
+    return LejiaResult.ok(list);
+  }
+
+
 
   @ApiOperation(value = "当期好“店”推荐")
   @RequestMapping(value = "/newShop", method = RequestMethod.GET)
@@ -98,4 +124,5 @@ public class BannerController {
   public LejiaResult common(@PathVariable Long id) {
     return LejiaResult.ok(dictionaryService.findDictionaryById(id).getValue());
   }
+
 }
