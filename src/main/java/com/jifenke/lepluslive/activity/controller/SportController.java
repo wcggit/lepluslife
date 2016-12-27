@@ -53,9 +53,9 @@ public class SportController {
   LejiaResult openSportPage(
       @ApiParam(value = "用户标识token") @RequestParam(required = true) String token) {
 
-    LeJiaUserInfo leJiaUserInfo = leJiaUserInfoService.findByToken(token);
+    LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);
+    LeJiaUserInfo leJiaUserInfo = leJiaUserInfoService.findByLeJiaUser(leJiaUser);
     if (leJiaUserInfo == null) {  //创建新运动信息
-      LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);
       if (leJiaUser != null) {
         leJiaUserInfo = leJiaUserInfoService.createUserInfo(leJiaUser);
       }
@@ -87,9 +87,9 @@ public class SportController {
   LejiaResult submitSport(@ApiParam(value = "运动步数") @RequestParam(required = true) Integer distance,
                           @ApiParam(value = "用户标识token") @RequestParam(required = true) String token) {
 
-    LeJiaUserInfo leJiaUserInfo = leJiaUserInfoService.findByToken(token);
+    LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);
+    LeJiaUserInfo leJiaUserInfo = leJiaUserInfoService.findByLeJiaUser(leJiaUser);
     if (leJiaUserInfo == null) {  //创建新运动信息
-      LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);
       if (leJiaUser != null) {
         leJiaUserInfo = leJiaUserInfoService.createUserInfo(leJiaUser);
       }

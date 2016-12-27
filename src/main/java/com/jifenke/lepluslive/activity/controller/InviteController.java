@@ -54,9 +54,9 @@ public class InviteController {
                                map.get("pic"), map.get("title"), map.get("content"),
                                map.get("url")));
     } else {
-      LeJiaUserInfo info = leJiaUserInfoService.findByToken(token);
+      LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);
+      LeJiaUserInfo info = leJiaUserInfoService.findByLeJiaUser(leJiaUser);
       if (info == null) {  //创建新用户信息
-        LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);
         if (leJiaUser != null) {
           info = leJiaUserInfoService.createUserInfo(leJiaUser);
         }
