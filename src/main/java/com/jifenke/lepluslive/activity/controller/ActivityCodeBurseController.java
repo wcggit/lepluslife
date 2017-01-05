@@ -2,9 +2,11 @@ package com.jifenke.lepluslive.activity.controller;
 
 import com.jifenke.lepluslive.activity.domain.entities.ActivityCodeBurse;
 import com.jifenke.lepluslive.activity.domain.entities.ActivityJoinLog;
+import com.jifenke.lepluslive.activity.domain.entities.RechargeCard;
 import com.jifenke.lepluslive.activity.service.ActivityCodeBurseService;
 import com.jifenke.lepluslive.activity.service.ActivityJoinLogService;
 import com.jifenke.lepluslive.activity.service.ActivityShareLogService;
+import com.jifenke.lepluslive.activity.service.RechargeCardService;
 import com.jifenke.lepluslive.global.service.MessageService;
 import com.jifenke.lepluslive.global.util.CookieUtils;
 import com.jifenke.lepluslive.global.util.LejiaResult;
@@ -31,6 +33,7 @@ import org.springframework.web.servlet.ModelAndView;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -73,6 +76,8 @@ public class ActivityCodeBurseController {
 
   @Inject
   private MessageService messageService;
+  @Inject
+  private RechargeCardService rechargeCardService;
 
   //分享页面 06/09/02
   @RequestMapping(value = "/share/{id}", method = RequestMethod.GET)
@@ -313,6 +318,43 @@ public class ActivityCodeBurseController {
       }
     }
     return LejiaResult.ok(result);
+  }
+
+  /**
+   * 充值卡 兑换
+   * @param exchangeCode 充值兑换码
+   * @return 状态
+   */
+  @RequestMapping(value = "/rechargeCard/exchange", method = RequestMethod.POST)
+  public LejiaResult rechargeCardSubmit(@RequestParam String exchangeCode, HttpServletRequest request) {
+    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
+
+    try {
+      if (exchangeCode!=null && !exchangeCode.equals("")){
+        List<RechargeCard> list1 = rechargeCardService.findRechargeCardByExchangeCode(exchangeCode);
+        List<RechargeCard> list2 = rechargeCardService.findRechargeCardByWeiXinUser(weiXinUser);
+        if(list1.size()>0){
+          return LejiaResult.build(499, "兑换码已使用!");
+        }
+        if(list2.size()>2){
+          return LejiaResult.build(498, "兑换次数超限!");
+        }
+
+        RechargeCard rechargeCard = new RechargeCard();
+        rechargeCard.setRechargeStatus(1);
+        rechargeCard.setCreateTime(new Date());
+        rechargeCard.setExchangeCode(exchangeCode);
+        rechargeCard.setWeiXinUser(weiXinUser);
+        rechargeCardService.saveRechargeCard(rechargeCard);
+        return LejiaResult.ok();
+      }else {
+
+        return LejiaResult.build(497, "兑换码错误!");
+      }
+
+    } catch (Exception e) {
+      return LejiaResult.build(202, "服务器异常");
+    }
   }
 
 }
