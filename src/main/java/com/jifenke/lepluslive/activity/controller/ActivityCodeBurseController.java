@@ -336,7 +336,7 @@ public class ActivityCodeBurseController {
         if(list1.size()>0){
           return LejiaResult.build(499, "兑换码已使用!");
         }
-        if(list2.size()>2){
+        if(list2.size()>100){
           return LejiaResult.build(498, "兑换次数超限!");
         }
 
