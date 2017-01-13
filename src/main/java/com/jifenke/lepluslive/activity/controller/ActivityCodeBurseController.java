@@ -139,7 +139,13 @@ public class ActivityCodeBurseController {
     //判断是否获得过红包
     ActivityJoinLog joinLog = activityJoinLogService.findLogBySubActivityAndOpenId(0, weiXinUser);
     if (joinLog == null) {//未参与
-      model.addAttribute("status", 0);
+      if (weiXinUser.getLeJiaUser().getPhoneNumber() != null && !""
+          .equals(weiXinUser.getLeJiaUser().getPhoneNumber())) {
+        model.addAttribute("status", 1);
+        model.addAttribute("scoreA", 200);
+      } else {
+        model.addAttribute("status", 0);
+      }
     } else {
       model.addAttribute("scoreA", joinLog.getDetail());
       model.addAttribute("status", 1);
