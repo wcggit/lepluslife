@@ -296,7 +296,7 @@ public class LeJiaUserController {
 
   /**
    * app微信用户 今日昨日红包积分 收益
-   * token 用户token
+   * token 用户token(实为 user_sid)
    */
   @ApiOperation(value = "今日昨日红包积分收益")
   @RequestMapping(value = "/scoreAB", method = RequestMethod.POST)

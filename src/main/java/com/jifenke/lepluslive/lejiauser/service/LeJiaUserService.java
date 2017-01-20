@@ -264,13 +264,13 @@ public class LeJiaUserService {
 
 
     sql = " SELECT today_a.tsa, today_b.tsb FROM "
-          + " (SELECT SUM(sad.number) tsa, u.token token FROM le_jia_user u INNER JOIN scorea sa ON u.id=sa.le_jia_user_id "
+          + " (SELECT SUM(sad.number) tsa, u.user_sid token FROM le_jia_user u INNER JOIN scorea sa ON u.id=sa.le_jia_user_id "
           + " INNER JOIN scorea_detail sad ON sa.id=sad.scorea_id "
-          + " WHERE sad.number>0 AND u.token='" + token + "'"
+          + " WHERE sad.number>0 AND u.user_sid='" + token + "'"
           + " AND DATE(sad.date_created)='" + today + "') today_a, "
-          + " (SELECT SUM(sbd.number) tsb, u.token token FROM le_jia_user u INNER JOIN scoreb sb ON u.id=sb.le_jia_user_id "
+          + " (SELECT SUM(sbd.number) tsb, u.user_sid token FROM le_jia_user u INNER JOIN scoreb sb ON u.id=sb.le_jia_user_id "
           + " INNER JOIN scoreb_detail sbd ON sb.id=sbd.scoreb_id "
-          + " WHERE sbd.number>0 AND u.token='" + token + "'"
+          + " WHERE sbd.number>0 AND u.user_sid='" + token + "'"
           + " AND DATE(sbd.date_created)='" + today + "') today_b ";
 //          + " WHERE today_a.token = today_b.token";
 
@@ -293,13 +293,13 @@ public class LeJiaUserService {
 //        + " AND DATE(sad.date_created)='" + yesterday + "' AND DATE(sbd.date_created)='" + yesterday + "'";
 
     sql = " SELECT yesterday_a.ysa, yesterday_b.ysb FROM "
-          + " (SELECT SUM(sad.number) ysa, u.token token FROM le_jia_user u INNER JOIN scorea sa ON u.id=sa.le_jia_user_id "
+          + " (SELECT SUM(sad.number) ysa, u.user_sid token FROM le_jia_user u INNER JOIN scorea sa ON u.id=sa.le_jia_user_id "
           + " INNER JOIN scorea_detail sad ON sa.id=sad.scorea_id "
-          + " WHERE sad.number>0 AND u.token='" + token + "'"
+          + " WHERE sad.number>0 AND u.user_sid='" + token + "'"
           + " AND DATE(sad.date_created)='" + yesterday + "') yesterday_a, "
-          + " (SELECT SUM(sbd.number) ysb, u.token token FROM le_jia_user u INNER JOIN scoreb sb ON u.id=sb.le_jia_user_id "
+          + " (SELECT SUM(sbd.number) ysb, u.user_sid token FROM le_jia_user u INNER JOIN scoreb sb ON u.id=sb.le_jia_user_id "
           + " INNER JOIN scoreb_detail sbd ON sb.id=sbd.scoreb_id "
-          + " WHERE sbd.number>0 AND u.token='" + token + "'"
+          + " WHERE sbd.number>0 AND u.user_sid='" + token + "'"
           + " AND DATE(sbd.date_created)='" + yesterday + "') yesterday_b ";
 //          + " WHERE yesterday_a.token = yesterday_b.token";
 
