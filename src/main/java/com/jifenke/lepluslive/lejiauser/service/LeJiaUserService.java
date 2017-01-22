@@ -21,8 +21,11 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -49,6 +52,9 @@ public class LeJiaUserService {
 
   @Inject
   private MerchantService merchantService;
+  @Inject
+  private EntityManager em;
+
 
   /**
    * APP获取用户信息  16/09/07
@@ -241,5 +247,64 @@ public class LeJiaUserService {
 
   public long countPartnerBindLeJiaUser(Long id) {
     return leJiaUserRepository.countPartnerBindLeJiaUser(id);
+  }
+
+  /**
+   * 今日红包积分 收益
+   * @param token 用户token
+   * @param today 今日
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+  public List<Object[]> todayScoreAB(String token, String today) {
+    String sql = null;
+//    sql = " SELECT SUM(sad.number), SUM(sbd.number) FROM le_jia_user u INNER JOIN scorea sa ON u.id=sa.le_jia_user_id INNER JOIN scoreb sb ON u.id=sb.le_jia_user_id "
+//          + " INNER JOIN scorea_detail sad ON sa.id=sad.scorea_id INNER JOIN scoreb_detail sbd ON sb.id=sbd.scoreb_id "
+//          + " WHERE sad.number>0 AND sbd.number>0 AND u.token='" + token + "'"
+//          + " AND DATE(sad.date_created)='" + today + "' AND DATE(sbd.date_created)='" + today + "'";
+
+
+    sql = " SELECT today_a.tsa, today_b.tsb FROM "
+          + " (SELECT SUM(sad.number) tsa, u.user_sid token FROM le_jia_user u INNER JOIN scorea sa ON u.id=sa.le_jia_user_id "
+          + " INNER JOIN scorea_detail sad ON sa.id=sad.scorea_id "
+          + " WHERE sad.number>0 AND u.user_sid='" + token + "'"
+          + " AND DATE(sad.date_created)='" + today + "') today_a, "
+          + " (SELECT SUM(sbd.number) tsb, u.user_sid token FROM le_jia_user u INNER JOIN scoreb sb ON u.id=sb.le_jia_user_id "
+          + " INNER JOIN scoreb_detail sbd ON sb.id=sbd.scoreb_id "
+          + " WHERE sbd.number>0 AND u.user_sid='" + token + "'"
+          + " AND DATE(sbd.date_created)='" + today + "') today_b ";
+//          + " WHERE today_a.token = today_b.token";
+
+
+    Query query = em.createNativeQuery(sql);
+    List<Object[]> list = query.getResultList();
+    return list;
+  }
+  /**
+   * 昨日红包积分 收益
+   * @param token     用户token
+   * @param yesterday 昨日
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+  public List<Object[]> yesterdayScoreAB(String token, String yesterday) {
+    String sql = null;
+//    sql = " SELECT SUM(sad.number), SUM(sbd.number) FROM le_jia_user u INNER JOIN scorea sa ON u.id=sa.le_jia_user_id INNER JOIN scoreb sb ON u.id=sb.le_jia_user_id "
+//        + " INNER JOIN scorea_detail sad ON sa.id=sad.scorea_id INNER JOIN scoreb_detail sbd ON sb.id=sbd.scoreb_id "
+//        + " WHERE sad.number>0 AND sbd.number>0 AND u.token='" + token + "'"
+//        + " AND DATE(sad.date_created)='" + yesterday + "' AND DATE(sbd.date_created)='" + yesterday + "'";
+
+    sql = " SELECT yesterday_a.ysa, yesterday_b.ysb FROM "
+          + " (SELECT SUM(sad.number) ysa, u.user_sid token FROM le_jia_user u INNER JOIN scorea sa ON u.id=sa.le_jia_user_id "
+          + " INNER JOIN scorea_detail sad ON sa.id=sad.scorea_id "
+          + " WHERE sad.number>0 AND u.user_sid='" + token + "'"
+          + " AND DATE(sad.date_created)='" + yesterday + "') yesterday_a, "
+          + " (SELECT SUM(sbd.number) ysb, u.user_sid token FROM le_jia_user u INNER JOIN scoreb sb ON u.id=sb.le_jia_user_id "
+          + " INNER JOIN scoreb_detail sbd ON sb.id=sbd.scoreb_id "
+          + " WHERE sbd.number>0 AND u.user_sid='" + token + "'"
+          + " AND DATE(sbd.date_created)='" + yesterday + "') yesterday_b ";
+//          + " WHERE yesterday_a.token = yesterday_b.token";
+
+    Query query = em.createNativeQuery(sql);
+    List<Object[]> list = query.getResultList();
+    return list;
   }
 }

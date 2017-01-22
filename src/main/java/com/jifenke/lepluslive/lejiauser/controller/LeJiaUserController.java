@@ -33,8 +33,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -288,6 +292,47 @@ public class LeJiaUserController {
     } else {
       return LejiaResult.build(500, "服务器异常");
     }
+  }
+
+  /**
+   * app微信用户 今日昨日红包积分 收益
+   * token 用户token(实为 user_sid)
+   */
+  @ApiOperation(value = "今日昨日红包积分收益")
+  @RequestMapping(value = "/scoreAB", method = RequestMethod.POST)
+  public
+  @ResponseBody
+  LejiaResult scoreAB(@RequestParam(required = true) String token) {
+
+    if (token == null || "null".equals(token) || "".equals(token)) {
+      return LejiaResult.build(2008, messageUtil.getMsg("2008"));
+    }
+    Map<String, Object> result = new HashMap<>();
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    Date date1 = new Date();
+    String today = getDay(0,date1,sdf);//今日
+    String yesterday = getDay(-1,date1,sdf);//昨日
+
+    List<Object[]> listToday = leJiaUserService.todayScoreAB(token, today);
+    List<Object[]> listYesterday = leJiaUserService.yesterdayScoreAB(token, yesterday);
+    if (listToday.size()==1){
+      Object[] o1 = listToday.get(0);
+      result.put("tScoreA", o1[0] == null ? "0" : o1[0].toString());
+      result.put("tScoreB", o1[1] == null ? "0" : o1[1].toString());
+    }
+    if (listYesterday.size()==1){
+      Object[] o2 = listYesterday.get(0);
+      result.put("yScoreA", o2[0] == null ? "0" : o2[0].toString());
+      result.put("yScoreB", o2[1] == null ? "0" : o2[1].toString());
+    }
+
+    return LejiaResult.build(200, "请求成功", result);
+  }
+  public String getDay(int i, Date date, SimpleDateFormat sdf) {
+    Calendar calendar = Calendar.getInstance();
+    calendar.setTime(date);
+    calendar.add(Calendar.DAY_OF_YEAR, i);
+    return sdf.format(calendar.getTime());
   }
 
   /**
