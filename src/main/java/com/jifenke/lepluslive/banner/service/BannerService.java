@@ -146,7 +146,7 @@ public class BannerService {
           + " INNER JOIN merchant_type t ON m.merchant_type_id = t.id INNER JOIN area ON m.area_id = area.id LEFT OUTER JOIN merchant_rebate_policy re ON m.id = re.merchant_id";
     }
     sql += " ORDER BY m.sid ASC";
-    sql += " LIMIT " + 0 + "," + 3;
+    sql += " LIMIT " + 0 + "," + 100;
 
     Query query = em.createNativeQuery(sql);
     List<Object[]> list = query.getResultList();
@@ -334,6 +334,41 @@ public class BannerService {
       hot += banner.getTitle() + "_";
     }
     return hot;
+  }
+
+  /**
+   * app端   启动广告
+   * @param cityId 城市id
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+  public Map<String, Object> startAd(Long cityId) {
+
+    String sql = null;
+    sql = " SELECT b1.sid, b1.picture, b1.after_type, b1.url, b1.url_title, b1.product_id, b1.merchant_id"
+          + " FROM banner b1 "
+//          + " LEFT JOIN city c1 ON b1.city_id = c1.id "
+          + " WHERE b1.banner_type_id = 12 AND b1.status = 1 ";
+    if (cityId != null && !"null".equals(cityId) && !"".equals(cityId)) {
+      sql += " AND b1.city_id = " + cityId;
+    }
+    sql += " ORDER BY b1.sid DESC ";
+    sql += " LIMIT " + 0 + "," + 3;
+
+    Query query = em.createNativeQuery(sql);
+    List<Object[]> list = query.getResultList();
+
+    Map<String, Object> result = new HashMap<>();
+    if (list.size() > 0){
+      Object[] o2 = list.get(0);
+      result.put("sid",         o2[0] == null ? "0" : o2[0].toString());
+      result.put("picture",     o2[1] == null ? "" : o2[1].toString());
+      result.put("afterType",   o2[2] == null ? "0" : o2[2].toString());
+      result.put("url",         o2[3] == null ? "" : o2[3].toString());
+      result.put("urlTitle",    o2[4] == null ? "" : o2[4].toString());
+      result.put("productId",   o2[5] == null ? "0" : o2[5].toString());
+      result.put("merchantId",  o2[6] == null ? "0" : o2[6].toString());
+    }
+    return result;
   }
 
 }
