@@ -9,9 +9,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -53,7 +55,7 @@ public class BannerController {
       BannerCriteria bc = new BannerCriteria();
       bc.setType(id);//bannerType
       bc.setOffset(1);//起始页
-      bc.setPageSize(3);
+      bc.setPageSize(100);
       list = bannerService.findHomePageByType(bc);
     }else if (id==10){
       list = bannerService.findHomePageByType10(status,longitude,latitude);
@@ -62,6 +64,22 @@ public class BannerController {
     return LejiaResult.ok(list);
   }
 
+  /**
+   * app端   启动广告
+   * cityId  城市id
+   *
+   */
+  @ApiOperation(value = "app启动广告")
+  @RequestMapping(value = "/startAd", method = RequestMethod.POST)
+  @ResponseBody
+  public LejiaResult startAd(@RequestParam(required = false) Long cityId,
+                             @RequestParam(required = true) Integer type) {
+    if (type == null) {
+      return LejiaResult.build(2008, "type为null");
+    }
+    Map<String, Object> result = bannerService.startAd(cityId, type);
+    return LejiaResult.build(200, "请求成功", result);
+  }
 
 
   @ApiOperation(value = "当期好“店”推荐")

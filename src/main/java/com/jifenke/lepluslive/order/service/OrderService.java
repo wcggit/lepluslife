@@ -8,7 +8,6 @@ import com.jifenke.lepluslive.product.domain.entities.Product;
 import com.jifenke.lepluslive.product.domain.entities.ProductSpec;
 import com.jifenke.lepluslive.product.service.ProductService;
 import com.jifenke.lepluslive.weixin.controller.dto.CartDetailDto;
-import com.jifenke.lepluslive.weixin.controller.dto.OrderDto;
 import com.jifenke.lepluslive.order.domain.entities.OnLineOrder;
 import com.jifenke.lepluslive.order.domain.entities.OrderDetail;
 import com.jifenke.lepluslive.order.repository.OrderRepository;
@@ -17,7 +16,6 @@ import com.jifenke.lepluslive.score.service.ScoreAService;
 import com.jifenke.lepluslive.score.service.ScoreBService;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.repository.DictionaryRepository;
-import com.jifenke.lepluslive.weixin.service.DictionaryService;
 import com.jifenke.lepluslive.weixin.service.JobThread;
 import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
 import com.jifenke.lepluslive.weixin.service.WeiXinUserService;
@@ -34,7 +32,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -155,6 +152,7 @@ public class OrderService {
       if (address != null) {
         onLineOrder.setAddress(address);
       }
+      onLineOrder.setOrderPrice(orderPrice);
       onLineOrder.setFreightPrice(freightPrice);
       onLineOrder.setTotalPrice(totalPrice);
       onLineOrder.setTotalScore(totalScore);
