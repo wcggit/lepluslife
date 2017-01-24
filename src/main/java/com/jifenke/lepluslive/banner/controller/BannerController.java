@@ -67,12 +67,17 @@ public class BannerController {
   /**
    * app端   启动广告
    * cityId  城市id
+   *
    */
   @ApiOperation(value = "app启动广告")
-  @RequestMapping(value = "/startAd", method = RequestMethod.GET)
+  @RequestMapping(value = "/startAd", method = RequestMethod.POST)
   @ResponseBody
-  public LejiaResult startAd(@RequestParam(required = false) Long cityId) {
-    Map<String, Object> result = bannerService.startAd(cityId);
+  public LejiaResult startAd(@RequestParam(required = false) Long cityId,
+                             @RequestParam(required = true) Integer type) {
+    if (type == null) {
+      return LejiaResult.build(2008, "type为null");
+    }
+    Map<String, Object> result = bannerService.startAd(cityId, type);
     return LejiaResult.build(200, "请求成功", result);
   }
 
