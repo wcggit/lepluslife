@@ -341,7 +341,7 @@ public class BannerService {
    * @param cityId 城市id
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
-  public Map<String, Object> startAd(Long cityId) {
+  public Map<String, Object> startAd(Long cityId, Integer type) {
 
     String sql = null;
     sql = " SELECT b1.sid, b1.picture, b1.after_type, b1.url, b1.url_title, b1.product_id, b1.merchant_id"
@@ -351,8 +351,9 @@ public class BannerService {
     if (cityId != null && !"null".equals(cityId) && !"".equals(cityId)) {
       sql += " AND b1.city_id = " + cityId;
     }
+    sql += " AND b1.app_type = " + type;
     sql += " ORDER BY b1.sid DESC ";
-    sql += " LIMIT " + 0 + "," + 3;
+    sql += " LIMIT " + 0 + "," + 10;
 
     Query query = em.createNativeQuery(sql);
     List<Object[]> list = query.getResultList();
@@ -360,7 +361,7 @@ public class BannerService {
     Map<String, Object> result = new HashMap<>();
     if (list.size() > 0){
       Object[] o2 = list.get(0);
-      result.put("sid",         o2[0] == null ? "0" : o2[0].toString());
+//      result.put("sid",         o2[0] == null ? "0" : o2[0].toString());
       result.put("picture",     o2[1] == null ? "" : o2[1].toString());
       result.put("afterType",   o2[2] == null ? "0" : o2[2].toString());
       result.put("url",         o2[3] == null ? "" : o2[3].toString());
@@ -368,7 +369,8 @@ public class BannerService {
       result.put("productId",   o2[5] == null ? "0" : o2[5].toString());
       result.put("merchantId",  o2[6] == null ? "0" : o2[6].toString());
     }
-    return result;
+    return result
+        ;
   }
 
 }
