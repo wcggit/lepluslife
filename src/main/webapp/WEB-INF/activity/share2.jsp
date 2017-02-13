@@ -95,9 +95,9 @@
 
     function getVerify() {
         var phoneNumber = $("input[name='phoneNumber']").val();
-        if (!/^(13[0-9]|14[0-9]|15[0-9]|18[0-9])\d{8}$/i.test(phoneNumber)) {
-            alert('请输入正确的手机号！');
-            return true
+        if ((!(/^1[3|4|5|6|7|8]\d{9}$/.test(phoneNumber)))) {
+            alert("请输入正确的手机号");
+            return false
         }
         $("#sendCode").addClass("disClick");
         f_timeout();

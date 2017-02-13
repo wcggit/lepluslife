@@ -523,6 +523,10 @@ public class OrderService {
                                                    Integer transmitWay) {
     Map<Object, Object> result = new HashMap<>();
     OnLineOrder onLineOrder = orderRepository.findOne(orderId);
+    if (onLineOrder.getState() == 1) { //订单已经支付
+      result.put("status", 5012);
+      return result;
+    }
     if (onLineOrder.getState() == 4) { //订单已经失效
       result.put("status", 5008);
       return result;
