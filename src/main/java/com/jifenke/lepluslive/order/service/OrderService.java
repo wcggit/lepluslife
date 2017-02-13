@@ -539,7 +539,7 @@ public class OrderService {
       return result;
     }
 
-    onLineOrder.setOrderSid(MvUtil.getOrderNumber()); //必须重新设置,否者导致微信订单号重复报错
+    // onLineOrder.setOrderSid(MvUtil.getOrderNumber()); //必须重新设置,否者导致微信订单号重复报错  不必要！！！
     onLineOrder.setTruePrice(truePrice);
     onLineOrder.setTransmitWay(transmitWay);
     onLineOrder.setTrueScore(trueScore);
