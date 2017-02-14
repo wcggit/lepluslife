@@ -523,6 +523,10 @@ public class OrderService {
                                                    Integer transmitWay) {
     Map<Object, Object> result = new HashMap<>();
     OnLineOrder onLineOrder = orderRepository.findOne(orderId);
+    if (onLineOrder.getState() == 1) { //订单已经支付
+      result.put("status", 5012);
+      return result;
+    }
     if (onLineOrder.getState() == 4) { //订单已经失效
       result.put("status", 5008);
       return result;
@@ -535,7 +539,7 @@ public class OrderService {
       return result;
     }
 
-    onLineOrder.setOrderSid(MvUtil.getOrderNumber()); //必须重新设置,否者导致微信订单号重复报错
+    // onLineOrder.setOrderSid(MvUtil.getOrderNumber()); //必须重新设置,否者导致微信订单号重复报错  不必要！！！
     onLineOrder.setTruePrice(truePrice);
     onLineOrder.setTransmitWay(transmitWay);
     onLineOrder.setTrueScore(trueScore);

@@ -256,7 +256,8 @@ public class OrderController {
           unifiedOrder.get("prepay_id").toString());
       return LejiaResult.build(200, "ok", sortedMap);
     } else {
-      return LejiaResult.build(4001, messageService.getMsg("4001"));
+      return LejiaResult
+          .build(4001, messageService.getMsg("4001") + "," + String.valueOf(unifiedOrder.get("err_code_des")));
     }
   }
 
