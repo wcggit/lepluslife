@@ -1,6 +1,6 @@
 package com.jifenke.lepluslive.weixin.service;
 
-import com.jifenke.lepluslive.global.util.CookieUtils;
+import com.jifenke.lepluslive.global.config.Constants;
 import com.jifenke.lepluslive.global.util.MD5Util;
 import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.global.util.WeixinPayUtil;
@@ -25,7 +25,7 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Created by wcg on 16/3/21.
+ * 微信支付相关 Created by zhangwen on 17/2/21.
  */
 @Service
 @Transactional(readOnly = true)
@@ -35,31 +35,28 @@ public class WeiXinPayService {
 
 
   @Value("${weixin.appId}")
-  private String appId;
+  private String appId_JS;
 
   @Value("${weixin.mchId}")
-  private String mchId;
-
-  @Value("${app.appId}")
-  private String _appId;
-
-  @Value("${app.mchId}")
-  private String _mchId;
-
-  @Value("${weixin.weixinRootUrl}")
-  private String weixinRootUrl;
+  private String mchId_JS;
 
   @Value("${weixin.mchKey}")
-  private String mchKey;
+  private String mchKey_JS;
+
+  @Value("${app.appId}")
+  private String appId_APP;
+
+  @Value("${app.mchId}")
+  private String mchId_APP;
 
   @Value("${app.mchKey}")
-  private String _mchKey;
-
-  @Value("${weixin.jsapiTicket}")
-  private String jsapiTicket;
+  private String mchKey_APP;
 
   @Inject
   private DictionaryService dictionaryService;
+
+  @Inject
+  private WeiXinService weiXinService;
 
   /**
    * 获取公众号支付页面的配置参数wxconfig
@@ -68,7 +65,7 @@ public class WeiXinPayService {
     Long timestamp = new Date().getTime() / 1000;
     String noncestr = MvUtil.getRandomStr();
     Map<String, Object> map = new HashMap<>();
-    map.put("appId", appId);
+    map.put("appId", appId_JS);
     map.put("timestamp", timestamp);
     map.put("noncestr", noncestr);
     map.put("signature", getJsapiSignature(request, noncestr, timestamp));
@@ -77,15 +74,15 @@ public class WeiXinPayService {
 
 
   /**
-   * 封装订单参数
+   * 公众号支付封装预支付参数
    */
   @Transactional(readOnly = true)
-  public SortedMap<Object, Object> buildOrderParams(HttpServletRequest request, String body,
+  public SortedMap<String, Object> buildOrderParams(HttpServletRequest request, String body,
                                                     String orderSid, String truePrice,
                                                     String notifyUrl) {
-    SortedMap<Object, Object> orderParams = new TreeMap<>();
-    orderParams.put("appid", appId);
-    orderParams.put("mch_id", mchId);
+    SortedMap<String, Object> orderParams = new TreeMap<>();
+    orderParams.put("appid", appId_JS);
+    orderParams.put("mch_id", mchId_JS);
     orderParams.put("nonce_str", MvUtil.getRandomStr());
     orderParams.put("body", body);
     orderParams.put("out_trade_no", orderSid);
@@ -95,73 +92,82 @@ public class WeiXinPayService {
     orderParams.put("notify_url", notifyUrl);
     orderParams.put("trade_type", "JSAPI");
     orderParams.put("input_charset", "UTF-8");
-    orderParams.put("openid", CookieUtils.getCookieValue(request, appId + "-user-open-id"));
-    String sign = createSign("UTF-8", orderParams, mchKey);
+    orderParams.put("openid", weiXinService.getCurrentWeiXinUser(request).getOpenId());
+    String sign = createSign("UTF-8", orderParams, "JSAPI");
     orderParams.put("sign", sign);
     return orderParams;
   }
 
   /**
-   * 封装app订单参数  2016/12/13
+   * APP支付封装预支付参数  2016/12/13
    */
   @Transactional(readOnly = true)
-  public SortedMap<Object, Object> buildAPPOrderParams(HttpServletRequest request, String body,
+  public SortedMap<String, Object> buildAPPOrderParams(HttpServletRequest request, String body,
                                                        String orderSid, String truePrice,
                                                        String notifyUrl) {
-    SortedMap<Object, Object> orderParams = new TreeMap<Object, Object>();
-    orderParams.put("appid", _appId);
-    orderParams.put("mch_id", _mchId);
+    SortedMap<String, Object> orderParams = new TreeMap<>();
+    orderParams.put("appid", appId_APP);
+    orderParams.put("mch_id", mchId_APP);
     orderParams.put("nonce_str", MvUtil.getRandomStr());
     orderParams.put("body", body);
     orderParams.put("out_trade_no", orderSid);
     orderParams.put("fee_type", "CNY");
     orderParams.put("total_fee", truePrice);
-//    orderParams.put("total_fee", "1");
     orderParams.put("spbill_create_ip", getIpAddr(request));
     orderParams.put("notify_url", notifyUrl);
     orderParams.put("trade_type", "APP");
     orderParams.put("input_charset", "UTF-8");
-    String sign = createSign("UTF-8", orderParams, _mchKey);
+    String sign = createSign("UTF-8", orderParams, "APP");
     orderParams.put("sign", sign);
     return orderParams;
   }
 
+  /**
+   * 公众号支付封装吊起支付参数
+   *
+   * @param prepayId 预支付交易会话标识
+   */
+  public SortedMap<String, Object> buildJsapiParams(String prepayId) {
+    SortedMap<String, Object> jsapiParams = new TreeMap<>();
+    jsapiParams.put("appId", appId_JS);
+    jsapiParams.put("timeStamp", new Date().getTime() / 1000);
+    jsapiParams.put("nonceStr", MvUtil.getRandomStr());
+    jsapiParams.put("package", "prepay_id=" + prepayId);
+    jsapiParams.put("signType", "MD5");
+    String sign = createSign("UTF-8", jsapiParams, "JSAPI");
+    jsapiParams.put("sign", sign);
+    return jsapiParams;
+  }
 
   /**
-   * APP支付封装订单参数
+   * APP支付封装吊起支付参数
+   *
+   * @param prepayId 预支付交易会话标识
    */
-  @Transactional(readOnly = true)
-  public SortedMap<Object, Object> _buildOrderParams(HttpServletRequest request,
-                                                     OnLineOrder onLineOrder) {
-    SortedMap<Object, Object> orderParams = new TreeMap<Object, Object>();
-    orderParams.put("appid", _appId);
-    orderParams.put("mch_id", _mchId);
-    orderParams.put("nonce_str", MvUtil.getRandomStr());
-    orderParams.put("body", "乐加商城消费");
-    orderParams.put("out_trade_no", onLineOrder.getOrderSid());
-    orderParams.put("fee_type", "CNY");
-    orderParams.put("total_fee", String.valueOf(onLineOrder.getTruePrice()));
-//    orderParams.put("total_fee", "1");
-    orderParams.put("spbill_create_ip", getIpAddr(request));
-    orderParams.put("notify_url", weixinRootUrl + "/weixin/pay/afterPay");
-    orderParams.put("trade_type", "APP");
-    orderParams.put("input_charset", "UTF-8");
-    String sign = createSign("UTF-8", orderParams, _mchKey);
-    orderParams.put("sign", sign);
-    return orderParams;
+  public SortedMap<String, Object> buildAppParams(String prepayId) {
+    SortedMap<String, Object> jsapiParams = new TreeMap<>();
+    jsapiParams.put("appid", appId_APP);
+    jsapiParams.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+    jsapiParams.put("noncestr", MvUtil.getRandomStr());
+    jsapiParams.put("partnerid", mchId_APP);
+    jsapiParams.put("prepayid", prepayId);
+    jsapiParams.put("package", "Sign=WXPay");
+    String sign = createSign("UTF-8", jsapiParams, "APP");
+    jsapiParams.put("sign", sign);
+    return jsapiParams;
   }
 
   /**
    * 公众号封装订单查询参数
    */
   @Transactional(readOnly = true)
-  public SortedMap<Object, Object> buildOrderQueryParams(OnLineOrder onLineOrder) {
-    SortedMap<Object, Object> orderParams = new TreeMap<Object, Object>();
-    orderParams.put("appid", appId);
-    orderParams.put("mch_id", mchId);
+  public SortedMap<String, Object> buildOrderQueryParams(OnLineOrder onLineOrder) {
+    SortedMap<String, Object> orderParams = new TreeMap<>();
+    orderParams.put("appid", appId_JS);
+    orderParams.put("mch_id", mchId_JS);
     orderParams.put("out_trade_no", onLineOrder.getOrderSid());
     orderParams.put("nonce_str", MvUtil.getRandomStr());
-    String sign = createSign("UTF-8", orderParams, mchKey);
+    String sign = createSign("UTF-8", orderParams, "JSAPI");
     orderParams.put("sign", sign);
     return orderParams;
   }
@@ -170,13 +176,13 @@ public class WeiXinPayService {
    * APP封装订单查询参数   16/09/29
    */
   @Transactional(readOnly = true)
-  public SortedMap<Object, Object> buildAPPOrderQueryParams(OnLineOrder onLineOrder) {
-    SortedMap<Object, Object> orderParams = new TreeMap<Object, Object>();
-    orderParams.put("appid", _appId);
-    orderParams.put("mch_id", _mchId);
+  public SortedMap<String, Object> buildAPPOrderQueryParams(OnLineOrder onLineOrder) {
+    SortedMap<String, Object> orderParams = new TreeMap<>();
+    orderParams.put("appid", appId_APP);
+    orderParams.put("mch_id", mchId_APP);
     orderParams.put("out_trade_no", onLineOrder.getOrderSid());
     orderParams.put("nonce_str", MvUtil.getRandomStr());
-    String sign = createSign("UTF-8", orderParams, _mchKey);
+    String sign = createSign("UTF-8", orderParams, "APP");
     orderParams.put("sign", sign);
     return orderParams;
   }
@@ -199,36 +205,34 @@ public class WeiXinPayService {
     if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
       ip = request.getRemoteAddr();
     }
-    return ip.equals("0:0:0:0:0:0:0:1") ? "127.0.0.1" : ip;
+    return "0:0:0:0:0:0:0:1".equals(ip) ? "127.0.0.1" : ip;
   }
 
   /**
    * 生成微信签名
    */
-  public String createSign(String characterEncoding, SortedMap<Object, Object> parameters,
-                           String mch_key) {
-    StringBuffer sb = new StringBuffer();
-    Set es = parameters.entrySet();//所有参与传参的参数按照accsii排序（升序）
-    Iterator it = es.iterator();
-    while (it.hasNext()) {
-      Map.Entry entry = (Map.Entry) it.next();
-      String k = (String) entry.getKey();
-      Object v = entry.getValue();
+  public String createSign(String characterEncoding, Map<String, Object> parameters,
+                           String type) {
+    StringBuilder sb = new StringBuilder();
+    parameters.forEach((k, v) -> {
       if (null != v && !"".equals(v)
           && !"sign".equals(k) && !"key".equals(k)) {
-        sb.append(k + "=" + v + "&");
+        sb.append(k).append("=").append(v).append("&");
       }
+    });
+    if ("JSAPI".equals(type)) {
+      sb.append("key=").append(mchKey_JS);
+    } else {
+      sb.append("key=").append(mchKey_APP);
     }
-    sb.append("key=" + mch_key);
-    String sign = MD5Util.MD5Encode(sb.toString(), characterEncoding).toUpperCase();
-    return sign;
+    return MD5Util.MD5Encode(sb.toString(), characterEncoding).toUpperCase();
   }
 
 
   /**
    * 微信统一支付接口，创建微信预支付订单
    */
-  public Map<Object, Object> createUnifiedOrder(SortedMap orderParams) {
+  public Map<String, Object> createUnifiedOrder(SortedMap<String, Object> orderParams) {
     return WeixinPayUtil
         .createUnifiedOrder("https://api.mch.weixin.qq.com/pay/unifiedorder", "POST",
                             getRequestXml(orderParams));
@@ -237,7 +241,7 @@ public class WeiXinPayService {
   /**
    * 查询订单状态
    */
-  public Map<Object, Object> orderStatusQuery(SortedMap orderParams) {
+  public Map<String, Object> orderStatusQuery(SortedMap<String, Object> orderParams) {
     return WeixinPayUtil
         .createUnifiedOrder("https://api.mch.weixin.qq.com/pay/orderquery", "POST",
                             getRequestXml(orderParams));
@@ -246,8 +250,8 @@ public class WeiXinPayService {
   /**
    * 获取请求的XML
    */
-  public String getRequestXml(SortedMap<Object, Object> parameters) {
-    StringBuffer sb = new StringBuffer();
+  public String getRequestXml(SortedMap<String, Object> parameters) {
+    StringBuilder sb = new StringBuilder();
     sb.append("<xml>");
     Set es = parameters.entrySet();//所有参与传参的参数按照accsii排序（升序）
     Iterator it = es.iterator();
@@ -262,33 +266,8 @@ public class WeiXinPayService {
     return sb.toString();
   }
 
-  public SortedMap buildJsapiParams(String prepayId) {
-    SortedMap<Object, Object> jsapiParams = new TreeMap<Object, Object>();
-    jsapiParams.put("appId", appId);
-    jsapiParams.put("timeStamp", new Date().getTime() / 1000);
-    jsapiParams.put("nonceStr", MvUtil.getRandomStr());
-    jsapiParams.put("package", "prepay_id=" + prepayId);
-    jsapiParams.put("signType", "MD5");
-    String sign = createSign("UTF-8", jsapiParams, mchKey);
-    jsapiParams.put("sign", sign);
-    return jsapiParams;
-  }
-
-  public SortedMap buildAppParams(String prepayId) {
-    SortedMap<Object, Object> jsapiParams = new TreeMap<Object, Object>();
-    jsapiParams.put("appid", _appId);
-    jsapiParams.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
-    jsapiParams.put("noncestr", MvUtil.getRandomStr());
-    jsapiParams.put("partnerid", _mchId);
-    jsapiParams.put("prepayid", prepayId);
-    jsapiParams.put("package", "Sign=WXPay");
-    String sign = createSign("UTF-8", jsapiParams, _mchKey);
-    jsapiParams.put("sign", sign);
-    return jsapiParams;
-  }
-
   public String getJsapiSignature(HttpServletRequest request, String noncestr, Long timestamp) {
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     sb.append("jsapi_ticket=");
     sb.append(dictionaryService.findDictionaryById(8L).getValue());
     sb.append("&noncestr=");
@@ -304,33 +283,8 @@ public class WeiXinPayService {
 
   public String getCompleteRequestUrl(HttpServletRequest request) {
 
-    String s = weixinRootUrl +
-               request.getRequestURI() +
-               (request.getQueryString() != null ? "?" + request.getQueryString() : "");
-    return s;
-  }
-
-  /**
-   * 封装订单参数
-   */
-  @Transactional(readOnly = true)
-  public SortedMap<Object, Object> test(String body, String orderSid, String truePrice,
-                                        String notifyUrl, String openId) {
-    SortedMap<Object, Object> orderParams = new TreeMap<>();
-    orderParams.put("appid", appId);
-    orderParams.put("mch_id", mchId);
-    orderParams.put("nonce_str", MvUtil.getRandomStr());
-    orderParams.put("body", body);
-    orderParams.put("out_trade_no", orderSid);
-    orderParams.put("fee_type", "CNY");
-    orderParams.put("total_fee", truePrice);
-    orderParams.put("spbill_create_ip", "127.0.0.1");
-    orderParams.put("notify_url", notifyUrl);
-    orderParams.put("trade_type", "JSAPI");
-    orderParams.put("input_charset", "UTF-8");
-    orderParams.put("openid", openId);
-    String sign = createSign("UTF-8", orderParams, mchKey);
-    orderParams.put("sign", sign);
-    return orderParams;
+    return Constants.WEI_XIN_ROOT_URL +
+           request.getRequestURI() +
+           (request.getQueryString() != null ? "?" + request.getQueryString() : "");
   }
 }

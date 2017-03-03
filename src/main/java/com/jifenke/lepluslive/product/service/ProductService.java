@@ -91,11 +91,6 @@ public class ProductService {
     return productSpecRepository.findAllByProductAndState(product, 1);
   }
 
-  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
-  public Long getTotalCount() {
-    return productRepository.getTotalCount();
-  }
-
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public List<ProductType> findAllProductType() {
@@ -111,10 +106,6 @@ public class ProductService {
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public List<ProductDetail> findAllProductDetailsByProduct(Product product) {
     return productDetailRepository.findAllByProductOrderBySid(product);
-  }
-
-  public List<Product> findProducts() {
-    return productRepository.findAll();
   }
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)

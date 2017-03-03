@@ -40,16 +40,6 @@ public class RechargeService {
   }
 
   /**
-   * 获得当前account余额  16/10/26
-   */
-  public Map balance() {
-    SortedMap<Object, Object> orderParams = new TreeMap<>();
-    orderParams.put("api_key", phoneKey);
-    String url = Constants.PHONE_BALANCE + buildParams(orderParams);
-    return HttpUtils.get(url);
-  }
-
-  /**
    * 充值  16/10/28
    *
    * @param phone    要充值的手机号码
@@ -89,4 +79,13 @@ public class RechargeService {
     return result.toString();
   }
 
+//  /**
+//   * 获得当前account余额  16/10/26
+//   */
+//  public Map balance() {
+//    SortedMap<Object, Object> orderParams = new TreeMap<>();
+//    orderParams.put("api_key", phoneKey);
+//    String url = Constants.PHONE_BALANCE + buildParams(orderParams);
+//    return HttpUtils.get(url);
+//  }
 }

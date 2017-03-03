@@ -7,17 +7,13 @@ import com.jifenke.lepluslive.global.util.CookieUtils;
 import com.jifenke.lepluslive.global.util.JsonUtils;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
-import com.jifenke.lepluslive.order.domain.entities.OnLineOrder;
 import com.jifenke.lepluslive.order.service.OrderService;
 import com.jifenke.lepluslive.product.domain.entities.ProductSpec;
 import com.jifenke.lepluslive.product.service.ProductService;
 import com.jifenke.lepluslive.weixin.controller.dto.CartDetailDto;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
-import com.jifenke.lepluslive.weixin.service.DictionaryService;
-import com.jifenke.lepluslive.weixin.service.WeiXinUserService;
+import com.jifenke.lepluslive.weixin.service.WeiXinService;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -42,9 +38,6 @@ import javax.servlet.http.HttpServletResponse;
 @RequestMapping("/weixin")
 public class WeiXinCartController {
 
-  @Value("${weixin.appId}")
-  private String appid;
-
   @Inject
   private ProductService productService;
 
@@ -52,18 +45,14 @@ public class WeiXinCartController {
   private OrderService orderService;
 
   @Inject
-  private DictionaryService dictionaryService;
-
-  @Inject
   private AddressService addressService;
 
   @Inject
-  private WeiXinUserService weiXinUserService;
+  private WeiXinService weiXinService;
 
 
   @RequestMapping(value = "/cart", method = RequestMethod.GET)
-  public ModelAndView goProductPage(HttpServletRequest request, HttpServletResponse response,
-                                    Model model) {
+  public ModelAndView goProductPage() {
 
     return MvUtil.go("/weixin/cart");
   }
@@ -71,8 +60,8 @@ public class WeiXinCartController {
   @RequestMapping("/cart/ajax")
   public
   @ResponseBody
-  List<CartDetailDto> getCartDetail(HttpServletRequest request, HttpServletResponse response) {
-    String openId = CookieUtils.getCookieValue(request, appid + "-user-open-id");
+  List<CartDetailDto> getCartDetail(HttpServletRequest request) {
+    String openId = weiXinService.getCurrentWeiXinUser(request).getOpenId();
     String cart = CookieUtils.getCookieValue(request, openId + "-cart");
     List<CartDetailDto> cartDetailDtos = null;
     if (cart != null) {
@@ -97,8 +86,7 @@ public class WeiXinCartController {
   @ResponseBody
   LejiaResult addToCart(@RequestBody CartDetailDto cartDetailDto, HttpServletRequest request,
                         HttpServletResponse response) {
-    String openId = CookieUtils.getCookieValue(request, appid + "-user-open-id");
-
+    String openId = weiXinService.getCurrentWeiXinUser(request).getOpenId();
     String cart = CookieUtils.getCookieValue(request, openId + "-cart");
     List<CartDetailDto> cartDetailDtos = null;
     LejiaResult lejiaResult = new LejiaResult();
@@ -131,7 +119,7 @@ public class WeiXinCartController {
         cartNumber += cartDetailDto.getProductNumber();
       }
     } else {
-      cartDetailDtos = new ArrayList<CartDetailDto>();
+      cartDetailDtos = new ArrayList<>();
       cartDetailDtos.add(cartDetailDto);
       cartNumber += cartDetailDto.getProductNumber();
     }
@@ -146,8 +134,8 @@ public class WeiXinCartController {
   @RequestMapping(value = "/cart/cartNumber", method = RequestMethod.GET)
   public
   @ResponseBody
-  LejiaResult addToCart(HttpServletRequest request, HttpServletResponse response) {
-    String openId = CookieUtils.getCookieValue(request, appid + "-user-open-id");
+  LejiaResult addToCart(HttpServletRequest request) {
+    String openId = weiXinService.getCurrentWeiXinUser(request).getOpenId();
     String cart = CookieUtils.getCookieValue(request, openId + "-cart");
     int cartNumber = 0;
     if (cart != null) {
@@ -164,7 +152,7 @@ public class WeiXinCartController {
   @ResponseBody
   LejiaResult deleteCart(@RequestParam long product, @RequestParam long productSpec,
                          HttpServletRequest request, HttpServletResponse response) {
-    String openId = CookieUtils.getCookieValue(request, appid + "-user-open-id");
+    String openId = weiXinService.getCurrentWeiXinUser(request).getOpenId();
     String cart = CookieUtils.getCookieValue(request, openId + "-cart");
     int count = 0;
     List<CartDetailDto> cartDetailDtos = null;
@@ -191,7 +179,7 @@ public class WeiXinCartController {
   LejiaResult changeProductNumber(@RequestParam long product, @RequestParam long productSpec,
                                   @RequestParam int number,
                                   HttpServletRequest request, HttpServletResponse response) {
-    String openId = CookieUtils.getCookieValue(request, appid + "-user-open-id");
+    String openId = weiXinService.getCurrentWeiXinUser(request).getOpenId();
     String cart = CookieUtils.getCookieValue(request, openId + "-cart");
     int cartNumber = 0;
     List<CartDetailDto> cartDetailDtos = null;
@@ -216,15 +204,14 @@ public class WeiXinCartController {
   @ResponseBody
   LejiaResult createCartOrder(@RequestBody List<CartDetailDto> cartDetailDtos,
                               HttpServletRequest request, HttpServletResponse response) {
-    String openId = CookieUtils.getCookieValue(request, appid + "-user-open-id");
-    WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByOpenId(openId);
+    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
 
     Long count = orderService.getCurrentUserObligationOrdersCount(weiXinUser.getLeJiaUser());
     if (count >= 4) {
       return LejiaResult.build(5001, "未支付订单过多,请支付后再下单");
     }
     Address address = addressService.findAddressByLeJiaUserAndState(weiXinUser.getLeJiaUser());
-    String cart = CookieUtils.getCookieValue(request, openId + "-cart");
+    String cart = CookieUtils.getCookieValue(request, weiXinUser.getOpenId() + "-cart");
     List<CartDetailDto> cartDetailDtoOrigin = null;
     if (cart != null) {
       cartDetailDtoOrigin = JsonUtils.jsonToList(cart, CartDetailDto.class);
@@ -235,7 +222,7 @@ public class WeiXinCartController {
                                        5L);
       if ("200".equals(result.get("status").toString())) {
         CookieUtils
-            .setCookie(request, response, openId + "-cart",
+            .setCookie(request, response, weiXinUser.getOpenId() + "-cart",
                        JsonUtils.objectToJson(cartDetailDtoOrigin),
                        Constants.COOKIE_DISABLE_TIME);
       }

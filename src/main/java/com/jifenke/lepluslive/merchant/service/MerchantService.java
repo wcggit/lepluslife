@@ -3,7 +3,6 @@ package com.jifenke.lepluslive.merchant.service;
 import com.jifenke.lepluslive.merchant.controller.dto.MerchantDto;
 import com.jifenke.lepluslive.merchant.domain.entities.City;
 import com.jifenke.lepluslive.merchant.domain.entities.Merchant;
-import com.jifenke.lepluslive.merchant.domain.entities.MerchantInfo;
 import com.jifenke.lepluslive.merchant.domain.entities.MerchantScroll;
 import com.jifenke.lepluslive.merchant.repository.MerchantInfoRepository;
 import com.jifenke.lepluslive.merchant.repository.MerchantRepository;
@@ -115,16 +114,7 @@ public class MerchantService {
       scrollList.add(m);
     }
     map.put("scrolls", scrollList);
-    //商家详情图
-//    List<Map> detailList = new ArrayList<>();
-//    List<Object[]> list3 = merchantDetailRepository.findMerchantDetailsByMerchantId(id);
-//    for (Object[] o : list3) {
-//      Map<String, Object> m = new HashMap<>();
-//      m.put("sid", o[0]);
-//      m.put("picture", o[1]);
-//      detailList.add(m);
-//    }
-//    map.put("details", detailList);
+    //商家详情图 暂无
     return map;
   }
 
@@ -310,14 +300,6 @@ public class MerchantService {
       dtoList.add(merchantDto);
     }
     return dtoList;
-  }
-
-  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public void test(Merchant merchant) {
-    MerchantInfo info = new MerchantInfo();
-    merchantInfoRepository.save(info);
-    merchant.setMerchantInfo(info);
-    merchantRepository.save(merchant);
   }
 
   /**

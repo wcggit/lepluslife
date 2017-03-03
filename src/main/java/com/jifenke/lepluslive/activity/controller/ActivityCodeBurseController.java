@@ -8,7 +8,6 @@ import com.jifenke.lepluslive.activity.service.ActivityJoinLogService;
 import com.jifenke.lepluslive.activity.service.ActivityShareLogService;
 import com.jifenke.lepluslive.activity.service.RechargeCardService;
 import com.jifenke.lepluslive.global.service.MessageService;
-import com.jifenke.lepluslive.global.util.CookieUtils;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
@@ -21,7 +20,6 @@ import com.jifenke.lepluslive.weixin.service.DictionaryService;
 import com.jifenke.lepluslive.weixin.service.WeiXinService;
 import com.jifenke.lepluslive.weixin.service.WeiXinUserService;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,8 +45,6 @@ import javax.servlet.http.HttpServletResponse;
 @RequestMapping("/weixin")
 public class ActivityCodeBurseController {
 
-  @Value("${weixin.appId}")
-  private String appId;
   @Inject
   private ActivityCodeBurseService activityCodeBurseService;
   @Inject
@@ -138,8 +134,7 @@ public class ActivityCodeBurseController {
   //关注图文链接页面
   @RequestMapping("/subPage")
   public ModelAndView subPage(HttpServletRequest request, Model model) {
-    String openId = CookieUtils.getCookieValue(request, appId + "-user-open-id");
-    WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByOpenId(openId);
+    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
     model.addAttribute("wxConfig", weiXinService.getWeiXinConfig(request));
     //判断是否获得过红包
     ActivityJoinLog joinLog = activityJoinLogService.findLogBySubActivityAndOpenId(0, weiXinUser);
@@ -202,8 +197,7 @@ public class ActivityCodeBurseController {
   @RequestMapping(value = "/activity/{id}", method = RequestMethod.GET)
   public ModelAndView goActivityPage(HttpServletRequest request, @PathVariable String id,
                                      Model model) {
-    String openId = CookieUtils.getCookieValue(request, appId + "-user-open-id");
-    WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByOpenId(openId);
+    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
     String[] str = id.split("_");
     if ("0".equals(str[0])) { //普通关注
       //判断是否获得过红包

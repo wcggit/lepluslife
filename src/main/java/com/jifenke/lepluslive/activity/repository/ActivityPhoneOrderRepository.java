@@ -20,7 +20,8 @@ public interface ActivityPhoneOrderRepository extends JpaRepository<ActivityPhon
   /**
    * 获取某一用户所有的已支付订单  16/11/01
    */
-  List<ActivityPhoneOrder> findByLeJiaUserAndPayStateOrderByIdDesc(LeJiaUser leJiaUser, Integer payState);
+  List<ActivityPhoneOrder> findByLeJiaUserAndPayStateOrderByCreateDateDesc(LeJiaUser leJiaUser,
+                                                                           Integer payState);
 
   /**
    * 今日已使用话费池  16/10/27

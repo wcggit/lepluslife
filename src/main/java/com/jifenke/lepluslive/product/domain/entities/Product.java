@@ -15,7 +15,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
@@ -37,7 +36,7 @@ public class Product implements Serializable {
   @NotNull
   private String name;
 
-  private Integer type = 1; //商品类型 1=常规|2=秒杀
+  private Integer type = 1; //商品类型 1=常规|2=限量|3=秒杀|4=金币
 
   @NotNull
   private String picture;
@@ -78,6 +77,11 @@ public class Product implements Serializable {
 
   @ManyToOne
   private Category mark; //商品角标  为null时无角标
+
+  private Integer isBackRed = 0;    //是否返红包 1返 0不返
+  private Integer backRedType = 2;  //返红包类型 1比例返还 2金额返还
+  private Integer backRatio = 0;    //返还比例
+  private Integer backMoney = 0;    //返还金额
 
   @Column(name = "points_count")
   private Long pointsCount = 0L;   // 该商品的所有订单使用的积分加和  不再使用
@@ -259,6 +263,38 @@ public class Product implements Serializable {
 
   public void setState(Integer state) {
     this.state = state;
+  }
+
+  public Integer getIsBackRed() {
+    return isBackRed;
+  }
+
+  public void setIsBackRed(Integer isBackRed) {
+    this.isBackRed = isBackRed;
+  }
+
+  public Integer getBackRedType() {
+    return backRedType;
+  }
+
+  public void setBackRedType(Integer backRedType) {
+    this.backRedType = backRedType;
+  }
+
+  public Integer getBackRatio() {
+    return backRatio;
+  }
+
+  public void setBackRatio(Integer backRatio) {
+    this.backRatio = backRatio;
+  }
+
+  public Integer getBackMoney() {
+    return backMoney;
+  }
+
+  public void setBackMoney(Integer backMoney) {
+    this.backMoney = backMoney;
   }
 
   @Override

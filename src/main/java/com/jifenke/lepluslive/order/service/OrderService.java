@@ -1,20 +1,19 @@
 package com.jifenke.lepluslive.order.service;
 
 import com.jifenke.lepluslive.Address.domain.entities.Address;
-import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
+import com.jifenke.lepluslive.order.domain.entities.OnLineOrder;
+import com.jifenke.lepluslive.order.domain.entities.OrderDetail;
 import com.jifenke.lepluslive.order.domain.entities.PayOrigin;
+import com.jifenke.lepluslive.order.repository.OrderRepository;
 import com.jifenke.lepluslive.product.domain.entities.Product;
 import com.jifenke.lepluslive.product.domain.entities.ProductSpec;
 import com.jifenke.lepluslive.product.service.ProductService;
-import com.jifenke.lepluslive.weixin.controller.dto.CartDetailDto;
-import com.jifenke.lepluslive.order.domain.entities.OnLineOrder;
-import com.jifenke.lepluslive.order.domain.entities.OrderDetail;
-import com.jifenke.lepluslive.order.repository.OrderRepository;
-import com.jifenke.lepluslive.Address.service.AddressService;
+import com.jifenke.lepluslive.score.domain.entities.ScoreC;
 import com.jifenke.lepluslive.score.service.ScoreAService;
 import com.jifenke.lepluslive.score.service.ScoreBService;
-import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
+import com.jifenke.lepluslive.score.service.ScoreCService;
+import com.jifenke.lepluslive.weixin.controller.dto.CartDetailDto;
 import com.jifenke.lepluslive.weixin.repository.DictionaryRepository;
 import com.jifenke.lepluslive.weixin.service.JobThread;
 import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
@@ -37,7 +36,7 @@ import javax.inject.Inject;
 
 
 /**
- * Created by wcg on 16/3/20.
+ * 线上订单相关 Created by zhangwen on 16/3/20.
  */
 @Service
 @Transactional(readOnly = true)
@@ -45,9 +44,6 @@ public class OrderService {
 
   @Inject
   private ProductService productService;
-
-  @Inject
-  private AddressService addressService;
 
   @Inject
   private WeiXinPayService weiXinPayService;
@@ -60,6 +56,9 @@ public class OrderService {
 
   @Inject
   private ScoreBService scoreBService;
+
+  @Inject
+  private ScoreCService scoreCService;
 
   @Inject
   private Scheduler scheduler;
@@ -314,36 +313,43 @@ public class OrderService {
     return result;
   }
 
-
+  /**
+   * 商品订单支付成功回调 2017/02/22 zhangwen
+   *
+   * @param map 支付回调参数
+   */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public String orderConfirm(Long orderId, Long addressId) {
-    OnLineOrder onLineOrder = orderRepository.findOne(orderId);
-    onLineOrder.setAddress(addressService.findOneAddress(addressId));
-    orderRepository.save(onLineOrder);
-    return onLineOrder.getOrderSid();
-  }
-
-
-  public OnLineOrder findOrderBySid(String orderSid) {
-    return orderRepository.findByOrderSid(orderSid);
+  public void paySuccess(Map<String, Object> map) {
+    String orderSid = (String) map.get("out_trade_no");
+    OnLineOrder onLineOrder = orderRepository.findByOrderSid(orderSid);
+    if (onLineOrder != null) {
+      //保存微信支付日志
+      PayOrigin payOrigin = onLineOrder.getPayOrigin();
+      String orderType = "onLineOrder";
+      if (payOrigin.getPayFrom() == 1) {
+        orderType = "APPOnLineOrder";
+      }
+      weixinPayLogService.savePayLog(map, orderType, 1);
+      if (onLineOrder.getType() != null && onLineOrder.getType() == 1) { //积分订单处理
+        paySuccessByScore(onLineOrder);
+        return;
+      }
+      //金币订单处理
+      paySuccessByGold(onLineOrder);
+    }
   }
 
   /**
-   * @param orderSid 支付成功后,a积分加,b积分减,修改订单状态为已支付  并分润  16/11/05
+   * 积分类订单支付成功执行 2017/02/22 zhangwen
+   *
+   * @param onLineOrder 支付成功后,a积分加,b积分减,修改订单状态为已支付  并分润  16/11/05
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public void paySuccess(String orderSid) {
-    OnLineOrder onLineOrder = orderRepository.findByOrderSid(orderSid);
-    //保存微信支付日志
+  public void paySuccessByScore(OnLineOrder onLineOrder) {
     PayOrigin payOrigin = onLineOrder.getPayOrigin();
-    String orderType = "onLineOrder";
-    if (payOrigin.getId() == 1) {
-      orderType = "APPOnLineOrder";
-    }
-    weixinPayLogService.savePayLog(onLineOrder.getOrderSid(), orderType);
     PayOrigin payWay = new PayOrigin();
     System.out.println(onLineOrder.getState() + "之前");
-    if (onLineOrder.getState() == 0) {
+    if (onLineOrder.getState() == 0 || onLineOrder.getState() == 4) {
       Integer PAY_BACK_SCALE = Integer.parseInt(dictionaryRepository.findOne(3L).getValue());
       Long
           payBackScore =
@@ -369,20 +375,13 @@ public class OrderService {
           payWay.setId(6L);
         }
       }
-      payWay.setPayFrom(payOrigin.getPayFrom());
       onLineOrder.setPayOrigin(payWay);
       //订单相关product的销量等数据处理
       try {
         productService.editProductSaleByPayOrder(onLineOrder);
         //如果返还A红包不为0,改变会员状态
         if (payBackScore > 0) {
-          WeiXinUser w = weiXinUserService.findWeiXinUserByLeJiaUser(user);
-          if (w != null) {
-            if (w.getState() == 0) {
-              w.setState(1);
-              weiXinUserService.saveWeiXinUser(w);
-            }
-          }
+          weiXinUserService.setWeiXinState(user);
         }
       } catch (Exception e) {
         e.printStackTrace();
@@ -397,60 +396,52 @@ public class OrderService {
   }
 
   /**
-   * @param onLineOrder 支付成功后,a积分加,b积分减,修改订单状态为已支付
+   * 金币类订单支付成功执行 2017/02/22 zhangwen
+   *
+   * @param onLineOrder 支付成功后,a积分加,C积分减,修改订单状态为已支付   17/02/22
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public void paySuccessQuery(OnLineOrder onLineOrder) {
-    if (onLineOrder.getState() == 0 || onLineOrder.getState() == 4) {
-      Integer PAY_BACK_SCALE = Integer.parseInt(dictionaryRepository.findOne(3L).getValue());
-      Long
-          payBackScore =
-          (long) Math.ceil((double) (onLineOrder.getTruePrice() * PAY_BACK_SCALE) / 100);
-      PayOrigin payOrigin = onLineOrder.getPayOrigin();
-      PayOrigin payWay = new PayOrigin();
+  public void paySuccessByGold(OnLineOrder onLineOrder) {
+    PayOrigin payOrigin = onLineOrder.getPayOrigin();
+    PayOrigin payWay = new PayOrigin();
+    System.out.println(onLineOrder.getState() + "之前");
+    if (onLineOrder.getState() == 0) {
       onLineOrder.setState(1);
       onLineOrder.setPayState(1);
       onLineOrder.setPayDate(new Date());
-      onLineOrder.setPayBackA(payBackScore);
       LeJiaUser user = onLineOrder.getLeJiaUser();
-      scoreAService.paySuccess(onLineOrder.getLeJiaUser(), payBackScore, onLineOrder.getOrderSid());
-      if (onLineOrder.getTrueScore() != 0) {
-        if (payOrigin.getId() == 1) {
-          payWay.setId(4L);
-        } else {
-          payWay.setId(8L);
-        }
-        scoreBService
-            .paySuccess(onLineOrder.getLeJiaUser(), onLineOrder.getTrueScore(), 2, "乐+商城消费",
-                        onLineOrder.getOrderSid());
-      } else {
-        if (payOrigin.getId() == 1) {
-          payWay.setId(2L);
-        } else {
-          payWay.setId(6L);
-        }
-      }
-      payWay.setPayFrom(payOrigin.getPayFrom());
-      onLineOrder.setPayOrigin(payWay);
-      //订单相关product的销量等数据处理
       try {
-        productService.editProductSaleByPayOrder(onLineOrder);
-        //如果返还A红包不为0,改变会员状态
-        if (payBackScore > 0) {
-          WeiXinUser w = weiXinUserService.findWeiXinUserByLeJiaUser(user);
-          if (w != null) {
-            if (w.getState() == 0) {
-              w.setState(1);
-              weiXinUserService.saveWeiXinUser(w);
-            }
+        if (onLineOrder.getTrueScore() != 0) {
+          if (payOrigin.getId() == 1) {
+            payWay.setId(11L);
+          } else {
+            payWay.setId(12L);
           }
+          //减金币及添加金币记录
+          ScoreC scoreC = scoreCService.findScoreCByLeJiaUser(user);
+          scoreCService.saveScoreC(scoreC, 0, onLineOrder.getTrueScore());
+          scoreCService.saveScoreCDetail(scoreC, 0, onLineOrder.getTrueScore(), 2, "金币商城消费",
+                                         onLineOrder.getOrderSid());
+        } else {
+          if (payOrigin.getId() == 1) {
+            payWay.setId(2L);
+          } else {
+            payWay.setId(6L);
+          }
+        }
+        onLineOrder.setPayOrigin(payWay);
+        //订单相关product的销量等数据处理
+        productService.editProductSaleByPayOrder(onLineOrder);
+        Long payBackScore = onLineOrder.getPayBackA();
+        //如果返还A红包不为0,发红包并改变会员状态
+        if (payBackScore != null && payBackScore > 0) {
+          scoreAService.paySuccess(user, payBackScore, onLineOrder.getOrderSid());
+          weiXinUserService.setWeiXinState(user);
         }
       } catch (Exception e) {
         e.printStackTrace();
       }
-      new Thread(() -> { //合伙人和商家分润
-        orderShareService.onLineOrderShare(onLineOrder);
-      }).start();
+      System.out.println(onLineOrder.getState() + "之后");
       orderRepository.save(onLineOrder);
     }
   }
@@ -519,9 +510,9 @@ public class OrderService {
    * @param transmitWay 物流方式 1=自提
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public Map<Object, Object> setPriceScoreForOrder(Long orderId, Long truePrice, Long trueScore,
+  public Map<String, Object> setPriceScoreForOrder(Long orderId, Long truePrice, Long trueScore,
                                                    Integer transmitWay) {
-    Map<Object, Object> result = new HashMap<>();
+    Map<String, Object> result = new HashMap<>();
     OnLineOrder onLineOrder = orderRepository.findOne(orderId);
     if (onLineOrder.getState() == 1) { //订单已经支付
       result.put("status", 5012);
@@ -576,7 +567,7 @@ public class OrderService {
     if (onLineOrder != null) {
       if (onLineOrder.getState() == 4 || onLineOrder.getState() == 0) {
         //调接口查询订单是否支付完成
-        SortedMap<Object, Object> map = null;
+        SortedMap<String, Object> map = null;
         String currOrderType;
         if (orderType == 1) {
           map = weiXinPayService.buildOrderQueryParams(onLineOrder);
@@ -585,18 +576,16 @@ public class OrderService {
           map = weiXinPayService.buildAPPOrderQueryParams(onLineOrder);
           currOrderType = "APPOnLineOrder";
         }
-        Map orderMap = weiXinPayService.orderStatusQuery(map);
+        Map<String, Object> orderMap = weiXinPayService.orderStatusQuery(map);
         String returnCode = (String) orderMap.get("return_code");
         String resultCode = (String) orderMap.get("result_code");
         String tradeState = (String) orderMap.get("trade_state");
         if ("SUCCESS".equals(returnCode) && "SUCCESS".equals(resultCode) && "SUCCESS"
             .equals(tradeState)) {
           //保存微信掉单日志
-          weixinPayLogService
-              .savePayLog(onLineOrder.getOrderSid(), returnCode, resultCode, tradeState,
-                          currOrderType);
+          weixinPayLogService.savePayLog(orderMap, currOrderType, 2);
           //对订单进行处理
-          paySuccessQuery(onLineOrder);
+          paySuccessByScore(onLineOrder);
         }
       }
     }
@@ -628,166 +617,7 @@ public class OrderService {
     return 1;
   }
 
-  //APP立即购买操作  即将改版
-//  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-//  public OnLineOrder createOrder(OrderDto orderDto, LeJiaUser leJiaUser, Address address,
-//                                 Long payWayId, Integer FREIGHT_FREE_PRICE) {
-//    Product product = productService.findOneProduct(orderDto.getProductId());
-////    productService.editProductSpecRepository(orderDto.getProductSpec(), orderDto.getProductNum());
-//    OnLineOrder onLineOrder = new OnLineOrder();
-//    ProductSpec productSpec = productService.findOneProductSpec(orderDto.getProductSpec());
-//    Long totalPrice = productSpec.getPrice() * orderDto.getProductNum();
-//    Long totalMinPrice = productSpec.getMinPrice() * orderDto.getProductNum();
-//    Long totalScore = totalPrice - totalMinPrice;
-//    //判断是否包邮
-//    if (totalPrice.intValue() >= FREIGHT_FREE_PRICE) {
-//      onLineOrder.setFreightPrice(0L);
-//      onLineOrder.setTotalPrice(totalPrice);
-//    } else {
-//      Long FREIGHT_PRICE = Long.parseLong(dictionaryRepository.findOne(2L).getValue());
-//      onLineOrder.setFreightPrice(FREIGHT_PRICE);
-//      onLineOrder.setTotalPrice(totalPrice + FREIGHT_PRICE);
-//    }
-//    onLineOrder.setTruePrice(totalPrice);
-////    onLineOrder.setFreightPrice(0L);
-////    onLineOrder.setTotalPrice(1L);
-////    onLineOrder.setTruePrice(1L);
-//
-//    onLineOrder.setTotalScore(
-//        (long) Math.floor(Double.parseDouble(totalScore.toString()) / 100));
-//    onLineOrder.setLeJiaUser(leJiaUser);
-//    onLineOrder.setState(-1);
-//    onLineOrder.setAddress(address);
-//    PayOrigin payOrigin = new PayOrigin(payWayId);  //设置支付来源
-//    onLineOrder.setPayOrigin(payOrigin);
-//    List<OrderDetail> orderDetails = onLineOrder.getOrderDetails();
-//    OrderDetail orderDetail = new OrderDetail();
-//
-//    orderDetail.setProduct(product);
-//    orderDetail.setState(1);
-//    orderDetail.setProductNumber(orderDto.getProductNum());
-//    orderDetail.setProductSpec(productSpec);
-//    orderDetail.setOnLineOrder(onLineOrder);
-//    orderDetails.add(orderDetail);
-//
-//    orderRepository.save(onLineOrder);
-//
-//    //====创建订单后,生成quartz任务
-////    createOrderScheduler(order.getId());
-//    JobThread jobThread = new JobThread(onLineOrder.getId(), scheduler);
-//    jobThread.start();
-//
-//    return onLineOrder;
-//  }
-
-  // 2016/10/9注释
-//  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-//  public OnLineOrder findOrderById(Long orderId, Boolean flag) {
-//    OnLineOrder onLineOrder = orderRepository.findOne(orderId);
-//    List<OrderDetail> orderDetails = onLineOrder.getOrderDetails().stream().filter((orderDetail) ->
-//                                                                                       orderDetail
-//                                                                                           .getState()
-//                                                                                       == 0
-//    ).collect(Collectors.toList());
-//
-//    if (orderDetails.size() == onLineOrder.getOrderDetails().size()) {
-//      orderRepository.delete(onLineOrder);
-//    }
-//
-//    if (flag == null) {
-//      flag = false;
-//    }
-//    if (flag) {
-//      onLineOrder.getOrderDetails().removeAll(orderDetails);
-//    }
-//
-//    return onLineOrder;
-//  }
-
-//  /**
-//   * 5分钟后查询订单是否支付完成防止掉单
-//   */
-//  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-//  public void startOrderStatusQueryJob(Long orderId) {
-//    new Thread(new Runnable() {
-//      @Override
-//      public void run() {
-//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//        try {
-//          Date time = sdf.parse(sdf.format(new Date().getTime() + Constants.ORDER_QUERY));
-//          JobDetail orderStatusQuery = JobBuilder.newJob(OrderStatusQueryJob.class)
-//              .withIdentity("orderStatusQuery" + orderId, jobGroupName)
-//              .usingJobData("orderId", orderId)
-//              .build();
-//          Trigger orderStatusQueryTrigger = TriggerBuilder.newTrigger()
-//              .withIdentity(
-//                  TriggerKey.triggerKey("orderStatusQueryJobTrigger"
-//                                        + orderId, triggerGroupName))
-//              .startAt(time)
-//              .build();
-//          scheduler.scheduleJob(orderStatusQuery, orderStatusQueryTrigger);
-//          scheduler.start();
-//
-//        } catch (Exception e) {
-//          e.printStackTrace();
-//        }
-//      }
-//    }).start();
-//  }
-
-  //  /**
-//   * 购物车生成订单基本信息 原来的，待删除
-//   */
-//  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-//  public OnLineOrder createCartOrder(List<CartDetailDto> cartDetailDtos, LeJiaUser leJiaUser,
-//                                     Address address, Integer FREIGHT_FREE_PRICE) {
-//    OnLineOrder onLineOrder = new OnLineOrder();
-//    List<OrderDetail> orderDetails = onLineOrder.getOrderDetails();
-//    Long totalPrice = 0L;
-//    Long totalScore = 0L;
-//    for (CartDetailDto cartDetailDto : cartDetailDtos) {
-//      OrderDetail orderDetail = new OrderDetail();
-//      Product product = productService.findOneProduct(cartDetailDto.getProduct().getId());
-//      ProductSpec productSpec = productService.editProductSpecRepository(
-//          cartDetailDto.getProductSpec().getId(),
-//          cartDetailDto.getProductNumber());
-//      if (productSpec != null) {
-//        totalPrice += productSpec.getPrice() * cartDetailDto.getProductNumber();
-//        totalScore +=
-//            (productSpec.getPrice() - productSpec.getMinPrice()) * cartDetailDto.getProductNumber();
-//        orderDetail.setState(1);
-//      } else {
-//        orderDetail.setState(0);
-//      }
-//      orderDetail.setProduct(product);
-//      orderDetail.setProductNumber(cartDetailDto.getProductNumber());
-//      orderDetail.setProductSpec(productSpec);
-//      orderDetail.setOnLineOrder(onLineOrder);
-//      orderDetails.add(orderDetail);
-//    }
-//    //判断是否包邮
-//    if (totalPrice.intValue() >= FREIGHT_FREE_PRICE) {
-//      onLineOrder.setFreightPrice(0L);
-//      onLineOrder.setTotalPrice(totalPrice);
-//    } else {
-//      Long FREIGHT_PRICE = Long.parseLong(dictionaryRepository.findOne(2L).getValue());
-//      onLineOrder.setFreightPrice(FREIGHT_PRICE);
-//      onLineOrder.setTotalPrice(totalPrice + FREIGHT_PRICE);
-//    }
-//    onLineOrder.setLeJiaUser(leJiaUser);
-//    if (address != null) {
-//      onLineOrder.setAddress(address);
-//    }
-//    onLineOrder.setOrderDetails(orderDetails);
-//    onLineOrder.setState(0);
-//    onLineOrder.setTruePrice(totalPrice);
-//    PayOrigin payOrigin = new PayOrigin(5L); //设置支付来源
-//    onLineOrder.setPayOrigin(payOrigin);
-//
-//    onLineOrder.setTotalScore((long) Math.floor(Double.parseDouble(totalScore.toString()) / 100));
-//    orderRepository.save(onLineOrder);
-//    JobThread jobThread = new JobThread(onLineOrder.getId(), scheduler);
-//    jobThread.start();
-//    return onLineOrder;
+  //  public OnLineOrder findOrderBySid(String orderSid) {
+//    return orderRepository.findByOrderSid(orderSid);
 //  }
 }

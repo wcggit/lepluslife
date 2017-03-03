@@ -3,7 +3,6 @@ package com.jifenke.lepluslive.merchant.service;
 import com.jifenke.lepluslive.merchant.domain.entities.Merchant;
 import com.jifenke.lepluslive.merchant.domain.entities.MerchantWalletOnline;
 import com.jifenke.lepluslive.merchant.domain.entities.MerchantWalletOnlineLog;
-
 import com.jifenke.lepluslive.merchant.repository.MerchantWalletOnlineLogRepository;
 import com.jifenke.lepluslive.merchant.repository.MerchantWalletOnlineRepository;
 

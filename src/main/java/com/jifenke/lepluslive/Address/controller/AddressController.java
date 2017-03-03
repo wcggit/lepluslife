@@ -6,23 +6,22 @@ import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.lejiauser.service.LeJiaUserService;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
-import java.util.List;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 /**
  * Created by zhangwen on 2016/5/3.
  */
-@Controller
+@RestController
 @RequestMapping("/address")
 public class AddressController {
 
@@ -34,9 +33,7 @@ public class AddressController {
 
   @ApiOperation(value = "查看我的收获地址列表")
   @RequestMapping(value = "/list", method = RequestMethod.POST)
-  public
-  @ResponseBody
-  LejiaResult list(@RequestParam(required = false) String token) {
+  public LejiaResult list(@RequestParam(required = false) String token) {
 
     LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);
 
@@ -47,16 +44,15 @@ public class AddressController {
 
   @ApiOperation(value = "新增或修改收货地址")
   @RequestMapping(value = "/edit", method = RequestMethod.POST)
-  public
-  @ResponseBody
-  LejiaResult edit(@ApiParam(value = "用户身份标识token") @RequestParam(required = false) String token,
-                   @ApiParam(value = "地址id(如果是新增地址则为空)") @RequestParam(required = false) Long id,
-                   @ApiParam(value = "姓名") @RequestParam(required = false) String name,
-                   @ApiParam(value = "详细地址") @RequestParam(required = false) String location,
-                   @ApiParam(value = "电话号码") @RequestParam(required = false) String phoneNumber,
-                   @ApiParam(value = "省") @RequestParam(required = false) String province,
-                   @ApiParam(value = "市") @RequestParam(required = false) String city,
-                   @ApiParam(value = "区") @RequestParam(required = false) String county
+  public LejiaResult edit(
+      @ApiParam(value = "用户身份标识token") @RequestParam(required = false) String token,
+      @ApiParam(value = "地址id(如果是新增地址则为空)") @RequestParam(required = false) Long id,
+      @ApiParam(value = "姓名") @RequestParam(required = false) String name,
+      @ApiParam(value = "详细地址") @RequestParam(required = false) String location,
+      @ApiParam(value = "电话号码") @RequestParam(required = false) String phoneNumber,
+      @ApiParam(value = "省") @RequestParam(required = false) String province,
+      @ApiParam(value = "市") @RequestParam(required = false) String city,
+      @ApiParam(value = "区") @RequestParam(required = false) String county
   ) {
     LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);
     if (leJiaUser == null) {
@@ -74,9 +70,7 @@ public class AddressController {
 
   @ApiOperation(value = "修改默认收货地址")
   @RequestMapping(value = "/changeState", method = RequestMethod.POST)
-  public
-  @ResponseBody
-  LejiaResult changeState(
+  public LejiaResult changeState(
       @ApiParam(value = "原默认地址id(如果只有一个地址则为空)") @RequestParam(required = false) Long oldId,
       @ApiParam(value = "新默认地址id") @RequestParam(required = false) Long newId) {
 
@@ -85,9 +79,7 @@ public class AddressController {
 
   @ApiOperation(value = "删除收货地址")
   @RequestMapping(value = "/delAddress", method = RequestMethod.POST)
-  public
-  @ResponseBody
-  LejiaResult delAddress(
+  public LejiaResult delAddress(
       @ApiParam(value = "收货地址id") @RequestParam(required = false) Long id) {
     //在订单表有外键，不能删除可以隐藏
     return addressService.deleteAddress(id);

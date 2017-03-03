@@ -1,36 +1,26 @@
 package com.jifenke.lepluslive.product.controller;
 
 
-import com.jifenke.lepluslive.global.util.CookieUtils;
 import com.jifenke.lepluslive.global.util.JsonUtils;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
-
 import com.jifenke.lepluslive.order.service.OrderDetailService;
 import com.jifenke.lepluslive.product.domain.entities.Product;
-
 import com.jifenke.lepluslive.product.domain.entities.ProductDetail;
 import com.jifenke.lepluslive.product.domain.entities.ProductSpec;
 import com.jifenke.lepluslive.product.domain.entities.ProductType;
 import com.jifenke.lepluslive.product.domain.entities.ScrollPicture;
-
 import com.jifenke.lepluslive.product.service.ProductService;
-
 import com.jifenke.lepluslive.product.service.ScrollPictureService;
 import com.jifenke.lepluslive.score.domain.entities.ScoreB;
 import com.jifenke.lepluslive.score.service.ScoreBService;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
-import com.jifenke.lepluslive.weixin.service.WeiXinUserService;
+import com.jifenke.lepluslive.weixin.service.WeiXinService;
 
-
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ui.Model;
-
-
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -50,14 +40,8 @@ public class LimitProductController {
   @Inject
   private ProductService productService;
 
-  @Value("${weixin.appId}")
-  private String appId;
-
   @Inject
   private ScrollPictureService scrollPictureService;
-
-  @Inject
-  private WeiXinUserService weiXinUserService;
 
   @Inject
   private ScoreBService scoreBService;
@@ -65,13 +49,15 @@ public class LimitProductController {
   @Inject
   private OrderDetailService orderDetailService;
 
+  @Inject
+  private WeiXinService weiXinService;
+
   /**
    * 公众号 商品首页 16/09/20
    */
   @RequestMapping(value = "/weixin/productIndex", method = RequestMethod.GET)
   public ModelAndView productIndex(HttpServletRequest request, Model model) {
-    String openId = CookieUtils.getCookieValue(request, appId + "-user-open-id");
-    WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByOpenId(openId);
+    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
     ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(weiXinUser.getLeJiaUser());
     //商品分类
     List<ProductType> typeList = productService.findAllProductType();
@@ -102,8 +88,7 @@ public class LimitProductController {
   @RequestMapping(value = "/weixin/limitDetail", method = RequestMethod.GET)
   public ModelAndView goBannerPage(HttpServletRequest request,
                                    @RequestParam(required = true) Long productId, Model model) {
-    String openId = CookieUtils.getCookieValue(request, appId + "-user-open-id");
-    WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByOpenId(openId);
+    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
     Product product = null;
     List<ProductDetail> detailList = null;
     List<ProductSpec> specList = null;
@@ -125,7 +110,7 @@ public class LimitProductController {
       model.addAttribute("product", product);
       detailList = productService.findAllProductDetailsByProduct(product);
       specList = productService.findAllProductSpec(product);
-      scrollPictureList = scrollPictureService.findAllScorllPicture(product);
+      scrollPictureList = scrollPictureService.findAllByProduct(product);
       model.addAttribute("detailList", JsonUtils.objectToJson(detailList));
       model.addAttribute("specList", JsonUtils.objectToJson(specList));
       model.addAttribute("scrollList", scrollPictureList);

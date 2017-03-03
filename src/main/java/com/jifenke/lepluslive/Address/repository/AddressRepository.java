@@ -2,7 +2,6 @@ package com.jifenke.lepluslive.Address.repository;
 
 import com.jifenke.lepluslive.Address.domain.entities.Address;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
-import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jifenke.lepluslive.global.config.Constants;
 import com.jifenke.lepluslive.global.util.CookieUtils;
 import com.jifenke.lepluslive.global.util.MvUtil;
-import com.jifenke.lepluslive.global.util.WeixinPayUtil;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -140,8 +139,8 @@ public class WeiXinService {
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public WeiXinUser getCurrentWeiXinUser(HttpServletRequest request) {
-    String openId = CookieUtils.getCookieValue(request, appid + "-user-open-id");
-    return weiXinUserService.findWeiXinUserByOpenId(openId);
+    String unionId = CookieUtils.getCookieValue(request, "leJiaUnionId");
+    return weiXinUserService.findWeiXinUserByUnionId(unionId);
   }
 
   @Transactional(readOnly = true)

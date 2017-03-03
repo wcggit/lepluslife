@@ -1,21 +1,20 @@
 package com.jifenke.lepluslive.Address.service;
 
 import com.jifenke.lepluslive.Address.domain.entities.Address;
+import com.jifenke.lepluslive.Address.repository.AddressRepository;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.order.domain.entities.OnLineOrder;
 import com.jifenke.lepluslive.order.service.OrderService;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
-import com.jifenke.lepluslive.Address.repository.AddressRepository;
-import com.jifenke.lepluslive.weixin.service.WeiXinService;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.inject.Inject;
-
 import java.util.List;
+
+import javax.inject.Inject;
 
 /**
  * Created by wcg on 16/3/21.
@@ -23,9 +22,6 @@ import java.util.List;
 @Service
 @Transactional(readOnly = true)
 public class AddressService {
-
-  @Inject
-  private WeiXinService weiXinService;
 
   @Inject
   private AddressRepository addressRepository;

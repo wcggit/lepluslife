@@ -41,7 +41,7 @@
 
         <div class="mask-btn">
             <div><a style="color: #fff;width: 100%;height: 100%;display: block"
-                    href="/front/order/weixin/confirmOrder/${orderId}">重新付款</a></div>
+                    href="/front/order/weixin/confirmOrder?orderId=${orderId}">重新付款</a></div>
             <div onclick="hideModel('mask-failed')">继续逛逛</div>
         </div>
     </div>

@@ -231,7 +231,7 @@
         else if (window.event) {
             window.event.cancelBubble = true;//兼容IE
         }
-        location.href = '/front/order/weixin/confirmOrder/' + id;
+        location.href = '/front/order/weixin/confirmOrder?orderId=' + id;
     }
     function orderConfirm(id, e) {
         var ev = e || window.event;
@@ -243,7 +243,7 @@
         }
         $.ajax({
                    type: "post",
-                   url: "/weixin/order/orderConfirm",
+                   url: "/order/orderConfirm",
                    data: {orderId: id},
                    success: function (data) {
                        location.reload(true);
@@ -368,7 +368,7 @@
     $(".yes").click(function (e) { //取消订单
         $.ajax({
                    type: "post",
-                   url: "/weixin/order/orderCancle",
+                   url: "/order/orderCancle",
                    data: {orderId: orderCancleId},
                    success: function (data) {
                        location.reload(true);

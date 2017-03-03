@@ -12,8 +12,6 @@ import java.util.List;
  */
 public interface LeJiaUserInfoRepository extends JpaRepository<LeJiaUserInfo, Long> {
 
-  List<LeJiaUserInfo> findByToken(String token);
-
   List<LeJiaUserInfo> findByLeJiaUser(LeJiaUser leJiaUser);
 
 }

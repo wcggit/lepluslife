@@ -5,16 +5,14 @@ import com.jifenke.lepluslive.activity.domain.entities.LeJiaUserInfo;
 import com.jifenke.lepluslive.activity.service.ActivitySportLogService;
 import com.jifenke.lepluslive.activity.service.LeJiaUserInfoService;
 import com.jifenke.lepluslive.global.util.LejiaResult;
-
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.lejiauser.service.LeJiaUserService;
 import com.jifenke.lepluslive.weixin.service.DictionaryService;
 
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -27,7 +25,7 @@ import io.swagger.annotations.ApiParam;
 /**
  * Created by zhangwen on 2016/8/18.
  */
-@Controller
+@RestController
 @RequestMapping("/app/sport")
 public class SportController {
 
@@ -48,9 +46,7 @@ public class SportController {
    */
   @ApiOperation(value = "打开运动页")
   @RequestMapping(value = "/open", method = RequestMethod.POST)
-  public
-  @ResponseBody
-  LejiaResult openSportPage(
+  public LejiaResult openSportPage(
       @ApiParam(value = "用户标识token") @RequestParam(required = true) String token) {
 
     LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);
@@ -82,10 +78,9 @@ public class SportController {
    */
   @ApiOperation(value = "提交运动数据")
   @RequestMapping(value = "/submit", method = RequestMethod.POST)
-  public
-  @ResponseBody
-  LejiaResult submitSport(@ApiParam(value = "运动步数") @RequestParam(required = true) Integer distance,
-                          @ApiParam(value = "用户标识token") @RequestParam(required = true) String token) {
+  public LejiaResult submitSport(
+      @ApiParam(value = "运动步数") @RequestParam(required = true) Integer distance,
+      @ApiParam(value = "用户标识token") @RequestParam(required = true) String token) {
 
     LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);
     LeJiaUserInfo leJiaUserInfo = leJiaUserInfoService.findByLeJiaUser(leJiaUser);

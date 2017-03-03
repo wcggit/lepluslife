@@ -62,5 +62,4 @@ public class WeixinMerchantController {
     model.addAttribute("wxConfig", weiXinService.getWeiXinConfig(request));
     return MvUtil.go("/weixin/merchantInfo");
   }
-
 }

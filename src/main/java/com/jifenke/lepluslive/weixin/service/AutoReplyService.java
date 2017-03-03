@@ -23,21 +23,6 @@ public class AutoReplyService {
   private AutoReplyRuleRepository autoReplyRuleRepository;
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
-  public List<AutoReplyRule> findAllReplyRule() {
-    return autoReplyRuleRepository.findAll();
-  }
-
-  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
-  public AutoReplyRule findTextReplyById(Long id) {
-    return autoReplyRuleRepository.findOne(id);
-  }
-
-  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
-  public AutoReplyRule findImageReplyById(Long id) {
-    return autoReplyRuleRepository.findOne(id);
-  }
-
-  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public AutoReplyRule findByReplyType(String replyType) {
     List<AutoReplyRule> replyRuleList = autoReplyRuleRepository.findOneByReplyType(replyType);
     if (replyRuleList.size() > 0) {

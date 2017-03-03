@@ -64,11 +64,11 @@ public class LeJiaUser {
   @ManyToOne(fetch = FetchType.LAZY)
   private Partner bindPartner;
 
-
   private Date bindMerchantDate;
 
   private Date bindPartnerDate;
 
+  private Long cityId;
 
   public Date getBindMerchantDate() {
     return bindMerchantDate;
@@ -192,6 +192,14 @@ public class LeJiaUser {
 
   public String getUserName() {
     return userName;
+  }
+
+  public Long getCityId() {
+    return cityId;
+  }
+
+  public void setCityId(Long cityId) {
+    this.cityId = cityId;
   }
 
   public void setUserName(String userName) {
