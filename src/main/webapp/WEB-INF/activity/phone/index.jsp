@@ -57,22 +57,24 @@
             var hasBuyTotalCount = 0, hasBuyTypeCount = 0; //累计购买和分类购买
             if (ruleList[j].cheap == 0) { //不是特惠，累计购买和时段购买是否达到上限
                 for (var m = 0; m < orderList.length; m++) {
-                    if (ruleList[j].id == orderList[m].phoneRule.id && orderList[m].cheap == 0) {
-                        hasBuyTotalCount += 1; //累计购买该产品数量
-                        if (ruleList[j].limitType != 0) {
-                            //分日期购买限制
-                            if (ruleList[j].limitType == 1) {
-                                // console.log(orderList[m].payDate+'==='+ currDay)
-                                if (orderList[m].payDate >= currDay) {
-                                    hasBuyTypeCount += 1;
-                                }
-                            } else if (ruleList[j].limitType == 2) {
-                                if (orderList[m].payDate >= currWeek) {
-                                    hasBuyTypeCount += 1;
-                                }
-                            } else if (ruleList[j].limitType == 3) {
-                                if (orderList[m].payDate >= currMonth) {
-                                    hasBuyTypeCount += 1;
+                    if(orderList[m].phoneRule != null){
+                        if (ruleList[j].id == orderList[m].phoneRule.id && orderList[m].cheap == 0) {
+                            hasBuyTotalCount += 1; //累计购买该产品数量
+                            if (ruleList[j].limitType != 0) {
+                                //分日期购买限制
+                                if (ruleList[j].limitType == 1) {
+                                    // console.log(orderList[m].payDate+'==='+ currDay)
+                                    if (orderList[m].payDate >= currDay) {
+                                        hasBuyTypeCount += 1;
+                                    }
+                                } else if (ruleList[j].limitType == 2) {
+                                    if (orderList[m].payDate >= currWeek) {
+                                        hasBuyTypeCount += 1;
+                                    }
+                                } else if (ruleList[j].limitType == 3) {
+                                    if (orderList[m].payDate >= currMonth) {
+                                        hasBuyTypeCount += 1;
+                                    }
                                 }
                             }
                         }
@@ -131,7 +133,7 @@
     </c:if>
     <c:if test="${soldOut == 1}">
         <div class="bottom">
-            <div class="btn-soldOut">花费已售罄</div>
+            <div class="btn-soldOut">话费已售罄</div>
             <div class="recharge-desc">
                 <p><span id="times_hour"></span>小时<span id="times_minute"></span>分钟<span
                         id="times_second"></span>秒后刷新话费池</p>

@@ -1,6 +1,7 @@
 package com.jifenke.lepluslive.lejiauser;
 
 import net.glxn.qrgen.core.image.ImageType;
+
 import org.krysalis.barcode4j.tools.UnitConv;
 
 public class BarcodeConfig {

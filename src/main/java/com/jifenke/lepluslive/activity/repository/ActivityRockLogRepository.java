@@ -1,6 +1,7 @@
 package com.jifenke.lepluslive.activity.repository;
 
 import com.jifenke.lepluslive.activity.domain.entities.ActivityRockLog;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**

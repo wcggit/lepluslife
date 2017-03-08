@@ -5,15 +5,20 @@ import com.jifenke.lepluslive.job.ValidateCodeJob;
 import com.jifenke.lepluslive.lejiauser.domain.entities.ValidateCode;
 import com.jifenke.lepluslive.lejiauser.repository.ValidateCodeRepository;
 
-import org.quartz.*;
+import org.quartz.JobBuilder;
+import org.quartz.JobDetail;
+import org.quartz.Scheduler;
+import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
+import org.quartz.TriggerKey;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.inject.Inject;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import javax.inject.Inject;
 
 /**
  * Created by zhangwen on 2016/4/25.

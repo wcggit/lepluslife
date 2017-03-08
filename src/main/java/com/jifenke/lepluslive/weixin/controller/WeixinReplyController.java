@@ -50,7 +50,7 @@ public class WeixinReplyController {
     while ((str = bufferedReader.readLine()) != null) {
       buffer.append(str);
     }
-    Map map = WeixinPayUtil.doXMLParse(buffer.toString());
+    Map<String,Object> map = WeixinPayUtil.doXMLParse(buffer.toString());
     System.out.println(map);
 
     String res;

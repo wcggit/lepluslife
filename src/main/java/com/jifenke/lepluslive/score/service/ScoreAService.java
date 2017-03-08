@@ -58,11 +58,6 @@ public class ScoreAService {
     scoreARepository.save(scoreA);
   }
 
-  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
-  public ScoreADetail findScoreADetailByOrderSid(String orderSid) {
-    return scoreADetailRepository.findOneByOrderSid(orderSid);
-  }
-
   /**
    * 根据scoreA查询红包明细列表
    */

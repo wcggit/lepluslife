@@ -2,6 +2,7 @@ package com.jifenke.lepluslive.order.controller;
 
 import com.jifenke.lepluslive.Address.domain.entities.Address;
 import com.jifenke.lepluslive.Address.service.AddressService;
+import com.jifenke.lepluslive.global.config.Constants;
 import com.jifenke.lepluslive.global.service.MessageService;
 import com.jifenke.lepluslive.global.util.JsonUtils;
 import com.jifenke.lepluslive.global.util.LejiaResult;
@@ -21,16 +22,12 @@ import com.jifenke.lepluslive.score.domain.entities.ScoreB;
 import com.jifenke.lepluslive.score.service.ScoreBService;
 import com.jifenke.lepluslive.weixin.controller.dto.CartDetailDto;
 import com.jifenke.lepluslive.weixin.controller.dto.OrderDto;
-
 import com.jifenke.lepluslive.weixin.service.DictionaryService;
 import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
 
-
 import org.apache.commons.beanutils.BeanUtils;
-
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
-
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -48,7 +45,6 @@ import java.util.SortedMap;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
-
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -237,7 +233,7 @@ public class OrderController {
     if (orderId == null || truePrice == null || trueScore == null) {
       return LejiaResult.build(5010, messageService.getMsg("5010"));
     }
-    Map<Object, Object>
+    Map<String, Object>
         result =
         orderService.setPriceScoreForOrder(orderId, truePrice, trueScore, 2);
     String status = "" + result.get("status");
@@ -246,18 +242,22 @@ public class OrderController {
     }
 
     //封装订单参数
-    SortedMap<Object, Object>
+    OnLineOrder order = (OnLineOrder) result.get("data");
+    SortedMap<String, Object>
         map =
-        weiXinPayService._buildOrderParams(request, (OnLineOrder) result.get("data"));
+        weiXinPayService
+            .buildAPPOrderParams(request, "乐加商城消费", order.getOrderSid(), "" + order.getTruePrice(),
+                                 Constants.ONLINEORDER_NOTIFY_URL);
     //获取预支付id
-    Map unifiedOrder = weiXinPayService.createUnifiedOrder(map);
+    Map<String, Object> unifiedOrder = weiXinPayService.createUnifiedOrder(map);
     if (unifiedOrder.get("prepay_id") != null) {
-      SortedMap sortedMap = weiXinPayService.buildAppParams(
+      SortedMap<String, Object> sortedMap = weiXinPayService.buildAppParams(
           unifiedOrder.get("prepay_id").toString());
       return LejiaResult.build(200, "ok", sortedMap);
     } else {
       return LejiaResult
-          .build(4001, messageService.getMsg("4001") + "," + String.valueOf(unifiedOrder.get("err_code_des")));
+          .build(4001, messageService.getMsg("4001") + "," + String
+              .valueOf(unifiedOrder.get("err_code_des")));
     }
   }
 
@@ -327,18 +327,14 @@ public class OrderController {
 
   @ApiOperation("取消订单")
   @RequestMapping(value = "/orderCancle", method = RequestMethod.POST)
-  public
-  @ResponseBody
-  LejiaResult orderCancle(@RequestParam(required = true) Long orderId) {
+  public LejiaResult orderCancle(@RequestParam(required = true) Long orderId) {
     orderService.orderCancle(orderId);
     return LejiaResult.ok();
   }
 
   @ApiOperation("确认收货")
   @RequestMapping(value = "/orderConfirm", method = RequestMethod.POST)
-  public
-  @ResponseBody
-  LejiaResult orderConfim(@RequestParam(required = true) Long orderId) {
+  public LejiaResult orderConfim(@RequestParam(required = true) Long orderId) {
     orderService.confrimOrder(orderId);
     return LejiaResult.ok();
   }

@@ -3,28 +3,6 @@ package com.jifenke.lepluslive.global.util;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jifenke.lepluslive.weixin.domain.entities.AccessToken;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.ConnectException;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-
-import net.sf.json.JSONException;
-import net.sf.json.JSONObject;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -38,17 +16,33 @@ import org.jdom.input.SAXBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.qos.logback.core.joran.spi.XMLUtil;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.ConnectException;
+import java.net.URL;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
 
 /**
- * Created by wcg on 16/3/21.
+ * 微信支付相关工具类 Created by wcg on 16/3/21.
  */
 public class WeixinPayUtil {
 
   private static Logger log = LoggerFactory.getLogger(WeixinPayUtil.class);
 
-  public static Map createUnifiedOrder(String requestUrl, String requestMethod, String outputStr) {
+  public static Map<String, Object> createUnifiedOrder(String requestUrl, String requestMethod,
+                                                       String outputStr) {
     try {
       // 创建SSLContext对象，并使用我们指定的信任管理器初始化
       TrustManager[] tm = {new MyX509TrustManager()};
@@ -121,14 +115,14 @@ public class WeixinPayUtil {
   }
 
 
-  public static Map doXMLParse(String strxml) throws JDOMException, IOException {
+  public static Map<String, Object> doXMLParse(String strxml) throws JDOMException, IOException {
     strxml = strxml.replaceFirst("encoding=\".*\"", "encoding=\"UTF-8\"");
 
     if (null == strxml || "".equals(strxml)) {
       return null;
     }
 
-    Map m = new HashMap();
+    Map<String, Object> m = new TreeMap<>();
 
     InputStream in = new ByteArrayInputStream(strxml.getBytes("UTF-8"));
     SAXBuilder builder = new SAXBuilder();

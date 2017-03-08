@@ -12,11 +12,10 @@ import com.jifenke.lepluslive.score.service.ScoreAService;
 import com.jifenke.lepluslive.score.service.ScoreBService;
 import com.jifenke.lepluslive.weixin.service.WeiXinUserService;
 
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -33,7 +32,7 @@ import io.swagger.annotations.ApiOperation;
 /**
  * 积分和红包的查询 Created by zhangwen on 2016/5/11.
  */
-@Controller
+@RestController
 @RequestMapping("/score")
 public class ScoreController {
 
@@ -51,9 +50,7 @@ public class ScoreController {
 
   @ApiOperation(value = "红包列表")
   @RequestMapping(value = "/listA", method = RequestMethod.POST)
-  public
-  @ResponseBody
-  LejiaResult listA(@RequestParam(required = true) String token) {
+  public LejiaResult listA(@RequestParam(required = true) String token) {
 
     LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);
     ScoreA scoreA = scoreAService.findScoreAByLeJiaUser(leJiaUser);
@@ -74,9 +71,7 @@ public class ScoreController {
 
   @ApiOperation(value = "B积分列表")
   @RequestMapping(value = "/listB", method = RequestMethod.POST)
-  public
-  @ResponseBody
-  LejiaResult listB(@RequestParam(required = true) String token) {
+  public LejiaResult listB(@RequestParam(required = true) String token) {
 
     LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);
     ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(leJiaUser);
@@ -95,10 +90,8 @@ public class ScoreController {
   }
 
   @RequestMapping(value = "/scoreList", method = RequestMethod.POST)
-  public
-  @ResponseBody
-  LejiaResult scoreList(@RequestParam(required = false) String openId,
-                        @RequestParam(required = false) Integer type) {
+  public LejiaResult scoreList(@RequestParam(required = false) String openId,
+                               @RequestParam(required = false) Integer type) {
     LeJiaUser leJiaUser = weiXinUserService.findWeiXinUserByOpenId(openId).getLeJiaUser();
     if (leJiaUser != null) {
       if (type == 0) {

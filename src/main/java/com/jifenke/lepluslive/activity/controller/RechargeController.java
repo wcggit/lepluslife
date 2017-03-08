@@ -3,11 +3,11 @@ package com.jifenke.lepluslive.activity.controller;
 import com.jifenke.lepluslive.activity.domain.entities.ActivityPhoneOrder;
 import com.jifenke.lepluslive.activity.service.ActivityPhoneOrderService;
 import com.jifenke.lepluslive.activity.service.ActivityPhoneRuleService;
+import com.jifenke.lepluslive.activity.service.RechargeService;
 import com.jifenke.lepluslive.global.config.Constants;
 import com.jifenke.lepluslive.global.service.MessageService;
 import com.jifenke.lepluslive.global.util.JsonUtils;
 import com.jifenke.lepluslive.global.util.LejiaResult;
-import com.jifenke.lepluslive.activity.service.RechargeService;
 import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.lejiauser.service.LeJiaUserService;
@@ -129,7 +129,11 @@ public class RechargeController {
     int totalWorth = 0;
     int totalScore = 0;
     for (ActivityPhoneOrder order : list) {
-      totalScore += order.getTrueScoreB();
+      if (order.getType() != null && order.getType() == 2) {
+        totalScore += order.getTrueScoreB();
+      } else {
+        totalScore += order.getTrueScoreB() * 100;
+      }
       totalWorth += order.getWorth();
     }
     model.addAttribute("orderList", list);
@@ -255,7 +259,7 @@ public class RechargeController {
     //话费产品如果是全积分，这直接调用充话费接口
     if (order.getPhoneRule().getPayType() == 3) {
       try {
-        phoneOrderService.paySuccess(order.getOrderSid(), 2);
+        phoneOrderService.paySuccess(order.getOrderSid());
         return LejiaResult.build(2000, "支付成功", order.getId());
       } catch (Exception e) {
         e.printStackTrace();
@@ -263,15 +267,15 @@ public class RechargeController {
       }
     }
     //封装订单参数
-    SortedMap<Object, Object>
+    SortedMap<String, Object>
         map =
         weiXinPayService
             .buildAPPOrderParams(request, "话费充值", order.getOrderSid(), "" + order.getTruePrice(),
                                  Constants.PHONEORDER_NOTIFY_URL);
     //获取预支付id
-    Map unifiedOrder = weiXinPayService.createUnifiedOrder(map);
+    Map<String, Object> unifiedOrder = weiXinPayService.createUnifiedOrder(map);
     if (unifiedOrder.get("prepay_id") != null) {
-      SortedMap sortedMap = weiXinPayService.buildAppParams(
+      SortedMap<String, Object> sortedMap = weiXinPayService.buildAppParams(
           unifiedOrder.get("prepay_id").toString());
       sortedMap.put("orderId", order.getId());
       return LejiaResult.build(200, "ok", sortedMap);
@@ -289,7 +293,11 @@ public class RechargeController {
     List<ActivityPhoneOrder> list = orderService.findAllByLeJiaUser(leJiaUser);
     int totalScore = 0;
     for (ActivityPhoneOrder order : list) {
-      totalScore += order.getTrueScoreB();
+      if (order.getType() != null && order.getType() == 2) {
+        totalScore += order.getTrueScoreB() / 100;
+      } else {
+        totalScore += order.getTrueScoreB();
+      }
     }
     Map<String, Object> map = new HashMap<>();
     map.put("orderList", list);

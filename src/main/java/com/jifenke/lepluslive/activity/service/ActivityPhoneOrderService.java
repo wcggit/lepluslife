@@ -8,12 +8,12 @@ import com.jifenke.lepluslive.global.util.MD5Util;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.order.domain.entities.PayOrigin;
 import com.jifenke.lepluslive.score.domain.entities.ScoreB;
+import com.jifenke.lepluslive.score.domain.entities.ScoreC;
 import com.jifenke.lepluslive.score.service.ScoreAService;
 import com.jifenke.lepluslive.score.service.ScoreBService;
-import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
+import com.jifenke.lepluslive.score.service.ScoreCService;
 import com.jifenke.lepluslive.weixin.service.DictionaryService;
 import com.jifenke.lepluslive.weixin.service.WeiXinUserService;
-import com.jifenke.lepluslive.weixin.service.WeixinPayLogService;
 import com.jifenke.lepluslive.weixin.service.WxTemMsgService;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -37,9 +38,6 @@ import javax.inject.Inject;
 @Service
 public class ActivityPhoneOrderService {
 
-  @Value("${telephone.appkey}")
-  private String phoneKey;
-
   @Value("${telephone.secret}")
   private String phoneSecret;
 
@@ -53,10 +51,10 @@ public class ActivityPhoneOrderService {
   private DictionaryService dictionaryService;
 
   @Inject
-  private WeixinPayLogService payLogService;
+  private ScoreAService scoreAService;
 
   @Inject
-  private ScoreAService scoreAService;
+  private ScoreCService scoreCService;
 
   @Inject
   private WeiXinUserService weiXinUserService;
@@ -69,7 +67,6 @@ public class ActivityPhoneOrderService {
 
   @Inject
   private ScoreBService scoreBService;
-
 
   /**
    * 获取某一订单  16/10/31
@@ -97,7 +94,7 @@ public class ActivityPhoneOrderService {
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public List<ActivityPhoneOrder> findAllByLeJiaUser(LeJiaUser leJiaUser) {
-    return repository.findByLeJiaUserAndPayStateOrderByIdDesc(leJiaUser, 1);
+    return repository.findByLeJiaUserAndPayStateOrderByCreateDateDesc(leJiaUser, 1);
   }
 
   /**
@@ -191,7 +188,7 @@ public class ActivityPhoneOrderService {
   }
 
   /**
-   * 生成话费订单   16/10/28
+   * 生成积分话费订单   16/10/28
    *
    * @param ruleId   话费产品ID
    * @param user     购买用户
@@ -242,6 +239,60 @@ public class ActivityPhoneOrderService {
         int minA = rule.getMinRebate();
         order.setPayBackScore(new Random().nextInt(maxA - minA) + minA);
       }
+      repository.save(order);
+      result.put("status", 200);
+      result.put("data", order);
+      return result;
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new RuntimeException();
+    }
+  }
+
+  /**
+   * 生成金币话费订单   17/2/23 zhangwen
+   *
+   * @param worth    充值面额  单位/元
+   * @param user     购买用户
+   * @param phone    充值手机号码
+   * @param payWayId 5=公众号|1=APP
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  public Map<Object, Object> createPhoneOrder(LeJiaUser user, Integer worth, String phone,
+                                              Long payWayId)
+      throws Exception {
+    Map<Object, Object> result = new HashMap<>();
+    //校验充值面额 1,2,5,10,20,50,100,300
+    if (!(worth != null && (worth == 10 || worth == 20 || worth == 50 || worth == 100 || worth == 5
+                            || worth == 2 || worth == 1 || worth == 300))) {
+      result.put("status", 1007);
+      return result;
+    }
+
+    ScoreC scoreC = scoreCService.findScoreCByLeJiaUser(user);
+    try {
+      ActivityPhoneOrder order = new ActivityPhoneOrder();
+      order.setPhoneRule(null);
+      order.setType(2);
+      order.setPhone(phone);
+      order.setLeJiaUser(user);
+      order.setWorth(worth);
+      //金币不足时，以1金币=1元钱兑换
+      if (scoreC.getScore().intValue() < worth * 100) {
+        order.setTrueScoreB(scoreC.getScore().intValue());
+        order.setTruePrice(worth * 100 - scoreC.getScore().intValue());
+      } else {
+        order.setTruePrice(0);
+        order.setTrueScoreB(worth * 100);
+      }
+      order.setPayOrigin(new PayOrigin(payWayId));
+      Integer backScore = 2;
+      BigDecimal backA = new BigDecimal(order.getTruePrice()).multiply(
+          new BigDecimal(dictionaryService.findDictionaryById(54L).getValue()));
+      if (backA.compareTo(new BigDecimal(2)) == 1) {
+        backScore = backA.intValue();
+      }
+      order.setPayBackScore(backScore);
       repository.save(order);
       result.put("status", 200);
       result.put("data", order);
@@ -323,20 +374,31 @@ public class ActivityPhoneOrderService {
   }
 
   /**
-   * 话费订单微信支付成功后微信的处理  16/10/31
+   * 话费订单微信支付成功后处理  17/2/23
    *
-   * @param orderSid 订单ID
-   * @param way      1=微信支付|2=全积分
+   * @param orderSid 订单Sid
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public void paySuccess(String orderSid, Integer way) throws Exception {
+  public void paySuccess(String orderSid) throws Exception {
     ActivityPhoneOrder order = repository.findByOrderSid(orderSid);
+    if (order != null) {
+      if (order.getType() == 1) {
+        paySuccessByScore(order);
+        return;
+      }
+      paySuccessByGold(order);
+    }
+  }
+
+  /**
+   * 积分类话费订单微信支付成功后处理  16/10/31
+   *
+   * @param order 积分话费订单
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  public void paySuccessByScore(ActivityPhoneOrder order) throws Exception {
     try {
       if (order.getPayState() == 0) {
-        //保存微信支付日志
-        if (way == 1) {
-          payLogService.savePayLog(orderSid, "PhoneOrder");
-        }
         //如果是限购商品，或不是限购,但又库存限制，减库存
         if (order.getCheap() == 1 || order.getPhoneRule().getRepositoryLimit() == 1) {
           ruleService.reduceRepository(order.getPhoneRule());
@@ -347,10 +409,11 @@ public class ActivityPhoneOrderService {
         order.setPayDate(new Date());
         LeJiaUser user = order.getLeJiaUser();
         Integer payBackScore = order.getPayBackScore();
-        scoreAService.giveScoreAByDefault(user, payBackScore, "充话费返红包", 13, orderSid);
+        scoreAService.giveScoreAByDefault(user, payBackScore, "充话费返红包", 13, order.getOrderSid());
         //减积分
         if (order.getTrueScoreB() != null && order.getTrueScoreB() > 0) {
-          scoreBService.paySuccess(user, (long) order.getTrueScoreB(), 13, "充话费使用积分", orderSid);
+          scoreBService
+              .paySuccess(user, (long) order.getTrueScoreB(), 13, "充话费使用积分", order.getOrderSid());
         }
         PayOrigin payOrigin = order.getPayOrigin();
         PayOrigin payWay = new PayOrigin();
@@ -377,20 +440,90 @@ public class ActivityPhoneOrderService {
 
         //如果返还A红包不为0,改变会员状态
         if (payBackScore > 0) {
-          WeiXinUser w = weiXinUserService.findWeiXinUserByLeJiaUser(user);
-          if (w != null) {
-            if (w.getState() == 0) {
-              w.setState(1);
-              weiXinUserService.saveWeiXinUser(w);
-            }
-          }
+          weiXinUserService.setWeiXinState(user);
         }
         repository.save(order);
 
         //支付回调成功调用第三方充值接口充值
         Map<Object, Object>
             result =
-            rechargeService.submit(order.getPhone(), order.getWorth(), orderSid);
+            rechargeService.submit(order.getPhone(), order.getWorth(), order.getOrderSid());
+        if (result.get("status") == null || "failure".equalsIgnoreCase("" + result.get("status"))) {
+          //充值失败
+          order.setState(3);
+          order.setErrorDate(new Date());
+          order.setMessage("" + result.get("message"));
+          repository.save(order);
+        }
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new RuntimeException();
+    }
+  }
+
+  /**
+   * 金币类话费订单微信支付成功后处理  17/2/23
+   *
+   * @param order 金币话费订单
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  public void paySuccessByGold(ActivityPhoneOrder order) throws Exception {
+    try {
+      if (order.getPayState() == 0) {
+        order.setState(1);
+        order.setPayState(1);
+        order.setPayDate(new Date());
+        LeJiaUser user = order.getLeJiaUser();
+        ScoreC scoreC = scoreCService.findScoreCByLeJiaUser(user);
+        //减金币
+        if (order.getTrueScoreB() != null && order.getTrueScoreB() > 0) {
+          scoreCService.saveScoreC(scoreC, 0, order.getTrueScoreB().longValue());
+          scoreCService
+              .saveScoreCDetail(scoreC, 0, order.getTrueScoreB().longValue(), 15003, "充话费消耗金币",
+                                order.getOrderSid());
+        }
+        PayOrigin payOrigin = order.getPayOrigin();
+        PayOrigin payWay = new PayOrigin();
+        if (order.getTruePrice() == 0) {
+          if (payOrigin.getId() == 1) {
+            payWay.setId(13L);
+          } else {
+            payWay.setId(14L);
+          }
+        } else if (order.getTrueScoreB() == 0) {
+          if (payOrigin.getId() == 1) {
+            payWay.setId(2L);
+          } else {
+            payWay.setId(6L);
+          }
+        } else {
+          if (payOrigin.getId() == 1) {
+            payWay.setId(11L);
+          } else {
+            payWay.setId(12L);
+          }
+        }
+        order.setPayOrigin(payWay);
+
+        //        Integer payBackScore = order.getPayBackScore();
+//        scoreAService.giveScoreAByDefault(user, payBackScore, "充话费返红包", 13, orderSid);
+        //如果返还A红包不为0,改变会员状态
+//        if (payBackScore > 0) {
+//          WeiXinUser w = weiXinUserService.findWeiXinUserByLeJiaUser(user);
+//          if (w != null) {
+//            if (w.getState() == 0) {
+//              w.setState(1);
+//              weiXinUserService.saveWeiXinUser(w);
+//            }
+//          }
+//        }
+        repository.save(order);
+
+        //支付回调成功调用第三方充值接口充值
+        Map<Object, Object>
+            result =
+            rechargeService.submit(order.getPhone(), order.getWorth(), order.getOrderSid());
         if (result.get("status") == null || "failure".equalsIgnoreCase("" + result.get("status"))) {
           //充值失败
           order.setState(3);

@@ -4,12 +4,8 @@ import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.merchant.controller.dto.MerchantDto;
 import com.jifenke.lepluslive.merchant.domain.entities.Merchant;
-import com.jifenke.lepluslive.merchant.domain.entities.MerchantScroll;
 import com.jifenke.lepluslive.merchant.service.MerchantService;
 import com.jifenke.lepluslive.weixin.service.WeiXinService;
-
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 
 import org.springframework.http.MediaType;
 import org.springframework.ui.Model;
@@ -25,6 +21,9 @@ import java.util.Map;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
+
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 /**
  * Created by wcg on 16/3/17.
@@ -73,37 +72,12 @@ public class MerchantController {
       @RequestParam(required = false) Integer condition,
       @RequestParam(required = false) Integer partnership,
       @RequestParam(required = false) Double lat, @RequestParam(required = false) Double lon) {
-//    return merchantService.findMerchantsByPage(offset);
     if (offset == null) {
       offset = 1;
     }
-    List<MerchantDto>
-        merchantDtoList =
-        merchantService
-            .findWxMerchantListByCustomCondition(status, lat, lon, offset, type, cityName,
-                                                 condition, partnership);
-    return merchantDtoList;
-  }
-
-  @RequestMapping(value = "/info/{id}", method = RequestMethod.GET)
-  public ModelAndView goMerchantPage(HttpServletRequest request, Model model,
-                                     @PathVariable Long id,
-                                     @RequestParam(required = false) String distance,
-                                     @RequestParam(required = false) Integer status) {
-    Merchant merchant = merchantService.findMerchantById(id);
-    List<MerchantScroll> scrolls = merchantService.findAllScorllPicture(merchant);
-    model.addAttribute("merchant", merchant);
-    if (scrolls == null || scrolls.size() < 1) {
-      model.addAttribute("hasScroll", 0);
-    } else {
-      model.addAttribute("hasScroll", 1);
-    }
-    model.addAttribute("scrolls", scrolls);
-
-    model.addAttribute("distance", distance);
-    model.addAttribute("status", status);
-    model.addAttribute("wxConfig", weiXinService.getWeiXinConfig(request));
-    return MvUtil.go("/weixin/merchantInfo");
+    return merchantService
+        .findWxMerchantListByCustomCondition(status, lat, lon, offset, type, cityName,
+                                             condition, partnership);
   }
 
   @ApiOperation(value = "APP商家列表")

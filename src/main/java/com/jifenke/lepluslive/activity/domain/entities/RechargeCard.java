@@ -2,7 +2,6 @@ package com.jifenke.lepluslive.activity.domain.entities;
 
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 
-
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 

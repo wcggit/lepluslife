@@ -206,7 +206,7 @@
                    data: {productId: productId, specId: specId, buyNumber: buyNumber},
                    success: function (data) {
                        if (data.status == 200) {
-                           location.href = "/front/order/weixin/confirmOrder/" + data.data.id;
+                           location.href = "/front/order/weixin/confirmOrder?orderId=" + data.data.id;
                            //alert("订单ID为：" + data.data.id);
                        } else if (data.status == 5002) {
                            warnType = 1;

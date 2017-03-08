@@ -5,6 +5,8 @@ import com.jifenke.lepluslive.merchant.domain.entities.Merchant;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
+import java.util.Date;
+
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -28,7 +30,9 @@ public class RegisterOrigin {
   @OneToOne(fetch = FetchType.LAZY)
   private Merchant merchant;
 
-  private Integer originType; // 0 代表微信注册 1 代表app注册 2 代表商户注册
+  private Integer originType; // 0=微信注册|1=app注册2=商户注册|3=线下支付完成页
+
+  private Date dateCreated = new Date();
 
   public Long getId() {
     return id;
@@ -52,5 +56,13 @@ public class RegisterOrigin {
 
   public void setOriginType(Integer originType) {
     this.originType = originType;
+  }
+
+  public Date getDateCreated() {
+    return dateCreated;
+  }
+
+  public void setDateCreated(Date dateCreated) {
+    this.dateCreated = dateCreated;
   }
 }

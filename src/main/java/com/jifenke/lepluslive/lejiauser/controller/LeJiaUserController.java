@@ -3,11 +3,9 @@ package com.jifenke.lepluslive.lejiauser.controller;
 import com.jifenke.lepluslive.global.service.MessageService;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MD5Util;
-import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.lejiauser.controller.dto.LeJiaUserDto;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.lejiauser.service.LeJiaUserService;
-
 import com.jifenke.lepluslive.lejiauser.service.SmsService;
 import com.jifenke.lepluslive.lejiauser.service.ValidateCodeService;
 import com.jifenke.lepluslive.order.service.OrderService;
@@ -15,41 +13,39 @@ import com.jifenke.lepluslive.score.domain.entities.ScoreA;
 import com.jifenke.lepluslive.score.domain.entities.ScoreB;
 import com.jifenke.lepluslive.score.service.ScoreAService;
 import com.jifenke.lepluslive.score.service.ScoreBService;
-
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.service.DictionaryService;
 import com.jifenke.lepluslive.weixin.service.WeiXinUserService;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-
-
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-
 import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+
 /**
  * Created by wcg on 16/4/21.
  */
-@Controller
+@RestController
 @RequestMapping("/user")
 public class LeJiaUserController {
+
+  private static Logger logger = LoggerFactory.getLogger(LeJiaUserController.class);
 
   @Inject
   private LeJiaUserService leJiaUserService;
@@ -83,9 +79,7 @@ public class LeJiaUserController {
    */
   @ApiOperation(value = "注册和找回密码时发送验证码")
   @RequestMapping(value = "/sendCode", method = RequestMethod.POST)
-  public
-  @ResponseBody
-  LejiaResult sendCode(@RequestParam(required = false) String phoneNumber,
+  public LejiaResult sendCode(@RequestParam(required = false) String phoneNumber,
                        @ApiParam(value = "1=注册  2=找回") @RequestParam(required = false) Integer type,
                        HttpServletRequest request) {
     LeJiaUser leJiaUser = leJiaUserService.findUserByPhoneNumber(phoneNumber);  //是否已注册
@@ -125,9 +119,7 @@ public class LeJiaUserController {
    */
   @ApiOperation(value = "点击注册按钮")
   @RequestMapping(value = "/register", method = RequestMethod.POST)
-  public
-  @ResponseBody
-  LejiaResult register(@RequestParam(required = false) String phoneNumber,
+  public LejiaResult register(@RequestParam(required = false) String phoneNumber,
                        @RequestParam(required = false) String code,
                        @RequestParam(required = false) String token) throws IOException {
     LeJiaUser leJiaUser = leJiaUserService.findUserByPhoneNumber(phoneNumber);  //是否已注册
@@ -151,9 +143,7 @@ public class LeJiaUserController {
    */
   @ApiOperation(value = "三种情况设置密码")
   @RequestMapping(value = "/setPwd", method = RequestMethod.POST)
-  public
-  @ResponseBody
-  LejiaResult setPwd(@RequestParam(required = false) String phoneNumber,
+  public LejiaResult setPwd(@RequestParam(required = false) String phoneNumber,
                      @ApiParam(value = "旧密码 type=2时必须有") @RequestParam(required = false) String oldPwd,
                      @RequestParam(required = false) String pwd,
                      @ApiParam(value = "1=注册和发送验证码   2=验证旧密码") @RequestParam(required = false) Integer type) {
@@ -179,9 +169,7 @@ public class LeJiaUserController {
    */
   @ApiOperation(value = "点击登录按钮")
   @RequestMapping(value = "/login", method = RequestMethod.POST)
-  public
-  @ResponseBody
-  LejiaResult login(@RequestParam(required = true) String phoneNumber,
+  public LejiaResult login(@RequestParam(required = true) String phoneNumber,
                     @RequestParam(required = true) String pwd,
                     @ApiParam(value = "推送token") @RequestParam(required = false) String token) {
     LeJiaUser leJiaUser = leJiaUserService.findUserByPhoneNumber(phoneNumber);
@@ -204,9 +192,7 @@ public class LeJiaUserController {
 
   @ApiOperation(value = "发送验证码重置密码时验证验证码")
   @RequestMapping(value = "/validate", method = RequestMethod.POST)
-  public
-  @ResponseBody
-  LejiaResult validate(@RequestParam(required = false) String phoneNumber,
+  public LejiaResult validate(@RequestParam(required = false) String phoneNumber,
                        @RequestParam(required = false) String code) {
     Boolean b = validateCodeService.findByPhoneNumberAndCode(phoneNumber, code); //验证码是否正确
     if (!b) {
@@ -220,9 +206,7 @@ public class LeJiaUserController {
    */
   @ApiOperation(value = "点击“我的”")
   @RequestMapping(value = "/center", method = RequestMethod.POST)
-  public
-  @ResponseBody
-  LejiaResult userInfo(@RequestParam(required = false) String token) {
+  public LejiaResult userInfo(@RequestParam(required = false) String token) {
     LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);
     if (leJiaUser != null) {
       Map map = orderService.getOrdersCount(leJiaUser.getId());
@@ -236,9 +220,7 @@ public class LeJiaUserController {
    */
   @ApiOperation(value = "token获取个人数据")
   @RequestMapping(value = "/open", method = RequestMethod.POST)
-  public
-  @ResponseBody
-  LejiaResult open(@RequestParam(required = false) String token) {
+  public LejiaResult open(@RequestParam(required = false) String token) {
     if (token != null) {//获取个人数据
       Map map = leJiaUserService.getUserInfo(token);
       if (map != null) {
@@ -254,9 +236,7 @@ public class LeJiaUserController {
    */
   @ApiOperation(value = "微信登录")
   @RequestMapping(value = "/wxLogin", method = RequestMethod.POST)
-  public
-  @ResponseBody
-  LejiaResult wxLogin(@RequestParam(required = true) String unionid,
+  public LejiaResult wxLogin(@RequestParam(required = true) String unionid,
                       @RequestParam(required = true) String openid,
                       @RequestParam(required = false) String country,
                       @RequestParam(required = false) String nickname,
@@ -295,14 +275,11 @@ public class LeJiaUserController {
   }
 
   /**
-   * app微信用户 今日昨日红包积分 收益
-   * token 用户token(实为 user_sid)
+   * app微信用户 今日昨日红包积分 收益 token 用户token(实为 user_sid)
    */
   @ApiOperation(value = "今日昨日红包积分收益")
   @RequestMapping(value = "/scoreAB", method = RequestMethod.POST)
-  public
-  @ResponseBody
-  LejiaResult scoreAB(@RequestParam(required = true) String token) {
+  public LejiaResult scoreAB(@RequestParam(required = true) String token) {
 
     if (token == null || "null".equals(token) || "".equals(token)) {
       return LejiaResult.build(2008, messageUtil.getMsg("2008"));
@@ -310,17 +287,17 @@ public class LeJiaUserController {
     Map<String, Object> result = new HashMap<>();
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     Date date1 = new Date();
-    String today = getDay(0,date1,sdf);//今日
-    String yesterday = getDay(-1,date1,sdf);//昨日
+    String today = getDay(0, date1, sdf);//今日
+    String yesterday = getDay(-1, date1, sdf);//昨日
 
     List<Object[]> listToday = leJiaUserService.todayScoreAB(token, today);
     List<Object[]> listYesterday = leJiaUserService.yesterdayScoreAB(token, yesterday);
-    if (listToday.size()==1){
+    if (listToday.size() == 1) {
       Object[] o1 = listToday.get(0);
       result.put("tScoreA", o1[0] == null ? "0" : o1[0].toString());
       result.put("tScoreB", o1[1] == null ? "0" : o1[1].toString());
     }
-    if (listYesterday.size()==1){
+    if (listYesterday.size() == 1) {
       Object[] o2 = listYesterday.get(0);
       result.put("yScoreA", o2[0] == null ? "0" : o2[0].toString());
       result.put("yScoreB", o2[1] == null ? "0" : o2[1].toString());
@@ -328,6 +305,7 @@ public class LeJiaUserController {
 
     return LejiaResult.build(200, "请求成功", result);
   }
+
   public String getDay(int i, Date date, SimpleDateFormat sdf) {
     Calendar calendar = Calendar.getInstance();
     calendar.setTime(date);
@@ -342,9 +320,7 @@ public class LeJiaUserController {
    */
   @ApiOperation(value = "检测是否有新版本")
   @RequestMapping(value = "/checkVersion", method = RequestMethod.GET)
-  public
-  @ResponseBody
-  LejiaResult check(@RequestParam(required = true) String version) {
+  public LejiaResult check(@RequestParam(required = true) String version) {
     String[] newVersion = dictionaryService.findDictionaryById(30L).getValue().split("_");
     Map<String, String> map = new HashMap<>();
 
@@ -366,9 +342,7 @@ public class LeJiaUserController {
    */
   @ApiOperation(value = "判断登录方式(1=无手机号登录)")
   @RequestMapping(value = "/checkLogin", method = RequestMethod.GET)
-  public
-  @ResponseBody
-  LejiaResult checkLogin(@RequestParam(required = false) Integer state) {
+  public LejiaResult checkLogin(@RequestParam(required = false) Integer state) {
     String[] s = dictionaryService.findDictionaryById(40L).getValue().split("_");
     if (state != null) {
       if (state > Integer.valueOf(s[2])) { //审核中版本
@@ -379,6 +353,11 @@ public class LeJiaUserController {
     } else {
       return LejiaResult.build(200, "", s[0]);
     }
+  }
+
+  @RequestMapping(value = "/notFound")
+  public LejiaResult userTest() {
+    return LejiaResult.build(2003, "查找用户异常");
   }
 
 }

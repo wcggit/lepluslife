@@ -8,11 +8,10 @@ import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.lejiauser.service.LeJiaUserService;
 
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -26,7 +25,7 @@ import io.swagger.annotations.ApiParam;
 /**
  * Created by zhangwen on 2016/8/18.
  */
-@Controller
+@RestController
 @RequestMapping("/app/rock")
 public class RockController {
 
@@ -44,9 +43,7 @@ public class RockController {
    */
   @ApiOperation(value = "打开摇一摇页面")
   @RequestMapping(value = "/open", method = RequestMethod.POST)
-  public
-  @ResponseBody
-  LejiaResult openSportPage(
+  public LejiaResult openSportPage(
       @ApiParam(value = "用户标识token") @RequestParam(required = true) String token) {
 
     LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);
@@ -80,9 +77,7 @@ public class RockController {
    */
   @ApiOperation(value = "摇一摇接口")
   @RequestMapping(value = "/submit", method = RequestMethod.POST)
-  public
-  @ResponseBody
-  LejiaResult submitSport(
+  public LejiaResult submitSport(
       @ApiParam(value = "用户标识token") @RequestParam(required = true) String token) {
 
     LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);

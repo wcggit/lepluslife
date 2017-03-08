@@ -1,9 +1,9 @@
 package com.jifenke.lepluslive.order.domain.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
-import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.Address.domain.entities.Address;
+import com.jifenke.lepluslive.global.util.MvUtil;
+import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -33,15 +33,17 @@ public class OnLineOrder {
   @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "onLineOrder")
   private List<OrderDetail> orderDetails = new ArrayList<OrderDetail>();
 
+  private Integer type = 1;  //订单类型  1=积分订单|2=金币订单
+
   private Long orderPrice = 0L;  //对应商品的price和，虚拟总价，不包括邮费
 
   private Long totalPrice = 0L;  //对应商品的minPrice和，最低需付金额，包括邮费
 
-  private Long totalScore = 0L;  //订单可用积分
+  private Long totalScore = 0L;  //订单可用积分或金币
 
   private Long truePrice = 0L;  //不包括积分抵扣
 
-  private Long trueScore = 0L;  //订单实际使用积分
+  private Long trueScore = 0L;  //订单实际使用积分或金币
 
   private Long freightPrice = 0L;     //运费，选择线下自提时不变但没有计算价值(实际为0)
 
@@ -251,5 +253,13 @@ public class OnLineOrder {
 
   public void setPayState(Integer payState) {
     this.payState = payState;
+  }
+
+  public Integer getType() {
+    return type;
+  }
+
+  public void setType(Integer type) {
+    this.type = type;
   }
 }

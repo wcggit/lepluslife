@@ -493,7 +493,7 @@
     function orderCancle() { //取消订单
         $.ajax({
                    type: "post",
-                   url: "/weixin/order/orderCancle",
+                   url: "/order/orderCancle",
                    data: {orderId:${order.id}},
                    success: function (data) {
                        location.href = "/front/order/weixin/orderList";
@@ -501,12 +501,12 @@
                });
     }
     function goPayPage() { //支付
-        location.href = '/front/order/weixin/confirmOrder/' +${order.id};
+        location.href = '/front/order/weixin/confirmOrder?orderId=' +${order.id};
     }
     function orderConfirm() {  //确认收货
         $.ajax({
                    type: "post",
-                   url: "/weixin/order/orderConfirm",
+                   url: "/order/orderConfirm",
                    data: {orderId:${order.id}},
                    success: function (data) {
                        location.href = '/front/order/weixin/orderList';

@@ -36,7 +36,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
@@ -84,12 +83,6 @@ public class PartnerService {
   private WeiXinUserRepository weiXinUserRepository;
 
   private static ReentrantLock lock = new ReentrantLock();
-
-
-  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public List<Partner> findAllParter() {
-    return partnerRepository.findAll();
-  }
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public Map<String, Integer> giveScoreToUser(WeiXinUser weiXinUser, String phoneNumber,

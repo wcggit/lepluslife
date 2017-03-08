@@ -19,16 +19,31 @@ public class WeixinPayLog {
   @GeneratedValue(strategy = GenerationType.AUTO)
   private Long id;
 
-  private String outTradeNo;
-  private String returnCode;
-  private String resultCode;
-  private String tradeState;
+  private String outTradeNo; //商户订单号
+
+  private String returnCode; //返回状态码|SUCCESS/FAIL|通信标识，非交易标识
+
+  private String resultCode; //业务结果|SUCCESS/FAIL|交易是否成功
+
+  private String tradeState; //查询时返回的交易状态
 
   private Integer logType;    //1=支付后微信回调日志|2=掉单查询订单日志
 
   private String orderType;   //onLineOrder=公众号线上订单|APPOnLineOrder|offLineOrder|APPOffLineOrder|PhoneOrder话费订单
 
+  private String openId; //消费者openId
+
+  private Long totalFee;  //订单金额
+
+  private String transactionId;  //微信订单号
+
+  private String timeEnd;  //微信支付完成时间
+
   private Date createDate = new Date();
+
+  public WeixinPayLog(){
+
+  }
 
   public WeixinPayLog(String outTradeNo, String returnCode, String resultCode, Integer logType,
                       String orderType) {
@@ -111,5 +126,37 @@ public class WeixinPayLog {
 
   public void setCreateDate(Date createDate) {
     this.createDate = createDate;
+  }
+
+  public String getOpenId() {
+    return openId;
+  }
+
+  public void setOpenId(String openId) {
+    this.openId = openId;
+  }
+
+  public Long getTotalFee() {
+    return totalFee;
+  }
+
+  public void setTotalFee(Long totalFee) {
+    this.totalFee = totalFee;
+  }
+
+  public String getTransactionId() {
+    return transactionId;
+  }
+
+  public void setTransactionId(String transactionId) {
+    this.transactionId = transactionId;
+  }
+
+  public String getTimeEnd() {
+    return timeEnd;
+  }
+
+  public void setTimeEnd(String timeEnd) {
+    this.timeEnd = timeEnd;
   }
 }
