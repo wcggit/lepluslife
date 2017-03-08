@@ -8,10 +8,13 @@ import com.jifenke.lepluslive.score.domain.entities.ScoreA;
 import com.jifenke.lepluslive.score.domain.entities.ScoreADetail;
 import com.jifenke.lepluslive.score.domain.entities.ScoreB;
 import com.jifenke.lepluslive.score.domain.entities.ScoreBDetail;
+import com.jifenke.lepluslive.score.domain.entities.ScoreC;
 import com.jifenke.lepluslive.score.repository.ScoreADetailRepository;
 import com.jifenke.lepluslive.score.repository.ScoreARepository;
 import com.jifenke.lepluslive.score.repository.ScoreBDetailRepository;
 import com.jifenke.lepluslive.score.repository.ScoreBRepository;
+import com.jifenke.lepluslive.score.repository.ScoreCRepository;
+import com.jifenke.lepluslive.score.service.ScoreCService;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.repository.WeiXinUserRepository;
 
@@ -62,6 +65,9 @@ public class WeiXinUserService {
 
   @Inject
   private ActivityJoinLogService joinLogService;
+
+  @Inject
+  private ScoreCRepository scoreCRepository;
 
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
@@ -124,6 +130,10 @@ public class WeiXinUserService {
       scoreB.setTotalScore(0L);
       scoreB.setLeJiaUser(leJiaUser);
       scoreBRepository.save(scoreB);
+      ScoreC scoreC = new ScoreC();
+      scoreC.setLeJiaUser(leJiaUser);
+      scoreC.setLastUpdateDate(date);
+      scoreCRepository.save(scoreC);
     }
 
     weiXinUser.setOpenId(openid);
@@ -178,6 +188,10 @@ public class WeiXinUserService {
       scoreB.setTotalScore(0L);
       scoreB.setLeJiaUser(leJiaUser);
       scoreBRepository.save(scoreB);
+      ScoreC scoreC = new ScoreC();
+      scoreC.setLeJiaUser(leJiaUser);
+      scoreC.setLastUpdateDate(date);
+      scoreCRepository.save(scoreC);
     }
 
     weiXinUser.setOpenId(openid);
@@ -239,6 +253,10 @@ public class WeiXinUserService {
       scoreB.setTotalScore(0L);
       scoreB.setLeJiaUser(leJiaUser);
       scoreBRepository.save(scoreB);
+      ScoreC scoreC = new ScoreC();
+      scoreC.setLeJiaUser(leJiaUser);
+      scoreC.setLastUpdateDate(date);
+      scoreCRepository.save(scoreC);
     } else {
       leJiaUser = weiXinUser.getLeJiaUser();
     }
