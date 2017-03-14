@@ -21,7 +21,7 @@
     <c:set var="wxRootUrl" value="http://www.lepluslife.com"></c:set>
     <!--App自定义的css-->
     <link rel="stylesheet" href="${resourceUrl}/frontRes/css/reset.css">
-    <link rel="stylesheet" href="${resourceUrl}/frontRes/order/confirmOrder/css/pay.css">
+    <link rel="stylesheet" href="${resourceUrl}/frontRes/gold/order/css/pay.css">
     <script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
     <%--以下代替jquery--%>
     <script src="${resourceUrl}/js/zepto.min.js"></script>
@@ -31,7 +31,7 @@
 <section class="address" onclick="goAddressEdit()">
     <div>
         <div>
-            <img src="${resourceUrl}/frontRes/order/confirmOrder/img/address.png" alt="">
+            <img src="${resourceUrl}/frontRes/gold/order/img/address.png" alt="">
         </div>
     </div>
     <div>
@@ -87,7 +87,7 @@
     </div>
 </section>
 <section class="cost">
-    <div style="padding: 20px 0;">
+    <div>
         <div>使用金币</div>
         <div class="useJf">
             <input type="number" id="trueScore"/>
@@ -107,6 +107,13 @@
                 ￥<fmt:formatNumber type="number" value="${order.freightPrice/100}" pattern="0.00"
                                    maxFractionDigits="2"/>
             </c:if>
+        </div>
+    </div>
+    <div>
+        <div>留言</div>
+        <div>
+            <input type="text" id="message" class="right ly-text"
+                   placeholder="选填：加油卡、虚拟类商品请在此输入待充值号码">
         </div>
     </div>
     <div>
@@ -131,12 +138,12 @@
 </section>
 <section class="footer">
     <div>还需付款：￥<span id="truePrice"></span></div>
-    <div id="btn-wxPay">立即购买</div>
+    <div id="btn-wxPay" onclick="payByWx()">立即购买</div>
 </section>
 </body>
 <script>
     var canUseScore = eval('${canUseScore}'), orderTotalScore = eval('${order.totalScore}'); //用户可用金币和订单可用金币
-    var maxScore = 0, minPrice = eval('${order.truePrice}'), freightPrice = eval('${order.freightPrice}'); //最多可用金币和最少需付金额
+    var maxScore = 0, minPrice = eval('${order.totalPrice}'), freightPrice = eval('${order.freightPrice}'); //最多可用金币和最少需付金额
     var trueScoreInput = $("#trueScore"), postageInput = $("#postage"), postageText = '';
     function scoreAndPriceReset() {
         if (canUseScore >= orderTotalScore) {
@@ -185,7 +192,7 @@
             offline = false;
             $('#editAddr').css('display', 'block');
         } else { //线下自提
-            $(".off-img").attr("src", "${resourceUrl}/frontRes/order/confirmOrder/img/on.png");
+            $(".off-img").attr("src", "${resourceUrl}/frontRes/gold/order/img/on.png");
             $(".notUseAddress").css('display', 'block');
             $(".useAddress").css('display', 'none');
             $(".address").attr('onclick', '');
@@ -302,11 +309,12 @@
                 orderId: '${order.id}',
                 truePrice: truePrice,
                 trueScore: trueScore,
-                transmitWay: transmitWay
+                transmitWay: transmitWay,
+                message: $('#message').val()
             }, function (res) {
                 if (price == 0) {
                     if (res.status == 200) {
-                        location.href = "/front/order/weixin/orderList";
+                        window.location.href = '/weixin/pay/paySuccess/${order.id}';
                     } else {
                         alert("订单处理异常(" + res.status + ")");
                         $('#btn-wxPay').attr('onclick', 'payByWx()');
@@ -314,11 +322,9 @@
                 } else {
                     if (res.status == 200) {//调用微信支付js-api接口
                         weixinPay(res);
-                        return;
                     } else {
                         alert(res['msg']);
                         $('#btn-wxPay').attr('onclick', 'payByWx()');
-                        return;
                     }
                 }
             });
@@ -340,23 +346,23 @@
                 function (reslut) {
                     if (reslut.err_msg == "get_brand_wcpay_request:ok") {
                         // 支付成功后的回调函数
-                        var total = eval($("#truePrice").html()) * 100;
+//                        var total = eval($("#truePrice").html()) * 100;
                         window.location.href = '/weixin/pay/paySuccess/${order.id}';
                     } else {
                         window.location.href = '/weixin/pay/payFail/${order.id}';
                     }
                 }
         );
-//        if (typeof WeixinJSBridge == "undefined") {
-//            if (document.addEventListener) {
-//                document.addEventListener('WeixinJSBridgeReady', weixinPay, false);
-//            } else if (document.attachEvent) {
-//                document.attachEvent('WeixinJSBridgeReady', weixinPay);
-//                document.attachEvent('onWeixinJSBridgeReady', weixinPay);
-//            }
-//        } else {
-//            weixinPay();
-//        }
+        if (typeof WeixinJSBridge == "undefined") {
+            if (document.addEventListener) {
+                document.addEventListener('WeixinJSBridgeReady', weixinPay, false);
+            } else if (document.attachEvent) {
+                document.attachEvent('WeixinJSBridgeReady', weixinPay);
+                document.attachEvent('onWeixinJSBridgeReady', weixinPay);
+            }
+        } else {
+            weixinPay();
+        }
     }
 </script>
 </html>

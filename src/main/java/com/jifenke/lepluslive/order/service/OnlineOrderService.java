@@ -101,7 +101,7 @@ public class OnlineOrderService {
     //订单信息
     try {
       Long orderPrice = productSpec.getPrice() * buyNumber;
-      Long totalPrice = orderPrice;
+      Long totalPrice = 0L;
       Long totalScore = productSpec.getMinScore() * buyNumber.longValue();//订单最高可使用金币(以后不变)
       Long truePrice = 0L;  //该订单最低需使用金额
       Long freightPrice = 0L;
@@ -359,10 +359,11 @@ public class OnlineOrderService {
    * @param trueScore   实际使用金币
    * @param transmitWay 线下自提=1
    * @param payOrigin   支付来源 13=APP全金币|14=公众号全金币
+   * @param message     消费者留言
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public Map<String, Object> orderPayByScoreC(Long orderId, Long trueScore, Integer transmitWay,
-                                              Long payOrigin) throws Exception {
+                                              Long payOrigin, String message) throws Exception {
     Map<String, Object> result = new HashMap<>();
     OnLineOrder order = orderRepository.findOne(orderId);
     if (order == null) {
@@ -407,6 +408,7 @@ public class OnlineOrderService {
         order.setState(3);
       }
       order.setTransmitWay(transmitWay);
+      order.setMessage(message);
       //订单相关product的销量等数据处理
       productService.editProductSaleByPayOrder(order);
       //C金币修改及记录添加
@@ -429,10 +431,11 @@ public class OnlineOrderService {
    * @param truePrice   实际使用价格
    * @param trueScore   实际使用金币
    * @param transmitWay 物流方式 1=自提
+   * @param message     消费者留言
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public Map<String, Object> completeGoldOrder(Long orderId, Long truePrice, Long trueScore,
-                                               Integer transmitWay) {
+                                               Integer transmitWay, String message) {
     Map<String, Object> result = new HashMap<>();
     OnLineOrder onLineOrder = orderRepository.findOne(orderId);
     if (onLineOrder.getState() == 1) { //订单已经支付
@@ -453,6 +456,7 @@ public class OnlineOrderService {
     onLineOrder.setTruePrice(truePrice);
     onLineOrder.setTransmitWay(transmitWay);
     onLineOrder.setTrueScore(trueScore);
+    onLineOrder.setMessage(message);
 
     orderRepository.saveAndFlush(onLineOrder);
     result.put("status", 200);

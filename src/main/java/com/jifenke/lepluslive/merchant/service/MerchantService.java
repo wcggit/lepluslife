@@ -50,6 +50,14 @@ public class MerchantService {
   private MerchantScrollRepository merchantScrollRepository;
 
   /**
+   * 根据merchantSid获取商家详情 2017/3/7
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+  public Merchant findByMerchantSid(String merchantSid) {
+    return merchantRepository.findByMerchantSid(merchantSid);
+  }
+
+  /**
    * 获取商家详情
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)

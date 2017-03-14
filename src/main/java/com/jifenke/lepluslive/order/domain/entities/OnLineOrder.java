@@ -79,6 +79,8 @@ public class OnLineOrder {
 
   private String expressCompany; //快递公司名称
 
+  private String message = ""; //用户留言
+
   public Date getDeliveryDate() {
     return deliveryDate;
   }
@@ -261,5 +263,13 @@ public class OnLineOrder {
 
   public void setType(Integer type) {
     this.type = type;
+  }
+
+  public String getMessage() {
+    return message;
+  }
+
+  public void setMessage(String message) {
+    this.message = message;
   }
 }

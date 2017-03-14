@@ -67,9 +67,9 @@ public class Product implements Serializable {
 
   private Integer freePrice = 0;  //不包邮时，满此价格包邮，针对普通商品
 
-  private Integer buyLimit = 1;  //每个用户限购数量 0=无限制
+  private Integer buyLimit = 1;  //每个用户限购数量 0=无限制    临时：100=banner-img|50=products
 
-  private Integer hotStyle = 0;  //1=爆款
+  private Integer hotStyle = 0;  //1=爆款  临时：2=数码|3=北京公交卡|4=加油卡|5=美妆个护|6=神奇百货
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "product_type_id")

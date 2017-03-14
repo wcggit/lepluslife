@@ -1,6 +1,7 @@
 package com.jifenke.lepluslive.score.controller;
 
 import com.jifenke.lepluslive.global.util.LejiaResult;
+import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.lejiauser.service.LeJiaUserService;
 import com.jifenke.lepluslive.score.controller.dto.ScoreDto;
@@ -8,24 +9,31 @@ import com.jifenke.lepluslive.score.domain.entities.ScoreA;
 import com.jifenke.lepluslive.score.domain.entities.ScoreADetail;
 import com.jifenke.lepluslive.score.domain.entities.ScoreB;
 import com.jifenke.lepluslive.score.domain.entities.ScoreBDetail;
+import com.jifenke.lepluslive.score.domain.entities.ScoreC;
+import com.jifenke.lepluslive.score.domain.entities.ScoreCDetail;
 import com.jifenke.lepluslive.score.service.ScoreAService;
 import com.jifenke.lepluslive.score.service.ScoreBService;
+import com.jifenke.lepluslive.score.service.ScoreCService;
+import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
+import com.jifenke.lepluslive.weixin.service.WeiXinService;
 import com.jifenke.lepluslive.weixin.service.WeiXinUserService;
 
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
 
 import io.swagger.annotations.ApiOperation;
 
@@ -43,10 +51,25 @@ public class ScoreController {
   private ScoreBService scoreBService;
 
   @Inject
+  private ScoreCService scoreCService;
+
+  @Inject
   private LeJiaUserService leJiaUserService;
 
   @Inject
   private WeiXinUserService weiXinUserService;
+
+  @Inject
+  private WeiXinService weiXinService;
+
+  @RequestMapping("/scoreDetail")
+  public ModelAndView goScoreDetailPage(HttpServletRequest request, Model model,
+                                        @RequestParam Integer type) {
+    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
+    model.addAttribute("openId", weiXinUser.getOpenId());
+    model.addAttribute("type", type);
+    return MvUtil.go("/weixin/scoreDetail");
+  }
 
   @ApiOperation(value = "红包列表")
   @RequestMapping(value = "/listA", method = RequestMethod.POST)
@@ -122,6 +145,17 @@ public class ScoreController {
         } else {
           return LejiaResult.build(200, "ok", null);
         }
+      } else if (type == 2) {
+        ScoreC scoreC = scoreCService.findScoreCByLeJiaUser(leJiaUser);
+
+        List<ScoreCDetail> cDetails = scoreCService.findAllScoreCDetailByScoreC(scoreC);
+
+        if ((cDetails != null) && (cDetails.size() > 0)) {
+          Map result = formatCDetail(cDetails, scoreC);
+          return LejiaResult.build(200, "ok", result);
+        } else {
+          return LejiaResult.build(200, "ok", null);
+        }
       }
     }
     return LejiaResult.build(201, "未找到用户");
@@ -136,25 +170,21 @@ public class ScoreController {
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
     LinkedHashMap<String, ArrayList<Object>> map = new LinkedHashMap<>();
     List<ScoreDto> result = new ArrayList<>();
-    for (int i = 0; i < aDetails.size(); i++) {
-
-      if (map.containsKey(sdf.format(aDetails.get(i).getDateCreated()))) {
-        map.get(sdf.format(aDetails.get(i).getDateCreated())).add(aDetails.get(i));
+    aDetails.forEach(e -> {
+      if (map.containsKey(sdf.format(e.getDateCreated()))) {
+        map.get(sdf.format(e.getDateCreated())).add(e);
       } else {
         ArrayList<Object> aDetailList = new ArrayList<>();
-        aDetailList.add(aDetails.get(i));
-        map.put(sdf.format(aDetails.get(i).getDateCreated()), aDetailList);
+        aDetailList.add(e);
+        map.put(sdf.format(e.getDateCreated()), aDetailList);
       }
-    }
-    Iterator i = map.entrySet().iterator();
-
-    while (i.hasNext()) {
-      Map.Entry entry = (java.util.Map.Entry) i.next();
+    });
+    map.forEach((key, val) -> {
       ScoreDto scoreDto = new ScoreDto();
-      scoreDto.setCreateDate(entry.getKey().toString());
-      scoreDto.setList((ArrayList<Object>) entry.getValue());
+      scoreDto.setCreateDate(key);
+      scoreDto.setList(val);
       result.add(scoreDto);
-    }
+    });
     resultMap.put("list", result);
     return resultMap;
   }
@@ -168,25 +198,49 @@ public class ScoreController {
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
     LinkedHashMap<String, ArrayList<Object>> map = new LinkedHashMap<>();
     List<ScoreDto> result = new ArrayList<>();
-    for (int i = 0; i < bDetails.size(); i++) {
-
-      if (map.containsKey(sdf.format(bDetails.get(i).getDateCreated()))) {
-        map.get(sdf.format(bDetails.get(i).getDateCreated())).add(bDetails.get(i));
+    bDetails.forEach(e -> {
+      if (map.containsKey(sdf.format(e.getDateCreated()))) {
+        map.get(sdf.format(e.getDateCreated())).add(e);
       } else {
         ArrayList<Object> aDetailList = new ArrayList<>();
-        aDetailList.add(bDetails.get(i));
-        map.put(sdf.format(bDetails.get(i).getDateCreated()), aDetailList);
+        aDetailList.add(e);
+        map.put(sdf.format(e.getDateCreated()), aDetailList);
       }
-    }
-    Iterator i = map.entrySet().iterator();
-
-    while (i.hasNext()) {
-      Map.Entry entry = (java.util.Map.Entry) i.next();
+    });
+    map.forEach((key, val) -> {
       ScoreDto scoreDto = new ScoreDto();
-      scoreDto.setCreateDate(entry.getKey().toString());
-      scoreDto.setList((ArrayList<Object>) entry.getValue());
+      scoreDto.setCreateDate(key);
+      scoreDto.setList(val);
       result.add(scoreDto);
-    }
+    });
+    resultMap.put("list", result);
+    return resultMap;
+  }
+
+  private Map formatCDetail(List<ScoreCDetail> cDetails, ScoreC scoreC) {
+    Map<String, Object> resultMap = new HashMap<>();
+    Map<String, Object> map1 = new HashMap<>();
+    map1.put("totalScore", scoreC.getTotalScore());
+    map1.put("currScore", scoreC.getScore());
+    resultMap.put("scoreA", map1);
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+    LinkedHashMap<String, ArrayList<Object>> map = new LinkedHashMap<>();
+    List<ScoreDto> result = new ArrayList<>();
+    cDetails.forEach(e -> {
+      if (map.containsKey(sdf.format(e.getDateCreated()))) {
+        map.get(sdf.format(e.getDateCreated())).add(e);
+      } else {
+        ArrayList<Object> aDetailList = new ArrayList<>();
+        aDetailList.add(e);
+        map.put(sdf.format(e.getDateCreated()), aDetailList);
+      }
+    });
+    map.forEach((key, val) -> {
+      ScoreDto scoreDto = new ScoreDto();
+      scoreDto.setCreateDate(key);
+      scoreDto.setList(val);
+      result.add(scoreDto);
+    });
     resultMap.put("list", result);
     return resultMap;
   }

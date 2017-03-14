@@ -349,8 +349,8 @@
                            paySign: res['sign'], // 支付签名
                            success: function (res) {
                                // 支付成功后的回调函数
-                               var total = eval($("#truePrice").html()) * 100;
-                               window.location.href = '/weixin/pay/paySuccess/' + total;
+//                               var total = eval($("#truePrice").html()) * 100;
+                               window.location.href = '/weixin/pay/paySuccess/${order.id}';
                            },
                            cancel: function (res) {
                                window.location.href = '/weixin/pay/payFail/${order.id}';

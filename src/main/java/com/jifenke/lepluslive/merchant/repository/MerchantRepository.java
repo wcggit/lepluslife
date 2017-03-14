@@ -22,4 +22,6 @@ public interface MerchantRepository extends JpaRepository<Merchant, Long> {
   List<Object[]> findMerchantById(Long id);
 
   List<Merchant> findByPartnerAndPartnership(Partner partner, int i);
+
+  Merchant findByMerchantSid(String merchantSid);
 }

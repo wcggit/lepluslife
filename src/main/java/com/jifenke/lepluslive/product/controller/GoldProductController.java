@@ -53,8 +53,22 @@ public class GoldProductController {
    */
   @RequestMapping(value = "/weixin", method = RequestMethod.GET)
   public ModelAndView productIndex(HttpServletRequest request, Model model) {
-    model.addAttribute("score", scoreCService
-        .findScoreCByLeJiaUser(weiXinService.getCurrentWeiXinUser(request).getLeJiaUser()).getScore());
+    Long score = scoreCService
+        .findScoreCByLeJiaUser(weiXinService.getCurrentWeiXinUser(request).getLeJiaUser())
+        .getScore();
+    model.addAttribute("score", score);
+    Long a = score % 100;
+    model.addAttribute("score2", a < 10 ? ("0" + a) : a);
+    if (a > 0) {
+      model.addAttribute("score3", score + 100);
+    } else {
+      model.addAttribute("score3", score);
+    }
+    List<Map> list = goldProductService.findHotProductListByPage(1, 100);
+
+    for (Map map : list) {
+      model.addAttribute("p_" + map.get("id"), map);
+    }
     return MvUtil.go("/gold/product/index");
   }
 
@@ -81,10 +95,10 @@ public class GoldProductController {
       specList = productService.findAllProductSpec(product);
       scrollPictureList = scrollPictureService.findAllByProduct(product);
       model.addAttribute("detailList", JsonUtils.objectToJson(detailList));
-      model.addAttribute("specList", JsonUtils.objectToJson(specList));
+      model.addAttribute("specList", specList);
       model.addAttribute("scrollList", scrollPictureList);
     }
-    return MvUtil.go("/product/goldDetail");
+    return MvUtil.go("/gold/product/detail");
   }
 
   /**
@@ -97,7 +111,7 @@ public class GoldProductController {
     if (page == null || page < 1) {
       page = 1;
     }
-    List<Map> list = goldProductService.findHotProductListByPage(page);
+    List<Map> list = goldProductService.findHotProductListByPage(page, 100);
     return LejiaResult.ok(list);
   }
 

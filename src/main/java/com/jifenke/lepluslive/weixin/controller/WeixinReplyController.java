@@ -40,7 +40,6 @@ public class WeixinReplyController {
       return "";
     }
     if (request.getParameter("echostr") != null) {
-     // response.getWriter().write(request.getParameter("echostr"));
       return request.getParameter("echostr");
     }
     InputStreamReader inputStreamReader = new InputStreamReader(request.getInputStream(), "utf-8");

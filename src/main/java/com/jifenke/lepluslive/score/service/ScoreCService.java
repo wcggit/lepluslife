@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -103,5 +104,13 @@ public class ScoreCService {
       e.printStackTrace();
       throw new RuntimeException();
     }
+  }
+
+  /**
+   * 根据scoreC查询金币明细列表 2017/03/09
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+  public List<ScoreCDetail> findAllScoreCDetailByScoreC(ScoreC scoreC) {
+    return scoreCDetailRepository.findAllByScoreCOrderByIdDesc(scoreC);
   }
 }

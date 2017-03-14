@@ -313,26 +313,40 @@ public class WeixinPayController {
     }
   }
 
-  @RequestMapping(value = "/paySuccess/{truePrice}")
-  public ModelAndView goPaySuccessPage(@PathVariable Long truePrice, Model model,
+  @RequestMapping(value = "/paySuccess/{orderId}")
+  public ModelAndView goPaySuccessPage(@PathVariable Long orderId, Model model,
                                        HttpServletRequest request) {
     WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
-    model.addAttribute("totalScore", scoreAService.findScoreAByLeJiaUser(weiXinUser.getLeJiaUser())
-        .getTotalScore());
-    Integer PAY_BACK_SCALE = Integer.parseInt(dictionaryService.findDictionaryById(3L).getValue());
-    model.addAttribute("payBackScore",
-                       (long) Math.ceil((double) (truePrice * PAY_BACK_SCALE) / 100));
-    model.addAttribute("truePrice", truePrice);
 
-    ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(weiXinUser.getLeJiaUser());
-    //商品分类
-    List<ProductType> typeList = productService.findAllProductType();
-    //主打爆品
-    Map product = productService.findMainHotProduct();
-    model.addAttribute("scoreB", scoreB);
-    model.addAttribute("product", product);
-    model.addAttribute("typeList", typeList);
-    return MvUtil.go("/product/productIndex");
+    OnLineOrder order = orderService.findOnLineOrderById(orderId);
+    if (order != null) {
+      if (order.getType() == 1) {
+        Integer
+            PAY_BACK_SCALE =
+            Integer.parseInt(dictionaryService.findDictionaryById(3L).getValue());
+        model.addAttribute("totalScore",
+                           scoreAService.findScoreAByLeJiaUser(weiXinUser.getLeJiaUser())
+                               .getTotalScore());
+        model.addAttribute("payBackScore",
+                           (long) Math
+                               .ceil((double) (order.getTruePrice() * PAY_BACK_SCALE) / 100));
+        model.addAttribute("truePrice", order.getTruePrice());
+
+        ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(weiXinUser.getLeJiaUser());
+        //商品分类
+        List<ProductType> typeList = productService.findAllProductType();
+        //主打爆品
+        Map product = productService.findMainHotProduct();
+        model.addAttribute("scoreB", scoreB);
+        model.addAttribute("product", product);
+        model.addAttribute("typeList", typeList);
+        return MvUtil.go("/product/productIndex");
+      } else {
+        model.addAttribute("order", order);
+        return MvUtil.go("/gold/order/success");
+      }
+    }
+    return null;
   }
 
 
@@ -365,11 +379,14 @@ public class WeixinPayController {
                                           @RequestParam String truePrice,
                                           @RequestParam Long trueScore,
                                           @RequestParam Integer transmitWay,
+                                          @RequestParam String message,
                                           HttpServletRequest request) {
+    OnLineOrder onLineOrder = orderService.findOnLineOrderById(orderId);
+//    if(order.getState() )
     Long newTruePrice = (long) (Float.parseFloat(truePrice) * 100);
     if (newTruePrice == 0) {//全金币兑换流程
       try {
-        return onlineOrderService.orderPayByScoreC(orderId, trueScore, transmitWay, 14L);
+        return onlineOrderService.orderPayByScoreC(orderId, trueScore, transmitWay, 14L,message);
       } catch (Exception e) {
         Map<String, Object> map = new HashMap<>();
         map.put("status", 500);
@@ -378,7 +395,7 @@ public class WeixinPayController {
     }
     Map<String, Object>
         result =
-        onlineOrderService.completeGoldOrder(orderId, newTruePrice, trueScore, transmitWay);
+        onlineOrderService.completeGoldOrder(orderId, newTruePrice, trueScore, transmitWay,message);
     if (!"200".equals(result.get("status").toString())) {
       result.put("msg", messageService.getMsg("" + result.get("status")));
       return result;
