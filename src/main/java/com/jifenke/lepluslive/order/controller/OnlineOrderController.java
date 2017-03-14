@@ -2,6 +2,7 @@ package com.jifenke.lepluslive.order.controller;
 
 import com.jifenke.lepluslive.Address.domain.entities.Address;
 import com.jifenke.lepluslive.Address.service.AddressService;
+import com.jifenke.lepluslive.global.service.MessageService;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
@@ -65,6 +66,9 @@ public class OnlineOrderController {
   @Inject
   private ScoreCService scoreCService;
 
+  @Inject
+  private MessageService messageService;
+
   /**
    * 金币商品立即购买创建的待支付订单 17/02/20
    *
@@ -95,7 +99,11 @@ public class OnlineOrderController {
       Map
           result =
           onlineOrderService.createGoldOrder(productId, specId, buyNumber, leJiaUser, address, 5L);
-      return LejiaResult.build((Integer) result.get("status"), "ok", result.get("data"));
+      Integer status = (Integer) result.get("status");
+      return LejiaResult
+          .build(status, status == 200 ? "" : messageService.getMsg("" + status),
+                 result.get("data")
+          );
     } catch (Exception e) {
       e.printStackTrace();
       return LejiaResult.build(500, "服务器异常");

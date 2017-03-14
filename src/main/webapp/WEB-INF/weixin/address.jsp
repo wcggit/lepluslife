@@ -29,9 +29,9 @@
 
 <body>
 <!--底部菜单-->
-<nav class="mui-bar mui-bar-tab" style="background: #D62C2C;" onclick="formSubmit()">
+<nav class="mui-bar mui-bar-tab" style="background: #323232;" onclick="formSubmit()">
     <a class="mui-tab-item mui-active">
-        <span class="mui-tab-label" style="color: #fff; font-weight: bold;">保存</span>
+        <span class="mui-tab-label" style=" color: #cca97a">保存</span>
     </a>
 </nav>
 <div class="mui-content">

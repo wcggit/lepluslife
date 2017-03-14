@@ -213,7 +213,7 @@ public class LeJiaUserService {
    * @param leJiaUser  乐加用户
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  private Merchant bindMerchantAndPartner(Long merchantId, LeJiaUser leJiaUser) {
+  public Merchant bindMerchantAndPartner(Long merchantId, LeJiaUser leJiaUser) {
     Merchant merchant = merchantService.findMerchantById(merchantId);
     Partner partner = merchant.getPartner();
     Date date = new Date();
@@ -249,6 +249,7 @@ public class LeJiaUserService {
 
   /**
    * 今日红包积分 收益
+   *
    * @param token 用户token
    * @param today 今日
    */
@@ -259,7 +260,6 @@ public class LeJiaUserService {
 //          + " INNER JOIN scorea_detail sad ON sa.id=sad.scorea_id INNER JOIN scoreb_detail sbd ON sb.id=sbd.scoreb_id "
 //          + " WHERE sad.number>0 AND sbd.number>0 AND u.token='" + token + "'"
 //          + " AND DATE(sad.date_created)='" + today + "' AND DATE(sbd.date_created)='" + today + "'";
-
 
     sql = " SELECT today_a.tsa, today_b.tsb FROM "
           + " (SELECT SUM(sad.number) tsa, u.user_sid token FROM le_jia_user u INNER JOIN scorea sa ON u.id=sa.le_jia_user_id "
@@ -272,13 +272,14 @@ public class LeJiaUserService {
           + " AND DATE(sbd.date_created)='" + today + "') today_b ";
 //          + " WHERE today_a.token = today_b.token";
 
-
     Query query = em.createNativeQuery(sql);
     List<Object[]> list = query.getResultList();
     return list;
   }
+
   /**
    * 昨日红包积分 收益
+   *
    * @param token     用户token
    * @param yesterday 昨日
    */

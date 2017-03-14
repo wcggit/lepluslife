@@ -46,6 +46,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
   /**
    * 分页获取金币商品列表 17/02/20
    */
-  @Query(value = "SELECT p.id,p.name,p.price,p.min_score,p.picture,p.custom_sale,p.sale_num,p.postage FROM product p WHERE  p.state=1 AND p.type=4 ORDER BY p.sid DESC LIMIT ?1,?2", nativeQuery = true)
+  @Query(value = "SELECT p.id,p.name,p.price,p.min_score,p.picture,p.custom_sale,p.sale_num,p.postage,p.hot_style,p.buy_limit,p.description FROM product p WHERE  p.state=1 AND p.type=4 ORDER BY p.sid DESC LIMIT ?1,?2", nativeQuery = true)
   List<Object[]> findGoldProductListByPage(Integer startNum, Integer pageSize);
 }

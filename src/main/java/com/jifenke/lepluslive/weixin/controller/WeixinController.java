@@ -5,6 +5,7 @@ import com.jifenke.lepluslive.global.util.CookieUtils;
 import com.jifenke.lepluslive.global.util.JsonUtils;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
+import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.lejiauser.service.LeJiaUserService;
 import com.jifenke.lepluslive.partner.domain.entities.Partner;
 import com.jifenke.lepluslive.partner.service.PartnerService;
@@ -18,6 +19,7 @@ import com.jifenke.lepluslive.product.service.ScrollPictureService;
 import com.jifenke.lepluslive.score.domain.entities.ScoreB;
 import com.jifenke.lepluslive.score.service.ScoreAService;
 import com.jifenke.lepluslive.score.service.ScoreBService;
+import com.jifenke.lepluslive.score.service.ScoreCService;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.service.WeiXinService;
 import com.jifenke.lepluslive.weixin.service.WeiXinUserInfoService;
@@ -65,6 +67,9 @@ public class WeixinController {
 
   @Inject
   private ScoreBService scoreBService;
+
+  @Inject
+  private ScoreCService scoreCService;
 
   @Inject
   private ScoreAService scoreAService;
@@ -180,15 +185,17 @@ public class WeixinController {
     return null;
   }
 
+  /**
+   * 会员中心页面
+   */
   @RequestMapping("/user")
-  public ModelAndView goUserPage(Model model, HttpServletRequest request) throws IOException {
+  public ModelAndView goUserPage(Model model, HttpServletRequest request) {
     WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
-//    if (weiXinUser.getLeJiaUser().getOneBarCodeUrl() == null) {
-//      weiXinUser = weiXinUserService.saveBarCodeForUser(weiXinUser);
-//    }
-    model.addAttribute("scoreA", scoreAService.findScoreAByLeJiaUser(weiXinUser.getLeJiaUser()));
+    LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
+    model.addAttribute("scoreA", scoreAService.findScoreAByLeJiaUser(leJiaUser));
     model.addAttribute("user", weiXinUser);
-    model.addAttribute("scoreB", scoreBService.findScoreBByWeiXinUser(weiXinUser.getLeJiaUser()));
+//    model.addAttribute("scoreB", scoreBService.findScoreBByWeiXinUser(leJiaUser));
+    model.addAttribute("scoreC", scoreCService.findScoreCByLeJiaUser(leJiaUser));
     model.addAttribute("check", weiXinUserInfoService.checkYdAndWarning(weiXinUser));
     return MvUtil.go("/user/center");
   }

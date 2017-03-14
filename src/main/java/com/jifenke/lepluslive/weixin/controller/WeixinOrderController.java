@@ -5,9 +5,6 @@ import com.jifenke.lepluslive.Address.service.AddressService;
 import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.order.domain.entities.OnLineOrder;
 import com.jifenke.lepluslive.order.service.OrderService;
-import com.jifenke.lepluslive.score.domain.entities.ScoreA;
-import com.jifenke.lepluslive.score.domain.entities.ScoreB;
-import com.jifenke.lepluslive.score.service.ScoreAService;
 import com.jifenke.lepluslive.score.service.ScoreBService;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
@@ -17,7 +14,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -44,27 +40,10 @@ public class WeixinOrderController {
   private ScoreBService scoreBService;
 
   @Inject
-  private ScoreAService scoreAService;
-
-  @Inject
   private AddressService addressService;
 
   @Inject
   private WeiXinPayService weiXinPayService;
-
-  @RequestMapping("/scoreDetail")
-  public ModelAndView goScoreDetailPage(HttpServletRequest request, Model model,
-                                        @RequestParam Integer type) {
-    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
-    ScoreA scoreA = scoreAService.findScoreAByLeJiaUser(weiXinUser.getLeJiaUser());
-    ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(weiXinUser.getLeJiaUser());
-    model.addAttribute("scoreADetails", scoreAService.findAllScoreADetailByScoreA(scoreA));
-    model.addAttribute("scoreBDetails", scoreBService.findAllScoreBDetailByScoreB(scoreB));
-    model.addAttribute("openId", weiXinUser.getOpenId());
-    model.addAttribute("type", type);
-    return MvUtil.go("/weixin/scoreDetail");
-
-  }
 
   /**
    * 立刻支付按钮跳转到支付页面  16/09/23
