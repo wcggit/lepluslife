@@ -777,8 +777,10 @@
 </script>
 <script>
     <%-------------------------分享参数----------------------------%>
+    var shareTitle = '乐+专属福利兑换',
             shareLink = 'http://www.lepluslife.com/front/gold/weixin',
             shareImgUrl = '${resourceUrl}/loggo.png',
+            shareDesc = '四海八荒，话费加油卡免费兑换，手慢无！有多少金币，抵多少钱！';
 </script>
 <%@include file="/WEB-INF/weixin/common/share.jsp" %>
 </html>
