@@ -775,4 +775,10 @@
         window.location.href = '/front/order/weixin/orderList';
     }
 </script>
+<script>
+    <%-------------------------分享参数----------------------------%>
+            shareLink = 'http://www.lepluslife.com/front/gold/weixin',
+            shareImgUrl = '${resourceUrl}/loggo.png',
+</script>
+<%@include file="/WEB-INF/weixin/common/share.jsp" %>
 </html>

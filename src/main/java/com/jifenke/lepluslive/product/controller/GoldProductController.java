@@ -11,6 +11,7 @@ import com.jifenke.lepluslive.product.service.GoldProductService;
 import com.jifenke.lepluslive.product.service.ProductService;
 import com.jifenke.lepluslive.product.service.ScrollPictureService;
 import com.jifenke.lepluslive.score.service.ScoreCService;
+import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
 import com.jifenke.lepluslive.weixin.service.WeiXinService;
 
 import org.springframework.ui.Model;
@@ -48,6 +49,9 @@ public class GoldProductController {
   @Inject
   private GoldProductService goldProductService;
 
+  @Inject
+  private WeiXinPayService weiXinPayService;
+
   /**
    * 公众号 金币商品首页 17/2/20
    */
@@ -69,6 +73,7 @@ public class GoldProductController {
     for (Map map : list) {
       model.addAttribute("p_" + map.get("id"), map);
     }
+    model.addAttribute("wxConfig", weiXinPayService.getWeiXinPayConfig(request));
     return MvUtil.go("/gold/product/index");
   }
 
