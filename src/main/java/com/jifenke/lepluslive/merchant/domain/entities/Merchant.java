@@ -31,7 +31,7 @@ public class Merchant {
   @OneToOne(cascade = CascadeType.ALL)
   private MerchantBank merchantBank;
 
-  private String merchantSid = MvUtil.getMerchantSid();
+  private String merchantSid = MvUtil.getRandomNumber(7);
 
   @ManyToOne
   private City city;

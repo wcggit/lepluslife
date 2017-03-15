@@ -5,12 +5,11 @@
   Time: 17:48
   金币商城首页
 --%>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ page language="java" pageEncoding="UTF-8" %>
 <%@include file="/WEB-INF/commen.jsp" %>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
@@ -748,7 +747,7 @@
         $(document).one('touchstart', function () {
             setTimeout(function () {
                 $('.shadow').css('display', 'none')
-            },300)
+            }, 300)
 
         })
         event.stopPropagation();
@@ -765,6 +764,8 @@
         window.location.href = '/front/gold/weixin/p?productId=' + productId;
     }
     function goRecharge() {
+        /** 点击话费充值事件统计*/
+        $.get("/front/visit/recharge/0");
         window.location.href = '/front/order/weixin/recharge';
     }
     function goTravel() {

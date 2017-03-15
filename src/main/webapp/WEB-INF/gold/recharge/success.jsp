@@ -5,8 +5,6 @@
   Time: 12:59
   金币话费充值成功页面
 --%>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ page language="java" pageEncoding="UTF-8" %>
 <%@include file="/WEB-INF/commen.jsp" %>

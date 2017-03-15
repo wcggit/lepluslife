@@ -1,5 +1,6 @@
 package com.jifenke.lepluslive.global.util;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -7,6 +8,15 @@ import java.util.Date;
  * 时间相关工具类 Created by zhangwen on 16/10/31.
  */
 public class DateUtils {
+
+  private static SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyyMMdd");
+
+  /**
+   * 格式化时间为yyyyMMdd
+   */
+  public static String formatYYYYMMDD(Date date) {
+    return yyyyMMdd.format(date);
+  }
 
   /**
    * 获取今日的零点零分

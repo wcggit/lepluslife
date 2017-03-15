@@ -80,7 +80,7 @@
         <div class="num">
             <span class="decrease">-</span>
             <input class="buy-num" id="buyNumber" type="text" value="1" disabled>
-            <span class="add">+</span>
+            <span class="add active">+</span>
             <span class="kucun">库存：<span class="kucun-num"><c:forEach items="${specList}" var="spec"
                                                                       begin="0"
                                                                       end="0">${spec.repository}</c:forEach></span></span>
@@ -157,10 +157,15 @@
     });
 
     function checkNum(number) {
-        if (number > repository) {
+        if (number >= repository) {
             number = repository;
-        } else if (number < 0) {
+            $('.add').removeClass('active');
+        } else if (number <= 0) {
             number = 0;
+            $('.decrease').removeClass('active');
+        } else {
+            $('.add').addClass('active');
+            $('.decrease').addClass('active');
         }
         return number;
     }

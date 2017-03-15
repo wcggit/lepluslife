@@ -1,9 +1,12 @@
 package com.jifenke.lepluslive.statistics.service;
 
+import com.jifenke.lepluslive.global.util.DateUtils;
+
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -45,8 +48,11 @@ public class VisitLogRedisService {
 //    };
     //lambda
     RedisCallback<List<Object>> callback = (e) -> {
-      e.zIncrBy(category.getBytes(), 1, target.getBytes());//点击次数
-      e.sAdd((category + target).getBytes(), user.getBytes());//点击人数
+      e.zIncrBy(category.getBytes(), 1, target.getBytes());//总点击次数
+      e.sAdd((category + "total:" + target).getBytes(), user.getBytes());//总点击人
+      e.zIncrBy((category + "day:" + target).getBytes(), 1,
+                DateUtils.formatYYYYMMDD(new Date()).getBytes()); //每日点击次数
+
       return null;
     };
     redisTemplate.executePipelined(callback);

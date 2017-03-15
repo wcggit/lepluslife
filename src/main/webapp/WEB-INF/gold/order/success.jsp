@@ -5,9 +5,9 @@
   Time: 15:50
   金币订单支付成功页面
 --%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page language="java" pageEncoding="UTF-8" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@include file="/WEB-INF/commen.jsp" %>
 <html>
 <head>
     <meta charset="utf-8">
@@ -16,8 +16,6 @@
           content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <c:set var="resourceUrl" value="http://www.lepluslife.com/resource"></c:set>
-    <c:set var="wxRootUrl" value="http://www.lepluslife.com"></c:set>
     <!--App自定义的css-->
     <link rel="stylesheet" href="${resourceUrl}/frontRes/gold/success/css/paySuccess.css">
 </head>

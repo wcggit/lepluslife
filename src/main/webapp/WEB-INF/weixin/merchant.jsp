@@ -8,7 +8,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@include file="/WEB-INF/commen.jsp" %>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <!DOCTYPE html>
 <html>
 <script type="application/javascript">
@@ -104,7 +103,7 @@
 <script type="text/javascript" src="${resourceUrl}/js/mui.min.js"></script>
 <script>
     //count判断是第几次加载
-    var count = 1, imgLength = 10, shangshu, yushu, url = '${wxRootUrl}/merchant/list', gps = {};
+    var count = 1, imgLength = 10, shangshu, yushu, url = '/merchant/list', gps = {};
     wx.config({
                   debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
                   appId: '${wxConfig['appId']}', // 必填，公众号的唯一标识

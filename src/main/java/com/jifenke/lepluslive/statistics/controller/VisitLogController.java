@@ -35,16 +35,17 @@ public class VisitLogController {
   /**
    * 金币商品详情页统计 17/3/9
    */
-  @RequestMapping(value = "/product/{productId}", method = RequestMethod.GET)
-  public LejiaResult submit(HttpServletRequest request, @PathVariable String productId) {
+  @RequestMapping(value = "/{category}/{target}", method = RequestMethod.GET)
+  public LejiaResult submit(HttpServletRequest request, @PathVariable String category,
+                            @PathVariable String target) {
     String unionId = CookieUtils.getCookieValue(request, "leJiaUnionId");
     if (unionId == null) {
       unionId = "null";
     }
-    log.debug("unionId=" + unionId + "&&productId=" + productId);
-    visitLogService.saveLog(new VisitLog(unionId, "product", productId, "goldIndex"));
+    log.debug("unionId=" + unionId + "&&category=" + category + "&&target=" + target);
+    visitLogService.saveLog(new VisitLog(unionId, category, target, "goldIndex"));
 
-    redisService.addClickLog(unionId, "product:", "productId:" + productId);
+    redisService.addClickLog(unionId, category + ":", target);
 
     return LejiaResult.ok();
   }

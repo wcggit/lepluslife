@@ -33,7 +33,7 @@ public class CityController {
   public
   @ResponseBody
   LejiaResult list(@ApiParam(value = "第几页") @RequestParam(required = false) Integer page) {
-//    List<City> cities = cityService.findCitiesByPage(PaginationUtil.generatePageRequest(page, 10));
+
     List<City> cities = cityService.findAllCity();
     return LejiaResult.build(200, "ok", cities);
   }
