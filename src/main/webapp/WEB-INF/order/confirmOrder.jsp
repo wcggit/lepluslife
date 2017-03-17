@@ -141,6 +141,11 @@
     <div>还需付款：￥<span id="truePrice"></span></div>
     <div id="btn-wxPay">立即购买</div>
 </section>
+<div class="waiting">
+    <div class="img">
+        <img src="${resourceUrl}/frontRes/img/waiting.gif" alt="">
+    </div>
+</div>
 </body>
 <script>
     var canUseScore = eval('${canUseScore}'), orderTotalScore = eval('${order.totalScore}'); //用户可用积分和订单可用积分
@@ -291,6 +296,7 @@
 </script>
 <script type="text/javascript">
     function payByWx() {
+        $('.waiting').css('display','block');
         $('#btn-wxPay').attr('onclick', '');
         //是否线下自提
         var transmitWay = 0;    //取货方式  1=线下自提|2=快递
@@ -300,6 +306,7 @@
         if (transmitWay == 1 || ${order.address!=null}) {
             var truePrice = $("#truePrice").html();
             if (truePrice < 0) {
+                $('.waiting').css('display','none');
                 alert("选择商品后才能付款~");
                 location.href = "/front/product/weixin/productIndex";
                 return;
@@ -318,6 +325,7 @@
                     if (res.status == 200) {
                         location.href = "/front/order/weixin/orderList";
                     } else {
+                        $('.waiting').css('display','none');
                         alert("订单处理异常(" + res.status + ")");
                         $('#btn-wxPay').attr('onclick', 'payByWx()');
                     }
@@ -326,6 +334,7 @@
                         weixinPay(res);
                         return;
                     } else {
+                        $('.waiting').css('display','none');
                         alert(res['msg']);
                         $('#btn-wxPay').attr('onclick', 'payByWx()');
                         return;
@@ -341,6 +350,7 @@
     }, 200);
 
     function weixinPay(res) {
+        $('.waiting').css('display','none');
         wx.chooseWXPay({
                            timestamp: res['timeStamp'], // 支付签名时间戳，注意微信jssdk中的所有使用timestamp字段均为小写。但最新版的支付后台生成签名使用的timeStamp字段名需大写其中的S字符
                            nonceStr: res['nonceStr'], // 支付签名随机串，不长于 32 位

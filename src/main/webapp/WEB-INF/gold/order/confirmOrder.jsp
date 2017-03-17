@@ -138,6 +138,11 @@
     <div>还需付款：￥<span id="truePrice"></span></div>
     <div id="btn-wxPay" onclick="payByWx()">立即购买</div>
 </section>
+<div class="waiting">
+    <div class="img">
+        <img src="${resourceUrl}/frontRes/img/waiting.gif" alt="">
+    </div>
+</div>
 </body>
 <script>
     var canUseScore = eval('${canUseScore}'), orderTotalScore = eval('${order.totalScore}'); //用户可用金币和订单可用金币
@@ -286,6 +291,7 @@
 </script>
 <script type="text/javascript">
     function payByWx() {
+        $('.waiting').css('display','block');
         $('#btn-wxPay').attr('onclick', '');
         //是否线下自提
         var transmitWay = 0;    //取货方式  1=线下自提|2=快递
@@ -296,6 +302,7 @@
             var truePrice = $("#truePrice").html();
             if (truePrice < 0) {
                 alert("选择商品后才能付款~");
+                $('.waiting').css('display','none');
                 location.href = "/front/gold/weixin";
                 return;
             }
@@ -314,6 +321,7 @@
                     if (res.status == 200) {
                         window.location.href = '/weixin/pay/paySuccess/${order.id}';
                     } else {
+                        $('.waiting').css('display','none');
                         alert("订单处理异常(" + res.status + ")");
                         $('#btn-wxPay').attr('onclick', 'payByWx()');
                     }
@@ -321,6 +329,7 @@
                     if (res.status == 200) {//调用微信支付js-api接口
                         weixinPay(res);
                     } else {
+                        $('.waiting').css('display','none');
                         alert(res['msg']);
                         $('#btn-wxPay').attr('onclick', 'payByWx()');
                     }
@@ -332,6 +341,7 @@
     }
 
     function weixinPay(res) {
+        $('.waiting').css('display','none');
         WeixinJSBridge.invoke(
                 'getBrandWCPayRequest', {
                     "appId":     res['appId'] + "",     //公众号名称，由商户传入

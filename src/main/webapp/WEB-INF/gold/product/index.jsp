@@ -27,9 +27,9 @@
         </p>
 
         <h1 class="clearfix"><fmt:formatNumber
-                type="number" value="${score/100}" pattern="0"
-                maxFractionDigits="0"/><span>.${score2}</span><span class="right"
-                                                                    onclick="goOrderList()">查看订单</span>
+                type="number" value="${score/100}" pattern="0.00"
+                maxFractionDigits="2"/><span></span><span class="right"
+                                                          onclick="goOrderList()">查看订单</span>
         </h1>
     </div>
     <!--话费充值-->

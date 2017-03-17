@@ -61,13 +61,8 @@ public class GoldProductController {
         .findScoreCByLeJiaUser(weiXinService.getCurrentWeiXinUser(request).getLeJiaUser())
         .getScore();
     model.addAttribute("score", score);
-    Long a = score % 100;
-    model.addAttribute("score2", a < 10 ? ("0" + a) : a);
-    if (a > 0) {
-      model.addAttribute("score3", score + 100);
-    } else {
-      model.addAttribute("score3", score);
-    }
+    model.addAttribute("score3", score - score % 100);
+
     List<Map> list = goldProductService.findHotProductListByPage(1, 100);
 
     for (Map map : list) {
