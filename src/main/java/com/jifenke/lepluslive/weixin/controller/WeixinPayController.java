@@ -376,28 +376,21 @@ public class WeixinPayController {
    */
   @RequestMapping(value = "/goldOrder", method = RequestMethod.POST)
   public Map<String, Object> goldOrderPay(@RequestParam Long orderId,
-                                          @RequestParam String truePrice,
-                                          @RequestParam Long trueScore,
+                                          @RequestParam String trueScore,
                                           @RequestParam Integer transmitWay,
                                           @RequestParam String message,
                                           HttpServletRequest request) {
-    OnLineOrder onLineOrder = orderService.findOnLineOrderById(orderId);
-//    if(order.getState() )
-    Long newTruePrice = (long) (Float.parseFloat(truePrice) * 100);
-    if (newTruePrice == 0) {//全金币兑换流程
-      try {
-        return onlineOrderService.orderPayByScoreC(orderId, trueScore, transmitWay, 14L,message);
-      } catch (Exception e) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("status", 500);
-        return map;
-      }
-    }
+
+    Long newTrueScore = (long) (Float.parseFloat(trueScore) * 100);
     Map<String, Object>
         result =
-        onlineOrderService.completeGoldOrder(orderId, newTruePrice, trueScore, transmitWay,message);
-    if (!"200".equals(result.get("status").toString())) {
-      result.put("msg", messageService.getMsg("" + result.get("status")));
+        onlineOrderService.completeGoldOrder(orderId, newTrueScore, 14L, transmitWay, message);
+    String status = result.get("status").toString();
+    if ("2000".equals(status)) {//全金币兑换
+      return result;
+    }
+    if (!"200".equals(status)) {
+      result.put("msg", messageService.getMsg(status));
       return result;
     }
 

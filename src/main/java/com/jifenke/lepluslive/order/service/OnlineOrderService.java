@@ -355,52 +355,23 @@ public class OnlineOrderService {
   /**
    * 全金币支付购买金币商品  17/02/20
    *
-   * @param orderId     订单id
-   * @param trueScore   实际使用金币
    * @param transmitWay 线下自提=1
    * @param payOrigin   支付来源 13=APP全金币|14=公众号全金币
    * @param message     消费者留言
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public Map<String, Object> orderPayByScoreC(Long orderId, Long trueScore, Integer transmitWay,
-                                              Long payOrigin, String message) throws Exception {
+  public Map<String, Object> orderPayByScoreC(OnLineOrder order, Long trueScore,
+                                              Integer transmitWay,
+                                              Long payOrigin, String message) {
+
     Map<String, Object> result = new HashMap<>();
-    OnLineOrder order = orderRepository.findOne(orderId);
-    if (order == null) {
-      result.put("status", 5006);
-      return result;
-    }
     ScoreC scoreC = scoreCService.findScoreCByLeJiaUser(order.getLeJiaUser());
-    if (scoreC == null) {
-      result.put("status", 6006);
-      return result;
-    }
-    if (scoreC.getScore() < order.getTotalScore()) {
-      result.put("status", 6007);
-      return result;
-    }
-    if ((transmitWay == 2 && order.getFreightPrice() != 0)
-        || order.getTotalScore().longValue() != trueScore) {
-      result.put("status", 5007);
-      return result;
-    }
-    if (order.getState() == 4) {
-      result.put("status", 5008);
-      return result;
-    }
-    if (transmitWay != 1 && order.getFreightPrice() != 0) {
-      result.put("status", 5009);
-      result.put("msg", "订单金额或积分计算有误");
-      return result;
-    }
     Date date = new Date();
     try {
       //订单状态处理
       order.setPayOrigin(new PayOrigin(payOrigin));
       order.setState(1);
       order.setPayState(1);
-      order.setTrueScore(trueScore);
-      order.setTruePrice(0L);
       order.setPayDate(date);
       if (transmitWay == 1) {
         order.setDeliveryDate(date);
@@ -415,7 +386,7 @@ public class OnlineOrderService {
       scoreCService.saveScoreC(scoreC, 0, trueScore);
       scoreCService.saveScoreCDetail(scoreC, 0, trueScore, 2, "金币商城消费", order.getOrderSid());
       orderRepository.save(order);
-      result.put("status", 200);
+      result.put("status", 2000);
       result.put("data", order.getId());
       return result;
     } catch (Exception e) {
@@ -428,13 +399,12 @@ public class OnlineOrderService {
    * 金币订单页提交,输入实际使用金额和金币 17/02/20
    *
    * @param orderId     订单id
-   * @param truePrice   实际使用价格
    * @param trueScore   实际使用金币
    * @param transmitWay 物流方式 1=自提
    * @param message     消费者留言
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public Map<String, Object> completeGoldOrder(Long orderId, Long truePrice, Long trueScore,
+  public Map<String, Object> completeGoldOrder(Long orderId, Long trueScore, Long payOrigin,
                                                Integer transmitWay, String message) {
     Map<String, Object> result = new HashMap<>();
     OnLineOrder onLineOrder = orderRepository.findOne(orderId);
@@ -446,14 +416,25 @@ public class OnlineOrderService {
       result.put("status", 5008);
       return result;
     }
-
-    //需判断实际使用积分+红包与totalPrice+totalScore是否一致
-    if ((truePrice + trueScore) != (onLineOrder.getTotalScore() + onLineOrder.getFreightPrice())) {
-      result.put("status", 5009);
+    ScoreC scoreC = scoreCService.findScoreCByLeJiaUser(onLineOrder.getLeJiaUser());
+    if (scoreC.getScore() < trueScore) {
+      result.put("status", 6007);
       return result;
     }
 
-    onLineOrder.setTruePrice(truePrice);
+    Long newTruePrice = onLineOrder.getTotalScore() - trueScore;
+    if (newTruePrice < 0) {
+      result.put("status", 5009);
+      return result;
+    }
+    if (transmitWay == 2) {
+      newTruePrice += onLineOrder.getFreightPrice();
+    }
+    if (newTruePrice == 0) { //全积分兑换
+      return orderPayByScoreC(onLineOrder, trueScore, transmitWay, payOrigin, message);
+    }
+
+    onLineOrder.setTruePrice(newTruePrice);
     onLineOrder.setTransmitWay(transmitWay);
     onLineOrder.setTrueScore(trueScore);
     onLineOrder.setMessage(message);

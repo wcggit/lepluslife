@@ -774,6 +774,8 @@
     function goOrderList() {
         window.location.href = '/front/order/weixin/orderList';
     }
+    /** 进入该页面统计*/
+    $.get("/front/visit/product/0");
 </script>
 <script>
     <%-------------------------分享参数----------------------------%>

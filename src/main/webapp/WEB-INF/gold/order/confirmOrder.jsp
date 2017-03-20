@@ -157,7 +157,7 @@
         } else { //用户积分少于订单可用积分
             $('#maxScore').html(toDecimal(canUseScore / 100));
             $('#trueScore').val(toDecimal(canUseScore / 100));
-            $('#truePrice').html(toDecimal((orderTotalScore - canUseScore) / 100));
+            $('#truePrice').html(toDecimal((orderTotalScore - canUseScore + freightPrice) / 100));
             maxScore = canUseScore;
             $('#scoreBwarning').show();
             $('#BWarningText').html('您的金币不足，将按1元=1金币补交');
@@ -211,7 +211,7 @@
 
     //使用金币的最大值和最小值判断
     function judgeFun1() {
-        if (eval(trueScoreInput.val()) >= maxScore) {
+        if (eval(trueScoreInput.val() * 100) >= maxScore) {
             if (maxScore == orderTotalScore) {
                 $('#scoreBwarning').hide();
             } else if (maxScore == canUseScore) {
@@ -221,7 +221,7 @@
                 $('#scoreBwarning').show();
                 $('#BWarningText').html('使用金币不足，将按1元=1金币补交');
             }
-            trueScoreInput.val(maxScore);
+            trueScoreInput.val(maxScore / 100);
         } else if (eval(trueScoreInput.val()) <= 0) {
             trueScoreInput.val(0);
             $('#scoreBwarning').show();
@@ -291,7 +291,7 @@
 </script>
 <script type="text/javascript">
     function payByWx() {
-        $('.waiting').css('display','block');
+        $('.waiting').css('display', 'block');
         $('#btn-wxPay').attr('onclick', '');
         //是否线下自提
         var transmitWay = 0;    //取货方式  1=线下自提|2=快递
@@ -302,37 +302,26 @@
             var truePrice = $("#truePrice").html();
             if (truePrice < 0) {
                 alert("选择商品后才能付款~");
-                $('.waiting').css('display','none');
+                $('.waiting').css('display', 'none');
                 location.href = "/front/gold/weixin";
                 return;
             }
-            var trueScore = $('#trueScore').val() * 100;
-            var price = eval(truePrice * 100);
-
+            var trueScore = $('#trueScore').val();
 //            首先提交请求，生成预支付订单
             $.post('/weixin/pay/goldOrder', {
                 orderId: '${order.id}',
-                truePrice: truePrice,
                 trueScore: trueScore,
                 transmitWay: transmitWay,
                 message: $('#message').val()
             }, function (res) {
-                if (price == 0) {
-                    if (res.status == 200) {
-                        window.location.href = '/weixin/pay/paySuccess/${order.id}';
-                    } else {
-                        $('.waiting').css('display','none');
-                        alert("订单处理异常(" + res.status + ")");
-                        $('#btn-wxPay').attr('onclick', 'payByWx()');
-                    }
+                if (res.status == 2000) {
+                    window.location.href = '/weixin/pay/paySuccess/${order.id}';
+                } else if (res.status == 200) {//调用微信支付js-api接口
+                    weixinPay(res);
                 } else {
-                    if (res.status == 200) {//调用微信支付js-api接口
-                        weixinPay(res);
-                    } else {
-                        $('.waiting').css('display','none');
-                        alert(res['msg']);
-                        $('#btn-wxPay').attr('onclick', 'payByWx()');
-                    }
+                    $('.waiting').css('display', 'none');
+                    alert(res['msg']);
+                    $('#btn-wxPay').attr('onclick', 'payByWx()');
                 }
             });
         } else {
@@ -341,7 +330,7 @@
     }
 
     function weixinPay(res) {
-        $('.waiting').css('display','none');
+        $('.waiting').css('display', 'none');
         WeixinJSBridge.invoke(
                 'getBrandWCPayRequest', {
                     "appId":     res['appId'] + "",     //公众号名称，由商户传入
