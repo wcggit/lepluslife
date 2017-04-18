@@ -6,8 +6,8 @@ import com.jifenke.lepluslive.global.config.Constants;
 import com.jifenke.lepluslive.global.service.MessageService;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
+import com.jifenke.lepluslive.lejiauser.service.LeJiaUserService;
 import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
-import com.jifenke.lepluslive.weixin.service.WeiXinService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 
@@ -35,27 +37,30 @@ public class ActivityPhoneOrderController {
   private WeiXinPayService weiXinPayService;
 
   @Inject
-  private WeiXinService weiXinService;
-
-  @Inject
   private MessageService messageService;
 
   @Inject
   private ActivityPhoneOrderService phoneOrderService;
 
+  @Inject
+  private LeJiaUserService leJiaUserService;
+
   /**
    * 金币话费订单生成 生成支付参数  17/2/22
    *
-   * @param worth 话费金额
-   * @param phone 充值手机号
+   * @param worth  话费金额
+   * @param phone  充值手机号
+   * @param payWay 5=公众号|1=APP
    */
-  @RequestMapping(value = "/create", method = RequestMethod.POST)
+  @RequestMapping(value = "/user/create", method = RequestMethod.POST)
   public LejiaResult createGoldOrder(@RequestParam Integer worth, @RequestParam String phone,
-                                     HttpServletRequest request) {
-    LeJiaUser leJiaUser = weiXinService.getCurrentWeiXinUser(request).getLeJiaUser();
+                                     HttpServletRequest request, @RequestParam Long payWay) {
+    LeJiaUser
+        leJiaUser =
+        leJiaUserService.findUserById(Long.valueOf("" + request.getAttribute("leJiaUserId")));
     Map<Object, Object> result = null;
     try {
-      result = phoneOrderService.createPhoneOrder(leJiaUser, worth, phone, 5L);
+      result = phoneOrderService.createPhoneOrder(leJiaUser, worth, phone, payWay);
     } catch (Exception e) {
       e.printStackTrace();
       return LejiaResult.build(500, "出现未知错误,请联系管理员或稍后重试");
@@ -76,23 +81,52 @@ public class ActivityPhoneOrderController {
         return LejiaResult.build(500, "出现未知错误,请联系管理员或稍后重试");
       }
     }
-    //封装订单参数
-    SortedMap<String, Object>
-        map =
-        weiXinPayService.buildOrderParams(request, "金币充值话费", order.getOrderSid(),
-                                          "" + order.getTruePrice(),
-                                          Constants.PHONEORDER_NOTIFY_URL);
-    //获取预支付id
-    Map<String, Object> unifiedOrder = weiXinPayService.createUnifiedOrder(map);
-    if (unifiedOrder.get("prepay_id") != null) {
-      //返回前端页面
-      SortedMap<String, Object>
-          params =
-          weiXinPayService.buildJsapiParams(unifiedOrder.get("prepay_id").toString());
+    SortedMap<String, Object> params = weiXinPayService
+        .returnPayParams(payWay, request, "金币充值话费", order.getOrderSid(), "" + order.getTruePrice(),
+                         Constants.PHONEORDER_NOTIFY_URL);
+    if (params != null) {
       params.put("orderId", order.getId());
       return LejiaResult.ok(params);
     }
     return LejiaResult.build(500, "出现未知错误,请联系管理员或稍后重试");
+  }
+
+  /**
+   * 金币话费充值成功后查询数据  17/2/22
+   *
+   * @param orderId 话费订单
+   */
+  @RequestMapping(value = "/paySuccess", method = RequestMethod.POST)
+  public LejiaResult paySuccess(@RequestParam String orderId) {
+
+    ActivityPhoneOrder order = phoneOrderService.findByOrderId(orderId);
+    HashMap<String, Object> map = new HashMap<>();
+    if (order != null) {
+      map.put("worth", order.getWorth());
+      map.put("phoneNum", order.getPhone());
+      map.put("truePrice", order.getTruePrice());
+      map.put("trueScore", order.getTrueScoreB());
+      map.put("payBack", order.getPayBackScore());
+      return LejiaResult.build(200, "ok", map);
+    }
+    return LejiaResult.build(5006, messageService.getMsg("5006"));
+  }
+
+  /**
+   * 获取充值记录  17/4/7
+   */
+  @RequestMapping(value = "/user/list", method = RequestMethod.POST)
+  public Map<String, Object> orderList(HttpServletRequest request) {
+    Long userId = Long.valueOf("" + request.getAttribute("leJiaUserId"));
+    List<Map<String, Object>> list = phoneOrderService.findListByLeJiaUser(userId);
+    Integer totalSave = 0;
+    for (Map<String, Object> map : list) {
+      totalSave += Integer.valueOf("" + map.get("trueScore"));
+    }
+    Map<String, Object> result = new HashMap<>();
+    result.put("totalSave", totalSave);
+    result.put("list", list);
+    return result;
   }
 
   @RequestMapping(value = "/user/userTest", method = RequestMethod.GET)
