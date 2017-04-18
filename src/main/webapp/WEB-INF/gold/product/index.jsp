@@ -3,7 +3,7 @@
   User: zhangwen
   Date: 2017/3/3
   Time: 17:48
-  金币商城首页
+  todo:待删除
 --%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ page language="java" pageEncoding="UTF-8" %>
@@ -685,61 +685,6 @@
 </body>
 <script src="${resourceUrl}/js/zepto.min.js"></script>
 <script>
-    <%--var score = eval('${score}');--%>
-    <%--//强制保留两位小数--%>
-    <%--function toDecimal(x) {--%>
-    <%--var f = parseFloat(x);--%>
-    <%--if (isNaN(f)) {--%>
-    <%--return false;--%>
-    <%--}--%>
-    <%--var f = Math.round(x * 100) / 100;--%>
-    <%--var s = f.toString();--%>
-    <%--var rs = s.indexOf('.');--%>
-    <%--if (rs < 0) {--%>
-    <%--rs = s.length;--%>
-    <%--s += '.';--%>
-    <%--}--%>
-    <%--while (s.length <= rs + 2) {--%>
-    <%--s += '0';--%>
-    <%--}--%>
-    <%--return s;--%>
-    <%--}--%>
-    <%--function goProductDetail(productId) {--%>
-    <%--alert(productId);--%>
-    <%--}--%>
-    <%--function banner(e, p) {--%>
-    <%--e.append('<div onclick="goProductDetail(' + p.id + ')" class="banner-img"><img src="'--%>
-    <%--+ p.picture--%>
-    <%--+ '" alt=""><div class="product-desc"><h1 class="ttl">' + p.name--%>
-    <%--+ '</h1> <p class="desc">' + p.description--%>
-    <%--+ '</p> <p class="true-price">原价：' + toDecimal(p.price / 100)--%>
-    <%--+ '元</p>');--%>
-    <%--if (score >= p.minScore) {--%>
-    <%--e.append('<p class="now-price">需付：0元+' + toDecimal(p.minScore / 100) + '金币</p>');--%>
-    <%--} else {--%>
-    <%--e.append('<p class="now-price">需付：' + toDecimal((p.minScore - score) / 100) + '元+'--%>
-    <%--+ toDecimal(score / 100) + '金币</p>');--%>
-    <%--}--%>
-    <%--e.append('</div></div>');--%>
-    <%--}--%>
-    <%--$.ajax({--%>
-    <%--type: "get",--%>
-    <%--url: "/front/gold/list?page=1",--%>
-    <%--success: function (data) {--%>
-    <%--var list = data.data, length = list.length;--%>
-    <%--var smcp1 = '', smcp2 = ''; //数码产品拼接--%>
-    <%--for (var i = 0; i < length; i++) {--%>
-    <%--var type = list[i].type;--%>
-    <%--switch (type) {--%>
-    <%--case 2:--%>
-    <%--banner(smcp1, list[i]);--%>
-    <%--break;--%>
-    <%--default :--%>
-    <%--break;--%>
-    <%--}--%>
-    <%--}--%>
-    <%--}--%>
-    <%--});--%>
 
     <%--如何赚金币--%>
     $('.icon-problem').on('touchstart', function (event) {

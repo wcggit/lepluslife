@@ -8,7 +8,6 @@ import com.jifenke.lepluslive.merchant.service.CityService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -30,9 +29,7 @@ public class CityController {
 
   @ApiOperation(value = "获取所有的城市列表")
   @RequestMapping(value = "/list", method = RequestMethod.POST)
-  public
-  @ResponseBody
-  LejiaResult list(@ApiParam(value = "第几页") @RequestParam(required = false) Integer page) {
+  public LejiaResult list(@ApiParam(value = "第几页") @RequestParam(required = false) Integer page) {
 
     List<City> cities = cityService.findAllCity();
     return LejiaResult.build(200, "ok", cities);
@@ -40,9 +37,7 @@ public class CityController {
 
   @ApiOperation(value = "获取某个城市的地区列表")
   @RequestMapping(value = "/areas", method = RequestMethod.POST)
-  public
-  @ResponseBody
-  LejiaResult areas(@ApiParam(value = "城市Id") @RequestParam(required = false) Long id) {
+  public LejiaResult areas(@ApiParam(value = "城市Id") @RequestParam(required = false) Long id) {
     List<Area> areaList = cityService.findAreaListByCity(id);
     return LejiaResult.build(200, "ok", areaList);
   }

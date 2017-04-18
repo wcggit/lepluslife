@@ -46,7 +46,7 @@ public class Banner {
 
   private String oldPicture;            //往期推荐图
 
-  private Integer afterType = 1;        //后置类型  1=链接  2=商品   3=商家
+  private Integer afterType = 1;        //后置类型  1=链接|2=商品|3=商家|4=点不动
 
   private String url;                   //轮播图对应的html的链接
 

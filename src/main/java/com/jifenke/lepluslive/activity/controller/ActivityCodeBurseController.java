@@ -208,7 +208,7 @@ public class ActivityCodeBurseController {
         int
             status =
             scoreAService
-                .giveScoreAByDefault(weiXinUser.getLeJiaUser(), defaultScoreA, "关注送红包", 0,
+                .giveScoreAByDefault(weiXinUser.getLeJiaUser(), defaultScoreA, "关注送鼓励金", 0,
                                      "0_" + defaultScoreA);
         //添加参加记录
         if (status == 1) {

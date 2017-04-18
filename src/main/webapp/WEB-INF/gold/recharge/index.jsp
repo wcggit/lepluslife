@@ -231,20 +231,31 @@
     function buy() {
         var focusWorth = $('.focusClass').html();
         var selectWorth = focusWorth.substr(0, focusWorth.length - 1);
-        console.log('手机号码===' + $('#newTel').val() + '面值===' + selectWorth + '金币余额===' + userScore);
-        $.post("/front/phone/create", {phone: $('#newTel').val(), worth: selectWorth},
-               function (res) {
-                   if (res.status == 2000) {//全积分支付成功
-                       orderId = res.data;
-                       // 支付成功后的回调函数
-                       window.location.href = '/weixin/pay/phoneSuccess/' + orderId;
-                   } else if (res.status == 200) { //创建订单成功，吊起微信支付
-                       orderId = res.data.orderId;
-                       weixinPay(res.data);
-                   } else {
-                       alert(res.msg);
-                   }
-               })
+        var currPhone = $('#newTel').val();
+        console.log('手机号码===' + currPhone + '面值===' + selectWorth + '金币余额===' + userScore);
+        //检查是否可以下单
+        $.get("/front/phone/check", {phone: currPhone, worth: selectWorth}, function (resu) {
+            if (resu.status == 200) {
+                $.post("/front/phone/user/create",
+                       {phone: currPhone, worth: selectWorth, payWay: 5},
+                       function (res) {
+                           if (res.status == 2000) {//全积分支付成功
+                               orderId = res.data;
+                               // 支付成功后的回调函数
+                               window.location.href = '/weixin/pay/phoneSuccess/' + orderId;
+                           } else if (res.status == 200) { //创建订单成功，吊起微信支付
+                               orderId = res.data.orderId;
+                               weixinPay(res.data);
+                           } else {
+                               alert(res.msg);
+                               $('.btn-recharge').attr('onclick', 'btnFun()');
+                           }
+                       })
+            } else {
+                alert(resu.msg);
+                $('.btn-recharge').attr('onclick', 'btnFun()');
+            }
+        });
     }
 </script>
 <script>

@@ -8,6 +8,7 @@ import com.jifenke.lepluslive.merchant.domain.entities.City;
 import com.jifenke.lepluslive.merchant.domain.entities.Merchant;
 import com.jifenke.lepluslive.merchant.service.CityService;
 import com.jifenke.lepluslive.product.domain.entities.Product;
+import com.jifenke.lepluslive.statistics.service.RedisCacheService;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -45,6 +46,9 @@ public class BannerService {
 
   @Inject
   private EntityManager em;
+
+  @Inject
+  private RedisCacheService redisCacheService;
 
   /**
    * 首页，臻品轮播，新品首发
@@ -117,14 +121,13 @@ public class BannerService {
    * @param status    是否获取用户经纬度 1=是,0=否
    * @param longitude 经度
    * @param latitude  纬度
-   *
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public List<Map> findHomePageByType10(Integer status, Double longitude, Double latitude) {
     List<Map> mapList = new ArrayList<>();
 
     String sql = null;
-    if (status != null && status == 1 && longitude!=null && latitude!=null) {
+    if (status != null && status == 1 && longitude != null && latitude != null) {
       sql =
           "SELECT m.sid b_sid, m.picture b_picture, m.after_type b_after_type, m.url b_url, m.url_title b_url_title, m.introduce b_introduce, m.id merchant_id, m.merchant_name merchant_name, t.`name` AS tName, area.`name` AS aName, m.lj_commission, m.scorearebate, m.scorebrebate, re.import_scorebscale, m.partnership, ROUND( 6378.138 * 2 * ASIN(SQRT(POW(SIN(("
           + latitude + " * PI() / 180 - m.lat * PI() / 180) / 2),2) + COS(" + latitude
@@ -337,16 +340,18 @@ public class BannerService {
 
   /**
    * app端   启动广告
+   *
    * @param cityId 城市id
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public Map<String, Object> startAd(Long cityId, Integer type) {
 
     String sql = null;
-    sql = " SELECT b1.sid, b1.picture, b1.after_type, b1.url, b1.url_title, b1.product_id, b1.merchant_id"
-          + " FROM banner b1 "
+    sql =
+        " SELECT b1.sid, b1.picture, b1.after_type, b1.url, b1.url_title, b1.product_id, b1.merchant_id"
+        + " FROM banner b1 "
 //          + " LEFT JOIN city c1 ON b1.city_id = c1.id "
-          + " WHERE b1.banner_type_id = 12 AND b1.status = 1 ";
+        + " WHERE b1.banner_type_id = 12 AND b1.status = 1 ";
     if (cityId != null && !"null".equals(cityId) && !"".equals(cityId)) {
       sql += " AND b1.city_id = " + cityId;
     }
@@ -358,18 +363,41 @@ public class BannerService {
     List<Object[]> list = query.getResultList();
 
     Map<String, Object> result = new HashMap<>();
-    if (list.size() > 0){
+    if (list.size() > 0) {
       Object[] o2 = list.get(0);
 //      result.put("sid",         o2[0] == null ? "0" : o2[0].toString());
-      result.put("picture",     o2[1] == null ? "" : o2[1].toString());
-      result.put("afterType",   o2[2] == null ? "0" : o2[2].toString());
-      result.put("url",         o2[3] == null ? "" : o2[3].toString());
-      result.put("urlTitle",    o2[4] == null ? "" : o2[4].toString());
-      result.put("productId",   o2[5] == null ? "0" : o2[5].toString());
-      result.put("merchantId",  o2[6] == null ? "0" : o2[6].toString());
+      result.put("picture", o2[1] == null ? "" : o2[1].toString());
+      result.put("afterType", o2[2] == null ? "0" : o2[2].toString());
+      result.put("url", o2[3] == null ? "" : o2[3].toString());
+      result.put("urlTitle", o2[4] == null ? "" : o2[4].toString());
+      result.put("productId", o2[5] == null ? "0" : o2[5].toString());
+      result.put("merchantId", o2[6] == null ? "0" : o2[6].toString());
     }
-    return result
-        ;
+    return result;
+  }
+
+  /**
+   * 金币商城首页轮播图  2017/3/31
+   */
+  public String findGoldBanner() {
+    String
+        sql =
+        "SELECT picture,title,introduce,after_type AS afterType,url,url_title AS urlTitle,product_id AS productId FROM banner WHERE banner_type_id = 13 ORDER BY sid ASC";
+    String key = "banner:goldIndex";
+    long timeout = 300;
+    return redisCacheService.findBySqlAndCache(sql, key, timeout);
+  }
+
+  /**
+   * 新版首页臻品推荐  2017/3/31
+   */
+  public String findHomeProductRecommend() {
+    String
+        sql =
+        "SELECT b.picture AS picture,b.product_id AS productId,p.`name` AS `name`,p.price AS price FROM banner b INNER JOIN product p ON b.product_id = p.id WHERE banner_type_id = 14";
+    String key = "banner:homeProduct";
+    long timeout = 300;
+    return redisCacheService.findBySqlAndCache(sql, key, timeout);
   }
 
 }

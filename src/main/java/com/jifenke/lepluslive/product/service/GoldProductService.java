@@ -1,15 +1,11 @@
 package com.jifenke.lepluslive.product.service;
 
 import com.jifenke.lepluslive.product.repository.ProductRepository;
+import com.jifenke.lepluslive.statistics.service.RedisCacheService;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -23,39 +19,32 @@ public class GoldProductService {
   @Inject
   private ProductRepository productRepository;
 
+  @Inject
+  private RedisCacheService redisCacheService;
+
   /**
-   * 分页获取金币商品列表 2017/2/20
+   * 分页获取金币商品列表 2017/4/1
    *
    * @param currPage 第几页
    * @param pageSize 每页获取数量
+   * @param type     类别  0=所有分类
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
-  public List<Map> findHotProductListByPage(Integer currPage, Integer pageSize) {
-    List<Map> mapList = new ArrayList<>();
-    List<Object[]>
-        list =
-        productRepository.findGoldProductListByPage((currPage - 1) * 10, pageSize);
-    if (list != null && list.size() > 0) {
-      for (Object[] o : list) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("id", o[0]);
-        map.put("name", o[1]);
-        map.put("price", o[2]);
-//        map.put("minPrice", o[3]);
-        map.put("minScore", o[3]);
-        map.put("picture", o[4]);
-//        map.put("thumb", o[6]);
-        map.put("saleNumber", (int) o[5] + (int) o[6]);
-        map.put("postage", o[7]);
-        map.put("type", o[8]);
-        map.put("banner", o[9]);
-        map.put("description", o[10]);
-//        map.put("repository", o[12]);
-        mapList.add(map);
-      }
-      return mapList;
+  public String findHotProductListByPage(Integer currPage, Integer pageSize, Integer type) {
+    String sql;
+    String key = "gold:list:" + type + ":" + currPage;
+    if (type == 0) {
+      sql =
+          "SELECT id,`name`,price,picture,mark_id AS markType FROM product WHERE type=4 AND state=1 ORDER BY sid DESC LIMIT "
+          + (currPage - 1) * 10 + "," + pageSize;
+    } else {
+      sql =
+          "SELECT id,`name`,price,picture,mark_id AS markType FROM product WHERE type=4 AND state=1 AND product_type_id = "
+          + type + " ORDER BY sid DESC LIMIT "
+          + (currPage - 1) * 10 + "," + pageSize;
     }
-    return null;
+    long timeout = 600;
+    return redisCacheService.findBySqlAndCache(sql, key, timeout);
   }
 
 }

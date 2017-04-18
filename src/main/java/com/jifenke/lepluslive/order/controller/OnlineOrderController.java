@@ -69,47 +69,6 @@ public class OnlineOrderController {
   @Inject
   private MessageService messageService;
 
-  /**
-   * 金币商品立即购买创建的待支付订单 17/02/20
-   *
-   * @param productId 产品ID
-   * @param buyNumber 规格数量
-   * @param specId    规格ID
-   */
-  @RequestMapping(value = "/weixin/createGoldOrder", method = RequestMethod.POST)
-  @ResponseBody
-  public LejiaResult createGoldOrder(HttpServletRequest request,
-                                     @RequestParam(required = true) Long productId,
-                                     @RequestParam(required = true) Integer buyNumber,
-                                     @RequestParam(required = true) Long specId) {
-    LeJiaUser leJiaUser = weiXinService.getCurrentWeiXinUser(request).getLeJiaUser();
-    Long waitPayOrders = orderService.getCurrentUserObligationOrdersCount(leJiaUser);
-    if (waitPayOrders >= 4) {
-      return LejiaResult.build(5001, "未支付订单过多,请支付后再下单");
-    }
-    //查询某个用户待付款的某个商品的数量是否超过限制
-    int count = orderDetailService.getCurrentUserOrderProductCount(leJiaUser.getId(), productId);
-    Integer buyLimit = Integer.valueOf(dictionaryService.findDictionaryById(39L).getValue());
-    if ((count + buyNumber) > buyLimit) {
-      return LejiaResult.build(5004, "请先支付该商品的待支付订单");
-    }
-    Address address = addressService.findAddressByLeJiaUserAndState(leJiaUser);
-    //创建商品的待支付订单
-    try {
-      Map
-          result =
-          onlineOrderService.createGoldOrder(productId, specId, buyNumber, leJiaUser, address, 5L);
-      Integer status = (Integer) result.get("status");
-      return LejiaResult
-          .build(status, status == 200 ? "" : messageService.getMsg("" + status),
-                 result.get("data")
-          );
-    } catch (Exception e) {
-      e.printStackTrace();
-      return LejiaResult.build(500, "服务器异常");
-    }
-  }
-
 
   /**
    * 爆品详情页点击购买生成订单 16/09/22

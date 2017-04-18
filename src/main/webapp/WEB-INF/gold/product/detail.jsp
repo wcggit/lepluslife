@@ -45,7 +45,9 @@
     </div>
     <div class="center">
         <p class="ttl">${product.name}</p>
+
         <p class="desc">${product.description}</p>
+
         <div class="clearfix">
             <span class="left">快递：<fmt:formatNumber
                     type="number" value="${product.postage/100}" pattern="0.00"
@@ -185,8 +187,8 @@
 
         $.ajax({
                    type: "post",
-                   url: "/front/order/weixin/createGoldOrder",
-                   data: {productId: productId, specId: buySpecId, buyNumber: buyNum},
+                   url: "/front/order/user/create",
+                   data: {payWay: 5, carts: productId + '_' + buySpecId + '_' + buyNum},
                    success: function (data) {
                        if (data.status == 200) {
                            location.href =

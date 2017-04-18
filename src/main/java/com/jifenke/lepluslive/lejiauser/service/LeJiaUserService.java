@@ -83,6 +83,11 @@ public class LeJiaUserService {
     return leJiaUserRepository.findByUserSid(userSid);
   }
 
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+  public LeJiaUser findUserById(Long id) {
+    return leJiaUserRepository.findOne(id);
+  }
+
   //保存用户信息 16/10/24
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public void saveUser(LeJiaUser leJiaUser) {
@@ -256,25 +261,19 @@ public class LeJiaUserService {
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public List<Object[]> todayScoreAB(String token, String today) {
     String sql = null;
-//    sql = " SELECT SUM(sad.number), SUM(sbd.number) FROM le_jia_user u INNER JOIN scorea sa ON u.id=sa.le_jia_user_id INNER JOIN scoreb sb ON u.id=sb.le_jia_user_id "
-//          + " INNER JOIN scorea_detail sad ON sa.id=sad.scorea_id INNER JOIN scoreb_detail sbd ON sb.id=sbd.scoreb_id "
-//          + " WHERE sad.number>0 AND sbd.number>0 AND u.token='" + token + "'"
-//          + " AND DATE(sad.date_created)='" + today + "' AND DATE(sbd.date_created)='" + today + "'";
 
     sql = " SELECT today_a.tsa, today_b.tsb FROM "
           + " (SELECT SUM(sad.number) tsa, u.user_sid token FROM le_jia_user u INNER JOIN scorea sa ON u.id=sa.le_jia_user_id "
           + " INNER JOIN scorea_detail sad ON sa.id=sad.scorea_id "
-          + " WHERE sad.number>0 AND u.user_sid='" + token + "'"
-          + " AND DATE(sad.date_created)='" + today + "') today_a, "
-          + " (SELECT SUM(sbd.number) tsb, u.user_sid token FROM le_jia_user u INNER JOIN scoreb sb ON u.id=sb.le_jia_user_id "
-          + " INNER JOIN scoreb_detail sbd ON sb.id=sbd.scoreb_id "
-          + " WHERE sbd.number>0 AND u.user_sid='" + token + "'"
-          + " AND DATE(sbd.date_created)='" + today + "') today_b ";
-//          + " WHERE today_a.token = today_b.token";
+          + " WHERE u.user_sid='" + token + "'"
+          + " AND DATE(sad.date_created)='" + today + "' AND  sad.number>0) today_a, "
+          + " (SELECT SUM(sbd.number) tsb, u.user_sid token FROM le_jia_user u INNER JOIN scorec sb ON u.id=sb.le_jia_user_id "
+          + " INNER JOIN scorec_detail sbd ON sb.id=sbd.scorec_id "
+          + " WHERE u.user_sid='" + token + "'"
+          + " AND DATE(sbd.date_created)='" + today + "' AND sbd.number>0) today_b ";
 
     Query query = em.createNativeQuery(sql);
-    List<Object[]> list = query.getResultList();
-    return list;
+    return query.getResultList();
   }
 
   /**
@@ -294,12 +293,12 @@ public class LeJiaUserService {
     sql = " SELECT yesterday_a.ysa, yesterday_b.ysb FROM "
           + " (SELECT SUM(sad.number) ysa, u.user_sid token FROM le_jia_user u INNER JOIN scorea sa ON u.id=sa.le_jia_user_id "
           + " INNER JOIN scorea_detail sad ON sa.id=sad.scorea_id "
-          + " WHERE sad.number>0 AND u.user_sid='" + token + "'"
-          + " AND DATE(sad.date_created)='" + yesterday + "') yesterday_a, "
-          + " (SELECT SUM(sbd.number) ysb, u.user_sid token FROM le_jia_user u INNER JOIN scoreb sb ON u.id=sb.le_jia_user_id "
-          + " INNER JOIN scoreb_detail sbd ON sb.id=sbd.scoreb_id "
-          + " WHERE sbd.number>0 AND u.user_sid='" + token + "'"
-          + " AND DATE(sbd.date_created)='" + yesterday + "') yesterday_b ";
+          + " WHERE u.user_sid='" + token + "'"
+          + " AND DATE(sad.date_created)='" + yesterday + "' AND sad.number>0) yesterday_a, "
+          + " (SELECT SUM(sbd.number) ysb, u.user_sid token FROM le_jia_user u INNER JOIN scorec sb ON u.id=sb.le_jia_user_id "
+          + " INNER JOIN scorec_detail sbd ON sb.id=sbd.scorec_id "
+          + " WHERE u.user_sid='" + token + "'"
+          + " AND DATE(sbd.date_created)='" + yesterday + "' AND sbd.number>0) yesterday_b ";
 //          + " WHERE yesterday_a.token = yesterday_b.token";
 
     Query query = em.createNativeQuery(sql);

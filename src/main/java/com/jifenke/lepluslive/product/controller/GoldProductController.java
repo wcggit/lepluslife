@@ -1,16 +1,20 @@
 package com.jifenke.lepluslive.product.controller;
 
 import com.jifenke.lepluslive.global.util.JsonUtils;
-import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.product.domain.entities.Product;
 import com.jifenke.lepluslive.product.domain.entities.ProductDetail;
 import com.jifenke.lepluslive.product.domain.entities.ProductSpec;
+import com.jifenke.lepluslive.product.domain.entities.ProductType;
 import com.jifenke.lepluslive.product.domain.entities.ScrollPicture;
 import com.jifenke.lepluslive.product.service.GoldProductService;
+import com.jifenke.lepluslive.product.service.ProductModuleService;
 import com.jifenke.lepluslive.product.service.ProductService;
 import com.jifenke.lepluslive.product.service.ScrollPictureService;
+import com.jifenke.lepluslive.score.domain.entities.ScoreB;
+import com.jifenke.lepluslive.score.domain.entities.ScoreC;
 import com.jifenke.lepluslive.score.service.ScoreCService;
+import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
 import com.jifenke.lepluslive.weixin.service.WeiXinService;
 
@@ -52,6 +56,9 @@ public class GoldProductController {
   @Inject
   private WeiXinPayService weiXinPayService;
 
+  @Inject
+  private ProductModuleService productModuleService;
+
   /**
    * 公众号 金币商品首页 17/2/20
    */
@@ -63,13 +70,14 @@ public class GoldProductController {
     model.addAttribute("score", score);
     model.addAttribute("score3", score - score % 100);
 
-    List<Map> list = goldProductService.findHotProductListByPage(1, 100);
-
-    for (Map map : list) {
-      model.addAttribute("p_" + map.get("id"), map);
-    }
+//    List<Map> list = goldProductService.findHotProductListByPage(1, 100);
+//
+//    for (Map map : list) {
+//      model.addAttribute("p_" + map.get("id"), map);
+//    }
+    model.addAttribute("m", JsonUtils.jsonToPojo(productModuleService.findList(), Map.class));
     model.addAttribute("wxConfig", weiXinPayService.getWeiXinPayConfig(request));
-    return MvUtil.go("/gold/product/index");
+    return MvUtil.go("/gold/product/index2");
   }
 
   /**
@@ -102,17 +110,40 @@ public class GoldProductController {
   }
 
   /**
-   * 分页获取金币商品列表  17/2/20
+   * 分页分类获取金币商品列表  17/4/1
    *
    * @param page 当前页码
    */
   @RequestMapping(value = "/list", method = RequestMethod.GET)
-  public LejiaResult productList(@RequestParam Integer page) {
+  public String productList(@RequestParam Integer page, @RequestParam Integer productType) {
     if (page == null || page < 1) {
       page = 1;
     }
-    List<Map> list = goldProductService.findHotProductListByPage(page, 100);
-    return LejiaResult.ok(list);
+    return goldProductService.findHotProductListByPage(page, 10, productType);
+  }
+
+  /**
+   * 获取金币首页8个模块列表  17/3/30
+   */
+  @RequestMapping(value = "/module", method = RequestMethod.GET)
+  public String moduleList() {
+    return productModuleService.findList();
+  }
+
+  /**
+   * 金币商品分类页面 17/4/13
+   *
+   * @param type 商品分类
+   */
+  @RequestMapping(value = "/weixin/type", method = RequestMethod.GET)
+  public ModelAndView typeList(HttpServletRequest request, Model model,
+                               @RequestParam(required = false) Integer type) {
+    model.addAttribute("score", scoreCService
+        .findScoreCByLeJiaUser(weiXinService.getCurrentWeiXinUser(request).getLeJiaUser())
+        .getScore());
+    model.addAttribute("typeList", productService.findAllProductType());
+    model.addAttribute("type", type);
+    return MvUtil.go("/gold/product/list");
   }
 
 }

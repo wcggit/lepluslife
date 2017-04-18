@@ -334,7 +334,7 @@
         }
         $.ajax({
                    type: "get",
-                   url: "/weixin//subPage/open?phoneNumber=" + phoneNumber,
+                   url: "/weixin/subPage/open?phoneNumber=" + phoneNumber,
                    success: function (data) {
                        if (data.status == 200) {
                            $(".hb").hide();

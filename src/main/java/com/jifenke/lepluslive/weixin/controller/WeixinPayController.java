@@ -30,7 +30,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -95,6 +94,7 @@ public class WeixinPayController {
    * @param ruleId 话费产品ID
    * @param phone  充值手机号
    */
+  //todo:待删除 转移到其他方法
   @RequestMapping(value = "/phonePay", method = RequestMethod.POST)
   public LejiaResult phoneOrderPay(@RequestParam Long ruleId, @RequestParam String phone,
                                    HttpServletRequest request) {
@@ -195,6 +195,9 @@ public class WeixinPayController {
     }
   }
 
+  /**
+   * 金币充话费成功  2017/4/5
+   */
   @RequestMapping(value = "/phoneSuccess/{orderId}", method = RequestMethod.GET)
   public ModelAndView phoneSuccessPage(@PathVariable String orderId, HttpServletRequest request,
                                        Model model) {
@@ -210,13 +213,12 @@ public class WeixinPayController {
   }
 
   //微信支付接口
+  //todo:待删除 等公众号积分商品下线后可删除
   @RequestMapping(value = "/weixinpay")
-  public
-  @ResponseBody
-  Map<String, Object> weixinPay(@RequestParam Long orderId, @RequestParam String truePrice,
-                                @RequestParam Long trueScore,
-                                @RequestParam Integer transmitWay,
-                                HttpServletRequest request) {
+  public Map<String, Object> weixinPay(@RequestParam Long orderId, @RequestParam String truePrice,
+                                       @RequestParam Long trueScore,
+                                       @RequestParam Integer transmitWay,
+                                       HttpServletRequest request) {
 //    Long newTruePrice = (long) (Float.parseFloat(truePrice) * 100);
     Long newTruePrice = new BigDecimal(truePrice).multiply(new BigDecimal(100)).longValue();
     if (newTruePrice == 0) {//全积分兑换流程
@@ -349,7 +351,7 @@ public class WeixinPayController {
     return null;
   }
 
-
+  //todo:待删除 等公众号积分商品下线后可删除
   @RequestMapping(value = "/payFail/{orderId}")
   public ModelAndView goPayFailPage(@PathVariable Long orderId, Model model,
                                     HttpServletRequest request) {
@@ -365,59 +367,5 @@ public class WeixinPayController {
     model.addAttribute("orderId", orderId);
     return MvUtil.go("/product/productIndex");
   }
-
-  /**
-   * 金币类订单提交  2017/02/20
-   *
-   * @param orderId     订单ID
-   * @param truePrice   实际支付金额
-   * @param trueScore   实际使用金币
-   * @param transmitWay 取货方式
-   */
-  @RequestMapping(value = "/goldOrder", method = RequestMethod.POST)
-  public Map<String, Object> goldOrderPay(@RequestParam Long orderId,
-                                          @RequestParam String trueScore,
-                                          @RequestParam Integer transmitWay,
-                                          @RequestParam String message,
-                                          HttpServletRequest request) {
-
-    Long newTrueScore = (long) (Float.parseFloat(trueScore) * 100);
-    Map<String, Object>
-        result =
-        onlineOrderService.completeGoldOrder(orderId, newTrueScore, 14L, transmitWay, message);
-    String status = result.get("status").toString();
-    if ("2000".equals(status)) {//全金币兑换
-      return result;
-    }
-    if (!"200".equals(status)) {
-      result.put("msg", messageService.getMsg(status));
-      return result;
-    }
-
-    OnLineOrder order = (OnLineOrder) result.get("data");
-    //封装订单参数
-    SortedMap<String, Object>
-        map =
-        weiXinPayService
-            .buildOrderParams(request, "金币商城消费", order.getOrderSid(), "" + order.getTruePrice(),
-                              Constants.ONLINEORDER_NOTIFY_URL);
-    //获取预支付id
-    Map<String, Object> unifiedOrder = weiXinPayService.createUnifiedOrder(map);
-    if (unifiedOrder.get("prepay_id") != null) {
-      //返回前端页面
-      SortedMap<String, Object>
-          jsapiParams =
-          weiXinPayService.buildJsapiParams(unifiedOrder.get("prepay_id").toString());
-      jsapiParams.put("status", 200);
-      return jsapiParams;
-    } else {
-      log.error(unifiedOrder.get("return_msg").toString());
-      unifiedOrder.clear();
-      unifiedOrder.put("status", 500);
-      unifiedOrder.put("msg", "出现未知错误,请联系管理员或稍后重试");
-      return unifiedOrder;
-    }
-  }
-
 
 }

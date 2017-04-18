@@ -152,12 +152,13 @@
         if (canUseScore >= orderTotalScore) {
             $('#maxScore').html(toDecimal(orderTotalScore / 100));
             $('#trueScore').val(toDecimal(orderTotalScore / 100));
-            $('#truePrice').html(toDecimal(minPrice / 100));
+            $('#truePrice').html(toDecimal((minPrice - orderTotalScore) / 100));
             maxScore = orderTotalScore;
+            $('#scoreBwarning').hide();
         } else { //用户积分少于订单可用积分
             $('#maxScore').html(toDecimal(canUseScore / 100));
             $('#trueScore').val(toDecimal(canUseScore / 100));
-            $('#truePrice').html(toDecimal((orderTotalScore - canUseScore + freightPrice) / 100));
+            $('#truePrice').html(toDecimal((minPrice - canUseScore) / 100));
             maxScore = canUseScore;
             $('#scoreBwarning').show();
             $('#BWarningText').html('您的金币不足，将按1元=1金币补交');
@@ -230,7 +231,7 @@
     }
     //点击事件
     function allClick() {
-        $('#truePrice').html(toDecimal((minPrice + orderTotalScore - (eval(trueScoreInput.val())
+        $('#truePrice').html(toDecimal((minPrice - (eval(trueScoreInput.val())
                                                                       == null ? 0
                 : eval(trueScoreInput.val())) * 100)
                                        / 100));
@@ -308,16 +309,17 @@
             }
             var trueScore = $('#trueScore').val();
 //            首先提交请求，生成预支付订单
-            $.post('/weixin/pay/goldOrder', {
+            $.post('/front/order/submit', {
                 orderId: '${order.id}',
                 trueScore: trueScore,
+                payWay: 5,
                 transmitWay: transmitWay,
                 message: $('#message').val()
             }, function (res) {
                 if (res.status == 2000) {
                     window.location.href = '/weixin/pay/paySuccess/${order.id}';
                 } else if (res.status == 200) {//调用微信支付js-api接口
-                    weixinPay(res);
+                    weixinPay(res.data);
                 } else {
                     $('.waiting').css('display', 'none');
                     alert(res['msg']);
@@ -346,7 +348,7 @@
 //                        var total = eval($("#truePrice").html()) * 100;
                         window.location.href = '/weixin/pay/paySuccess/${order.id}';
                     } else {
-                        window.location.href = '/weixin/pay/payFail/${order.id}';
+                        window.location.href = '/front/order/weixin/orderList';
                     }
                 }
         );

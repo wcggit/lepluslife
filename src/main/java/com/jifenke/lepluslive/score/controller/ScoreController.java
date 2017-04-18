@@ -92,20 +92,17 @@ public class ScoreController {
     }
   }
 
-  @ApiOperation(value = "B积分列表")
+  @ApiOperation(value = "C金币列表")
   @RequestMapping(value = "/listB", method = RequestMethod.POST)
   public LejiaResult listB(@RequestParam(required = true) String token) {
 
     LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);
-    ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(leJiaUser);
-    if (scoreB == null) {
-      return LejiaResult.build(6001, "未找到积分记录");
-    }
+    ScoreC scoreC = scoreCService.findScoreCByLeJiaUser(leJiaUser);
 
-    List<ScoreBDetail> bDetails = scoreBService.findAllScoreBDetailByScoreB(scoreB);
+    List<ScoreCDetail> cDetails = scoreCService.findAllScoreCDetailByScoreC(scoreC);
 
-    if ((bDetails != null) && (bDetails.size() > 0)) {
-      Map result = formatBDetail(bDetails, scoreB);
+    if ((cDetails != null) && (cDetails.size() > 0)) {
+      Map result = formatCDetail(cDetails, scoreC);
       return LejiaResult.build(200, "ok", result);
     } else {
       return LejiaResult.build(200, "ok", null);

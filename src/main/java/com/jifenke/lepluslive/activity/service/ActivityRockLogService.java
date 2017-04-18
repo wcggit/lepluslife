@@ -113,7 +113,7 @@ public class ActivityRockLogService {
           aDetail.setNumber(numberA.longValue());
           aDetail.setScoreA(scoreA);
           aDetail.setOrigin(7);
-          aDetail.setOperate("摇一摇得红包");
+          aDetail.setOperate("摇一摇得鼓励金");
           scoreADetailRepository.save(aDetail);
         }
         if (numberB > 0) {

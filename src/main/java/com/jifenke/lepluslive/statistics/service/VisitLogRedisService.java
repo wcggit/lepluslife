@@ -49,7 +49,7 @@ public class VisitLogRedisService {
     //lambda
     RedisCallback<List<Object>> callback = (e) -> {
       e.zIncrBy(category.getBytes(), 1, target.getBytes());//总点击次数
-      e.sAdd((category + "total:" + target).getBytes(), user.getBytes());//总点击人
+//      e.sAdd((category + "total:" + target).getBytes(), user.getBytes());//总点击人
       e.zIncrBy((category + "day:" + target).getBytes(), 1,
                 DateUtils.formatYYYYMMDD(new Date()).getBytes()); //每日点击次数
 

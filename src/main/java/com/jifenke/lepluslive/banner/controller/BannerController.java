@@ -41,7 +41,7 @@ public class BannerController {
     return LejiaResult.ok(list);
   }
 
-  @ApiOperation(value = "9=首页轮播图,10=首页好店推荐,11=首页臻品推荐")
+  @ApiOperation(value = "9=首页轮播图,10=首页好店推荐")
   @RequestMapping(value = "/homePage/{id}", method = RequestMethod.GET)
   public LejiaResult homePage(@PathVariable Integer id,
                               @ApiParam(value = "是否获取到经纬度1=是,0=否.[id=10,好店推荐时]") @RequestParam(required = false) Integer status,
@@ -50,23 +50,21 @@ public class BannerController {
     List<Map> list = new ArrayList<>();
     if (id == 9) {
       list = bannerService.findByType123(id);
-    }else if (id==11){
+    } else if (id == 11) {
       BannerCriteria bc = new BannerCriteria();
       bc.setType(id);//bannerType
       bc.setOffset(1);//起始页
       bc.setPageSize(100);
       list = bannerService.findHomePageByType(bc);
-    }else if (id==10){
-      list = bannerService.findHomePageByType10(status,longitude,latitude);
+    } else if (id == 10) {
+      list = bannerService.findHomePageByType10(status, longitude, latitude);
     }
 
     return LejiaResult.ok(list);
   }
 
   /**
-   * app端   启动广告
-   * cityId  城市id
-   *
+   * app端   启动广告 cityId  城市id
    */
   @ApiOperation(value = "app启动广告")
   @RequestMapping(value = "/startAd", method = RequestMethod.POST)
@@ -134,6 +132,18 @@ public class BannerController {
   @RequestMapping(value = "/niceShopImage", method = RequestMethod.GET)
   public LejiaResult findNiceShopImage() {
     return LejiaResult.ok(dictionaryService.findDictionaryById(26L).getValue());
+  }
+
+  @ApiOperation(value = "金币商城首页轮播图")
+  @RequestMapping(value = "/gold", method = RequestMethod.GET)
+  public String findGoldBanner() {
+    return bannerService.findGoldBanner();
+  }
+
+  @ApiOperation(value = "新版首页臻品推荐")
+  @RequestMapping(value = "/home_product", method = RequestMethod.GET)
+  public String findHomeProductRecommend() {
+    return bannerService.findHomeProductRecommend();
   }
 
   @ApiOperation(value = "通用获取数据接口")

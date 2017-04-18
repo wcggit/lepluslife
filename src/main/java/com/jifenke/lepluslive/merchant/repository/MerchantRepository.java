@@ -1,6 +1,7 @@
 package com.jifenke.lepluslive.merchant.repository;
 
 import com.jifenke.lepluslive.merchant.domain.entities.Merchant;
+import com.jifenke.lepluslive.merchant.domain.entities.MerchantUser;
 import com.jifenke.lepluslive.partner.domain.entities.Partner;
 
 import org.springframework.data.domain.Page;
@@ -24,4 +25,11 @@ public interface MerchantRepository extends JpaRepository<Merchant, Long> {
   List<Merchant> findByPartnerAndPartnership(Partner partner, int i);
 
   Merchant findByMerchantSid(String merchantSid);
+
+  /**
+   * 查询某一商户下所有门店的详细信息  2017/01/09
+   *
+   * @param merchantUser 商户
+   */
+  List<Merchant> findByMerchantUser(MerchantUser merchantUser);
 }

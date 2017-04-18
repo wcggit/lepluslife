@@ -40,6 +40,8 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+//todo:待删除controller  进入充值记录页面action保留
+
 /**
  * 手机充值 Created by zhangwen on 2016/10/26.
  */
@@ -198,7 +200,7 @@ public class RechargeController {
       }
     } else {
       //处理失败，对订单进行标识
-      String message = map.get("message")[0];
+      String message = map.get("message") != null ? map.get("message")[0] : "未知错误1";
       try {
         orderService.payFail(orderSid, message);
       } catch (Exception e) {

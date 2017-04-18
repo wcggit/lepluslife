@@ -276,9 +276,9 @@
     }
     function merchantInfo(val) {
         var str = val.split('-');
-        location.href =
-        "${wxRootUrl}/weixin/merchant/info/" + str[0] + "?distance=" + str[1]
-        + "&status=" + gps.status;
+        window.location.href = "/front/shop/weixin/m?id=" + str[0]
+                               + "&distance="
+                               + str[1] + "&status=" + gps.status;
     }
     function drawStar(num, url, merId) {
         for (var i = 0; i < num; i++) {
