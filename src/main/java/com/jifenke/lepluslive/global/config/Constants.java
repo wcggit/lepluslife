@@ -43,6 +43,7 @@ public final class Constants {
 //    public static final Integer FREIGHT_PRICE = 1000;  //运费
 //    public static final Integer FREIGHT_FREE_PRICE = 4800;  //免运费最低价格
 
+  public static final String PHONE_STATUS = "http://api.huafeiduo.com/gateway.cgi?mod=order.phone.get&"; //检查是否完成了充值
   public static final String PHONE_CHECK = "http://api.huafeiduo.com/gateway.cgi?mod=order.phone.check&";  //充值前查询是否可充接口
   public static final String PHONE_BALANCE = "http://api.huafeiduo.com/gateway.cgi?mod=account.balance&";  //查询账户余额接口
   public static final String PHONE_SUBMIT = "http://api.huafeiduo.com/gateway.cgi?mod=order.phone.submit&";  //手机号充值接口

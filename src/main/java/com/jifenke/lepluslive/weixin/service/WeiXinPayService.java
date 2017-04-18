@@ -72,6 +72,40 @@ public class WeiXinPayService {
     return map;
   }
 
+  /**
+   * 返回微信APP支付或公众号支付所需要的参数  2017/4/5
+   *
+   * @param payWay    payWay 5=公众号|1=APP
+   * @param body      body
+   * @param orderSid  订单号
+   * @param truePrice 实付金额
+   * @param notifyUrl 异步回调地址
+   */
+  public SortedMap<String, Object> returnPayParams(Long payWay, HttpServletRequest request,
+                                                   String body,
+                                                   String orderSid, String truePrice,
+                                                   String notifyUrl) {
+    SortedMap<String, Object> map = null;
+    SortedMap<String, Object> params = null;
+    if (payWay == 5) {
+      map = buildOrderParams(request, body, orderSid, truePrice, notifyUrl);
+    } else {
+      map = buildAPPOrderParams(request, body, orderSid, truePrice, notifyUrl);
+    }
+    //获取预支付id
+    Map<String, Object> unifiedOrder = createUnifiedOrder(map);
+    if (unifiedOrder.get("prepay_id") != null) {
+      //返回
+      if (payWay == 5) {
+        params = buildJsapiParams(unifiedOrder.get("prepay_id").toString());
+      } else {
+        params = buildAppParams(unifiedOrder.get("prepay_id").toString());
+      }
+      return params;
+    }
+    return null;
+  }
+
 
   /**
    * 公众号支付封装预支付参数

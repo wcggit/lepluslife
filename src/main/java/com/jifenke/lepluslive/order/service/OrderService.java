@@ -554,43 +554,6 @@ public class OrderService {
     return orderRepository.findOne(id);
   }
 
-
-  /**
-   * 查询订单是否支付完成防止掉单 16/09/29
-   *
-   * @param id        订单id
-   * @param orderType 订单来源 1=公众号订单|2=APP订单
-   */
-  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public void orderStatusQuery(Long id, Integer orderType) {
-    OnLineOrder onLineOrder = orderRepository.findOne(id);
-    if (onLineOrder != null) {
-      if (onLineOrder.getState() == 4 || onLineOrder.getState() == 0) {
-        //调接口查询订单是否支付完成
-        SortedMap<String, Object> map = null;
-        String currOrderType;
-        if (orderType == 1) {
-          map = weiXinPayService.buildOrderQueryParams(onLineOrder);
-          currOrderType = "onLineOrder";
-        } else {
-          map = weiXinPayService.buildAPPOrderQueryParams(onLineOrder);
-          currOrderType = "APPOnLineOrder";
-        }
-        Map<String, Object> orderMap = weiXinPayService.orderStatusQuery(map);
-        String returnCode = (String) orderMap.get("return_code");
-        String resultCode = (String) orderMap.get("result_code");
-        String tradeState = (String) orderMap.get("trade_state");
-        if ("SUCCESS".equals(returnCode) && "SUCCESS".equals(resultCode) && "SUCCESS"
-            .equals(tradeState)) {
-          //保存微信掉单日志
-          weixinPayLogService.savePayLog(orderMap, currOrderType, 2);
-          //对订单进行处理
-          paySuccessByScore(onLineOrder);
-        }
-      }
-    }
-  }
-
   /**
    * 检测订单实付金额和积分是否正确  2016/10/9
    *
@@ -617,7 +580,39 @@ public class OrderService {
     return 1;
   }
 
-  //  public OnLineOrder findOrderBySid(String orderSid) {
-//    return orderRepository.findByOrderSid(orderSid);
+//  /**
+//   * 查询订单是否支付完成防止掉单 16/09/29
+//   *
+//   * @param id        订单id
+//   * @param orderType 订单来源 1=公众号订单|2=APP订单
+//   */
+//  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+//  public void orderStatusQuery(Long id, Integer orderType) {
+//    OnLineOrder onLineOrder = orderRepository.findOne(id);
+//    if (onLineOrder != null) {
+//      if (onLineOrder.getState() == 4 || onLineOrder.getState() == 0) {
+//        //调接口查询订单是否支付完成
+//        SortedMap<String, Object> map = null;
+//        String currOrderType;
+//        if (orderType == 1) {
+//          map = weiXinPayService.buildOrderQueryParams(onLineOrder);
+//          currOrderType = "onLineOrder";
+//        } else {
+//          map = weiXinPayService.buildAPPOrderQueryParams(onLineOrder);
+//          currOrderType = "APPOnLineOrder";
+//        }
+//        Map<String, Object> orderMap = weiXinPayService.orderStatusQuery(map);
+//        String returnCode = (String) orderMap.get("return_code");
+//        String resultCode = (String) orderMap.get("result_code");
+//        String tradeState = (String) orderMap.get("trade_state");
+//        if ("SUCCESS".equals(returnCode) && "SUCCESS".equals(resultCode) && "SUCCESS"
+//            .equals(tradeState)) {
+//          //保存微信掉单日志
+//          weixinPayLogService.savePayLog(orderMap, currOrderType, 2);
+//          //对订单进行处理
+//          paySuccessByScore(onLineOrder);
+//        }
+//      }
+//    }
 //  }
 }

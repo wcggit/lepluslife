@@ -30,6 +30,8 @@ public class City {
   @JsonIgnore
   private Integer hot;  //是否是热门城市
 
+  private String code;  //城市编码
+
 
   public Long getId() {
     return id;
@@ -61,5 +63,13 @@ public class City {
 
   public void setHot(Integer hot) {
     this.hot = hot;
+  }
+
+  public String getCode() {
+    return code;
+  }
+
+  public void setCode(String code) {
+    this.code = code;
   }
 }

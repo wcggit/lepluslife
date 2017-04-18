@@ -60,7 +60,7 @@ public class SmsService {
     }
     //防止ip攻击，待完善(使用页面随机码，防止接口恶意调用，由服务器生成并校验)
     String ipAddr = weiXinPayService.getIpAddr(request);
-    String code = MvUtil.getRandomNumber();
+    String code = MvUtil.getRandomNumber(6);
     ValidateCode validateCode = new ValidateCode();
     validateCode.setPhoneNumber(phoneNumber);
     validateCode.setCode(code);

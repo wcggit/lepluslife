@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.lang.reflect.InvocationTargetException;
@@ -46,18 +45,14 @@ public class ProductController {
 
   @ApiOperation(value = "获取所有的商品类别名称及顶部图片")
   @RequestMapping(value = "/type", method = RequestMethod.GET)
-  public
-  @ResponseBody
-  LejiaResult findAllProductType() {
+  public LejiaResult findAllProductType() {
     return LejiaResult.ok(productService.findAllProductType());
   }
 
-  //分页
+  //todo:待删除
   @ApiOperation(value = "查看商品列表")
   @RequestMapping(value = "/product", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-  public
-  @ResponseBody
-  List<ProductDto> findPageProduct(
+  public List<ProductDto> findPageProduct(
       @RequestParam(value = "page", required = false) Integer offset,
       @RequestParam(value = "productType", required = true) Integer productType) {
     List<ProductDto> products = productService
@@ -82,17 +77,13 @@ public class ProductController {
 
 
   @RequestMapping(value = "/product/productType", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-  public
-  @ResponseBody
-  List<ProductType> goProductTypePage() {
+  public List<ProductType> goProductTypePage() {
     return productService.findAllProductType();
   }
 
   @ApiOperation(value = "查看商品详情")
   @RequestMapping(value = "/product/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-  public
-  @ResponseBody
-  ProductDto getProductDetail(@PathVariable Long id) {
+  public ProductDto getProductDetail(@PathVariable Long id) {
     Product product = productService.findOneProduct(id);
     if (product != null) {
       List<ScrollPicture> scrollPictureList = scrollPictureService.findAllByProduct(product);
@@ -127,9 +118,7 @@ public class ProductController {
    * @param typeId 臻品类型 0=所有
    */
   @RequestMapping(value = "/productList", method = RequestMethod.GET)
-  public
-  @ResponseBody
-  LejiaResult productList(@RequestParam(required = true) Integer page,
+  public LejiaResult productList(@RequestParam(required = true) Integer page,
                           @RequestParam(required = true) Integer typeId) {
     if (page == null || page < 1) {
       page = 1;

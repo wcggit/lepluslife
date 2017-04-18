@@ -31,7 +31,7 @@ public class Merchant {
   @OneToOne(cascade = CascadeType.ALL)
   private MerchantBank merchantBank;
 
-  private String merchantSid = MvUtil.getMerchantSid();
+  private String merchantSid = MvUtil.getRandomNumber(7);
 
   @ManyToOne
   private City city;
@@ -96,6 +96,9 @@ public class Merchant {
 
   @OneToOne(cascade = CascadeType.ALL)
   private MerchantInfo merchantInfo;   //商家详情介绍
+
+  @ManyToOne
+  private MerchantUser merchantUser;                      //  门店所属商户
 
   public String getMerchantPhone() {
     return merchantPhone;
@@ -351,5 +354,13 @@ public class Merchant {
 
   public void setMerchantInfo(MerchantInfo merchantInfo) {
     this.merchantInfo = merchantInfo;
+  }
+
+  public MerchantUser getMerchantUser() {
+    return merchantUser;
+  }
+
+  public void setMerchantUser(MerchantUser merchantUser) {
+    this.merchantUser = merchantUser;
   }
 }

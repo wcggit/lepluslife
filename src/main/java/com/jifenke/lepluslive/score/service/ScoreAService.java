@@ -49,7 +49,7 @@ public class ScoreAService {
     scoreA.setScore(scoreA.getScore() + payBackScore);
     scoreA.setTotalScore(scoreA.getTotalScore() + payBackScore);
     ScoreADetail scoreADetail = new ScoreADetail();
-    scoreADetail.setOperate("乐+商城返红包");
+    scoreADetail.setOperate("乐+商城返鼓励金");
     scoreADetail.setOrigin(1);
     scoreADetail.setOrderSid(orderSid);
     scoreADetail.setScoreA(scoreA);
@@ -75,7 +75,7 @@ public class ScoreAService {
       scoreA.setScore(scoreA.getScore() + payBackScore);
       scoreA.setTotalScore(scoreA.getTotalScore() + payBackScore);
       ScoreADetail scoreADetail = new ScoreADetail();
-      scoreADetail.setOperate("关注送红包");
+      scoreADetail.setOperate("关注送鼓励金");
       scoreADetail.setOrigin(5);
       scoreADetail.setOrderSid(codeBurse.getType() + "_" + codeBurse.getId());
       scoreADetail.setScoreA(scoreA);

@@ -35,7 +35,7 @@ public class LeJiaUser {
 
   private String oneBarCodeUrl;
 
-  private String userSid = MvUtil.getBarCodeStr();
+  private String userSid = MvUtil.getRandomNumber(13);
 
   private Date createDate = new Date();
 

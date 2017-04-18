@@ -113,7 +113,7 @@ public class ActivityRockLogService {
           aDetail.setNumber(numberA.longValue());
           aDetail.setScoreA(scoreA);
           aDetail.setOrigin(7);
-          aDetail.setOperate("摇一摇得红包");
+          aDetail.setOperate("摇一摇得鼓励金");
           scoreADetailRepository.save(aDetail);
         }
         if (numberB > 0) {
@@ -148,19 +148,19 @@ public class ActivityRockLogService {
     HashMap<String, Integer> map = new HashMap<>();
     double random = Math.random();
     if (random < 0.7) {
-      int a = (int) (Math.random() * 10) + 1;
+      int a = (int) (Math.random() * 2) + 1;
       map.put("a", a);
       map.put("b", 0);
     } else if (0.7 <= random && random < 0.96) {
-      int a = (int) (Math.random() * 10) + 10;
+      int a = (int) (Math.random() * 3) + 2;
       map.put("a", a);
       map.put("b", 1);
     } else if (0.96 <= random && random < 0.99) {
-      int a = (int) (Math.random() * 20) + 20;
+      int a = (int) (Math.random() * 3) + 4;
       map.put("a", a);
       map.put("b", 2);
     } else {
-      int a = (int) (Math.random() * 60) + 40;
+      int a = (int) (Math.random() * 5) + 6;
       map.put("a", a);
       map.put("b", 3);
     }

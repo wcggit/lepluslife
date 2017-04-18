@@ -79,6 +79,20 @@ public class RechargeService {
     return result.toString();
   }
 
+  /**
+   * 查询该订单是否已经充值  16/12/09
+   *
+   * @param orderSid 自有订单号
+   */
+  public Map status(String orderSid) {
+    SortedMap<Object, Object> orderParams = new TreeMap<>();
+    orderParams.put("sp_order_id", orderSid);
+    orderParams.put("api_key", phoneKey);
+    String url = Constants.PHONE_STATUS + buildParams(orderParams);
+
+    return HttpUtils.get(url);
+  }
+
 //  /**
 //   * 获得当前account余额  16/10/26
 //   */

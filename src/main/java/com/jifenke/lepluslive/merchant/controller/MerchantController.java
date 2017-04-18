@@ -63,7 +63,7 @@ public class MerchantController {
     return MvUtil.go("/weixin/merchantType");
   }
 
-  //分页
+  //分页 todo:待删除
   @RequestMapping(value = "/list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
   public List<MerchantDto> findPageMerchant(
       @RequestParam(value = "page", required = false) Integer offset,
@@ -80,7 +80,7 @@ public class MerchantController {
                                              condition, partnership);
   }
 
-  @ApiOperation(value = "APP商家列表")
+  @ApiOperation(value = "商家列表")
   @RequestMapping(value = "/reload", method = RequestMethod.POST)
   public LejiaResult merchantList(
       @ApiParam(value = "是否获取到经纬度1=是,0=否") @RequestParam(required = true) Integer status,

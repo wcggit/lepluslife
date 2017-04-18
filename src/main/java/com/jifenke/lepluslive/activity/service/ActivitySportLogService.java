@@ -123,7 +123,7 @@ public class ActivitySportLogService {
           aDetail.setNumber(numberA.longValue());
           aDetail.setScoreA(scoreA);
           aDetail.setOrigin(6);
-          aDetail.setOperate("运动得红包");
+          aDetail.setOperate("运动得鼓励金");
           scoreADetailRepository.save(aDetail);
           //添加积分
           scoreB.setTotalScore(scoreB.getTotalScore() + numberB);

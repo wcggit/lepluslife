@@ -5,9 +5,9 @@
   Time: 17:24
   Content:金币订单确认页
 --%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page language="java" pageEncoding="UTF-8" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@include file="/WEB-INF/commen.jsp" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -17,8 +17,6 @@
           content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <c:set var="resourceUrl" value="http://www.lepluslife.com/resource"></c:set>
-    <c:set var="wxRootUrl" value="http://www.lepluslife.com"></c:set>
     <!--App自定义的css-->
     <link rel="stylesheet" href="${resourceUrl}/frontRes/css/reset.css">
     <link rel="stylesheet" href="${resourceUrl}/frontRes/gold/order/css/pay.css">
@@ -140,6 +138,11 @@
     <div>还需付款：￥<span id="truePrice"></span></div>
     <div id="btn-wxPay" onclick="payByWx()">立即购买</div>
 </section>
+<div class="waiting">
+    <div class="img">
+        <img src="${resourceUrl}/frontRes/img/waiting.gif" alt="">
+    </div>
+</div>
 </body>
 <script>
     var canUseScore = eval('${canUseScore}'), orderTotalScore = eval('${order.totalScore}'); //用户可用金币和订单可用金币
@@ -149,12 +152,13 @@
         if (canUseScore >= orderTotalScore) {
             $('#maxScore').html(toDecimal(orderTotalScore / 100));
             $('#trueScore').val(toDecimal(orderTotalScore / 100));
-            $('#truePrice').html(toDecimal(minPrice / 100));
+            $('#truePrice').html(toDecimal((minPrice - orderTotalScore) / 100));
             maxScore = orderTotalScore;
+            $('#scoreBwarning').hide();
         } else { //用户积分少于订单可用积分
             $('#maxScore').html(toDecimal(canUseScore / 100));
             $('#trueScore').val(toDecimal(canUseScore / 100));
-            $('#truePrice').html(toDecimal((orderTotalScore - canUseScore) / 100));
+            $('#truePrice').html(toDecimal((minPrice - canUseScore) / 100));
             maxScore = canUseScore;
             $('#scoreBwarning').show();
             $('#BWarningText').html('您的金币不足，将按1元=1金币补交');
@@ -208,7 +212,7 @@
 
     //使用金币的最大值和最小值判断
     function judgeFun1() {
-        if (eval(trueScoreInput.val()) >= maxScore) {
+        if (eval(trueScoreInput.val() * 100) >= maxScore) {
             if (maxScore == orderTotalScore) {
                 $('#scoreBwarning').hide();
             } else if (maxScore == canUseScore) {
@@ -218,7 +222,7 @@
                 $('#scoreBwarning').show();
                 $('#BWarningText').html('使用金币不足，将按1元=1金币补交');
             }
-            trueScoreInput.val(maxScore);
+            trueScoreInput.val(maxScore / 100);
         } else if (eval(trueScoreInput.val()) <= 0) {
             trueScoreInput.val(0);
             $('#scoreBwarning').show();
@@ -227,7 +231,7 @@
     }
     //点击事件
     function allClick() {
-        $('#truePrice').html(toDecimal((minPrice + orderTotalScore - (eval(trueScoreInput.val())
+        $('#truePrice').html(toDecimal((minPrice - (eval(trueScoreInput.val())
                                                                       == null ? 0
                 : eval(trueScoreInput.val())) * 100)
                                        / 100));
@@ -288,6 +292,7 @@
 </script>
 <script type="text/javascript">
     function payByWx() {
+        $('.waiting').css('display', 'block');
         $('#btn-wxPay').attr('onclick', '');
         //是否线下自提
         var transmitWay = 0;    //取货方式  1=线下自提|2=快递
@@ -298,34 +303,27 @@
             var truePrice = $("#truePrice").html();
             if (truePrice < 0) {
                 alert("选择商品后才能付款~");
+                $('.waiting').css('display', 'none');
                 location.href = "/front/gold/weixin";
                 return;
             }
-            var trueScore = $('#trueScore').val() * 100;
-            var price = eval(truePrice * 100);
-
+            var trueScore = $('#trueScore').val();
 //            首先提交请求，生成预支付订单
-            $.post('/weixin/pay/goldOrder', {
+            $.post('/front/order/submit', {
                 orderId: '${order.id}',
-                truePrice: truePrice,
                 trueScore: trueScore,
+                payWay: 5,
                 transmitWay: transmitWay,
                 message: $('#message').val()
             }, function (res) {
-                if (price == 0) {
-                    if (res.status == 200) {
-                        window.location.href = '/weixin/pay/paySuccess/${order.id}';
-                    } else {
-                        alert("订单处理异常(" + res.status + ")");
-                        $('#btn-wxPay').attr('onclick', 'payByWx()');
-                    }
+                if (res.status == 2000) {
+                    window.location.href = '/weixin/pay/paySuccess/${order.id}';
+                } else if (res.status == 200) {//调用微信支付js-api接口
+                    weixinPay(res.data);
                 } else {
-                    if (res.status == 200) {//调用微信支付js-api接口
-                        weixinPay(res);
-                    } else {
-                        alert(res['msg']);
-                        $('#btn-wxPay').attr('onclick', 'payByWx()');
-                    }
+                    $('.waiting').css('display', 'none');
+                    alert(res['msg']);
+                    $('#btn-wxPay').attr('onclick', 'payByWx()');
                 }
             });
         } else {
@@ -334,6 +332,7 @@
     }
 
     function weixinPay(res) {
+        $('.waiting').css('display', 'none');
         WeixinJSBridge.invoke(
                 'getBrandWCPayRequest', {
                     "appId":     res['appId'] + "",     //公众号名称，由商户传入
@@ -349,7 +348,7 @@
 //                        var total = eval($("#truePrice").html()) * 100;
                         window.location.href = '/weixin/pay/paySuccess/${order.id}';
                     } else {
-                        window.location.href = '/weixin/pay/payFail/${order.id}';
+                        window.location.href = '/front/order/weixin/orderList';
                     }
                 }
         );

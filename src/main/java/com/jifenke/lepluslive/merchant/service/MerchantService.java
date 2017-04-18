@@ -4,6 +4,7 @@ import com.jifenke.lepluslive.merchant.controller.dto.MerchantDto;
 import com.jifenke.lepluslive.merchant.domain.entities.City;
 import com.jifenke.lepluslive.merchant.domain.entities.Merchant;
 import com.jifenke.lepluslive.merchant.domain.entities.MerchantScroll;
+import com.jifenke.lepluslive.merchant.domain.entities.MerchantUser;
 import com.jifenke.lepluslive.merchant.repository.MerchantInfoRepository;
 import com.jifenke.lepluslive.merchant.repository.MerchantRepository;
 import com.jifenke.lepluslive.merchant.repository.MerchantScrollRepository;
@@ -413,5 +414,15 @@ public class MerchantService {
 
   public List<Merchant> findMerchantByPartnerAndPartnership(Partner partner, int i) {
     return merchantRepository.findByPartnerAndPartnership(partner, i);
+  }
+
+  /**
+   * 查询某一商户下所有门店  2017/01/24
+   *
+   * @param merchantUser 商户
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+  public List<Merchant> countByMerchantUser(MerchantUser merchantUser) {
+    return merchantRepository.findByMerchantUser(merchantUser);
   }
 }

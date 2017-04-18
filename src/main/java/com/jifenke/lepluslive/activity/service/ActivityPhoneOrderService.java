@@ -5,6 +5,7 @@ import com.jifenke.lepluslive.activity.domain.entities.ActivityPhoneRule;
 import com.jifenke.lepluslive.activity.repository.ActivityPhoneOrderRepository;
 import com.jifenke.lepluslive.global.util.DateUtils;
 import com.jifenke.lepluslive.global.util.MD5Util;
+import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.order.domain.entities.PayOrigin;
 import com.jifenke.lepluslive.score.domain.entities.ScoreB;
@@ -12,6 +13,7 @@ import com.jifenke.lepluslive.score.domain.entities.ScoreC;
 import com.jifenke.lepluslive.score.service.ScoreAService;
 import com.jifenke.lepluslive.score.service.ScoreBService;
 import com.jifenke.lepluslive.score.service.ScoreCService;
+import com.jifenke.lepluslive.statistics.service.RedisCacheService;
 import com.jifenke.lepluslive.weixin.service.DictionaryService;
 import com.jifenke.lepluslive.weixin.service.WeiXinUserService;
 import com.jifenke.lepluslive.weixin.service.WxTemMsgService;
@@ -68,6 +70,9 @@ public class ActivityPhoneOrderService {
   @Inject
   private ScoreBService scoreBService;
 
+  @Inject
+  private RedisCacheService redisCacheService;
+
   /**
    * 获取某一订单  16/10/31
    *
@@ -95,6 +100,18 @@ public class ActivityPhoneOrderService {
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public List<ActivityPhoneOrder> findAllByLeJiaUser(LeJiaUser leJiaUser) {
     return repository.findByLeJiaUserAndPayStateOrderByCreateDateDesc(leJiaUser, 1);
+  }
+
+  /**
+   * 获取某一用户所有的已支付订单  16/11/01
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+  public List<Map<String, Object>> findListByLeJiaUser(Long userId) {
+    String
+        sql =
+        "SELECT worth,true_price AS truePrice,true_scoreb AS trueScore,phone,pay_date AS date,state FROM activity_phone_order WHERE le_jia_user_id = "
+        + userId + " AND type = 2 AND pay_state = 1 ORDER BY create_date DESC";
+    return redisCacheService.findBySql(sql);
   }
 
   /**
@@ -128,7 +145,7 @@ public class ActivityPhoneOrderService {
       String[] keys = new String[4];
       keys[0] = order.getPhone();
       keys[1] = order.getWorth() + ".00元";
-      keys[2] = order.getTruePrice() / 100.0 + "元+" + order.getTrueScoreB() + "积分";
+      keys[2] = order.getTruePrice() / 100.0 + "元+" + order.getTrueScoreB() / 100 + "金币";
       keys[3] = new SimpleDateFormat("yyyy-MM-dd HH:mm").format(order.getPayDate());
       wxTemMsgService.sendTemMessage(
           weiXinUserService.findWeiXinUserByLeJiaUser(order.getLeJiaUser()).getOpenId(), 6L, keys);
@@ -409,7 +426,7 @@ public class ActivityPhoneOrderService {
         order.setPayDate(new Date());
         LeJiaUser user = order.getLeJiaUser();
         Integer payBackScore = order.getPayBackScore();
-        scoreAService.giveScoreAByDefault(user, payBackScore, "充话费返红包", 13, order.getOrderSid());
+        scoreAService.giveScoreAByDefault(user, payBackScore, "充话费返鼓励金", 13, order.getOrderSid());
         //减积分
         if (order.getTrueScoreB() != null && order.getTrueScoreB() > 0) {
           scoreBService
@@ -506,18 +523,6 @@ public class ActivityPhoneOrderService {
         }
         order.setPayOrigin(payWay);
 
-        //        Integer payBackScore = order.getPayBackScore();
-//        scoreAService.giveScoreAByDefault(user, payBackScore, "充话费返红包", 13, orderSid);
-        //如果返还A红包不为0,改变会员状态
-//        if (payBackScore > 0) {
-//          WeiXinUser w = weiXinUserService.findWeiXinUserByLeJiaUser(user);
-//          if (w != null) {
-//            if (w.getState() == 0) {
-//              w.setState(1);
-//              weiXinUserService.saveWeiXinUser(w);
-//            }
-//          }
-//        }
         repository.save(order);
 
         //支付回调成功调用第三方充值接口充值
@@ -532,6 +537,78 @@ public class ActivityPhoneOrderService {
           repository.save(order);
         }
       }
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new RuntimeException();
+    }
+  }
+
+  /**
+   * 将订单重新充值  16/12/09
+   *
+   * @param orderSid 自有订单号
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  public Map<String, Object> recharge(String orderSid) throws Exception {
+    Map<String, Object> result = new HashMap<>();
+    //查询该笔订单是否已经充值
+    try {
+      Map map = rechargeService.status(orderSid);
+      System.out.println(map);
+      ActivityPhoneOrder order = repository.findByOrderSid(orderSid);
+      String status = String.valueOf(((Map<String, Object>) map.get("data")).get("status"));
+      Date date = new Date();
+      if ("success".equals(status)) {
+        //掉单，将订单设为已支付，并发送模板消息
+        Map map2 = (Map) map.get("data");
+        order.setState(2);
+        order.setWorth(Integer.valueOf(map2.get("card_worth").toString()));
+        order.setUsePrice(
+            new BigDecimal(map2.get("price").toString()).multiply(new BigDecimal(100)).intValue());
+        order.setOrderId(map2.get("order_id").toString());
+        order.setCompleteDate(date);
+        order.setPlatform(2);
+        repository.save(order);
+        //给用户发充值模板通知
+        String[] keys = new String[4];
+        keys[0] = order.getPhone();
+        keys[1] = order.getWorth() + ".00元";
+        keys[2] = order.getTruePrice() / 100.0 + "元+" + order.getTrueScoreB() / 100.0 + "金币";
+        keys[3] =
+            new SimpleDateFormat("yyyy-MM-dd HH:mm")
+                .format(order.getPayDate() == null ? date : order.getPayDate());
+        wxTemMsgService.sendTemMessage(
+            weiXinUserService.findWeiXinUserByLeJiaUser(order.getLeJiaUser()).getOpenId(), 6L,
+            keys);
+        result.put("status", 101);
+        result.put("msg", "充值回调丢失,该订单已经充值成功");
+      } else if ("recharging".equals(status) || "init".equals(status)) {
+        result.put("status", 102);
+        result.put("msg", "该订单正在充值中,请稍后查询");
+      } else if ("failure".equals(status)) {
+        //调充值接口充值
+        orderSid = MvUtil.getOrderNumber();
+        Map<Object, Object>
+            result2 =
+            rechargeService.submit(order.getPhone(), order.getWorth(), orderSid);
+        if (result2.get("status") == null || "failure"
+            .equalsIgnoreCase("" + result2.get("status"))) {
+          //充值失败
+          order.setState(3);
+          order.setErrorDate(new Date());
+          order.setMessage(result.get("message") == null ? "未知错误" : ("" + result.get("message")));
+          repository.save(order);
+          result.put("status", 103);
+          result.put("msg", result.get("message"));
+        } else {
+          order.setOrderSid(orderSid);
+          order.setPlatform(2);
+          repository.saveAndFlush(order);
+          result.put("status", 100);
+          result.put("msg", "重新充值成功，请稍后查询");
+        }
+      }
+      return result;
     } catch (Exception e) {
       e.printStackTrace();
       throw new RuntimeException();

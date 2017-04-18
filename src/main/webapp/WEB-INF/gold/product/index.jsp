@@ -3,14 +3,13 @@
   User: zhangwen
   Date: 2017/3/3
   Time: 17:48
-  金币商城首页
+  todo:待删除
 --%>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ page language="java" pageEncoding="UTF-8" %>
 <%@include file="/WEB-INF/commen.jsp" %>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
@@ -28,9 +27,9 @@
         </p>
 
         <h1 class="clearfix"><fmt:formatNumber
-                type="number" value="${score/100}" pattern="0"
-                maxFractionDigits="0"/><span>.${score2}</span><span class="right"
-                                                                    onclick="goOrderList()">查看订单</span>
+                type="number" value="${score/100}" pattern="0.00"
+                maxFractionDigits="2"/><span></span><span class="right"
+                                                          onclick="goOrderList()">查看订单</span>
         </h1>
     </div>
     <!--话费充值-->
@@ -686,61 +685,6 @@
 </body>
 <script src="${resourceUrl}/js/zepto.min.js"></script>
 <script>
-    <%--var score = eval('${score}');--%>
-    <%--//强制保留两位小数--%>
-    <%--function toDecimal(x) {--%>
-    <%--var f = parseFloat(x);--%>
-    <%--if (isNaN(f)) {--%>
-    <%--return false;--%>
-    <%--}--%>
-    <%--var f = Math.round(x * 100) / 100;--%>
-    <%--var s = f.toString();--%>
-    <%--var rs = s.indexOf('.');--%>
-    <%--if (rs < 0) {--%>
-    <%--rs = s.length;--%>
-    <%--s += '.';--%>
-    <%--}--%>
-    <%--while (s.length <= rs + 2) {--%>
-    <%--s += '0';--%>
-    <%--}--%>
-    <%--return s;--%>
-    <%--}--%>
-    <%--function goProductDetail(productId) {--%>
-    <%--alert(productId);--%>
-    <%--}--%>
-    <%--function banner(e, p) {--%>
-    <%--e.append('<div onclick="goProductDetail(' + p.id + ')" class="banner-img"><img src="'--%>
-    <%--+ p.picture--%>
-    <%--+ '" alt=""><div class="product-desc"><h1 class="ttl">' + p.name--%>
-    <%--+ '</h1> <p class="desc">' + p.description--%>
-    <%--+ '</p> <p class="true-price">原价：' + toDecimal(p.price / 100)--%>
-    <%--+ '元</p>');--%>
-    <%--if (score >= p.minScore) {--%>
-    <%--e.append('<p class="now-price">需付：0元+' + toDecimal(p.minScore / 100) + '金币</p>');--%>
-    <%--} else {--%>
-    <%--e.append('<p class="now-price">需付：' + toDecimal((p.minScore - score) / 100) + '元+'--%>
-    <%--+ toDecimal(score / 100) + '金币</p>');--%>
-    <%--}--%>
-    <%--e.append('</div></div>');--%>
-    <%--}--%>
-    <%--$.ajax({--%>
-    <%--type: "get",--%>
-    <%--url: "/front/gold/list?page=1",--%>
-    <%--success: function (data) {--%>
-    <%--var list = data.data, length = list.length;--%>
-    <%--var smcp1 = '', smcp2 = ''; //数码产品拼接--%>
-    <%--for (var i = 0; i < length; i++) {--%>
-    <%--var type = list[i].type;--%>
-    <%--switch (type) {--%>
-    <%--case 2:--%>
-    <%--banner(smcp1, list[i]);--%>
-    <%--break;--%>
-    <%--default :--%>
-    <%--break;--%>
-    <%--}--%>
-    <%--}--%>
-    <%--}--%>
-    <%--});--%>
 
     <%--如何赚金币--%>
     $('.icon-problem').on('touchstart', function (event) {
@@ -748,7 +692,7 @@
         $(document).one('touchstart', function () {
             setTimeout(function () {
                 $('.shadow').css('display', 'none')
-            },300)
+            }, 300)
 
         })
         event.stopPropagation();
@@ -765,6 +709,8 @@
         window.location.href = '/front/gold/weixin/p?productId=' + productId;
     }
     function goRecharge() {
+        /** 点击话费充值事件统计*/
+        $.get("/front/visit/recharge/0");
         window.location.href = '/front/order/weixin/recharge';
     }
     function goTravel() {
@@ -773,5 +719,15 @@
     function goOrderList() {
         window.location.href = '/front/order/weixin/orderList';
     }
+    /** 进入该页面统计*/
+    $.get("/front/visit/product/0");
 </script>
+<script>
+    <%-------------------------分享参数----------------------------%>
+    var shareTitle = '乐+专属福利兑换',
+            shareLink = 'http://www.lepluslife.com/front/gold/weixin',
+            shareImgUrl = '${resourceUrl}/loggo.png',
+            shareDesc = '四海八荒，话费加油卡免费兑换，手慢无！有多少金币，抵多少钱！';
+</script>
+<%@include file="/WEB-INF/weixin/common/share.jsp" %>
 </html>

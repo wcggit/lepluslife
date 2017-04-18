@@ -118,7 +118,7 @@ public class ActivityShareLogService {
       ScoreADetail scoreADetail = new ScoreADetail();
       scoreADetail.setNumber(Long.valueOf(String.valueOf(UA)));
       scoreADetail.setScoreA(scoreA);
-      scoreADetail.setOperate("分享得红包");
+      scoreADetail.setOperate("分享得鼓励金");
       scoreADetail.setOrigin(8);
       scoreADetail.setOrderSid(beLeJiaUser.getUserSid());
       scoreADetailRepository.save(scoreADetail);
@@ -152,7 +152,7 @@ public class ActivityShareLogService {
       ScoreADetail beScoreADetail = new ScoreADetail();
       beScoreADetail.setNumber(Long.valueOf(String.valueOf(BeUA)));
       beScoreADetail.setScoreA(beScoreA);
-      beScoreADetail.setOperate("分享注册得红包");
+      beScoreADetail.setOperate("分享注册得鼓励金");
       beScoreADetail.setOrigin(8);
       beScoreADetail.setOrderSid(leJiaUser.getUserSid());
       scoreADetailRepository.save(beScoreADetail);

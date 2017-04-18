@@ -40,6 +40,8 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+//todo:待删除controller  进入充值记录页面action保留
+
 /**
  * 手机充值 Created by zhangwen on 2016/10/26.
  */
@@ -198,7 +200,7 @@ public class RechargeController {
       }
     } else {
       //处理失败，对订单进行标识
-      String message = map.get("message")[0];
+      String message = map.get("message") != null ? map.get("message")[0] : "未知错误1";
       try {
         orderService.payFail(orderSid, message);
       } catch (Exception e) {
@@ -315,4 +317,39 @@ public class RechargeController {
     return LejiaResult.ok(phoneOrderService.findByOrderId(orderId));
   }
 
+//  /**
+//   * 将订单重新充值  16/12/09
+//   *
+//   * @param orderSid 自有订单号
+//   */
+//  @RequestMapping(value = "/recharge")
+//  public LejiaResult recharge(@RequestParam String orderSid) {
+//    try {
+//      return LejiaResult.ok(phoneOrderService.recharge(orderSid));
+//    } catch (Exception e) {
+//      e.printStackTrace();
+//      return LejiaResult.build(500, "server error");
+//    }
+//  }
+//
+//  /**
+//   * 将订单充值  16/12/09
+//   *
+//   * @param orderSid 自有订单号
+//   */
+//  @RequestMapping(value = "/reSubmit")
+//  public LejiaResult reSubmit(@RequestParam String orderSid) {
+//    ActivityPhoneOrder order = phoneOrderService.findByOrderSid(orderSid);
+//
+//    //支付回调成功调用第三方充值接口充值
+//    Map<Object, Object>
+//        result =
+//        rechargeService.submit(order.getPhone(), order.getWorth(), order.getOrderSid());
+//
+//    if (result.get("status") == null || "failure".equalsIgnoreCase("" + result.get("status"))) {
+//      //充值失败
+//      return LejiaResult.build(500, "充值失败");
+//    }
+//    return LejiaResult.build(200, "充值成功");
+//  }
 }

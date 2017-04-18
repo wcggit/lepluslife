@@ -11,8 +11,10 @@ import com.jifenke.lepluslive.lejiauser.service.ValidateCodeService;
 import com.jifenke.lepluslive.order.service.OrderService;
 import com.jifenke.lepluslive.score.domain.entities.ScoreA;
 import com.jifenke.lepluslive.score.domain.entities.ScoreB;
+import com.jifenke.lepluslive.score.domain.entities.ScoreC;
 import com.jifenke.lepluslive.score.service.ScoreAService;
 import com.jifenke.lepluslive.score.service.ScoreBService;
+import com.jifenke.lepluslive.score.service.ScoreCService;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.service.DictionaryService;
 import com.jifenke.lepluslive.weixin.service.WeiXinUserService;
@@ -74,14 +76,17 @@ public class LeJiaUserController {
   @Inject
   private MessageService messageUtil;
 
+  @Inject
+  private ScoreCService scoreCService;
+
   /**
    * @param type 1=注册  2=找回 3=绑定手机
    */
   @ApiOperation(value = "注册和找回密码时发送验证码")
   @RequestMapping(value = "/sendCode", method = RequestMethod.POST)
   public LejiaResult sendCode(@RequestParam(required = false) String phoneNumber,
-                       @ApiParam(value = "1=注册  2=找回") @RequestParam(required = false) Integer type,
-                       HttpServletRequest request) {
+                              @ApiParam(value = "1=注册  2=找回") @RequestParam(required = false) Integer type,
+                              HttpServletRequest request) {
     LeJiaUser leJiaUser = leJiaUserService.findUserByPhoneNumber(phoneNumber);  //是否已注册
     if (type == 1) {
       if (leJiaUser != null) {
@@ -120,8 +125,8 @@ public class LeJiaUserController {
   @ApiOperation(value = "点击注册按钮")
   @RequestMapping(value = "/register", method = RequestMethod.POST)
   public LejiaResult register(@RequestParam(required = false) String phoneNumber,
-                       @RequestParam(required = false) String code,
-                       @RequestParam(required = false) String token) throws IOException {
+                              @RequestParam(required = false) String code,
+                              @RequestParam(required = false) String token) throws IOException {
     LeJiaUser leJiaUser = leJiaUserService.findUserByPhoneNumber(phoneNumber);  //是否已注册
     if (leJiaUser != null) {
       return LejiaResult.build(2006, "该手机号已注册");
@@ -144,9 +149,9 @@ public class LeJiaUserController {
   @ApiOperation(value = "三种情况设置密码")
   @RequestMapping(value = "/setPwd", method = RequestMethod.POST)
   public LejiaResult setPwd(@RequestParam(required = false) String phoneNumber,
-                     @ApiParam(value = "旧密码 type=2时必须有") @RequestParam(required = false) String oldPwd,
-                     @RequestParam(required = false) String pwd,
-                     @ApiParam(value = "1=注册和发送验证码   2=验证旧密码") @RequestParam(required = false) Integer type) {
+                            @ApiParam(value = "旧密码 type=2时必须有") @RequestParam(required = false) String oldPwd,
+                            @RequestParam(required = false) String pwd,
+                            @ApiParam(value = "1=注册和发送验证码   2=验证旧密码") @RequestParam(required = false) Integer type) {
     LeJiaUser leJiaUser = leJiaUserService.findUserByPhoneNumber(phoneNumber);
     if (leJiaUser != null) {
       if (type == 1) {
@@ -170,8 +175,8 @@ public class LeJiaUserController {
   @ApiOperation(value = "点击登录按钮")
   @RequestMapping(value = "/login", method = RequestMethod.POST)
   public LejiaResult login(@RequestParam(required = true) String phoneNumber,
-                    @RequestParam(required = true) String pwd,
-                    @ApiParam(value = "推送token") @RequestParam(required = false) String token) {
+                           @RequestParam(required = true) String pwd,
+                           @ApiParam(value = "推送token") @RequestParam(required = false) String token) {
     LeJiaUser leJiaUser = leJiaUserService.findUserByPhoneNumber(phoneNumber);
     if (leJiaUser == null) {
       return LejiaResult.build(2005, "该手机号未注册");
@@ -193,7 +198,7 @@ public class LeJiaUserController {
   @ApiOperation(value = "发送验证码重置密码时验证验证码")
   @RequestMapping(value = "/validate", method = RequestMethod.POST)
   public LejiaResult validate(@RequestParam(required = false) String phoneNumber,
-                       @RequestParam(required = false) String code) {
+                              @RequestParam(required = false) String code) {
     Boolean b = validateCodeService.findByPhoneNumberAndCode(phoneNumber, code); //验证码是否正确
     if (!b) {
       return LejiaResult.build(3001, "验证码错误");
@@ -237,15 +242,15 @@ public class LeJiaUserController {
   @ApiOperation(value = "微信登录")
   @RequestMapping(value = "/wxLogin", method = RequestMethod.POST)
   public LejiaResult wxLogin(@RequestParam(required = true) String unionid,
-                      @RequestParam(required = true) String openid,
-                      @RequestParam(required = false) String country,
-                      @RequestParam(required = false) String nickname,
-                      @RequestParam(required = false) String city,
-                      @RequestParam(required = false) String province,
-                      @RequestParam(required = false) String language,
-                      @RequestParam(required = false) String headimgurl,
-                      @RequestParam(required = false) Long sex,
-                      @ApiParam(value = "推送token") @RequestParam(required = false) String token) {
+                             @RequestParam(required = true) String openid,
+                             @RequestParam(required = false) String country,
+                             @RequestParam(required = false) String nickname,
+                             @RequestParam(required = false) String city,
+                             @RequestParam(required = false) String province,
+                             @RequestParam(required = false) String language,
+                             @RequestParam(required = false) String headimgurl,
+                             @RequestParam(required = false) Long sex,
+                             @ApiParam(value = "推送token") @RequestParam(required = false) String token) {
     if (unionid == null || "null".equals(unionid) || "".equals(unionid)) {
       return LejiaResult.build(2008, messageUtil.getMsg("2008"));
     }
@@ -261,9 +266,10 @@ public class LeJiaUserController {
       return LejiaResult.build(500, "服务器异常");
     }
     ScoreA scoreA = scoreAService.findScoreAByLeJiaUser(leJiaUser);
-    ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(leJiaUser);
-    if (scoreA != null && scoreB != null && leJiaUser != null) {
-      return LejiaResult.build(200, "登录成功", new LeJiaUserDto(scoreA.getScore(), scoreB.getScore(),
+//    ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(leJiaUser);
+    ScoreC scoreC = scoreCService.findScoreCByLeJiaUser(leJiaUser);
+    if (scoreA != null && scoreC != null && leJiaUser != null) {
+      return LejiaResult.build(200, "登录成功", new LeJiaUserDto(scoreA.getScore(), scoreC.getScore(),
                                                              null,
                                                              leJiaUser.getUserSid(),
                                                              headimgurl,
@@ -275,9 +281,9 @@ public class LeJiaUserController {
   }
 
   /**
-   * app微信用户 今日昨日红包积分 收益 token 用户token(实为 user_sid)
+   * app微信用户 今日昨日红包金币 收益 token 用户token(实为 user_sid)
    */
-  @ApiOperation(value = "今日昨日红包积分收益")
+  @ApiOperation(value = "今日昨日红包金币收益")
   @RequestMapping(value = "/scoreAB", method = RequestMethod.POST)
   public LejiaResult scoreAB(@RequestParam(required = true) String token) {
 
