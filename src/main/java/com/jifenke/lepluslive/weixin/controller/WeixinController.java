@@ -194,10 +194,9 @@ public class WeixinController {
     LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
     model.addAttribute("scoreA", scoreAService.findScoreAByLeJiaUser(leJiaUser));
     model.addAttribute("user", weiXinUser);
-//    model.addAttribute("scoreB", scoreBService.findScoreBByWeiXinUser(leJiaUser));
     model.addAttribute("scoreC", scoreCService.findScoreCByLeJiaUser(leJiaUser));
-    model.addAttribute("check", weiXinUserInfoService.checkYdAndWarning(weiXinUser));
-    return MvUtil.go("/user/center");
+//    model.addAttribute("check", weiXinUserInfoService.checkYdAndWarning(weiXinUser));
+    return MvUtil.go("/user/index");
   }
 
 

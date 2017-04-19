@@ -341,5 +341,8 @@
     }
     action("typeInfo");
     action("typeInfo_");
+
+    /** 进入周边商家事件统计*/
+    $.get("/front/visit/shop/0");
 </script>
 </html>

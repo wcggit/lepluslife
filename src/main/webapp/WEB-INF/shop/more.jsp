@@ -79,7 +79,7 @@
                                           + list[i].url + ',' + list[i].merchantId
                                           + ')"><div><img src="' + list[i].picture
                                           + '" alt=""></div><p>' + list[i].shopName
-                                          + '</p><p>' + list[i].title
+                                          + '</p><p>' +list[i].title
                                           + '</p><p>' + list[i].content
                                           + '</p></div>';
                            }
