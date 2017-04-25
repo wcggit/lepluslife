@@ -31,6 +31,8 @@ public class ActivityPhoneOrder {
 
   private String orderId;   //第三方充值平台的订单编号
 
+  private Integer type = 1;  //订单类型  1=积分订单|2=金币订单
+
   private Integer cheap = 0;  //该订单是否是特惠订单
 
   private Integer state = 0;  //订单状态  0=待支付|1=已支付待充值|2=已充值|3=已支付充值失败
@@ -54,9 +56,9 @@ public class ActivityPhoneOrder {
 
   private Integer truePrice = 0;  //用户实际支付金额  单位/分
 
-  private Integer trueScoreB = 0;  //用户实际使用积分
+  private Integer trueScoreB = 0;  //用户实际使用积分或金币
 
-  private Integer usePrice = 0;   //账户实际消耗金额
+  private Integer usePrice = 0;   //第三方账户实际消耗金额
 
   private Integer payBackScore = 0;  //订单返红包金额
 
@@ -238,5 +240,13 @@ public class ActivityPhoneOrder {
 
   public void setMessage(String message) {
     this.message = message;
+  }
+
+  public Integer getType() {
+    return type;
+  }
+
+  public void setType(Integer type) {
+    this.type = type;
   }
 }

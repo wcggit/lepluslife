@@ -22,10 +22,10 @@
 <!--头部-->
 <nav class="mui-bar  mui-bar-nav" style="background: #D62C2C;border-bottom: solid 1px #CBCACA;">
     <a class="mui-tab-item">
-        <span class="mui-tab-label focusCol">红包明细</span>
+        <span class="mui-tab-label focusCol">鼓励金明细</span>
     </a>
     <a class="mui-tab-item">
-        <span class="mui-tab-label initCol">积分明细</span>
+        <span class="mui-tab-label initCol">金币明细</span>
     </a>
 </nav>
 
@@ -46,7 +46,7 @@
 <script type="text/javascript">
     document.title="明细记录";
     var dataDetail, count = 0, shangshu = 0, yushu = 0, dataLength = 0, url = "/score/scoreList";
-    var box = "redbox", span = "redword", text = "红包", jishu = 100;
+    var box = "redbox", span = "redword", text = "鼓励金", jishu = 100;
     var table = $("#article");
     mui.ajax(url, {
         data: {
@@ -85,14 +85,15 @@
                 if (index == 0) {
                     box = "redbox";
                     span = "redword";
-                    text = "红包";
+                    text = "鼓励金";
                     jishu = 100;
                 }
                 if (index == 1) {
                     box = "orangebox";
                     span = "orangeword";
-                    text = "积分";
-                    jishu = 1;
+                    text = "金币";
+                    jishu = 100;
+                    index = 2;
                 }
                 mui.ajax(url, {
                     data: {

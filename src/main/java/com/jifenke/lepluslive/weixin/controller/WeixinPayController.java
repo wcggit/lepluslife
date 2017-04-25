@@ -19,6 +19,7 @@ import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.service.DictionaryService;
 import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
 import com.jifenke.lepluslive.weixin.service.WeiXinService;
+import com.jifenke.lepluslive.weixin.service.WeixinPayLogService;
 
 import org.jdom.JDOMException;
 import org.slf4j.Logger;
@@ -29,13 +30,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,12 +85,16 @@ public class WeixinPayController {
   @Inject
   private ActivityPhoneOrderService phoneOrderService;
 
+  @Inject
+  private WeixinPayLogService weixinPayLogService;
+
   /**
    * 话费订单生成 生成支付参数  16/10/28
    *
    * @param ruleId 话费产品ID
    * @param phone  充值手机号
    */
+  //todo:待删除 转移到其他方法
   @RequestMapping(value = "/phonePay", method = RequestMethod.POST)
   public LejiaResult phoneOrderPay(@RequestParam Long ruleId, @RequestParam String phone,
                                    HttpServletRequest request) {
@@ -110,7 +115,7 @@ public class WeixinPayController {
     //话费产品如果是全积分，这直接调用充话费接口
     if (order.getPhoneRule().getPayType() == 3) {
       try {
-        phoneOrderService.paySuccess(order.getOrderSid(), 2);
+        phoneOrderService.paySuccess(order.getOrderSid());
         return LejiaResult.build(2000, "支付成功", order.getId());
       } catch (Exception e) {
         e.printStackTrace();
@@ -118,16 +123,16 @@ public class WeixinPayController {
       }
     }
     //封装订单参数
-    SortedMap<Object, Object>
+    SortedMap<String, Object>
         map =
         weiXinPayService
             .buildOrderParams(request, "话费充值", order.getOrderSid(), "" + order.getTruePrice(),
                               Constants.PHONEORDER_NOTIFY_URL);
     //获取预支付id
-    Map unifiedOrder = weiXinPayService.createUnifiedOrder(map);
+    Map<String, Object> unifiedOrder = weiXinPayService.createUnifiedOrder(map);
     if (unifiedOrder.get("prepay_id") != null) {
       //返回前端页面
-      SortedMap
+      SortedMap<String, Object>
           params =
           weiXinPayService.buildJsapiParams(unifiedOrder.get("prepay_id").toString());
       params.put("orderId", order.getId());
@@ -145,68 +150,87 @@ public class WeixinPayController {
     InputStreamReader inputStreamReader = new InputStreamReader(request.getInputStream(), "utf-8");
     BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
     String str = null;
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
     while ((str = bufferedReader.readLine()) != null) {
       buffer.append(str);
     }
-    Map map = WeixinPayUtil.doXMLParse(buffer.toString());
-    String orderSid = (String) map.get("out_trade_no");
-    String returnCode = (String) map.get("return_code");
-    String resultCode = (String) map.get("result_code");
-    //操作订单
-    if ("SUCCESS".equals(returnCode) && "SUCCESS".equals(resultCode)) {
-      try {
-        phoneOrderService.paySuccess(orderSid, 1);
-      } catch (Exception e) {
-        log.error(e.getMessage());
+    Map<String, Object> map = WeixinPayUtil.doXMLParse(buffer.toString());
+    if (map != null) {
+      //验签
+      String
+          sign =
+          weiXinPayService.createSign("UTF-8", map, String.valueOf(map.get("trade_type")));
+      if (map.get("sign") != null && String.valueOf(map.get("sign")).equals(sign)) {
+        //保存微信支付日志
+        weixinPayLogService.savePayLog(map, "PhoneOrder", 1);
+
+        String orderSid = (String) map.get("out_trade_no");
+        String returnCode = (String) map.get("return_code");
+        String resultCode = (String) map.get("result_code");
+        //操作订单
+        if ("SUCCESS".equals(returnCode) && "SUCCESS".equals(resultCode)) {
+          try {
+            phoneOrderService.paySuccess(orderSid);
+          } catch (Exception e) {
+            log.error(e.getMessage());
+            buffer.delete(0, buffer.length());
+            buffer.append("<xml>");
+            buffer.append("<return_code>FAIL</" + "return_code" + ">");
+            buffer.append("</xml>");
+            String s = buffer.toString();
+            response.setContentType("application/xml");
+            response.getWriter().write(s);
+            return;
+          }
+        }
+        //返回微信的信息
         buffer.delete(0, buffer.length());
         buffer.append("<xml>");
-        buffer.append("<return_code>FAIL</" + "return_code" + ">");
+        buffer.append("<return_code>" + returnCode + "</" + "return_code" + ">");
         buffer.append("</xml>");
         String s = buffer.toString();
         response.setContentType("application/xml");
         response.getWriter().write(s);
-        return;
       }
     }
-
-    //返回微信的信息
-    buffer.delete(0, buffer.length());
-    buffer.append("<xml>");
-    buffer.append("<return_code>" + returnCode + "</" + "return_code" + ">");
-    buffer.append("</xml>");
-    String s = buffer.toString();
-    response.setContentType("application/xml");
-    response.getWriter().write(s);
   }
 
+  /**
+   * 金币充话费成功  2017/4/5
+   */
   @RequestMapping(value = "/phoneSuccess/{orderId}", method = RequestMethod.GET)
-  public ModelAndView phoneSuccessPage(@PathVariable String orderId, Model model) {
+  public ModelAndView phoneSuccessPage(@PathVariable String orderId, HttpServletRequest request,
+                                       Model model) {
 
-    model.addAttribute("order", phoneOrderService.findByOrderId(orderId));
+    ActivityPhoneOrder order = phoneOrderService.findByOrderId(orderId);
+    model.addAttribute("order", order);
+    model.addAttribute("wxConfig", weiXinPayService.getWeiXinPayConfig(request));
+    if (order.getType() == 2) {
+      return MvUtil.go("/gold/recharge/success");
+    }
 
     return MvUtil.go("/activity/phone/success");
   }
 
   //微信支付接口
+  //todo:待删除 等公众号积分商品下线后可删除
   @RequestMapping(value = "/weixinpay")
-  public
-  @ResponseBody
-  Map<Object, Object> weixinPay(@RequestParam Long orderId, @RequestParam String truePrice,
-                                @RequestParam Long trueScore,
-                                @RequestParam Integer transmitWay,
-                                HttpServletRequest request) {
-    Long newTruePrice = (long) (Float.parseFloat(truePrice) * 100);
+  public Map<String, Object> weixinPay(@RequestParam Long orderId, @RequestParam String truePrice,
+                                       @RequestParam Long trueScore,
+                                       @RequestParam Integer transmitWay,
+                                       HttpServletRequest request) {
+//    Long newTruePrice = (long) (Float.parseFloat(truePrice) * 100);
+    Long newTruePrice = new BigDecimal(truePrice).multiply(new BigDecimal(100)).longValue();
     if (newTruePrice == 0) {//全积分兑换流程
       try {
         return onlineOrderService.orderPayByScoreB(orderId, trueScore, transmitWay, 10L);
       } catch (Exception e) {
-        Map<Object, Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
         map.put("status", 500);
         return map;
       }
     }
-    Map<Object, Object>
+    Map<String, Object>
         result =
         orderService.setPriceScoreForOrder(orderId, newTruePrice, trueScore, transmitWay);
     if (!"200".equals(result.get("status").toString())) {
@@ -216,19 +240,16 @@ public class WeixinPayController {
 
     OnLineOrder order = (OnLineOrder) result.get("data");
     //封装订单参数
-    SortedMap<Object, Object>
+    SortedMap<String, Object>
         map =
         weiXinPayService
             .buildOrderParams(request, "乐加商城消费", order.getOrderSid(), "" + order.getTruePrice(),
                               Constants.ONLINEORDER_NOTIFY_URL);
     //获取预支付id
-    Map unifiedOrder = weiXinPayService.createUnifiedOrder(map);
+    Map<String, Object> unifiedOrder = weiXinPayService.createUnifiedOrder(map);
     if (unifiedOrder.get("prepay_id") != null) {
-      //创建定时任务，5分钟后查询订单是否支付完成防止掉单
-      //修改为支付完成点击“完成”时查询订单状态
-      // orderService.startOrderStatusQueryJob(orderId);
       //返回前端页面
-      SortedMap
+      SortedMap<String, Object>
           jsapiParams =
           weiXinPayService.buildJsapiParams(unifiedOrder.get("prepay_id").toString());
       jsapiParams.put("status", 200);
@@ -251,66 +272,86 @@ public class WeixinPayController {
     InputStreamReader inputStreamReader = new InputStreamReader(request.getInputStream(), "utf-8");
     BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
     String str = null;
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
     while ((str = bufferedReader.readLine()) != null) {
       buffer.append(str);
     }
-    Map map = WeixinPayUtil.doXMLParse(buffer.toString());
-    String orderSid = (String) map.get("out_trade_no");
-    String returnCode = (String) map.get("return_code");
-    String resultCode = (String) map.get("result_code");
-    //操作订单
-    if ("SUCCESS".equals(returnCode) && "SUCCESS".equals(resultCode)) {
-      try {
-        orderService.paySuccess(orderSid);
-      } catch (Exception e) {
-        log.error(e.getMessage());
-        buffer.delete(0, buffer.length());
-        buffer.append("<xml>");
-        buffer.append("<return_code>FAIL</" + "return_code" + ">");
-        buffer.append("</xml>");
-        String s = buffer.toString();
-        response.setContentType("application/xml");
-        response.getWriter().write(s);
-        return;
+    Map<String, Object> map = WeixinPayUtil.doXMLParse(buffer.toString());
+    if (map != null) {
+      System.out.println("参数为========" + map.toString());
+      //验签
+      String
+          sign =
+          weiXinPayService.createSign("UTF-8", map, String.valueOf(map.get("trade_type")));
+      System.out.println("签名==========" + sign);
+      if (map.get("sign") != null && String.valueOf(map.get("sign")).equals(sign)) {
+        String returnCode = (String) map.get("return_code");
+        String resultCode = (String) map.get("result_code");
+        //操作订单
+        if ("SUCCESS".equals(returnCode) && "SUCCESS".equals(resultCode)) {
+          try {
+            orderService.paySuccess(map);
+          } catch (Exception e) {
+            log.error(e.getMessage());
+            buffer.delete(0, buffer.length());
+            buffer.append("<xml>");
+            buffer.append("<return_code>FAIL</" + "return_code" + ">");
+            buffer.append("</xml>");
+            String s = buffer.toString();
+            response.setContentType("application/xml");
+            response.getWriter().write(s);
+            return;
+          }
+          //返回微信的信息
+          buffer.delete(0, buffer.length());
+          buffer.append("<xml>");
+          buffer.append("<return_code>" + returnCode + "</" + "return_code" + ">");
+          buffer.append("</xml>");
+          String s = buffer.toString();
+          response.setContentType("application/xml");
+          response.getWriter().write(s);
+        }
       }
     }
-
-    //返回微信的信息
-    buffer.delete(0, buffer.length());
-    buffer.append("<xml>");
-    buffer.append("<return_code>" + returnCode + "</" + "return_code" + ">");
-    buffer.append("</xml>");
-    String s = buffer.toString();
-    response.setContentType("application/xml");
-    response.getWriter().write(s);
-
-
   }
 
-  @RequestMapping(value = "/paySuccess/{truePrice}")
-  public ModelAndView goPaySuccessPage(@PathVariable Long truePrice, Model model,
+  @RequestMapping(value = "/paySuccess/{orderId}")
+  public ModelAndView goPaySuccessPage(@PathVariable Long orderId, Model model,
                                        HttpServletRequest request) {
     WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
-    model.addAttribute("totalScore", scoreAService.findScoreAByLeJiaUser(weiXinUser.getLeJiaUser())
-        .getTotalScore());
-    Integer PAY_BACK_SCALE = Integer.parseInt(dictionaryService.findDictionaryById(3L).getValue());
-    model.addAttribute("payBackScore",
-                       (long) Math.ceil((double) (truePrice * PAY_BACK_SCALE) / 100));
-    model.addAttribute("truePrice", truePrice);
 
-    ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(weiXinUser.getLeJiaUser());
-    //商品分类
-    List<ProductType> typeList = productService.findAllProductType();
-    //主打爆品
-    Map product = productService.findMainHotProduct();
-    model.addAttribute("scoreB", scoreB);
-    model.addAttribute("product", product);
-    model.addAttribute("typeList", typeList);
-    return MvUtil.go("/product/productIndex");
+    OnLineOrder order = orderService.findOnLineOrderById(orderId);
+    if (order != null) {
+      if (order.getType() == 1) {
+        Integer
+            PAY_BACK_SCALE =
+            Integer.parseInt(dictionaryService.findDictionaryById(3L).getValue());
+        model.addAttribute("totalScore",
+                           scoreAService.findScoreAByLeJiaUser(weiXinUser.getLeJiaUser())
+                               .getTotalScore());
+        model.addAttribute("payBackScore",
+                           (long) Math
+                               .ceil((double) (order.getTruePrice() * PAY_BACK_SCALE) / 100));
+        model.addAttribute("truePrice", order.getTruePrice());
+
+        ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(weiXinUser.getLeJiaUser());
+        //商品分类
+        List<ProductType> typeList = productService.findAllProductType();
+        //主打爆品
+        Map product = productService.findMainHotProduct();
+        model.addAttribute("scoreB", scoreB);
+        model.addAttribute("product", product);
+        model.addAttribute("typeList", typeList);
+        return MvUtil.go("/product/productIndex");
+      } else {
+        model.addAttribute("order", order);
+        return MvUtil.go("/gold/order/success");
+      }
+    }
+    return null;
   }
 
-
+  //todo:待删除 等公众号积分商品下线后可删除
   @RequestMapping(value = "/payFail/{orderId}")
   public ModelAndView goPayFailPage(@PathVariable Long orderId, Model model,
                                     HttpServletRequest request) {
@@ -326,6 +367,5 @@ public class WeixinPayController {
     model.addAttribute("orderId", orderId);
     return MvUtil.go("/product/productIndex");
   }
-
 
 }

@@ -2,6 +2,7 @@ package com.jifenke.lepluslive.order.controller;
 
 import com.jifenke.lepluslive.Address.domain.entities.Address;
 import com.jifenke.lepluslive.Address.service.AddressService;
+import com.jifenke.lepluslive.global.service.MessageService;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
@@ -11,14 +12,13 @@ import com.jifenke.lepluslive.order.service.OrderDetailService;
 import com.jifenke.lepluslive.order.service.OrderService;
 import com.jifenke.lepluslive.score.domain.entities.ScoreB;
 import com.jifenke.lepluslive.score.service.ScoreBService;
+import com.jifenke.lepluslive.score.service.ScoreCService;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.service.DictionaryService;
 import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
 import com.jifenke.lepluslive.weixin.service.WeiXinService;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -38,9 +38,6 @@ import javax.servlet.http.HttpServletRequest;
 @RestController
 @RequestMapping("/front/order")
 public class OnlineOrderController {
-
-  @Value("${weixin.appId}")
-  private String appid;
 
   @Inject
   private OrderService orderService;
@@ -65,6 +62,12 @@ public class OnlineOrderController {
 
   @Inject
   private WeiXinPayService weiXinPayService;
+
+  @Inject
+  private ScoreCService scoreCService;
+
+  @Inject
+  private MessageService messageService;
 
 
   /**
@@ -143,15 +146,22 @@ public class OnlineOrderController {
    *
    * @param orderId 订单ID
    */
-  @RequestMapping(value = "/weixin/confirmOrder/{orderId}", method = RequestMethod.GET)
-  public ModelAndView productIndex(HttpServletRequest request, @PathVariable Long orderId,
+  @RequestMapping(value = "/weixin/confirmOrder", method = RequestMethod.GET)
+  public ModelAndView productIndex(HttpServletRequest request, @RequestParam Long orderId,
                                    Model model) {
     WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
-    ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(weiXinUser.getLeJiaUser());
     OnLineOrder order = orderService.findOnLineOrderById(orderId);
     model.addAttribute("order", order);
-    model.addAttribute("canUseScore", scoreB.getScore()); //用户可用积分
     model.addAttribute("wxConfig", weiXinPayService.getWeiXinPayConfig(request));
+    if (order.getType() != null && order.getType() == 2) {
+      model.addAttribute("canUseScore",
+                         scoreCService.findScoreCByLeJiaUser(weiXinUser.getLeJiaUser())
+                             .getScore()); //用户可用金币
+      return MvUtil.go("/gold/order/confirmOrder");
+    }
+    ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(weiXinUser.getLeJiaUser());
+    model.addAttribute("canUseScore", scoreB.getScore()); //用户可用积分
+
     return MvUtil.go("/order/confirmOrder");
   }
 
@@ -183,4 +193,16 @@ public class OnlineOrderController {
     return LejiaResult.ok(onLineOrders);
   }
 
+  /**
+   * 跳转到金币冲话费首页 17/02/22 在这儿的原因=微信支付目录设置问题
+   */
+  @RequestMapping(value = "/weixin/recharge", method = RequestMethod.GET)
+  public ModelAndView recharge(HttpServletRequest request, Model model) {
+    LeJiaUser leJiaUser = weiXinService.getCurrentWeiXinUser(request).getLeJiaUser();
+    model.addAttribute("wxConfig", weiXinPayService.getWeiXinPayConfig(request));
+    model.addAttribute("phone", leJiaUser.getPhoneNumber());
+    model.addAttribute("canUseScore",
+                       scoreCService.findScoreCByLeJiaUser(leJiaUser).getScore()); //用户可用金币
+    return MvUtil.go("/gold/recharge/index");
+  }
 }

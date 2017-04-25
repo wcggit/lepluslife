@@ -25,26 +25,49 @@
     <link rel="stylesheet" href="${resourceUrl}/frontRes/activity/phone/css/common.css">
     <link rel="stylesheet" href="${resourceUrl}/frontRes/activity/phone/css/rechargeRecord.css">
 </head>
+<style>
+    .main .top ul li:first-child {
+        border: 0;
+    }
+    .main .top ul li {
+        width: 100%;
+    }
+</style>
 <body>
 <div class="main">
     <div class="top">
-        <p>您已累计充值</p>
+        <p>您已累计节省</p>
         <ul>
-            <li class="left">
-                <span class="num"><span class="icon"></span>${totalWorth}</span>元话费
+            <li class="">
+                <span class="num"><span class="icon"></span><fmt:formatNumber type="number"
+                                                                              value="${totalScore/100}"
+                                                                              pattern="0.00"
+                                                                              maxFractionDigits="2"/></span>元话费
             </li>
-            <li class="left">
-                <span class="num"><span class="icon"></span>${totalScore}</span>积分
-            </li>
+            <%--<li class="left">--%>
+            <%--<span class="num"><span class="icon"></span>${totalScore}</span>积分--%>
+            <%--</li>--%>
         </ul>
     </div>
     <ul class="bottom">
         <c:forEach items="${orderList}" var="order">
             <li class="list list-ing">
-                <p>充值话费：￥${order.worth} (￥<fmt:formatNumber type="number"
-                                                            value="${order.truePrice/100}"
-                                                            pattern="0.00"
-                                                            maxFractionDigits="2"/>+${order.trueScoreB}积分)</p>
+                <c:if test="${order.type == 2}">
+                    <p>充值话费：￥${order.worth} (￥<fmt:formatNumber type="number"
+                                                                value="${order.truePrice/100}"
+                                                                pattern="0.00"
+                                                                maxFractionDigits="2"/>+<fmt:formatNumber
+                            type="number"
+                            value="${order.trueScoreB/100}"
+                            pattern="0.00"
+                            maxFractionDigits="2"/>金币)</p>
+                </c:if>
+                <c:if test="${order.type != 2}">
+                    <p>充值话费：￥${order.worth} (￥<fmt:formatNumber type="number"
+                                                                value="${order.truePrice/100}"
+                                                                pattern="0.00"
+                                                                maxFractionDigits="2"/>+${order.trueScoreB}积分)</p>
+                </c:if>
 
                 <p>手机号：${order.phone}</p>
 
@@ -63,21 +86,13 @@
                 </span>
             </li>
         </c:forEach>
-
-        <%--<li class="list list-ed">--%>
-        <%--<p>充值话费：￥100 (￥10+90积分)</p>--%>
-
-        <%--<p>手机号：18726381008</p>--%>
-
-        <%--<p>2016.10.25 14:23:56</p>--%>
-        <%--<span class="state state-ed">已充值</span>--%>
-        <%--</li>--%>
     </ul>
     <div class="btn" onclick="goPhoneIndex()">继续充值</div>
 </div>
 <script>
     function goPhoneIndex() {
-        window.location.href = "/front/phone/weixin/index";
+//        window.location.href = "/front/phone/weixin/index";
+        window.location.href = "/front/order/weixin/recharge";
     }
 </script>
 </body>

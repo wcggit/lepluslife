@@ -325,7 +325,7 @@
                    },
                    success: function (data) {
                        if (data.status == 200) {
-                           location.href = "/front/order/weixin/confirmOrder/" + data.data.id;
+                           location.href = "/front/order/weixin/confirmOrder?orderId=" + data.data.id;
                        } else if (data.status == 5004) {
                            warnType = 1;
                            showTanChuang();

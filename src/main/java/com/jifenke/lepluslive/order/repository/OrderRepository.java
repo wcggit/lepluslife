@@ -37,7 +37,7 @@ public interface OrderRepository extends JpaRepository<OnLineOrder, Long> {
                                                                     LeJiaUser leJiaUser,
                                                                     Integer status);
 
-  @Query(value = "select count(*) from on_line_order where le_jia_user_id = ?1 and state = 0", nativeQuery = true)
+  @Query(value = "select count(1) from on_line_order where le_jia_user_id = ?1 and state = 0", nativeQuery = true)
   Long getCurrentUserObligationOrdersCount(Long leJiaUserId);
 
   @Query(value = "SELECT state,COUNT(state) FROM on_line_order WHERE le_jia_user_id=?1 AND state IN(0,1,2) GROUP BY state", nativeQuery = true)

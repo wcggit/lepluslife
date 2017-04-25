@@ -8,11 +8,10 @@ import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.lejiauser.service.LeJiaUserService;
 import com.jifenke.lepluslive.weixin.service.DictionaryService;
 
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
@@ -24,7 +23,7 @@ import io.swagger.annotations.ApiParam;
 /**
  * APP邀请好友 Created by zhangwen on 2016/9/1.
  */
-@Controller
+@RestController
 @RequestMapping("/app/invite")
 public class InviteController {
 
@@ -42,9 +41,7 @@ public class InviteController {
    */
   @ApiOperation(value = "打开邀请好友页面")
   @RequestMapping(value = "/open", method = RequestMethod.GET)
-  public
-  @ResponseBody
-  LejiaResult openSportPage(
+  public LejiaResult openSportPage(
       @ApiParam(value = "用户标识token") @RequestParam(required = false) String token) {
     Map<String, String> map = dictionaryService.findInvite();
     if (token == null) {

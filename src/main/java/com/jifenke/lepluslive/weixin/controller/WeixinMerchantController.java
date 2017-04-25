@@ -23,6 +23,7 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
 /**
+ * todo:待删除
  * Created by wcg on 16/3/18.
  */
 @RestController
@@ -62,5 +63,4 @@ public class WeixinMerchantController {
     model.addAttribute("wxConfig", weiXinService.getWeiXinConfig(request));
     return MvUtil.go("/weixin/merchantInfo");
   }
-
 }

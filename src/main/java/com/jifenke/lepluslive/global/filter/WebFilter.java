@@ -1,5 +1,6 @@
 package com.jifenke.lepluslive.global.filter;
 
+import com.jifenke.lepluslive.lejiauser.service.LeJiaUserService;
 import com.jifenke.lepluslive.weixin.service.WeiXinUserService;
 
 import org.springframework.context.annotation.Configuration;
@@ -17,11 +18,19 @@ public class WebFilter extends WebMvcConfigurerAdapter {
   @Inject
   private WeiXinUserService weiXinUserService;
 
+  @Inject
+  private LeJiaUserService leJiaUserService;
+
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
     WeiXinFilter weiXinFilter = new WeiXinFilter();
-    weiXinFilter.setWeiXinUserService(weiXinUserService);
-    registry.addInterceptor(weiXinFilter).addPathPatterns("/weixin/**").addPathPatterns("/*/*/weixin/**");
+//    weiXinFilter.setWeiXinUserService(weiXinUserService);
+    IdentifyUserFilter filter = new IdentifyUserFilter();
+    filter.setWeiXinUserService(weiXinUserService);
+    filter.setLeJiaUserService(leJiaUserService);
+    registry.addInterceptor(weiXinFilter).addPathPatterns("/weixin/**")
+        .addPathPatterns("/*/*/weixin/**");
+    registry.addInterceptor(filter).addPathPatterns("/*/*/user/**");
     super.addInterceptors(registry);
   }
 }

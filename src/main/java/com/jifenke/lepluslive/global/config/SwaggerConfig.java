@@ -4,9 +4,6 @@ package com.jifenke.lepluslive.global.config;
  * Created by zhangwen on 2016/4/26.
  */
 
-import static com.google.common.base.Predicates.or;
-import static springfox.documentation.builders.PathSelectors.regex;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.request.async.DeferredResult;
@@ -15,6 +12,9 @@ import springfox.documentation.service.ApiInfo;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
+
+import static com.google.common.base.Predicates.or;
+import static springfox.documentation.builders.PathSelectors.regex;
 
 
 /**
@@ -53,20 +53,6 @@ public class SwaggerConfig {
         .paths(or(regex("/merchant/.*")))//过滤的接口
         .build()
         .apiInfo(merchantApiInfo());
-  }
-
-  @Bean
-  public Docket topicApi() {
-    return new Docket(DocumentationType.SWAGGER_2)
-        .groupName("topic")
-        .genericModelSubstitutes(DeferredResult.class)
-        .useDefaultResponseMessages(false)
-        .forCodeGeneration(true)
-        .pathMapping("/")// base，最终调用接口后会和paths拼接在一起
-        .select()
-        .paths(or(regex("/topic/.*")))//过滤的接口
-        .build()
-        .apiInfo(topicApiInfo());
   }
 
   @Bean
@@ -240,20 +226,6 @@ public class SwaggerConfig {
 
   private ApiInfo merchantApiInfo() {
     ApiInfo apiInfo = new ApiInfo("商家相关操作",//大标题
-                                  "EHR Platform's REST API, all the applications could access the Object model data via JSON.",
-//小标题
-                                  "0.1",//版本
-                                  "NO terms of service",
-                                  "zhangwenit@126.com",//作者
-                                  "The Apache License, Version 2.0",//链接显示文字
-                                  "http://www.apache.org/licenses/LICENSE-2.0.html"//网站链接
-    );
-
-    return apiInfo;
-  }
-
-  private ApiInfo topicApiInfo() {
-    ApiInfo apiInfo = new ApiInfo("专题相关操作",//大标题
                                   "EHR Platform's REST API, all the applications could access the Object model data via JSON.",
 //小标题
                                   "0.1",//版本

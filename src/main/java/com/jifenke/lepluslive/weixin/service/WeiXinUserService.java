@@ -1,23 +1,20 @@
 package com.jifenke.lepluslive.weixin.service;
 
 import com.jifenke.lepluslive.activity.service.ActivityJoinLogService;
-import com.jifenke.lepluslive.lejiauser.BarcodeConfig;
+import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.lejiauser.domain.entities.RegisterOrigin;
-import com.jifenke.lepluslive.lejiauser.service.BarcodeService;
-import com.jifenke.lepluslive.filemanage.service.FileImageService;
-import com.jifenke.lepluslive.global.config.Constants;
-import com.jifenke.lepluslive.global.util.MvUtil;
+import com.jifenke.lepluslive.lejiauser.repository.LeJiaUserRepository;
 import com.jifenke.lepluslive.score.domain.entities.ScoreA;
 import com.jifenke.lepluslive.score.domain.entities.ScoreADetail;
 import com.jifenke.lepluslive.score.domain.entities.ScoreB;
-import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.score.domain.entities.ScoreBDetail;
+import com.jifenke.lepluslive.score.domain.entities.ScoreC;
 import com.jifenke.lepluslive.score.repository.ScoreADetailRepository;
-import com.jifenke.lepluslive.score.repository.ScoreBDetailRepository;
-import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.score.repository.ScoreARepository;
+import com.jifenke.lepluslive.score.repository.ScoreBDetailRepository;
 import com.jifenke.lepluslive.score.repository.ScoreBRepository;
-import com.jifenke.lepluslive.lejiauser.repository.LeJiaUserRepository;
+import com.jifenke.lepluslive.score.repository.ScoreCRepository;
+import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.repository.WeiXinUserRepository;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -45,12 +42,6 @@ public class WeiXinUserService {
   private String barCodeRootUrl;
 
   @Inject
-  private FileImageService fileImageService;
-
-  @Inject
-  private BarcodeService barcodeService;
-
-  @Inject
   private WeiXinUserRepository weiXinUserRepository;
 
   @Inject
@@ -74,6 +65,9 @@ public class WeiXinUserService {
   @Inject
   private ActivityJoinLogService joinLogService;
 
+  @Inject
+  private ScoreCRepository scoreCRepository;
+
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public WeiXinUser findWeiXinUserByOpenId(String openId) {
@@ -94,19 +88,7 @@ public class WeiXinUserService {
     return weiXinUserRepository.findByLeJiaUser(leJiaUser);
   }
 
-  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public WeiXinUser saveBarCodeForUser(WeiXinUser weiXinUser) throws IOException {
-    LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
-    byte[]
-        bytes =
-        barcodeService.barcode(leJiaUser.getUserSid(), BarcodeConfig.Barcode.defaultConfig());
-    String filePath = MvUtil.getFilePath(Constants.BAR_CODE_EXT);
-    fileImageService.SaveUserBarCode(bytes, filePath);
 
-    leJiaUser.setOneBarCodeUrl(barCodeRootUrl + "/" + filePath);
-    leJiaUserRepository.save(leJiaUser);
-    return weiXinUser;
-  }
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public void saveWeiXinUser(WeiXinUser weiXinUser) throws Exception {
@@ -115,7 +97,7 @@ public class WeiXinUserService {
 
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public void saveWeiXinUser(Map<String, Object> userDetail, Map<String, Object> map)
+  public String saveWeiXinUser(Map<String, Object> userDetail, Map<String, Object> map)
       throws IOException {
     String openid = userDetail.get("openid").toString();
     String
@@ -147,6 +129,10 @@ public class WeiXinUserService {
       scoreB.setTotalScore(0L);
       scoreB.setLeJiaUser(leJiaUser);
       scoreBRepository.save(scoreB);
+      ScoreC scoreC = new ScoreC();
+      scoreC.setLeJiaUser(leJiaUser);
+      scoreC.setLastUpdateDate(date);
+      scoreCRepository.save(scoreC);
     }
 
     weiXinUser.setOpenId(openid);
@@ -163,6 +149,7 @@ public class WeiXinUserService {
     weiXinUser.setLastUserInfoDate(date);
     weiXinUser.setLastUpdated(date);
     weiXinUserRepository.save(weiXinUser);
+    return unionId;
   }
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
@@ -200,6 +187,10 @@ public class WeiXinUserService {
       scoreB.setTotalScore(0L);
       scoreB.setLeJiaUser(leJiaUser);
       scoreBRepository.save(scoreB);
+      ScoreC scoreC = new ScoreC();
+      scoreC.setLeJiaUser(leJiaUser);
+      scoreC.setLastUpdateDate(date);
+      scoreCRepository.save(scoreC);
     }
 
     weiXinUser.setOpenId(openid);
@@ -261,6 +252,10 @@ public class WeiXinUserService {
       scoreB.setTotalScore(0L);
       scoreB.setLeJiaUser(leJiaUser);
       scoreBRepository.save(scoreB);
+      ScoreC scoreC = new ScoreC();
+      scoreC.setLeJiaUser(leJiaUser);
+      scoreC.setLastUpdateDate(date);
+      scoreCRepository.save(scoreC);
     } else {
       leJiaUser = weiXinUser.getLeJiaUser();
     }
@@ -414,4 +409,33 @@ public class WeiXinUserService {
     map.put("scoreB", valueB);
     return map;
   }
+
+  /**
+   * 将该用户变为会员  2017/02/23
+   *
+   * @param leJiaUser leJiaUser
+   */
+  public void setWeiXinState(LeJiaUser leJiaUser) {
+    WeiXinUser w = findWeiXinUserByLeJiaUser(leJiaUser);
+    if (w != null) {
+      if (w.getState() == 0) {
+        w.setState(1);
+        weiXinUserRepository.save(w);
+      }
+    }
+  }
+
+  //  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+//  public WeiXinUser saveBarCodeForUser(WeiXinUser weiXinUser) throws IOException {
+//    LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
+//    byte[]
+//        bytes =
+//        barcodeService.barcode(leJiaUser.getUserSid(), BarcodeConfig.Barcode.defaultConfig());
+//    String filePath = MvUtil.getFilePath(Constants.BAR_CODE_EXT);
+//    fileImageService.SaveUserBarCode(bytes, filePath);
+//
+//    leJiaUser.setOneBarCodeUrl(barCodeRootUrl + "/" + filePath);
+//    leJiaUserRepository.save(leJiaUser);
+//    return weiXinUser;
+//  }
 }

@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,7 +60,7 @@ public class SmsService {
     }
     //防止ip攻击，待完善(使用页面随机码，防止接口恶意调用，由服务器生成并校验)
     String ipAddr = weiXinPayService.getIpAddr(request);
-    String code = MvUtil.getRandomNumber();
+    String code = MvUtil.getRandomNumber(6);
     ValidateCode validateCode = new ValidateCode();
     validateCode.setPhoneNumber(phoneNumber);
     validateCode.setCode(code);
@@ -113,41 +112,4 @@ public class SmsService {
       throw new RuntimeException();
     }
   }
-
-//  /**
-//   * 发送短信，此方法建议在job中调用，或者异步调用
-//   */
-//  public Map<Object, Object> sendValidateCode(String phoneNumber, String code, Integer type) {
-
-//    new Thread(new Runnable() {
-//      @Override
-//      public void run() {
-//        String smsSendUrl = Constants.SMS_SEND_URL;
-//        String smsTemplateCode = null;
-//        if (type == 1) {//注册
-//          smsTemplateCode = Constants.SMS_REGISTER_CODE;
-//        } else if (type == 2) {
-//          smsTemplateCode = Constants.SMS_CHANGE_PWD_CODE;
-//        } else if (type == 3) {
-//          smsTemplateCode = Constants.SMS_BANGDING_CODE;
-//        }
-//
-//        TaobaoClient client = new DefaultTaobaoClient(smsSendUrl, appkey, secret);
-//        AlibabaAliqinFcSmsNumSendRequest req = new AlibabaAliqinFcSmsNumSendRequest();
-//        // req.setExtend("123456");
-//        req.setSmsType("normal");
-//        req.setSmsFreeSignName("乐加生活");
-//        req.setSmsParamString("{\"code\":\"" + code + "\",\"product\":\"乐加生活\"}");
-//        req.setRecNum(phoneNumber);
-//        req.setSmsTemplateCode(smsTemplateCode);
-//        try {
-//          AlibabaAliqinFcSmsNumSendResponse rsp = client.execute(req);
-//          // System.out.println(rsp.getBody());
-//        } catch (Exception e) {
-//          e.printStackTrace();
-//        }
-//      }
-//    }).start();
-//  }
-
 }

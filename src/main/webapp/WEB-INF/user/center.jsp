@@ -3,7 +3,7 @@
   User: zhangwen
   Date: 16/9/8
   Time: 下午8:58
-  To change this template use File | Settings | File Templates.
+  todo:待删除
 --%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@include file="/WEB-INF/commen.jsp" %>
@@ -29,21 +29,21 @@
         <div class="swiper-container swiper-shade">
             <div class="swiper-wrapper">
                 <div class="swiper-slide">
-                    <img src="${resourceUrl}/frontRes/user/center/img/guide1.jpg" alt="">
+                    <img src="${resourceUrl}/frontRes/user/center/img/guide21.jpg" alt="">
 
                     <div class="nextPage swiperNext">
                         <img src="${resourceUrl}/frontRes/user/center/img/next.png" alt="">
                     </div>
                 </div>
                 <div class="swiper-slide">
-                    <img src="${resourceUrl}/frontRes/user/center/img/guide2.jpg" alt="">
+                    <img src="${resourceUrl}/frontRes/user/center/img/guide22.jpg" alt="">
 
                     <div class="nextPage swiperNext position">
                         <img src="${resourceUrl}/frontRes/user/center/img/next.png" alt="">
                     </div>
                 </div>
                 <div class="swiper-slide">
-                    <img src="${resourceUrl}/frontRes/user/center/img/guide3.jpg" alt="">
+                    <img src="${resourceUrl}/frontRes/user/center/img/guide23.jpg" alt="">
 
                     <div class="nextPage know position">
                         <img src="${resourceUrl}/frontRes/user/center/img/know.png" alt="">
@@ -117,22 +117,22 @@
     </div>
 </section>
 <section class="own">
-    <div class="ownMain" onclick="goPage('weixin/scoreDetail?type=0')">
+    <div class="ownMain" onclick="goPage('score/scoreDetail?type=0')">
         <div><span>${scoreA.score/100}</span>元</div>
         <div>
-            <div>
+            <div style="padding-left: 22%;">
                 <img src="${resourceUrl}/frontRes/user/center/img/hongbao.png" alt="">
             </div>
-            <div>红包</div>
+            <div>鼓励金</div>
         </div>
     </div>
-    <div class="ownMain" onclick="goPage('weixin/scoreDetail?type=1')">
-        <div><span>${scoreB.score}</span>积分</div>
+    <div class="ownMain" onclick="goPage('score/scoreDetail?type=2')">
+        <div><span>${scoreC.score/100}</span>金币</div>
         <div>
             <div>
                 <img src="${resourceUrl}/frontRes/user/center/img/jifen.png" alt="">
             </div>
-            <div>积分</div>
+            <div>金币</div>
         </div>
     </div>
     <div class="ownMain msg">
@@ -158,11 +158,11 @@
         </div>
         <p>臻品商城</p>
     </div>
-    <div class="msg">
+    <div onclick="goPage('front/gold/weixin')">
         <div>
             <img src="${resourceUrl}/frontRes/user/center/img/jifenzhuanxiang.png" alt="">
         </div>
-        <p>积分专享</p>
+        <p>金币商城</p>
     </div>
 </section>
 <section class="module">
@@ -334,7 +334,7 @@
         }
         $.ajax({
                    type: "get",
-                   url: "/weixin//subPage/open?phoneNumber=" + phoneNumber,
+                   url: "/weixin/subPage/open?phoneNumber=" + phoneNumber,
                    success: function (data) {
                        if (data.status == 200) {
                            $(".hb").hide();

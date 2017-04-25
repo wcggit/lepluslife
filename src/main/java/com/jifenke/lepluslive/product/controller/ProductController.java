@@ -1,28 +1,22 @@
 package com.jifenke.lepluslive.product.controller;
 
 
-import com.jifenke.lepluslive.global.util.CookieUtils;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.product.controller.dto.ProductDto;
 import com.jifenke.lepluslive.product.domain.entities.Product;
-
 import com.jifenke.lepluslive.product.domain.entities.ProductType;
 import com.jifenke.lepluslive.product.domain.entities.ScrollPicture;
 import com.jifenke.lepluslive.product.service.ProductService;
-
 import com.jifenke.lepluslive.product.service.ScrollPictureService;
-
 import com.jifenke.lepluslive.weixin.service.DictionaryService;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-
+import org.springframework.web.bind.annotation.RestController;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -30,15 +24,13 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
 
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 
 /**
  * Created by wcg on 16/3/9.
  */
-@Controller
+@RestController
 @RequestMapping("shop")
 public class ProductController {
 
@@ -53,18 +45,14 @@ public class ProductController {
 
   @ApiOperation(value = "获取所有的商品类别名称及顶部图片")
   @RequestMapping(value = "/type", method = RequestMethod.GET)
-  public
-  @ResponseBody
-  LejiaResult findAllProductType() {
+  public LejiaResult findAllProductType() {
     return LejiaResult.ok(productService.findAllProductType());
   }
 
-  //分页
+  //todo:待删除
   @ApiOperation(value = "查看商品列表")
   @RequestMapping(value = "/product", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-  public
-  @ResponseBody
-  List<ProductDto> findPageProduct(
+  public List<ProductDto> findPageProduct(
       @RequestParam(value = "page", required = false) Integer offset,
       @RequestParam(value = "productType", required = true) Integer productType) {
     List<ProductDto> products = productService
@@ -89,27 +77,16 @@ public class ProductController {
 
 
   @RequestMapping(value = "/product/productType", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-  public
-  @ResponseBody
-  List<ProductType> goProductTypePage() {
+  public List<ProductType> goProductTypePage() {
     return productService.findAllProductType();
-  }
-
-  @RequestMapping(value = "/product/cookie", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-  public
-  @ResponseBody
-  LejiaResult getProductCookie(HttpServletRequest request) {
-    return LejiaResult.build(20, CookieUtils.getCookieValue(request, "currentType"));
   }
 
   @ApiOperation(value = "查看商品详情")
   @RequestMapping(value = "/product/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-  public
-  @ResponseBody
-  ProductDto getProductDetail(@PathVariable Long id) {
+  public ProductDto getProductDetail(@PathVariable Long id) {
     Product product = productService.findOneProduct(id);
     if (product != null) {
-      List<ScrollPicture> scrollPictureList = scrollPictureService.findAllScorllPicture(product);
+      List<ScrollPicture> scrollPictureList = scrollPictureService.findAllByProduct(product);
       ProductType productType = productService.findOneProductType(product.getProductType().getId());
       ProductDto productDto = new ProductDto();
       productDto.setProductSpecs(productService.findAllProductSpec(product));
@@ -141,9 +118,7 @@ public class ProductController {
    * @param typeId 臻品类型 0=所有
    */
   @RequestMapping(value = "/productList", method = RequestMethod.GET)
-  public
-  @ResponseBody
-  LejiaResult productList(@RequestParam(required = true) Integer page,
+  public LejiaResult productList(@RequestParam(required = true) Integer page,
                           @RequestParam(required = true) Integer typeId) {
     if (page == null || page < 1) {
       page = 1;

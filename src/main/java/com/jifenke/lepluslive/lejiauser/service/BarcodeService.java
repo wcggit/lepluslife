@@ -3,18 +3,20 @@ package com.jifenke.lepluslive.lejiauser.service;
 import com.jifenke.lepluslive.lejiauser.BarcodeConfig;
 
 import net.glxn.qrgen.javase.QRCode;
+
 import org.krysalis.barcode4j.impl.AbstractBarcodeBean;
 import org.krysalis.barcode4j.impl.code128.Code128Bean;
 import org.krysalis.barcode4j.output.bitmap.BitmapCanvasProvider;
 import org.springframework.stereotype.Service;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+
+import javax.imageio.ImageIO;
 
 @Service
 public class BarcodeService {

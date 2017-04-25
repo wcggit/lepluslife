@@ -1,6 +1,5 @@
 package com.jifenke.lepluslive.partner.domain.entities;
 
-import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 
 import javax.persistence.Entity;
@@ -47,6 +46,9 @@ public class Partner {
 
   @OneToOne
   private WeiXinUser weiXinUser;
+
+  @ManyToOne
+  private PartnerManager partnerManager;
 
   public WeiXinUser getWeiXinUser() {
     return weiXinUser;

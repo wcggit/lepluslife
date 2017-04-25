@@ -3,11 +3,11 @@ package com.jifenke.lepluslive.activity.controller;
 import com.jifenke.lepluslive.activity.domain.entities.ActivityPhoneOrder;
 import com.jifenke.lepluslive.activity.service.ActivityPhoneOrderService;
 import com.jifenke.lepluslive.activity.service.ActivityPhoneRuleService;
+import com.jifenke.lepluslive.activity.service.RechargeService;
 import com.jifenke.lepluslive.global.config.Constants;
 import com.jifenke.lepluslive.global.service.MessageService;
 import com.jifenke.lepluslive.global.util.JsonUtils;
 import com.jifenke.lepluslive.global.util.LejiaResult;
-import com.jifenke.lepluslive.activity.service.RechargeService;
 import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.lejiauser.service.LeJiaUserService;
@@ -39,6 +39,8 @@ import java.util.SortedMap;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+//todo:待删除controller  进入充值记录页面action保留
 
 /**
  * 手机充值 Created by zhangwen on 2016/10/26.
@@ -129,7 +131,11 @@ public class RechargeController {
     int totalWorth = 0;
     int totalScore = 0;
     for (ActivityPhoneOrder order : list) {
-      totalScore += order.getTrueScoreB();
+      if (order.getType() != null && order.getType() == 2) {
+        totalScore += order.getTrueScoreB();
+      } else {
+        totalScore += order.getTrueScoreB() * 100;
+      }
       totalWorth += order.getWorth();
     }
     model.addAttribute("orderList", list);
@@ -194,7 +200,7 @@ public class RechargeController {
       }
     } else {
       //处理失败，对订单进行标识
-      String message = map.get("message")[0];
+      String message = map.get("message") != null ? map.get("message")[0] : "未知错误1";
       try {
         orderService.payFail(orderSid, message);
       } catch (Exception e) {
@@ -255,7 +261,7 @@ public class RechargeController {
     //话费产品如果是全积分，这直接调用充话费接口
     if (order.getPhoneRule().getPayType() == 3) {
       try {
-        phoneOrderService.paySuccess(order.getOrderSid(), 2);
+        phoneOrderService.paySuccess(order.getOrderSid());
         return LejiaResult.build(2000, "支付成功", order.getId());
       } catch (Exception e) {
         e.printStackTrace();
@@ -263,15 +269,15 @@ public class RechargeController {
       }
     }
     //封装订单参数
-    SortedMap<Object, Object>
+    SortedMap<String, Object>
         map =
         weiXinPayService
             .buildAPPOrderParams(request, "话费充值", order.getOrderSid(), "" + order.getTruePrice(),
                                  Constants.PHONEORDER_NOTIFY_URL);
     //获取预支付id
-    Map unifiedOrder = weiXinPayService.createUnifiedOrder(map);
+    Map<String, Object> unifiedOrder = weiXinPayService.createUnifiedOrder(map);
     if (unifiedOrder.get("prepay_id") != null) {
-      SortedMap sortedMap = weiXinPayService.buildAppParams(
+      SortedMap<String, Object> sortedMap = weiXinPayService.buildAppParams(
           unifiedOrder.get("prepay_id").toString());
       sortedMap.put("orderId", order.getId());
       return LejiaResult.build(200, "ok", sortedMap);
@@ -289,7 +295,11 @@ public class RechargeController {
     List<ActivityPhoneOrder> list = orderService.findAllByLeJiaUser(leJiaUser);
     int totalScore = 0;
     for (ActivityPhoneOrder order : list) {
-      totalScore += order.getTrueScoreB();
+      if (order.getType() != null && order.getType() == 2) {
+        totalScore += order.getTrueScoreB() / 100;
+      } else {
+        totalScore += order.getTrueScoreB();
+      }
     }
     Map<String, Object> map = new HashMap<>();
     map.put("orderList", list);
@@ -307,4 +317,39 @@ public class RechargeController {
     return LejiaResult.ok(phoneOrderService.findByOrderId(orderId));
   }
 
+//  /**
+//   * 将订单重新充值  16/12/09
+//   *
+//   * @param orderSid 自有订单号
+//   */
+//  @RequestMapping(value = "/recharge")
+//  public LejiaResult recharge(@RequestParam String orderSid) {
+//    try {
+//      return LejiaResult.ok(phoneOrderService.recharge(orderSid));
+//    } catch (Exception e) {
+//      e.printStackTrace();
+//      return LejiaResult.build(500, "server error");
+//    }
+//  }
+//
+//  /**
+//   * 将订单充值  16/12/09
+//   *
+//   * @param orderSid 自有订单号
+//   */
+//  @RequestMapping(value = "/reSubmit")
+//  public LejiaResult reSubmit(@RequestParam String orderSid) {
+//    ActivityPhoneOrder order = phoneOrderService.findByOrderSid(orderSid);
+//
+//    //支付回调成功调用第三方充值接口充值
+//    Map<Object, Object>
+//        result =
+//        rechargeService.submit(order.getPhone(), order.getWorth(), order.getOrderSid());
+//
+//    if (result.get("status") == null || "failure".equalsIgnoreCase("" + result.get("status"))) {
+//      //充值失败
+//      return LejiaResult.build(500, "充值失败");
+//    }
+//    return LejiaResult.build(200, "充值成功");
+//  }
 }

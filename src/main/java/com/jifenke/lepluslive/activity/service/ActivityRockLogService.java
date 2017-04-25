@@ -102,30 +102,34 @@ public class ActivityRockLogService {
         leJiaUserInfo.setRockA(leJiaUserInfo.getRockA() + numberA);
         leJiaUserInfo.setRockB(leJiaUserInfo.getRockB() + numberB);
         leJiaUserInfoRepository.save(leJiaUserInfo);
-        //添加红包
-        scoreA.setTotalScore(scoreA.getTotalScore() + numberA);
-        scoreA.setScore(scoreA.getScore() + numberA);
-        scoreA.setLastUpdateDate(date);
-        scoreARepository.save(scoreA);
-        //添加红包记录
-        ScoreADetail aDetail = new ScoreADetail();
-        aDetail.setNumber(numberA.longValue());
-        aDetail.setScoreA(scoreA);
-        aDetail.setOrigin(7);
-        aDetail.setOperate("摇一摇得红包");
-        scoreADetailRepository.save(aDetail);
-        //添加积分
-        scoreB.setTotalScore(scoreB.getTotalScore() + numberB);
-        scoreB.setScore(scoreB.getScore() + numberB);
-        scoreB.setLastUpdateDate(date);
-        scoreBRepository.save(scoreB);
-        //添加积分记录
-        ScoreBDetail bDetail = new ScoreBDetail();
-        bDetail.setOrigin(7);
-        bDetail.setOperate("摇一摇得积分");
-        bDetail.setNumber(numberB.longValue());
-        bDetail.setScoreB(scoreB);
-        scoreBDetailRepository.save(bDetail);
+        if (numberA > 0) {
+          //添加红包
+          scoreA.setTotalScore(scoreA.getTotalScore() + numberA);
+          scoreA.setScore(scoreA.getScore() + numberA);
+          scoreA.setLastUpdateDate(date);
+          scoreARepository.save(scoreA);
+          //添加红包记录
+          ScoreADetail aDetail = new ScoreADetail();
+          aDetail.setNumber(numberA.longValue());
+          aDetail.setScoreA(scoreA);
+          aDetail.setOrigin(7);
+          aDetail.setOperate("摇一摇得鼓励金");
+          scoreADetailRepository.save(aDetail);
+        }
+        if (numberB > 0) {
+          //添加积分
+          scoreB.setTotalScore(scoreB.getTotalScore() + numberB);
+          scoreB.setScore(scoreB.getScore() + numberB);
+          scoreB.setLastUpdateDate(date);
+          scoreBRepository.save(scoreB);
+          //添加积分记录
+          ScoreBDetail bDetail = new ScoreBDetail();
+          bDetail.setOrigin(7);
+          bDetail.setOperate("摇一摇得积分");
+          bDetail.setNumber(numberB.longValue());
+          bDetail.setScoreB(scoreB);
+          scoreBDetailRepository.save(bDetail);
+        }
 
         //返回当前摇一摇获得的积分和红包及总计获得的
         map.put("totalA", leJiaUserInfo.getRockA());
@@ -143,16 +147,20 @@ public class ActivityRockLogService {
   private HashMap<String, Integer> getScoreByRock() {
     HashMap<String, Integer> map = new HashMap<>();
     double random = Math.random();
-    if (random < 0.9) {
-      int a = (int) (Math.random() * 30) + 1;
+    if (random < 0.7) {
+      int a = (int) (Math.random() * 2) + 1;
+      map.put("a", a);
+      map.put("b", 0);
+    } else if (0.7 <= random && random < 0.96) {
+      int a = (int) (Math.random() * 3) + 2;
       map.put("a", a);
       map.put("b", 1);
-    } else if (0.9 <= random && random < 0.97) {
-      int a = (int) (Math.random() * 20) + 30;
+    } else if (0.96 <= random && random < 0.99) {
+      int a = (int) (Math.random() * 3) + 4;
       map.put("a", a);
       map.put("b", 2);
     } else {
-      int a = (int) (Math.random() * 50) + 50;
+      int a = (int) (Math.random() * 5) + 6;
       map.put("a", a);
       map.put("b", 3);
     }

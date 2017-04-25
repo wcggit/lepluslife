@@ -5,6 +5,7 @@ import com.jifenke.lepluslive.global.util.CookieUtils;
 import com.jifenke.lepluslive.global.util.JsonUtils;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
+import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.lejiauser.service.LeJiaUserService;
 import com.jifenke.lepluslive.partner.domain.entities.Partner;
 import com.jifenke.lepluslive.partner.service.PartnerService;
@@ -16,10 +17,10 @@ import com.jifenke.lepluslive.product.domain.entities.ScrollPicture;
 import com.jifenke.lepluslive.product.service.ProductService;
 import com.jifenke.lepluslive.product.service.ScrollPictureService;
 import com.jifenke.lepluslive.score.domain.entities.ScoreB;
-import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.score.service.ScoreAService;
 import com.jifenke.lepluslive.score.service.ScoreBService;
-import com.jifenke.lepluslive.weixin.service.DictionaryService;
+import com.jifenke.lepluslive.score.service.ScoreCService;
+import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.service.WeiXinService;
 import com.jifenke.lepluslive.weixin.service.WeiXinUserInfoService;
 import com.jifenke.lepluslive.weixin.service.WeiXinUserService;
@@ -27,12 +28,11 @@ import com.jifenke.lepluslive.weixin.service.WeiXinUserService;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -56,12 +56,6 @@ public class WeixinController {
 
   private static Logger log = LoggerFactory.getLogger(WeixinController.class);
 
-  @Value("${weixin.appId}")
-  private String appId;
-
-  @Value("${weixin.weixinRootUrl}")
-  private String weixinRootUrl;
-
   @Inject
   private WeiXinUserService weiXinUserService;
 
@@ -73,6 +67,9 @@ public class WeixinController {
 
   @Inject
   private ScoreBService scoreBService;
+
+  @Inject
+  private ScoreCService scoreCService;
 
   @Inject
   private ScoreAService scoreAService;
@@ -90,9 +87,9 @@ public class WeixinController {
   private PartnerService partnerService;
 
   @RequestMapping("/shop")
-  public ModelAndView goProductPage(HttpServletRequest request, Model model) {
-    String openId = CookieUtils.getCookieValue(request, appId + "-user-open-id");
-    WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByOpenId(openId);
+  public ModelAndView goProductPage(@CookieValue String leJiaUnionId,
+                                    Model model) {
+    WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByUnionId(leJiaUnionId);
     ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(weiXinUser.getLeJiaUser());
     //商品分类
     List<ProductType> typeList = productService.findAllProductType();
@@ -110,7 +107,7 @@ public class WeixinController {
                                           HttpServletResponse response) {
     Product product = productService.findOneProduct(id);
     ProductType productType = product.getProductType();
-    List<ScrollPicture> scrollPictureList = scrollPictureService.findAllScorllPicture(product);
+    List<ScrollPicture> scrollPictureList = scrollPictureService.findAllByProduct(product);
     List<ProductDetail>
         productDetails =
         productService.findAllProductDetailsByProduct(product);
@@ -155,7 +152,11 @@ public class WeixinController {
 
     if (map.get("openid") != null) {
       String openid = "" + map.get("openid");
+      String unionId = "";
       WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByOpenId(openid);
+      if (weiXinUser != null) {
+        unionId = weiXinUser.getUnionId();
+      }
       //2种情况 当用户不存在时,当上次登录距离此次已经经过了3天
       if (weiXinUser == null || new Date(
           weiXinUser.getLastUpdated().getTime() + 3 * 24 * 60 * 60 * 1000)
@@ -166,14 +167,14 @@ public class WeixinController {
           log.error(userDetail.get("errcode").toString() + userDetail.get("errmsg").toString());
         } else {
           try {
-            weiXinUserService.saveWeiXinUser(userDetail, map);
+            unionId = weiXinUserService.saveWeiXinUser(userDetail, map);
           } catch (IOException e) {
             e.printStackTrace();
           }
         }
       }
       try {
-        CookieUtils.setCookie(request, response, appId + "-user-open-id", openid,
+        CookieUtils.setCookie(request, response, "leJiaUnionId", unionId,
                               Constants.COOKIE_DISABLE_TIME);
         response.sendRedirect(action);
       } catch (IOException e) {
@@ -184,17 +185,18 @@ public class WeixinController {
     return null;
   }
 
+  /**
+   * 会员中心页面
+   */
   @RequestMapping("/user")
-  public ModelAndView goUserPage(Model model, HttpServletRequest request) throws IOException {
+  public ModelAndView goUserPage(Model model, HttpServletRequest request) {
     WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
-//    if (weiXinUser.getLeJiaUser().getOneBarCodeUrl() == null) {
-//      weiXinUser = weiXinUserService.saveBarCodeForUser(weiXinUser);
-//    }
-    model.addAttribute("scoreA", scoreAService.findScoreAByLeJiaUser(weiXinUser.getLeJiaUser()));
+    LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
+    model.addAttribute("scoreA", scoreAService.findScoreAByLeJiaUser(leJiaUser));
     model.addAttribute("user", weiXinUser);
-    model.addAttribute("scoreB", scoreBService.findScoreBByWeiXinUser(weiXinUser.getLeJiaUser()));
-    model.addAttribute("check", weiXinUserInfoService.checkYdAndWarning(weiXinUser));
-    return MvUtil.go("/user/center");
+    model.addAttribute("scoreC", scoreCService.findScoreCByLeJiaUser(leJiaUser));
+//    model.addAttribute("check", weiXinUserInfoService.checkYdAndWarning(weiXinUser));
+    return MvUtil.go("/user/index");
   }
 
 
@@ -203,21 +205,14 @@ public class WeixinController {
     return MvUtil.go("/weixin/load");
   }
 
-  @RequestMapping("/city")
-  public ModelAndView goMerchantPage(HttpServletRequest request, Model model) {
-    model.addAttribute("wxConfig", weiXinService.getWeiXinConfig(request));
-    return MvUtil.go("/weixin/merchant");
-  }
-
   @RequestMapping("/partner/bind_wx_user/{sid}")
   public ModelAndView partnerBindUser(@PathVariable String sid, Model model,
                                       HttpServletRequest request) {
     Partner partner = partnerService.findPartnerBySid(sid);
-    String openId = CookieUtils.getCookieValue(request, appId + "-user-open-id");
+    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
     model.addAttribute("partner", partner);
     model.addAttribute("partnerSid", sid + "?");
-    model.addAttribute("openid", openId);
-    WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByOpenId(openId);
+    model.addAttribute("openid", weiXinUser.getOpenId());
     model.addAttribute("weiXinUser", weiXinUser);
     if (partner.getWeiXinUser() == null) {
       if (partnerService.findPartnerByWeiXinUser(weiXinUser).isPresent()) {
@@ -247,12 +242,9 @@ public class WeixinController {
   }
 
   @RequestMapping(value = "/partner/bind/{sid}")
-  public
-  @ResponseBody
-  LejiaResult bindPartnerConfirm(@PathVariable String sid, HttpServletRequest request) {
+  public LejiaResult bindPartnerConfirm(@PathVariable String sid, HttpServletRequest request) {
     Partner partner = partnerService.findPartnerBySid(sid);
-    String openId = CookieUtils.getCookieValue(request, appId + "-user-open-id");
-    WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByOpenId(openId);
+    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
     return partnerService.bindWeiXinUser(partner, weiXinUser) ? LejiaResult.ok()
                                                               : LejiaResult.build(201, "绑定名额已满");
   }

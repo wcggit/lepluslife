@@ -166,9 +166,13 @@
         '<div class="all"><div>共 <span style="margin-right: 3px;">' + orderHasProCount
         + '</span>件商品</div><div>合计：<span style="font-size: 15px;color: #333;">￥'
         + toDecimal(totalPrice / 100)
-        + '</span> + <span style="font-size: 14px;color: #fb991a;">'
-        + totalScore
-        + '积分</span><spanstyle="font-size: 13px;color: #666;">';
+        + '</span> + <span style="font-size: 14px;color: #fb991a;">';
+        if (data.type == 1) {
+            divStr += totalScore + '积分';
+        } else {
+            divStr += toDecimal(totalScore / 100) + '金币';
+        }
+        divStr += '</span><spanstyle="font-size: 13px;color: #666;">';
         if (data.transmitWay == 1) {
             divStr += '（线下自提）</span></div></div>';
         } else if (data.freightPrice == 0) {
@@ -194,15 +198,22 @@
             + orderDetails[i].productSpec.specDetail
             + '</p><p>￥'
             + toDecimal(orderDetails[i].productSpec.minPrice
-                        / 100) + '+<span>'
-            + (orderDetails[i].product.type == 1 ? Math.floor(((orderDetails[i].productSpec.price
-                                                                - orderDetails[i].productSpec.minPrice)
-                                                               - (orderDetails[i].productSpec.price
+                        / 100) + '+<span>';
+            if (data.type == 1) {
+                divStr +=
+                (orderDetails[i].product.type == 1 ? Math.floor(((orderDetails[i].productSpec.price
                                                                   - orderDetails[i].productSpec.minPrice)
-                                                                 % 100) / 100)
-                    : (orderDetails[i].productSpec.minScore
-                       == null ? 0
-                    : orderDetails[i].productSpec.minScore)) + '积分</span></p></div></div>';
+                                                                 - (orderDetails[i].productSpec.price
+                                                                    - orderDetails[i].productSpec.minPrice)
+                                                                   % 100) / 100)
+                        : (orderDetails[i].productSpec.minScore
+                           == null ? 0
+                        : orderDetails[i].productSpec.minScore)) + '积分</span></p></div></div>';
+            } else {
+                divStr +=
+                toDecimal(orderDetails[i].productSpec.minScore / 100) + '金币</span></p></div></div>';
+            }
+
         }
         divStr += '</div>';
         return divStr;
@@ -231,7 +242,7 @@
         else if (window.event) {
             window.event.cancelBubble = true;//兼容IE
         }
-        location.href = '/front/order/weixin/confirmOrder/' + id;
+        location.href = '/front/order/weixin/confirmOrder?orderId=' + id;
     }
     function orderConfirm(id, e) {
         var ev = e || window.event;
@@ -243,7 +254,7 @@
         }
         $.ajax({
                    type: "post",
-                   url: "/weixin/order/orderConfirm",
+                   url: "/order/orderConfirm",
                    data: {orderId: id},
                    success: function (data) {
                        location.reload(true);
@@ -368,7 +379,7 @@
     $(".yes").click(function (e) { //取消订单
         $.ajax({
                    type: "post",
-                   url: "/weixin/order/orderCancle",
+                   url: "/order/orderCancle",
                    data: {orderId: orderCancleId},
                    success: function (data) {
                        location.reload(true);

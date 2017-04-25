@@ -3,8 +3,8 @@ package com.jifenke.lepluslive.merchant.service;
 import com.jifenke.lepluslive.merchant.controller.dto.MerchantDto;
 import com.jifenke.lepluslive.merchant.domain.entities.City;
 import com.jifenke.lepluslive.merchant.domain.entities.Merchant;
-import com.jifenke.lepluslive.merchant.domain.entities.MerchantInfo;
 import com.jifenke.lepluslive.merchant.domain.entities.MerchantScroll;
+import com.jifenke.lepluslive.merchant.domain.entities.MerchantUser;
 import com.jifenke.lepluslive.merchant.repository.MerchantInfoRepository;
 import com.jifenke.lepluslive.merchant.repository.MerchantRepository;
 import com.jifenke.lepluslive.merchant.repository.MerchantScrollRepository;
@@ -49,6 +49,14 @@ public class MerchantService {
 
   @Inject
   private MerchantScrollRepository merchantScrollRepository;
+
+  /**
+   * 根据merchantSid获取商家详情 2017/3/7
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+  public Merchant findByMerchantSid(String merchantSid) {
+    return merchantRepository.findByMerchantSid(merchantSid);
+  }
 
   /**
    * 获取商家详情
@@ -115,16 +123,7 @@ public class MerchantService {
       scrollList.add(m);
     }
     map.put("scrolls", scrollList);
-    //商家详情图
-//    List<Map> detailList = new ArrayList<>();
-//    List<Object[]> list3 = merchantDetailRepository.findMerchantDetailsByMerchantId(id);
-//    for (Object[] o : list3) {
-//      Map<String, Object> m = new HashMap<>();
-//      m.put("sid", o[0]);
-//      m.put("picture", o[1]);
-//      detailList.add(m);
-//    }
-//    map.put("details", detailList);
+    //商家详情图 暂无
     return map;
   }
 
@@ -312,14 +311,6 @@ public class MerchantService {
     return dtoList;
   }
 
-  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public void test(Merchant merchant) {
-    MerchantInfo info = new MerchantInfo();
-    merchantInfoRepository.save(info);
-    merchant.setMerchantInfo(info);
-    merchantRepository.save(merchant);
-  }
-
   /**
    * 获取商家轮播图
    */
@@ -423,5 +414,15 @@ public class MerchantService {
 
   public List<Merchant> findMerchantByPartnerAndPartnership(Partner partner, int i) {
     return merchantRepository.findByPartnerAndPartnership(partner, i);
+  }
+
+  /**
+   * 查询某一商户下所有门店  2017/01/24
+   *
+   * @param merchantUser 商户
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+  public List<Merchant> countByMerchantUser(MerchantUser merchantUser) {
+    return merchantRepository.findByMerchantUser(merchantUser);
   }
 }

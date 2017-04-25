@@ -5,7 +5,6 @@ import com.jifenke.lepluslive.lejiauser.controller.dto.LeJiaUserDto;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.lejiauser.domain.entities.RegisterOrigin;
 import com.jifenke.lepluslive.lejiauser.repository.LeJiaUserRepository;
-
 import com.jifenke.lepluslive.merchant.domain.entities.Merchant;
 import com.jifenke.lepluslive.merchant.service.MerchantService;
 import com.jifenke.lepluslive.partner.domain.entities.Partner;
@@ -20,13 +19,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.inject.Inject;
-
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 
 /**
  * Created by wcg on 16/4/21.
@@ -49,6 +50,9 @@ public class LeJiaUserService {
 
   @Inject
   private MerchantService merchantService;
+  @Inject
+  private EntityManager em;
+
 
   /**
    * APP获取用户信息  16/09/07
@@ -77,6 +81,11 @@ public class LeJiaUserService {
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public LeJiaUser findUserByUserSid(String userSid) {
     return leJiaUserRepository.findByUserSid(userSid);
+  }
+
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+  public LeJiaUser findUserById(Long id) {
+    return leJiaUserRepository.findOne(id);
   }
 
   //保存用户信息 16/10/24
@@ -209,7 +218,7 @@ public class LeJiaUserService {
    * @param leJiaUser  乐加用户
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  private Merchant bindMerchantAndPartner(Long merchantId, LeJiaUser leJiaUser) {
+  public Merchant bindMerchantAndPartner(Long merchantId, LeJiaUser leJiaUser) {
     Merchant merchant = merchantService.findMerchantById(merchantId);
     Partner partner = merchant.getPartner();
     Date date = new Date();
@@ -241,5 +250,59 @@ public class LeJiaUserService {
 
   public long countPartnerBindLeJiaUser(Long id) {
     return leJiaUserRepository.countPartnerBindLeJiaUser(id);
+  }
+
+  /**
+   * 今日红包积分 收益
+   *
+   * @param token 用户token
+   * @param today 今日
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+  public List<Object[]> todayScoreAB(String token, String today) {
+    String sql = null;
+
+    sql = " SELECT today_a.tsa, today_b.tsb FROM "
+          + " (SELECT SUM(sad.number) tsa, u.user_sid token FROM le_jia_user u INNER JOIN scorea sa ON u.id=sa.le_jia_user_id "
+          + " INNER JOIN scorea_detail sad ON sa.id=sad.scorea_id "
+          + " WHERE u.user_sid='" + token + "'"
+          + " AND DATE(sad.date_created)='" + today + "' AND  sad.number>0) today_a, "
+          + " (SELECT SUM(sbd.number) tsb, u.user_sid token FROM le_jia_user u INNER JOIN scorec sb ON u.id=sb.le_jia_user_id "
+          + " INNER JOIN scorec_detail sbd ON sb.id=sbd.scorec_id "
+          + " WHERE u.user_sid='" + token + "'"
+          + " AND DATE(sbd.date_created)='" + today + "' AND sbd.number>0) today_b ";
+
+    Query query = em.createNativeQuery(sql);
+    return query.getResultList();
+  }
+
+  /**
+   * 昨日红包积分 收益
+   *
+   * @param token     用户token
+   * @param yesterday 昨日
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+  public List<Object[]> yesterdayScoreAB(String token, String yesterday) {
+    String sql = null;
+//    sql = " SELECT SUM(sad.number), SUM(sbd.number) FROM le_jia_user u INNER JOIN scorea sa ON u.id=sa.le_jia_user_id INNER JOIN scoreb sb ON u.id=sb.le_jia_user_id "
+//        + " INNER JOIN scorea_detail sad ON sa.id=sad.scorea_id INNER JOIN scoreb_detail sbd ON sb.id=sbd.scoreb_id "
+//        + " WHERE sad.number>0 AND sbd.number>0 AND u.token='" + token + "'"
+//        + " AND DATE(sad.date_created)='" + yesterday + "' AND DATE(sbd.date_created)='" + yesterday + "'";
+
+    sql = " SELECT yesterday_a.ysa, yesterday_b.ysb FROM "
+          + " (SELECT SUM(sad.number) ysa, u.user_sid token FROM le_jia_user u INNER JOIN scorea sa ON u.id=sa.le_jia_user_id "
+          + " INNER JOIN scorea_detail sad ON sa.id=sad.scorea_id "
+          + " WHERE u.user_sid='" + token + "'"
+          + " AND DATE(sad.date_created)='" + yesterday + "' AND sad.number>0) yesterday_a, "
+          + " (SELECT SUM(sbd.number) ysb, u.user_sid token FROM le_jia_user u INNER JOIN scorec sb ON u.id=sb.le_jia_user_id "
+          + " INNER JOIN scorec_detail sbd ON sb.id=sbd.scorec_id "
+          + " WHERE u.user_sid='" + token + "'"
+          + " AND DATE(sbd.date_created)='" + yesterday + "' AND sbd.number>0) yesterday_b ";
+//          + " WHERE yesterday_a.token = yesterday_b.token";
+
+    Query query = em.createNativeQuery(sql);
+    List<Object[]> list = query.getResultList();
+    return list;
   }
 }

@@ -1,6 +1,5 @@
 package com.jifenke.lepluslive.coupon.controller;
 
-import com.jifenke.lepluslive.coupon.domain.entities.LeJiaUserCoupon;
 import com.jifenke.lepluslive.coupon.service.LeJiaUserCouponService;
 import com.jifenke.lepluslive.coupon.service.MerchantCouponService;
 import com.jifenke.lepluslive.global.service.MessageService;

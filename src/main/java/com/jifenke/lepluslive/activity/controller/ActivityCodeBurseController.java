@@ -2,11 +2,12 @@ package com.jifenke.lepluslive.activity.controller;
 
 import com.jifenke.lepluslive.activity.domain.entities.ActivityCodeBurse;
 import com.jifenke.lepluslive.activity.domain.entities.ActivityJoinLog;
+import com.jifenke.lepluslive.activity.domain.entities.RechargeCard;
 import com.jifenke.lepluslive.activity.service.ActivityCodeBurseService;
 import com.jifenke.lepluslive.activity.service.ActivityJoinLogService;
 import com.jifenke.lepluslive.activity.service.ActivityShareLogService;
+import com.jifenke.lepluslive.activity.service.RechargeCardService;
 import com.jifenke.lepluslive.global.service.MessageService;
-import com.jifenke.lepluslive.global.util.CookieUtils;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
@@ -19,7 +20,6 @@ import com.jifenke.lepluslive.weixin.service.DictionaryService;
 import com.jifenke.lepluslive.weixin.service.WeiXinService;
 import com.jifenke.lepluslive.weixin.service.WeiXinUserService;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,6 +31,7 @@ import org.springframework.web.servlet.ModelAndView;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -44,8 +45,6 @@ import javax.servlet.http.HttpServletResponse;
 @RequestMapping("/weixin")
 public class ActivityCodeBurseController {
 
-  @Value("${weixin.appId}")
-  private String appId;
   @Inject
   private ActivityCodeBurseService activityCodeBurseService;
   @Inject
@@ -73,6 +72,8 @@ public class ActivityCodeBurseController {
 
   @Inject
   private MessageService messageService;
+  @Inject
+  private RechargeCardService rechargeCardService;
 
   //分享页面 06/09/02
   @RequestMapping(value = "/share/{id}", method = RequestMethod.GET)
@@ -133,13 +134,18 @@ public class ActivityCodeBurseController {
   //关注图文链接页面
   @RequestMapping("/subPage")
   public ModelAndView subPage(HttpServletRequest request, Model model) {
-    String openId = CookieUtils.getCookieValue(request, appId + "-user-open-id");
-    WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByOpenId(openId);
+    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
     model.addAttribute("wxConfig", weiXinService.getWeiXinConfig(request));
     //判断是否获得过红包
     ActivityJoinLog joinLog = activityJoinLogService.findLogBySubActivityAndOpenId(0, weiXinUser);
     if (joinLog == null) {//未参与
-      model.addAttribute("status", 0);
+      if (weiXinUser.getLeJiaUser().getPhoneNumber() != null && !""
+          .equals(weiXinUser.getLeJiaUser().getPhoneNumber())) {
+        model.addAttribute("status", 1);
+        model.addAttribute("scoreA", 200);
+      } else {
+        model.addAttribute("status", 0);
+      }
     } else {
       model.addAttribute("scoreA", joinLog.getDetail());
       model.addAttribute("status", 1);
@@ -191,8 +197,7 @@ public class ActivityCodeBurseController {
   @RequestMapping(value = "/activity/{id}", method = RequestMethod.GET)
   public ModelAndView goActivityPage(HttpServletRequest request, @PathVariable String id,
                                      Model model) {
-    String openId = CookieUtils.getCookieValue(request, appId + "-user-open-id");
-    WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByOpenId(openId);
+    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
     String[] str = id.split("_");
     if ("0".equals(str[0])) { //普通关注
       //判断是否获得过红包
@@ -203,7 +208,7 @@ public class ActivityCodeBurseController {
         int
             status =
             scoreAService
-                .giveScoreAByDefault(weiXinUser.getLeJiaUser(), defaultScoreA, "关注送红包", 0,
+                .giveScoreAByDefault(weiXinUser.getLeJiaUser(), defaultScoreA, "关注送鼓励金", 0,
                                      "0_" + defaultScoreA);
         //添加参加记录
         if (status == 1) {
@@ -313,6 +318,43 @@ public class ActivityCodeBurseController {
       }
     }
     return LejiaResult.ok(result);
+  }
+
+  /**
+   * 充值卡 兑换
+   * @param exchangeCode 充值兑换码
+   * @return 状态
+   */
+  @RequestMapping(value = "/rechargeCard/exchange", method = RequestMethod.POST)
+  public LejiaResult rechargeCardSubmit(@RequestParam String exchangeCode, HttpServletRequest request) {
+    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
+
+    try {
+      if (exchangeCode!=null && !exchangeCode.equals("")){
+        List<RechargeCard> list1 = rechargeCardService.findRechargeCardByExchangeCode(exchangeCode);
+        List<RechargeCard> list2 = rechargeCardService.findRechargeCardByWeiXinUser(weiXinUser);
+        if(list1.size()>0){
+          return LejiaResult.build(499, "兑换码已使用!");
+        }
+        if(list2.size()>100){
+          return LejiaResult.build(498, "兑换次数超限!");
+        }
+
+        RechargeCard rechargeCard = new RechargeCard();
+        rechargeCard.setRechargeStatus(1);
+        rechargeCard.setCreateTime(new Date());
+        rechargeCard.setExchangeCode(exchangeCode);
+        rechargeCard.setWeiXinUser(weiXinUser);
+        rechargeCardService.saveRechargeCard(rechargeCard);
+        return LejiaResult.ok();
+      }else {
+
+        return LejiaResult.build(497, "兑换码错误!");
+      }
+
+    } catch (Exception e) {
+      return LejiaResult.build(202, "服务器异常");
+    }
   }
 
 }

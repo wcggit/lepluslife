@@ -1,8 +1,6 @@
 package com.jifenke.lepluslive.lejiauser.repository;
 
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
-import com.jifenke.lepluslive.merchant.domain.entities.Merchant;
-import com.jifenke.lepluslive.partner.domain.entities.Partner;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -24,17 +22,12 @@ public interface LeJiaUserRepository extends JpaRepository<LeJiaUser, Long> {
    * @param token 用户唯一标识
    * @return 个人信息
    */
-  @Query(value = "SELECT w.nickname,w.head_image_url,u.user_sid,u.phone_number,a.score AS aScore,b.score AS bScore,u.bind_merchant_id FROM le_jia_user u LEFT OUTER JOIN wei_xin_user w ON u.wei_xin_user_id=w.id INNER JOIN scorea a ON a.le_jia_user_id=u.id INNER JOIN scoreb b ON b.le_jia_user_id=u.id AND u.user_sid=?1", nativeQuery = true)
+  @Query(value = "SELECT w.nickname,w.head_image_url,u.user_sid,u.phone_number,a.score AS aScore,b.score AS bScore,u.bind_merchant_id FROM le_jia_user u LEFT OUTER JOIN wei_xin_user w ON u.wei_xin_user_id=w.id INNER JOIN scorea a ON a.le_jia_user_id=u.id INNER JOIN scorec b ON b.le_jia_user_id=u.id AND u.user_sid=?1", nativeQuery = true)
   List<Object[]> getUserInfo(String token);
-
-  @Query(value = "select merchant_id from off_line_order where le_jia_user_id = ?1 and complete_date  is  not null  order by complete_date desc limit 1", nativeQuery = true)
-  Long checkUserBindMerchant(Long leJiaUserId);
 
   @Query(value = "select count(*) from le_jia_user where bind_merchant_id = ?1", nativeQuery = true)
   Long countMerchantBindLeJiaUser(Long merchantId);
 
   @Query(value = "select count(*) from le_jia_user where bind_partner_id = ?1", nativeQuery = true)
   Long countPartnerBindLeJiaUser(Long partnerId);
-
-  // List<LeJiaUser> findAllByMerchant(Merchant merchant);
 }

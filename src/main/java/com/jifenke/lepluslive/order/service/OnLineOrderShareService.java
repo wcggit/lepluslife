@@ -3,7 +3,6 @@ package com.jifenke.lepluslive.order.service;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.merchant.domain.entities.Merchant;
 import com.jifenke.lepluslive.merchant.domain.entities.MerchantWalletOnline;
-
 import com.jifenke.lepluslive.merchant.service.MerchantWalletOnlineService;
 import com.jifenke.lepluslive.order.domain.entities.OnLineOrder;
 import com.jifenke.lepluslive.order.domain.entities.OnLineOrderShare;

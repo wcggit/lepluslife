@@ -2,7 +2,6 @@ package com.jifenke.lepluslive.global.filter;
 
 import com.jifenke.lepluslive.global.config.Constants;
 import com.jifenke.lepluslive.global.util.CookieUtils;
-import com.jifenke.lepluslive.weixin.service.WeiXinUserService;
 
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -19,37 +18,27 @@ import javax.servlet.http.HttpSession;
  */
 public class WeiXinFilter implements HandlerInterceptor {
 
-  private WeiXinUserService weiXinUserService;
-
-  private String appId = Constants.APPID;
-
-  private String weixinRootUrl = Constants.WEI_XIN_ROOT_URL;
-
-
   @Override
   public boolean preHandle(HttpServletRequest request,
                            HttpServletResponse httpServletResponse, Object o) throws Exception {
     String action = request.getRequestURI();
     if (action.equals("/weixin/weixinReply") || action.equals("/weixin/load") || action
-        .equals("/weixin/userRegister") || action.equals("/weixin/pay/afterPay")|| action.equals("/weixin/pay/afterPhonePay")) {
+        .equals("/weixin/userRegister") || action.equals("/weixin/pay/afterPay") || action
+            .equals("/weixin/pay/afterPhonePay")) {
       return true;
     }
-    String openId = CookieUtils.getCookieValue(request, appId + "-user-open-id");
-    if (openId != null) {
-//      WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByOpenId(openId);
-//      if (weiXinUser != null) {
-//        return true;
-//      }
+    String unionId = CookieUtils.getCookieValue(request, "leJiaUnionId");
+    if (unionId != null) {
       return true;
     }
     try {
-      String callbackUrl = weixinRootUrl + "/weixin/userRegister?action=" + action;
+      String callbackUrl = Constants.WEI_XIN_ROOT_URL + "/weixin/userRegister?action=" + action;
       String
           redirectUrl =
-          "https://open.weixin.qq.com/connect/oauth2/authorize?appid=" + appId + "&redirect_uri=" +
+          "https://open.weixin.qq.com/connect/oauth2/authorize?appid=" + Constants.APPID
+          + "&redirect_uri=" +
           URLEncoder.encode(callbackUrl, "UTF-8")
           + "&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect";
-//      httpServletResponse.sendRedirect(redirectUrl);
       HttpSession seesion = request.getSession();
       seesion.setAttribute("redirectUrl", redirectUrl);
       request.getRequestDispatcher("/weixin/load").forward(request, httpServletResponse);
@@ -71,9 +60,5 @@ public class WeiXinFilter implements HandlerInterceptor {
                               HttpServletResponse httpServletResponse, Object o, Exception e)
       throws Exception {
 
-  }
-
-  public void setWeiXinUserService(WeiXinUserService weiXinUserService) {
-    this.weiXinUserService = weiXinUserService;
   }
 }

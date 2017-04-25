@@ -20,7 +20,7 @@ public class PayOrigin {
 
   private Integer payFrom;   //支付来源 1=app 2=公众号 3=线下扫码
 
-  private Integer payType;   //支付方式  0=未选择 1=微信 2=微信+A积分 3=微信+B积分
+  private Integer payType;   //支付方式  0=未选择 1=微信 2=微信+A积分 3=微信+B积分 4=全B积分 5=微信+C金币 6=全C金币
 
   private String detail;  //描述
 

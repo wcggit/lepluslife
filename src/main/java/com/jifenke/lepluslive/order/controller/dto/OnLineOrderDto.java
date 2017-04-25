@@ -15,13 +15,13 @@ public class OnLineOrderDto {
 
   private Long id; //订单id
 
-  private Long scoreB;  //用户可用积分
+  private Long scoreB;  //用户可用积分或金币
 
   private Long orderPrice; //订单虚拟总价
 
   private Long totalPrice;  //包括邮费
 
-  private Long totalScore;  //该订单可使用积分
+  private Long totalScore;  //该订单可使用积分或金币
 
   private Long truePrice;  //不包括邮费
 

@@ -25,79 +25,13 @@
     <link rel="stylesheet" type="text/css" href="${resourceUrl}/css/createAddress.css" />
     <link rel="stylesheet" type="text/css" href="${resourceUrl}/css/mui.picker.min.css"/>
     <script src="${resourceUrl}/js/jquery-1.11.3.min.js"></script>
-    <style>
-        /*.mui-control-content {*/
-            /*padding-top: 12.1vw;*/
-        /*}*/
-
-        /*.mui-content-padded {*/
-            /*margin: 0;*/
-            /*margin-top: 10px;*/
-        /*}*/
-        /*.mui-input-row label~input{*/
-            /*padding-right: 40px;*/
-        /*}*/
-
-        /*#showCityPicker3 .mui-icon {*/
-            /*line-height: 1.5;*/
-            /*margin-right: 4vw;*/
-            /*color: #8C8C8C;*/
-        /*}*/
-
-        /*#cityResult3 {*/
-            /*margin-top: 8px;*/
-            /*line-height: 11vw;*/
-        /*}*/
-        /*.mui-input-row label {*/
-            /*text-align: right;*/
-            /*color: #888888;*/
-        /*}*/
-        /*.mui-input-group .mui-input-row {*/
-            /*height: auto;*/
-        /*}*/
-        /*.mui-input-row label~input{*/
-            /*padding: 28px 40px 20px 0;*/
-        /*}*/
-        /*.mui-input-row label {*/
-            /*text-align: right;*/
-            /*color: #888888;*/
-        /*}*/
-        /*.mui-input-group .mui-input-row {*/
-            /*height: 50px;*/
-        /*}*/
-        /*.mui-input-group .mui-input-row:last-child {*/
-            /*height: auto;*/
-        /*}*/
-        /*.mui-input-row label~input, .mui-input-row label~textarea{*/
-            /*width: 70%;*/
-        /*}*/
-        /*.mui-input-row label{*/
-            /*width: 30%;*/
-            /*padding: 20px 15px;*/
-        /*}*/
-        /*.mui-input-group .mui-input-row:after {*/
-            /*right: 15px;*/
-        /*}*/
-        /*#showCityPicker3 .mui-icon {*/
-            /*line-height: 2.3;*/
-        /*}*/
-        /*.mui-input-row textarea{*/
-            /*padding-top: 18px;*/
-            /*height: 50px;*/
-            /*padding-right: 40px;*/
-        /*}*/
-        /*.mui-input-row .mui-input-clear~.mui-icon-clear, .mui-input-row .mui-input-password~.mui-icon-eye, .mui-input-row .mui-input-speech~.mui-icon-speech {*/
-            /*color: rgba(133, 133, 133, 0.48);*/
-            /*top: 16px;*/
-        /*}*/
-    </style>
 </head>
 
 <body>
 <!--底部菜单-->
-<nav class="mui-bar mui-bar-tab" style="background: #D62C2C;" onclick="formSubmit()">
+<nav class="mui-bar mui-bar-tab" style="background: #323232;" onclick="formSubmit()">
     <a class="mui-tab-item mui-active">
-        <span class="mui-tab-label" style="color: #fff; font-weight: bold;">保存</span>
+        <span class="mui-tab-label" style=" color: #cca97a">保存</span>
     </a>
 </nav>
 <div class="mui-content">

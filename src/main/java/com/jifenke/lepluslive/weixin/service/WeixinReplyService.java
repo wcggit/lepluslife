@@ -6,6 +6,9 @@ import com.jifenke.lepluslive.activity.service.ActivityCodeBurseService;
 import com.jifenke.lepluslive.activity.service.ActivityJoinLogService;
 import com.jifenke.lepluslive.lejiauser.service.LeJiaUserService;
 import com.jifenke.lepluslive.merchant.service.MerchantService;
+import com.jifenke.lepluslive.statistics.domain.entities.VisitLog;
+import com.jifenke.lepluslive.statistics.service.VisitLogRedisService;
+import com.jifenke.lepluslive.statistics.service.VisitLogService;
 import com.jifenke.lepluslive.weixin.domain.entities.AutoReplyRule;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.domain.entities.WeixinMessage;
@@ -54,6 +57,12 @@ public class WeixinReplyService {
   @Inject
   private MerchantService merchantService;
 
+  @Inject
+  private VisitLogService visitLogService;
+
+  @Inject
+  private VisitLogRedisService redisService;
+
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public String routeWeixinEvent(Map map) {
 
@@ -80,9 +89,11 @@ public class WeixinReplyService {
       case "CLICK":
 //                用户点击菜单事件
         str = buildMenuMessageReply(map);
+        menuViewVisit(map);
         break;
       case "VIEW":
 //                点击菜单跳转链接时的事件推送
+        menuViewVisit(map);
         break;
       default:
         break;
@@ -221,24 +232,22 @@ public class WeixinReplyService {
   }
 
   /**
-   * 点击自定义菜单发送信息
+   * 点击自定义菜单发送图片
    */
   private String buildMenuMessageReply(Map map) {
-    AutoReplyRule rule = autoReplyService.findByKeyword((String) map.get("EventKey"));
-    if (rule == null) {
-      rule = autoReplyService.findByReplyType("defaultReply");
-    }
-    if (rule != null) {
-      WeixinReply reply = null;
-      if (null != rule.getReplyText() && (!"".equals(rule.getReplyText()))) {
-        reply = new WeixinReplyText(map, rule);
-      } else {
-        reply = new WeixinReplyImageText(map, rule);
-      }
-      String str = reply.buildReplyXmlString(null);
-      return str;
-    }
-    return "";
+    //回复
+    StringBuffer buffer = new StringBuffer();
+    buffer.append("<xml><ToUserName><![CDATA[").append(map.get("FromUserName"))
+        .append("]]></ToUserName>");
+    buffer.append("<FromUserName><![CDATA[").append(map.get("ToUserName"))
+        .append("]]></FromUserName>");
+    buffer.append("<CreateTime>").append(map.get("CreateTime")).append("</CreateTime>");
+    buffer.append("<MsgType><![CDATA[image]]></MsgType><Image><MediaId><![CDATA[");
+//    buffer.append("V9tGnEZo9vEqxnbQQltE9J9ii3mV2IIGUrSVQupvEhE");
+    buffer.append("ExYmvSBL_aElY8lmMTB2gh_lWkXwHQ5TDeA12f4KAeU");
+    buffer.append("]]></MediaId></Image></xml>");
+
+    return buffer.toString();
   }
 
   /**
@@ -402,5 +411,16 @@ public class WeixinReplyService {
         e.printStackTrace();
       }
     }
+  }
+
+  /**
+   * 点击菜单到URL时保存点击记录  2017/03/10
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  private void menuViewVisit(Map map) {
+    visitLogService.saveLog(new VisitLog(String.valueOf(map.get("FromUserName")), "menu",
+                                         String.valueOf(map.get("EventKey")), "weixin"));
+    redisService.addClickLog(String.valueOf(map.get("FromUserName")), "menu:",
+                             String.valueOf(map.get("EventKey")));
   }
 }

@@ -14,6 +14,4 @@ public interface ScoreADetailRepository extends JpaRepository<ScoreADetail,Long>
 
   List<ScoreADetail> findAllByScoreAOrderByIdDesc(ScoreA scoreA);
 
-  ScoreADetail findOneByOrderSid(String orderSid);
-
 }

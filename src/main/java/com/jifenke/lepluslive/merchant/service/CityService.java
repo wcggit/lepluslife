@@ -5,7 +5,6 @@ import com.jifenke.lepluslive.merchant.domain.entities.City;
 import com.jifenke.lepluslive.merchant.repository.AreaRepository;
 import com.jifenke.lepluslive.merchant.repository.CityRepository;
 
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,11 +25,6 @@ public class CityService {
 
   @Inject
   private AreaRepository areaRepository;
-
-  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
-  public List<City> findCitiesByPage(Pageable pageable) {
-    return cityRepository.findAll(pageable).getContent();
-  }
 
   /**
    * 获取所有的城市列表  2016/12/21
