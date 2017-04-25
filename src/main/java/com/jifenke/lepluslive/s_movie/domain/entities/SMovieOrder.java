@@ -5,7 +5,6 @@ import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 
 import java.util.Date;
 
-import javax.inject.Inject;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -55,5 +54,123 @@ public class SMovieOrder {
 
   private Integer state = 0;   //订单状态   0=待付款|1=已付款待核销|2=已付款已核销|3=已退款
 
+  public Long getId() {
+    return id;
+  }
 
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public Date getDateCreated() {
+    return dateCreated;
+  }
+
+  public void setDateCreated(Date dateCreated) {
+    this.dateCreated = dateCreated;
+  }
+
+  public String getOrderSid() {
+    return orderSid;
+  }
+
+  public void setOrderSid(String orderSid) {
+    this.orderSid = orderSid;
+  }
+
+  public Date getDateCompleted() {
+    return dateCompleted;
+  }
+
+  public void setDateCompleted(Date dateCompleted) {
+    this.dateCompleted = dateCompleted;
+  }
+
+  public Date getDateUsed() {
+    return dateUsed;
+  }
+
+  public void setDateUsed(Date dateUsed) {
+    this.dateUsed = dateUsed;
+  }
+
+  public SMovieTerminal getsMovieTerminal() {
+    return sMovieTerminal;
+  }
+
+  public void setsMovieTerminal(SMovieTerminal sMovieTerminal) {
+    this.sMovieTerminal = sMovieTerminal;
+  }
+
+  public SMovieProduct getsMovieProduct() {
+    return sMovieProduct;
+  }
+
+  public void setsMovieProduct(SMovieProduct sMovieProduct) {
+    this.sMovieProduct = sMovieProduct;
+  }
+
+  public LeJiaUser getLeJiaUser() {
+    return leJiaUser;
+  }
+
+  public void setLeJiaUser(LeJiaUser leJiaUser) {
+    this.leJiaUser = leJiaUser;
+  }
+
+  public Long getTotalPrice() {
+    return totalPrice;
+  }
+
+  public void setTotalPrice(Long totalPrice) {
+    this.totalPrice = totalPrice;
+  }
+
+  public Long getTrueScore() {
+    return trueScore;
+  }
+
+  public void setTrueScore(Long trueScore) {
+    this.trueScore = trueScore;
+  }
+
+  public Long getTruePrice() {
+    return truePrice;
+  }
+
+  public void setTruePrice(Long truePrice) {
+    this.truePrice = truePrice;
+  }
+
+  public Long getCommission() {
+    return commission;
+  }
+
+  public void setCommission(Long commission) {
+    this.commission = commission;
+  }
+
+  public Long getTrueIncome() {
+    return trueIncome;
+  }
+
+  public void setTrueIncome(Long trueIncome) {
+    this.trueIncome = trueIncome;
+  }
+
+  public Long getPayBackA() {
+    return payBackA;
+  }
+
+  public void setPayBackA(Long payBackA) {
+    this.payBackA = payBackA;
+  }
+
+  public Integer getState() {
+    return state;
+  }
+
+  public void setState(Integer state) {
+    this.state = state;
+  }
 }
