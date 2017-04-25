@@ -8,6 +8,8 @@ import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.lejiauser.service.LeJiaUserService;
 import com.jifenke.lepluslive.partner.domain.entities.Partner;
+import com.jifenke.lepluslive.partner.domain.entities.PartnerManager;
+import com.jifenke.lepluslive.partner.service.PartnerManagerService;
 import com.jifenke.lepluslive.partner.service.PartnerService;
 import com.jifenke.lepluslive.product.controller.dto.ProductDto;
 import com.jifenke.lepluslive.product.domain.entities.Product;
@@ -85,6 +87,9 @@ public class WeixinController {
 
   @Inject
   private PartnerService partnerService;
+
+  @Inject
+  private PartnerManagerService partnerManagerService;
 
   @RequestMapping("/shop")
   public ModelAndView goProductPage(@CookieValue String leJiaUnionId,
@@ -248,5 +253,44 @@ public class WeixinController {
     return partnerService.bindWeiXinUser(partner, weiXinUser) ? LejiaResult.ok()
                                                               : LejiaResult.build(201, "绑定名额已满");
   }
+
+
+  @RequestMapping(value = "/partnerManager/bind/{sid}")
+  public LejiaResult bindPartnerManagerConfirm(@PathVariable String sid, HttpServletRequest request) {
+    PartnerManager partnerManager = partnerManagerService.findByPartnerManagerSid(sid);
+    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
+    return partnerManagerService.bindWeiXinUser(partnerManager, weiXinUser) ? LejiaResult.ok()
+            : LejiaResult.build(201, "绑定账户异常");
+  }
+
+  @RequestMapping("/partnerManager/bind_wx_user/{sid}")
+  public ModelAndView partnerManagerBindUser(@PathVariable String sid, Model model,
+                                      HttpServletRequest request) {
+    PartnerManager partnerManager = partnerManagerService.findByPartnerManagerSid(sid);
+    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
+    model.addAttribute("partnerManager", partnerManager);
+    model.addAttribute("partnerManagerSid", sid + "?");
+    model.addAttribute("openid", weiXinUser.getOpenId());
+    model.addAttribute("weiXinUser", weiXinUser);
+    if (partnerManager.getWeiXinUser() == null) {
+      if (partnerManagerService.findByWeiXinUser(weiXinUser).isPresent()) {
+        model.addAttribute("code", "1"); //该微信号已经绑定合伙人且不是当前合伙人
+      } else {
+        PartnerManager bindPartnerManager = weiXinUser.getLeJiaUser().getBindPartnerManager();
+        if (bindPartnerManager != null && bindPartnerManager.getId().equals(partnerManager.getId())) {//已经绑上无须在考虑绑定
+          model.addAttribute("code", "4");
+        }
+      }
+    } else {
+      // 如果已经绑上当前用户
+      if (weiXinUser.getId().equals(partnerManager.getWeiXinUser().getId())) {
+        model.addAttribute("code", "5"); //该微信号已经绑定合伙人且是当前合伙人
+      } else {
+        model.addAttribute("code", "3");//该合伙人已绑定微信号且非该微信号
+      }
+    }
+    return MvUtil.go("/weixin/partnerManagerBind");
+  }
+
 
 }

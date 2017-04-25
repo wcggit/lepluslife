@@ -252,6 +252,10 @@ public class LeJiaUserService {
     return leJiaUserRepository.countPartnerBindLeJiaUser(id);
   }
 
+  public long countPartnerManagerBindLeJiaUser(Long id) {
+    return leJiaUserRepository.countPartnerManagerBindLeJiaUser(id);
+  }
+
   /**
    * 今日红包积分 收益
    *

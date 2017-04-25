@@ -30,4 +30,7 @@ public interface LeJiaUserRepository extends JpaRepository<LeJiaUser, Long> {
 
   @Query(value = "select count(*) from le_jia_user where bind_partner_id = ?1", nativeQuery = true)
   Long countPartnerBindLeJiaUser(Long partnerId);
+
+  @Query(value = "select count(*) from le_jia_user where bind_partner_manager_id = ?1", nativeQuery = true)
+  Long countPartnerManagerBindLeJiaUser(Long managerId);
 }
