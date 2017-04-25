@@ -105,7 +105,7 @@
         console.log(cardNum + '==========' + phoneNum);
         $.ajax({
                    type: "get",
-                   url: "/front/user/cardCheck?cardNum=" + cardNum,
+                   url: "/front/card/cardCheck?cardNum=" + cardNum,
                    success: function (data) {
                        if (data.status == 200) {
                            cardInfo = data.data;

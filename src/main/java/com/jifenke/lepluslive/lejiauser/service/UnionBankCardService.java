@@ -38,14 +38,19 @@ public class UnionBankCardService {
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public void addUnionBankCard(LeJiaUser leJiaUser, String cardNum, String phoneNum,
                                Integer registerWay) {
-    UnionBankCard unionBankCard = new UnionBankCard();
-    unionBankCard.setNumber(cardNum);
+    UnionBankCard unionBankCard = repository.findByNumber(cardNum);
+    if (unionBankCard == null) {
+      unionBankCard = new UnionBankCard();
+      unionBankCard.setNumber(cardNum);
+    }
     unionBankCard.setPhoneNumber(phoneNum);
     unionBankCard.setRegisterWay(registerWay);
     unionBankCard.setUserSid(leJiaUser.getUserSid());
-    Map map = register(cardNum, phoneNum);
-    if ("0000".equals(map.get("msg_rsp_code"))) {
-      unionBankCard.setState(1);
+    if (unionBankCard.getState() != 1) {
+      Map map = register(cardNum, phoneNum);
+      if ("0000".equals(map.get("msg_rsp_code"))) {
+        unionBankCard.setState(1);
+      }
     }
     repository.save(unionBankCard);
   }

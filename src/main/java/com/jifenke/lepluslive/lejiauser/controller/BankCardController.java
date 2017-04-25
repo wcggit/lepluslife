@@ -7,14 +7,12 @@ import com.jifenke.lepluslive.lejiauser.domain.entities.BankCard;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.lejiauser.service.BankCardService;
 import com.jifenke.lepluslive.lejiauser.service.LeJiaUserService;
-import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.service.WeiXinService;
 
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -32,7 +30,7 @@ import io.swagger.annotations.ApiOperation;
  * 用户银行卡号相关接口 Created by zhangwen on 2016/11/28.
  */
 @RestController
-@RequestMapping("/front/user")
+@RequestMapping("/front")
 public class BankCardController {
 
   @Inject
@@ -50,7 +48,7 @@ public class BankCardController {
   /**
    * 用户银行卡列表页  2017/4/19
    */
-  @RequestMapping(value = "/weixin/cardList", method = RequestMethod.GET)
+  @RequestMapping(value = "/user/weixin/cardList", method = RequestMethod.GET)
   public ModelAndView cardList(Model model, HttpServletRequest request) {
     model.addAttribute("list", cardConvert(bankCardService.findByLeJiaUser(
         weiXinService.getCurrentWeiXinUser(request).getLeJiaUser())));
@@ -62,7 +60,7 @@ public class BankCardController {
   /**
    * 添加银行卡页面  2017/4/19
    */
-  @RequestMapping(value = "/weixin/addCard", method = RequestMethod.GET)
+  @RequestMapping(value = "/user/weixin/addCard", method = RequestMethod.GET)
   public ModelAndView addCard(Model model, HttpServletRequest request) {
     model.addAttribute("user",
                        weiXinService.getCurrentWeiXinUser(request).getLeJiaUser());
@@ -74,7 +72,7 @@ public class BankCardController {
    *
    * @param cardNum 银行卡号
    */
-  @RequestMapping(value = "/cardCheck", method = RequestMethod.GET)
+  @RequestMapping(value = "/card/cardCheck", method = RequestMethod.GET)
   public LejiaResult cardCheck(@RequestParam String cardNum) {
     if (cardNum == null || cardNum.length() < 15) {
       return LejiaResult.build(2011, messageUtil.getMsg("2011"));
@@ -83,15 +81,25 @@ public class BankCardController {
   }
 
 
-  @ApiOperation(value = "获取银行卡列表")
-  @RequestMapping(value = "/card/list", method = RequestMethod.POST)
+  //获取银行卡列表 todo:带删除，更换接口，隐藏卡号返回数据
+  @RequestMapping(value = "/user/card/list", method = RequestMethod.POST)
   public LejiaResult list(@RequestParam(required = true) String token) {
     return LejiaResult
         .ok(bankCardService.findByLeJiaUser(leJiaUserService.findUserByUserSid(token)));
   }
 
+  /**
+   * 新版获取银行卡列表  2017/4/20
+   */
+  @RequestMapping(value = "/card/user/list", method = RequestMethod.POST)
+  public LejiaResult list(HttpServletRequest request) {
+    return LejiaResult
+        .ok(cardConvert(bankCardService.findByLeJiaUser(leJiaUserService.findUserById(
+            Long.valueOf("" + request.getAttribute("leJiaUserId"))))));
+  }
+
   @ApiOperation(value = "删除绑定的银行卡")
-  @RequestMapping(value = "/card/del", method = RequestMethod.POST)
+  @RequestMapping(value = "/user/card/del", method = RequestMethod.POST)
   public LejiaResult delCard(@RequestParam Long id, @RequestParam String token) {
     try {
       bankCardService.deleteBankCard(id, token);
@@ -102,8 +110,19 @@ public class BankCardController {
     return LejiaResult.ok();
   }
 
-  @ApiOperation(value = "绑定银行卡")
-  @RequestMapping(value = "/card/add", method = RequestMethod.POST)
+  /**
+   * 绑定银行卡  2017/4/20 todo:第一个拦截路径以后要去掉
+   *
+   * @param token       用户TOKEN
+   * @param number      银行卡号
+   * @param cardType    卡类型
+   * @param prefixNum   卡bin
+   * @param cardName    卡名称
+   * @param bankName    发卡行
+   * @param phoneNum    手机号
+   * @param registerWay 注册途径
+   */
+  @RequestMapping(value = {"/user/card/add", "/card/user/add"}, method = RequestMethod.POST)
   public LejiaResult addCard(@RequestParam String token, @RequestParam String number,
                              @RequestParam String cardType,
                              @RequestParam String prefixNum, @RequestParam String cardName,
@@ -146,9 +165,10 @@ public class BankCardController {
       for (BankCard card : list) {
         Map<String, Object> map = new HashMap<>();
         map.put("number",
-                "**** **** **** " + card.getNumber().substring(card.getNumber().length() - 2));
+                "**** **** **** " + card.getNumber().substring(card.getNumber().length() - 4));
         map.put("cardType", card.getCardType());
         map.put("bankName", card.getBankName());
+        map.put("id", card.getId());
         result.add(map);
       }
       return result;

@@ -2,6 +2,7 @@ package com.jifenke.lepluslive.order.domain.entities;
 
 import com.jifenke.lepluslive.merchant.domain.entities.Merchant;
 import com.jifenke.lepluslive.partner.domain.entities.Partner;
+import com.jifenke.lepluslive.partner.domain.entities.PartnerManager;
 
 import java.util.Date;
 
@@ -25,21 +26,31 @@ public class OnLineOrderShare {
   private Long id;
 
   @OneToOne
-  private OnLineOrder onLineOrder;
+  private OnLineOrder onLineOrder;  //即将废弃 不用了 采用type+orderSid
+
+  private Integer type = 0;   //分润单来源   1=商城|2=电影票
+
+  private String orderSid;   //对应的分润来源的订单号
 
   private Long shareMoney = 0L;  //=toLockMerchant + toLockPartner
 
-  private Long toLockMerchant = 0L;
-
-  private Long toLockPartner = 0L;
 
   private Date createDate = new Date();
 
   @ManyToOne
-  private Merchant lockMerchant;
+  private Merchant lockMerchant; //锁定商户
+
+  private Long toLockMerchant = 0L;
 
   @ManyToOne
-  private Partner lockPartner;
+  private Partner lockPartner;  //锁定天使合伙人
+
+  private Long toLockPartner = 0L;
+
+  @ManyToOne
+  private PartnerManager lockPartnerManager; //锁定城市合伙人
+
+  private Long toLockPartnerManager = 0L;
 
   public Long getShareMoney() {
     return shareMoney;
@@ -103,5 +114,37 @@ public class OnLineOrderShare {
 
   public void setToLockPartner(Long toLockPartner) {
     this.toLockPartner = toLockPartner;
+  }
+
+  public Long getToLockPartnerManager() {
+    return toLockPartnerManager;
+  }
+
+  public void setToLockPartnerManager(Long toLockPartnerManager) {
+    this.toLockPartnerManager = toLockPartnerManager;
+  }
+
+  public PartnerManager getLockPartnerManager() {
+    return lockPartnerManager;
+  }
+
+  public void setLockPartnerManager(PartnerManager lockPartnerManager) {
+    this.lockPartnerManager = lockPartnerManager;
+  }
+
+  public Integer getType() {
+    return type;
+  }
+
+  public void setType(Integer type) {
+    this.type = type;
+  }
+
+  public String getOrderSid() {
+    return orderSid;
+  }
+
+  public void setOrderSid(String orderSid) {
+    this.orderSid = orderSid;
   }
 }
