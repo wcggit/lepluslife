@@ -5,6 +5,11 @@ import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 
 import javax.persistence.*;
 import java.util.Date;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 /**
  * Created by wcg on 16/6/21.
@@ -169,4 +174,5 @@ public class PartnerManager {
     public void setWeiXinUser(WeiXinUser weiXinUser) {
         this.weiXinUser = weiXinUser;
     }
+
 }

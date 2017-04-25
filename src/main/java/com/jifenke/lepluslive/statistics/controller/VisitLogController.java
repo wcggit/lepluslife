@@ -33,7 +33,7 @@ public class VisitLogController {
 
 
   /**
-   * 金币商品详情页统计 17/3/9
+   * 访问信息统计 17/3/9
    */
   @RequestMapping(value = "/{category}/{target}", method = RequestMethod.GET)
   public LejiaResult submit(HttpServletRequest request, @PathVariable String category,
