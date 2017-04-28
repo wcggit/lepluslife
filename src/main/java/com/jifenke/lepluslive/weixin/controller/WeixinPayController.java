@@ -7,6 +7,7 @@ import com.jifenke.lepluslive.global.service.MessageService;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.global.util.WeixinPayUtil;
+import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.order.domain.entities.OnLineOrder;
 import com.jifenke.lepluslive.order.service.OnlineOrderService;
 import com.jifenke.lepluslive.order.service.OrderService;
@@ -15,6 +16,7 @@ import com.jifenke.lepluslive.product.service.ProductService;
 import com.jifenke.lepluslive.score.domain.entities.ScoreB;
 import com.jifenke.lepluslive.score.service.ScoreAService;
 import com.jifenke.lepluslive.score.service.ScoreBService;
+import com.jifenke.lepluslive.score.service.ScoreCService;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.service.DictionaryService;
 import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
@@ -72,6 +74,9 @@ public class WeixinPayController {
 
   @Inject
   private ScoreBService scoreBService;
+
+  @Inject
+  private ScoreCService scoreCService;
 
   @Inject
   private DictionaryService dictionaryService;
@@ -213,17 +218,16 @@ public class WeixinPayController {
   }
 
   //微信支付接口
-  //todo:待删除 等公众号积分商品下线后可删除
   @RequestMapping(value = "/weixinpay")
   public Map<String, Object> weixinPay(@RequestParam Long orderId, @RequestParam String truePrice,
-                                       @RequestParam Long trueScore,
+                                       @RequestParam String trueScore,
                                        @RequestParam Integer transmitWay,
                                        HttpServletRequest request) {
-//    Long newTruePrice = (long) (Float.parseFloat(truePrice) * 100);
     Long newTruePrice = new BigDecimal(truePrice).multiply(new BigDecimal(100)).longValue();
-    if (newTruePrice == 0) {//全积分兑换流程
+    Long newTrueScore = new BigDecimal(trueScore).multiply(new BigDecimal(100)).longValue();
+    if (newTruePrice == 0) {//全金币兑换流程
       try {
-        return onlineOrderService.orderPayByScoreB(orderId, trueScore, transmitWay, 10L);
+        return onlineOrderService.orderPayByScore(orderId, newTrueScore, transmitWay, 14L);
       } catch (Exception e) {
         Map<String, Object> map = new HashMap<>();
         map.put("status", 500);
@@ -232,7 +236,7 @@ public class WeixinPayController {
     }
     Map<String, Object>
         result =
-        orderService.setPriceScoreForOrder(orderId, newTruePrice, trueScore, transmitWay);
+        orderService.setPriceScoreForOrder(orderId, newTruePrice, newTrueScore, transmitWay);
     if (!"200".equals(result.get("status").toString())) {
       result.put("msg", messageService.getMsg("" + result.get("status")));
       return result;
@@ -243,7 +247,7 @@ public class WeixinPayController {
     SortedMap<String, Object>
         map =
         weiXinPayService
-            .buildOrderParams(request, "乐加商城消费", order.getOrderSid(), "" + order.getTruePrice(),
+            .buildOrderParams(request, "臻品商城消费", order.getOrderSid(), "" + order.getTruePrice(),
                               Constants.ONLINEORDER_NOTIFY_URL);
     //获取预支付id
     Map<String, Object> unifiedOrder = weiXinPayService.createUnifiedOrder(map);
@@ -318,7 +322,7 @@ public class WeixinPayController {
   @RequestMapping(value = "/paySuccess/{orderId}")
   public ModelAndView goPaySuccessPage(@PathVariable Long orderId, Model model,
                                        HttpServletRequest request) {
-    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
+    LeJiaUser leJiaUser = weiXinService.getCurrentWeiXinUser(request).getLeJiaUser();
 
     OnLineOrder order = orderService.findOnLineOrderById(orderId);
     if (order != null) {
@@ -327,20 +331,18 @@ public class WeixinPayController {
             PAY_BACK_SCALE =
             Integer.parseInt(dictionaryService.findDictionaryById(3L).getValue());
         model.addAttribute("totalScore",
-                           scoreAService.findScoreAByLeJiaUser(weiXinUser.getLeJiaUser())
+                           scoreAService.findScoreAByLeJiaUser(leJiaUser)
                                .getTotalScore());
         model.addAttribute("payBackScore",
                            (long) Math
                                .ceil((double) (order.getTruePrice() * PAY_BACK_SCALE) / 100));
         model.addAttribute("truePrice", order.getTruePrice());
-
-        ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(weiXinUser.getLeJiaUser());
         //商品分类
         List<ProductType> typeList = productService.findAllProductType();
         //主打爆品
-        Map product = productService.findMainHotProduct();
-        model.addAttribute("scoreB", scoreB);
-        model.addAttribute("product", product);
+//        Map product = productService.findMainHotProduct();
+//        model.addAttribute("product", product);
+        model.addAttribute("scoreC", scoreCService.findScoreCByLeJiaUser(leJiaUser));
         model.addAttribute("typeList", typeList);
         return MvUtil.go("/product/productIndex");
       } else {
@@ -355,14 +357,13 @@ public class WeixinPayController {
   @RequestMapping(value = "/payFail/{orderId}")
   public ModelAndView goPayFailPage(@PathVariable Long orderId, Model model,
                                     HttpServletRequest request) {
-    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
-    ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(weiXinUser.getLeJiaUser());
+    LeJiaUser leJiaUser = weiXinService.getCurrentWeiXinUser(request).getLeJiaUser();
     //商品分类
     List<ProductType> typeList = productService.findAllProductType();
     //主打爆品
-    Map product = productService.findMainHotProduct();
-    model.addAttribute("scoreB", scoreB);
-    model.addAttribute("product", product);
+//    Map product = productService.findMainHotProduct();
+//    model.addAttribute("product", product);
+    model.addAttribute("scoreC", scoreCService.findScoreCByLeJiaUser(leJiaUser));
     model.addAttribute("typeList", typeList);
     model.addAttribute("orderId", orderId);
     return MvUtil.go("/product/productIndex");

@@ -22,7 +22,6 @@ import com.jifenke.lepluslive.score.service.ScoreBService;
 import com.jifenke.lepluslive.score.service.ScoreCService;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.service.WeiXinService;
-import com.jifenke.lepluslive.weixin.service.WeiXinUserInfoService;
 import com.jifenke.lepluslive.weixin.service.WeiXinUserService;
 
 import org.apache.commons.beanutils.BeanUtils;
@@ -81,32 +80,25 @@ public class WeixinController {
   private LeJiaUserService leJiaUserService;
 
   @Inject
-  private WeiXinUserInfoService weiXinUserInfoService;
-
-  @Inject
   private PartnerService partnerService;
 
   @RequestMapping("/shop")
   public ModelAndView goProductPage(@CookieValue String leJiaUnionId,
                                     Model model) {
-    WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByUnionId(leJiaUnionId);
-    ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(weiXinUser.getLeJiaUser());
+    LeJiaUser leJiaUser = weiXinUserService.findWeiXinUserByUnionId(leJiaUnionId).getLeJiaUser();
     //商品分类
     List<ProductType> typeList = productService.findAllProductType();
     //主打爆品
-    Map product = productService.findMainHotProduct();
-    model.addAttribute("scoreB", scoreB);
-    model.addAttribute("product", product);
+//    Map product = productService.findMainHotProduct();
+//    model.addAttribute("product", product);
+    model.addAttribute("scoreC", scoreCService.findScoreCByLeJiaUser(leJiaUser));
     model.addAttribute("typeList", typeList);
     return MvUtil.go("/product/productIndex");
   }
 
   @RequestMapping("/product/{id}")
-  public ModelAndView goProductDetailPage(@PathVariable Long id, Model model,
-                                          HttpServletRequest request,
-                                          HttpServletResponse response) {
+  public ModelAndView goProductDetailPage(@PathVariable Long id, Model model) {
     Product product = productService.findOneProduct(id);
-    ProductType productType = product.getProductType();
     List<ScrollPicture> scrollPictureList = scrollPictureService.findAllByProduct(product);
     List<ProductDetail>
         productDetails =
@@ -121,19 +113,13 @@ public class WeixinController {
         return scrollPicture;
       }).collect(
           Collectors.toList()));
-      WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
-      ScoreB scoreB = null;
-      scoreB = scoreBService.findScoreBByWeiXinUser(weiXinUser.getLeJiaUser());
+
       model.addAttribute("product", productDto);
-      model.addAttribute("scoreB", scoreB.getScore());
       model.addAttribute("productdetails", JsonUtils.objectToJson(productDetails));
-      CookieUtils
-          .setCookie(request, response, "currentType", productType.getId() + " " + product.getId(),
-                     Constants.COOKIE_DISABLE_TIME);
     } catch (Exception e) {
       e.printStackTrace();
     }
-    return MvUtil.go("/weixin/productDetail");
+    return MvUtil.go("/product/productDetail");
   }
 
   @RequestMapping("/userRegister")

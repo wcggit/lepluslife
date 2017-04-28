@@ -2,7 +2,6 @@ package com.jifenke.lepluslive.order.controller;
 
 import com.jifenke.lepluslive.Address.domain.entities.Address;
 import com.jifenke.lepluslive.Address.service.AddressService;
-import com.jifenke.lepluslive.global.service.MessageService;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
@@ -10,11 +9,8 @@ import com.jifenke.lepluslive.order.domain.entities.OnLineOrder;
 import com.jifenke.lepluslive.order.service.OnlineOrderService;
 import com.jifenke.lepluslive.order.service.OrderDetailService;
 import com.jifenke.lepluslive.order.service.OrderService;
-import com.jifenke.lepluslive.score.domain.entities.ScoreB;
-import com.jifenke.lepluslive.score.service.ScoreBService;
 import com.jifenke.lepluslive.score.service.ScoreCService;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
-import com.jifenke.lepluslive.weixin.service.DictionaryService;
 import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
 import com.jifenke.lepluslive.weixin.service.WeiXinService;
 
@@ -43,13 +39,8 @@ public class OnlineOrderController {
   private OrderService orderService;
 
   @Inject
-  private DictionaryService dictionaryService;
-
-  @Inject
   private AddressService addressService;
 
-  @Inject
-  private ScoreBService scoreBService;
 
   @Inject
   private WeiXinService weiXinService;
@@ -66,9 +57,6 @@ public class OnlineOrderController {
   @Inject
   private ScoreCService scoreCService;
 
-  @Inject
-  private MessageService messageService;
-
 
   /**
    * 爆品详情页点击购买生成订单 16/09/22
@@ -80,9 +68,9 @@ public class OnlineOrderController {
   @RequestMapping(value = "/weixin/createHotOrder", method = RequestMethod.POST)
   @ResponseBody
   public LejiaResult createHotOrder(HttpServletRequest request,
-                                    @RequestParam(required = true) Long productId,
-                                    @RequestParam(required = true) Integer buyNumber,
-                                    @RequestParam(required = true) Long specId) {
+                                    @RequestParam Long productId,
+                                    @RequestParam Integer buyNumber,
+                                    @RequestParam Long specId) {
     WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
     LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
     //查询某个用户待付款的某个商品的数量
@@ -104,44 +92,6 @@ public class OnlineOrderController {
   }
 
   /**
-   * 普通商品立即购买创建的待支付订单 16/09/24
-   *
-   * @param productId 产品ID
-   * @param buyNumber 规格数量
-   * @param specId    规格ID
-   */
-  @RequestMapping(value = "/weixin/createCommonOrder", method = RequestMethod.POST)
-  @ResponseBody
-  public LejiaResult createBuyOrder(HttpServletRequest request,
-                                    @RequestParam(required = true) Long productId,
-                                    @RequestParam(required = true) Integer buyNumber,
-                                    @RequestParam(required = true) Long specId) {
-    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
-    LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
-    Long waitPayOrders = orderService.getCurrentUserObligationOrdersCount(leJiaUser);
-    if (waitPayOrders >= 4) {
-      return LejiaResult.build(5001, "未支付订单过多,请支付后再下单");
-    }
-    //查询某个用户待付款的某个商品的数量是否超过限制
-    int count = orderDetailService.getCurrentUserOrderProductCount(leJiaUser.getId(), productId);
-    Integer buyLimit = Integer.valueOf(dictionaryService.findDictionaryById(39L).getValue());
-    if ((count + buyNumber) > buyLimit) {
-      return LejiaResult.build(5004, "请先支付该商品的待支付订单");
-    }
-    Address address = addressService.findAddressByLeJiaUserAndState(leJiaUser);
-    //创建商品的待支付订单
-    try {
-      Map
-          result =
-          orderService.createBuyOrder(productId, specId, buyNumber, leJiaUser, address, 5L);
-      return LejiaResult.build((Integer) result.get("status"), "ok", result.get("data"));
-    } catch (Exception e) {
-      e.printStackTrace();
-      return LejiaResult.build(500, "服务器异常");
-    }
-  }
-
-  /**
    * 订单确认页 16/09/22
    *
    * @param orderId 订单ID
@@ -153,15 +103,12 @@ public class OnlineOrderController {
     OnLineOrder order = orderService.findOnLineOrderById(orderId);
     model.addAttribute("order", order);
     model.addAttribute("wxConfig", weiXinPayService.getWeiXinPayConfig(request));
+    model.addAttribute("canUseScore",
+                       scoreCService.findScoreCByLeJiaUser(weiXinUser.getLeJiaUser())
+                           .getScore()); //用户可用金币
     if (order.getType() != null && order.getType() == 2) {
-      model.addAttribute("canUseScore",
-                         scoreCService.findScoreCByLeJiaUser(weiXinUser.getLeJiaUser())
-                             .getScore()); //用户可用金币
       return MvUtil.go("/gold/order/confirmOrder");
     }
-    ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(weiXinUser.getLeJiaUser());
-    model.addAttribute("canUseScore", scoreB.getScore()); //用户可用积分
-
     return MvUtil.go("/order/confirmOrder");
   }
 

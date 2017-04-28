@@ -14,10 +14,10 @@
     <meta charset="UTF-8">
     <meta name="viewport"
           content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
-    <title>臻品</title>
-    <link rel="stylesheet" type="text/css" href="${resourceUrl}/frontRes/gold/index/css/reset.css">
-    <link rel="stylesheet" type="text/css" href="${resourceUrl}/frontRes/gold/index/css/home2.css">
-    <link rel="stylesheet" href="${resourceUrl}/frontRes/css/swiper.min.css">
+    <title>金币商城</title>
+    <link rel="stylesheet" type="text/css" href="${commonResource}/css/reset.css">
+    <link rel="stylesheet" type="text/css" href="${resource}/gold/index/css/home2.css">
+    <link rel="stylesheet" href="${commonResource}/css/swiper.min.css">
 </head>
 <body>
 <div class="main">
@@ -246,7 +246,8 @@
                                 maxFractionDigits="0"/>金币</p>
                     </c:if>
                 </div>
-                <div class="product-item border-right" onclick="detail(${m.key2.list[1].pruductId})">
+                <div class="product-item border-right"
+                     onclick="detail(${m.key2.list[1].pruductId})">
                     <div class="good-img w-sp w-bo">
                         <img src="${m.key2.list[1].pic}" alt="">
                     </div>
@@ -440,8 +441,8 @@
 
                 <p class="right_ half">${m.key5.detail}</p>
 
-            <span class="right_ w-right" onclick="typeList(4)">查看更多 <span><img
-                    src="${resourceUrl}/frontRes/gold/index/img/back.png" alt=""></span></span>
+                <span class="right_ w-right" onclick="typeList(4)">查看更多 <span><img
+                        src="${resourceUrl}/frontRes/gold/index/img/back.png" alt=""></span></span>
             </h3>
             <div class="banner-img" onclick="detail(${m.key5.list[0].pruductId})">
                 <img src="${m.key5.list[0].pic}" alt="">
@@ -533,8 +534,8 @@
 
                 <p class="right_ half">${m.key6.detail}</p>
 
-            <span class="right_ w-right" onclick="typeList(2)">查看更多 <span><img
-                    src="${resourceUrl}/frontRes/gold/index/img/back.png" alt=""></span></span>
+                <span class="right_ w-right" onclick="typeList(2)">查看更多 <span><img
+                        src="${resourceUrl}/frontRes/gold/index/img/back.png" alt=""></span></span>
             </h3>
             <div class="banner-img" onclick="detail(${m.key6.list[0].pruductId})">
                 <img src="${m.key6.list[0].pic}" alt="">
@@ -626,8 +627,8 @@
 
                 <p class="right_ half">${m.key7.detail}</p>
 
-            <span class="right_ w-right" onclick="typeList(3)">查看更多 <span><img
-                    src="${resourceUrl}/frontRes/gold/index/img/back.png" alt=""></span></span>
+                <span class="right_ w-right" onclick="typeList(3)">查看更多 <span><img
+                        src="${resourceUrl}/frontRes/gold/index/img/back.png" alt=""></span></span>
             </h3>
             <div class="banner-img" onclick="detail(${m.key7.list[0].pruductId})">
                 <img src="${m.key7.list[0].pic}" alt="">
@@ -719,8 +720,8 @@
 
                 <p class="right_ half">${m.key8.detail}</p>
 
-            <span class="right_ w-right" onclick="typeList(1)">查看更多 <span><img
-                    src="${resourceUrl}/frontRes/gold/index/img/back.png" alt=""></span></span>
+                <span class="right_ w-right" onclick="typeList(1)">查看更多 <span><img
+                        src="${resourceUrl}/frontRes/gold/index/img/back.png" alt=""></span></span>
             </h3>
             <div class="banner-img" onclick="detail(${m.key8.list[0].pruductId})">
                 <img src="${m.key8.list[0].pic}" alt="">
@@ -812,8 +813,34 @@
         </div>
     </div>
 </div>
-<script src="${resourceUrl}/js/zepto.min.js"></script>
-<script src="${resourceUrl}/frontRes/js/swiper.min.js"></script>
+<section class="footer">
+    <div onclick="goMenu(1)">
+        <div>
+            <img src="${resource}/gold/img/zhenpin1.png" alt="">
+        </div>
+        <p>臻品</p>
+    </div>
+    <div>
+        <div>
+            <img src="${resource}/gold/img/miaosha2.png" alt="">
+        </div>
+        <p>秒杀</p>
+    </div>
+    <div onclick="goMenu(3)">
+        <div>
+            <img src="${resource}/gold/img/gouwuche1.png" alt="">
+        </div>
+        <p>购物车</p>
+    </div>
+    <div onclick="goMenu(4)">
+        <div>
+            <img src="${resource}/gold/img/dingdan1.png" alt="">
+        </div>
+        <p>订单</p>
+    </div>
+</section>
+<script src="${commonResource}/js/zepto.min.js"></script>
+<script src="${commonResource}/js/swiper.min.js"></script>
 <script>
     $('.showGetScore').on('touchstart', function () {
         $('.shadow').css('display', 'block')
@@ -823,6 +850,15 @@
             $('.shadow').css('display', 'none');
         }, 300);
     });
+    function goMenu(curIndex) { //go其他菜单页
+        if (curIndex == 1) {
+            location.href = "/front/product/weixin/productIndex";
+        } else if (curIndex == 3) {
+            location.href = "/weixin/cart";
+        } else if (curIndex == 4) {
+            location.href = "/front/order/weixin/orderList";
+        }
+    }
 </script>
 <script>
     /*********************** 加载轮播图 *************************/
@@ -831,9 +867,9 @@
         var list = eval("(" + res + ")");
         for (var i = 0; i < list.length; i++) {
             content +=
-            '<div class="swiper-slide" style="height:205px;" onclick="bannerType('
-            + list[i].afterType + ',' + list[i].url + ',' + list[i].productId
-            + ')"><img src="' + list[i].picture + '" alt=""></div>';
+                '<div class="swiper-slide" style="height:205px;" onclick="bannerType('
+                + list[i].afterType + ',' + list[i].url + ',' + list[i].productId
+                + ')"><img src="' + list[i].picture + '" alt=""></div>';
         }
         document.getElementById("newPush-name").innerHTML = list[0].title;
         document.getElementById("newPush-dis").innerHTML = list[0].introduce;
@@ -848,7 +884,7 @@
             onSlideChangeStart: function (swiper) {
                 document.getElementById("newPush-name").innerHTML = list[swiper.activeIndex].title;
                 document.getElementById("newPush-dis").innerHTML =
-                list[swiper.activeIndex].introduce;
+                    list[swiper.activeIndex].introduce;
             }
         });
     });
@@ -896,9 +932,9 @@
 <script>
     <%-------------------------分享参数----------------------------%>
     var shareTitle = '乐+专属福利兑换',
-            shareLink = 'http://www.lepluslife.com/front/gold/weixin',
-            shareImgUrl = '${resourceUrl}/loggo.png',
-            shareDesc = '四海八荒，话费加油卡免费兑换，手慢无！有多少金币，抵多少钱！';
+        shareLink = 'http://www.lepluslife.com/front/gold/weixin',
+        shareImgUrl = '${resourceUrl}/loggo.png',
+        shareDesc = '四海八荒，话费加油卡免费兑换，手慢无！有多少金币，抵多少钱！';
 </script>
 <%@include file="/WEB-INF/weixin/common/share.jsp" %>
 </html>

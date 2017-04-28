@@ -14,6 +14,7 @@ import com.jifenke.lepluslive.product.service.ProductService;
 import com.jifenke.lepluslive.product.service.ScrollPictureService;
 import com.jifenke.lepluslive.score.domain.entities.ScoreB;
 import com.jifenke.lepluslive.score.service.ScoreBService;
+import com.jifenke.lepluslive.score.service.ScoreCService;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.service.WeiXinService;
 
@@ -43,8 +44,9 @@ public class LimitProductController {
   @Inject
   private ScrollPictureService scrollPictureService;
 
+
   @Inject
-  private ScoreBService scoreBService;
+  private ScoreCService scoreCService;
 
   @Inject
   private OrderDetailService orderDetailService;
@@ -57,14 +59,13 @@ public class LimitProductController {
    */
   @RequestMapping(value = "/weixin/productIndex", method = RequestMethod.GET)
   public ModelAndView productIndex(HttpServletRequest request, Model model) {
-    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
-    ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(weiXinUser.getLeJiaUser());
     //商品分类
     List<ProductType> typeList = productService.findAllProductType();
     //主打爆品
-    Map product = productService.findMainHotProduct();
-    model.addAttribute("scoreB", scoreB);
-    model.addAttribute("product", product);
+//    Map product = productService.findMainHotProduct();
+    model.addAttribute("scoreC", scoreCService
+        .findScoreCByLeJiaUser(weiXinService.getCurrentWeiXinUser(request).getLeJiaUser()));
+//    model.addAttribute("product", product);
     model.addAttribute("typeList", typeList);
     return MvUtil.go("/product/productIndex");
   }
@@ -74,9 +75,9 @@ public class LimitProductController {
    */
   @RequestMapping(value = "/weixin/hotIndex", method = RequestMethod.GET)
   public ModelAndView hotIndex(Model model) {
-    //主打爆品
-    Map product = productService.findMainHotProduct();
-    model.addAttribute("product", product);
+//    //主打爆品
+//    Map product = productService.findMainHotProduct();
+//    model.addAttribute("product", product);
     return MvUtil.go("/product/hotIndex");
   }
 

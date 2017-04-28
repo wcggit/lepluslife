@@ -3,7 +3,7 @@
   User: wcg
   Date: 16/4/8
   Time: 下午4:25
-  To change this template use File | Settings | File Templates.
+  todo:待删除
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
@@ -124,11 +124,12 @@
                                gps.status = 1;
                                gps.lat = latitude;
                                gps.lon = longitude;
-                               var lnglatXY = [longitude, latitude];//地图上所标点的坐标
+//                               var lnglatXY = [longitude, latitude];//地图上所标点的坐标
+                               var lnglatXY = [118.1870,39.636673];//地图上所标点的坐标
                                AMap.service('AMap.Geocoder', function () {//回调函数
                                    //实例化Geocoder
                                    geocoder = new AMap.Geocoder({
-                                                                    city: "010"//城市，默认：“全国”
+//                                                                    city: "010"//城市，默认：“全国”
                                                                 });
                                    //TODO: 使用geocoder 对象完成相关功能
                                    //逆地理编码
@@ -136,6 +137,13 @@
                                        if (status === 'complete' && result.info === 'OK') {
                                            //获得了有效的地址信息:
                                            var currCity = result.regeocode.addressComponent.city;
+                                           console.log('cityName=' + currCity);
+                                           console.log('addressComponent='
+                                                       + result.regeocode.formattedAddress);
+                                           console.log('citycode='
+                                                       + result.regeocode.addressComponent.citycode);
+                                           console.log('addresscode='
+                                                       + result.regeocode.addressComponent.adcode);
                                            if (currCity == null || currCity == '') {
                                                currCity =
                                                result.regeocode.addressComponent.province;

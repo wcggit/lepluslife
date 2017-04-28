@@ -5,10 +5,9 @@
   Time: 20:15
   Content:商品中心
 --%>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<%--<%@include file="/WEB-INF/commen.jsp" %>--%>
+<%@ page language="java" pageEncoding="UTF-8" %>
+<%@include file="/WEB-INF/commen.jsp" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,17 +21,13 @@
     <title>臻品</title>
     <c:set var="resourceUrl" value="http://www.lepluslife.com/resource"></c:set>
     <c:set var="wxRootUrl" value="http://www.lepluslife.com"></c:set>
-    <link rel="stylesheet" href="${resourceUrl}/frontRes/css/reset.css">
-    <link rel="stylesheet" href="${resourceUrl}/frontRes/product/hotIndex/css/bastMain2.css">
-    <link rel="stylesheet" href="${resourceUrl}/frontRes/css/swiper.min.css">
+    <link rel="stylesheet" href="${resource}/product/index/css/reset.css">
+    <link rel="stylesheet" href="${resource}/product/index/css/bastMain2.css">
+    <link rel="stylesheet" href="${commonResource}/css/swiper.min.css">
     <link rel="stylesheet" href="${resourceUrl}/css/paySuccess.css">
     <link rel="stylesheet" href="${resourceUrl}/css/payFailed.css">
 </head>
-<style>
-    .swiper-pagination-bullet-active {
-        background-color: #e94634 !important;
-    }
-</style>
+
 <body>
 <c:if test="${orderId!=null}">
     <div id="mask-failed">
@@ -57,12 +52,12 @@
             <p>您在乐+商城的消费获得<font><fmt:formatNumber type="number"
                                                   value="${payBackScore/100}"
                                                   pattern="0.00"
-                                                  maxFractionDigits="2"/></font>元红包</p>
+                                                  maxFractionDigits="2"/></font>元鼓励金</p>
 
-            <p>累计红包：￥<font><fmt:formatNumber type="number"
-                                             value="${totalScore/100}"
-                                             pattern="0.00"
-                                             maxFractionDigits="2"/></font></p>
+            <p>累计鼓励金：￥<font><fmt:formatNumber type="number"
+                                              value="${totalScore/100}"
+                                              pattern="0.00"
+                                              maxFractionDigits="2"/></font></p>
         </div>
         <div class="mask-btn">
             <div><a style="color: #fff;width: 100%;height: 100%;display: block"
@@ -96,59 +91,67 @@
                             </div>
                         </section>
                         <section class="myJf">
-                            <div>我的积分：<span>${scoreB.score}积分</span></div>
+                            <div>我的金币：<span><fmt:formatNumber type="number"
+                                                              value="${scoreC.score/100}"
+                                                              pattern="0.00"
+                                                              maxFractionDigits="2"/>金币</span></div>
                             <div class="helpForJf">
-                                <div>如何赚积分</div>
+                                <div>如何赚金币</div>
                                 <div>
                                     <img src="${resourceUrl}/frontRes/product/hotIndex/img/qusetion.png"
                                          alt="">
                                 </div>
                             </div>
                         </section>
-                        <section class="top">
-                            <img src="${resourceUrl}/frontRes/product/hotIndex/img/line.png" alt="">
+                        <%--<section class="top">--%>
+                        <%--<img src="${resourceUrl}/frontRes/product/hotIndex/img/line.png" alt="">--%>
 
-                            <p>主打爆款</p>
+                        <%--<p>主打爆款</p>--%>
 
-                            <div style="float: right;margin-top: -6%;font-size: 14px;color: #999999;margin-right: 3%"
-                                 onclick="goMenu(2)">
-                                <img style="width: 10%;position: absolute;right: 0;left:87%;margin-top: 0.8%;"
-                                     src="${resourceUrl}/frontRes/product/hotIndex/img/index_all.png"
-                                     alt=""/>
-                            </div>
-                        </section>
-                        <c:if test="${product != null}">
-                            <section class="hotGoods" style="margin-top: -2px;" onclick="goHotDetail(${product.id})">
-                                <div>
-                                    <img src="${product.thumb}" alt="">
-                                </div>
+                        <%--<div style="float: right;margin-top: -6%;font-size: 14px;color: #999999;margin-right: 3%"--%>
+                        <%--onclick="goMenu(2)">--%>
+                        <%--<img style="width: 10%;position: absolute;right: 0;left:87%;margin-top: 0.8%;"--%>
+                        <%--src="${resourceUrl}/frontRes/product/hotIndex/img/index_all.png"--%>
+                        <%--alt=""/>--%>
+                        <%--</div>--%>
+                        <%--</section>--%>
+                        <%--<c:if test="${product != null}">--%>
+                        <%--<section class="hotGoods" style="margin-top: -2px;"--%>
+                        <%--onclick="goHotDetail(${product.id})">--%>
+                        <%--<div>--%>
+                        <%--<img src="${product.thumb}" alt="">--%>
+                        <%--</div>--%>
 
-                                <div></div>
-                                <div>${product.name}</div>
-                                <div><span
-                                        style="color:#333;font-size: 15px;margin-right: -2px"><fmt:formatNumber
-                                        type="number"
-                                        value="${product.minPrice/100}"
-                                        pattern="0.00"
-                                        maxFractionDigits="2"/>元</span> + <span
-                                        style="margin-left: -2px;font-size: 14px;color: #fb991a;">${product.minScore}积分</span>
-                                </div>
-                                <div>
-                                    <span class="line-down"
-                                          style="margin-top: -5px;font-size: 12px;color: #999;">市场价<fmt:formatNumber
-                                            type="number"
-                                            value="${product.price/100}"
-                                            pattern="0.00"
-                                            maxFractionDigits="2"/>元</span>
-                                </div>
-                                <div class="w-buyNow">
-                                    <img src="${resourceUrl}/frontRes/product/hotIndex/img/buyNow.png"
-                                         alt="">
+                        <%--<div></div>--%>
+                        <%--<div>${product.name}</div>--%>
+                        <%--<div><span--%>
+                        <%--style="color:#333;font-size: 15px;margin-right: -2px"><fmt:formatNumber--%>
+                        <%--type="number"--%>
+                        <%--value="${product.minPrice/100}"--%>
+                        <%--pattern="0.00"--%>
+                        <%--maxFractionDigits="2"/>元</span> + <span--%>
+                        <%--style="margin-left: -2px;font-size: 14px;color: #fb991a;"><fmt:formatNumber--%>
+                        <%--type="number"--%>
+                        <%--value="${product.minScore/100}"--%>
+                        <%--pattern="0.00"--%>
+                        <%--maxFractionDigits="2"/>金币</span>--%>
+                        <%--</div>--%>
+                        <%--<div>--%>
+                        <%--<span class="line-down"--%>
+                        <%--style="margin-top: -5px;font-size: 12px;color: #999;">市场价<fmt:formatNumber--%>
+                        <%--type="number"--%>
+                        <%--value="${product.price/100}"--%>
+                        <%--pattern="0.00"--%>
+                        <%--maxFractionDigits="2"/>元</span>--%>
+                        <%--</div>--%>
+                        <%--<div class="w-buyNow">--%>
+                        <%--<img src="${resourceUrl}/frontRes/product/hotIndex/img/buyNow.png"--%>
+                        <%--alt="">--%>
 
-                                    <p>仅剩${product.repository}份</p>
-                                </div>
-                            </section>
-                        </c:if>
+                        <%--<p>仅剩${product.repository}份</p>--%>
+                        <%--</div>--%>
+                        <%--</section>--%>
+                        <%--</c:if>--%>
 
                         <section class="top" style="margin-bottom: 10px;">
                             <img src="${resourceUrl}/frontRes/product/hotIndex/img/line.png" alt="">
@@ -201,19 +204,19 @@
     </div>
     <div>
         <div>
-            <p>1.合作商家消费赚积分</p>
+            <p>1.合作商家消费赚金币</p>
 
-            <p>您在乐加合作商家内消费，并且扫描乐加微信收款牌付款后，即可得到积分和红包奖励，花的越多，得的越多。</p>
+            <p>您在乐加合作商家内消费，并且扫描乐加微信收款牌付款后，即可得到金币和鼓励金奖励，花的越多，得的越多。</p>
 
-            <p>2.签到赚积分</p>
+            <p>2.签到赚金币</p>
 
-            <p>参加乐加公众号的签到活动，即可领取积分和红包奖励，连续签到还有更多奖励！</p>
+            <p>参加乐加公众号的签到活动，即可领取金币和鼓励金奖励，连续签到还有更多奖励！</p>
 
-            <p>3.评论抽奖赢积分</p>
+            <p>3.评论抽奖赢金币</p>
 
-            <p>在乐加生活推送的图文消息下留言，即有机会获得百元积分红包大礼!</p>
+            <p>在乐加生活推送的图文消息下留言，即有机会获得百元金币鼓励金大礼!</p>
 
-            <p>4.您每天最多获得20积分</p>
+            <p>4.您每天最多获得20金币</p>
         </div>
     </div>
     <div class="money-bottom">
@@ -226,25 +229,25 @@
 <section class="footer">
     <div>
         <div>
-            <img src="${resourceUrl}/frontRes/product/hotIndex/img/zhenpin2.png" alt="">
+            <img src="${resource}/gold/img/zhenpin2.png" alt="">
         </div>
         <p>臻品</p>
     </div>
     <div onclick="goMenu(2)">
         <div>
-            <img src="${resourceUrl}/frontRes/product/hotIndex/img/miaosha1.png" alt="">
+            <img src="${resource}/gold/img/miaosha1.png" alt="">
         </div>
         <p>秒杀</p>
     </div>
     <div onclick="goMenu(3)">
         <div>
-            <img src="${resourceUrl}/frontRes/product/hotIndex/img/gouwuche1.png" alt="">
+            <img src="${resource}/gold/img/gouwuche1.png" alt="">
         </div>
         <p>购物车</p>
     </div>
     <div onclick="goMenu(4)">
         <div>
-            <img src="${resourceUrl}/frontRes/product/hotIndex/img/dingdan1.png" alt="">
+            <img src="${resource}/gold/img/dingdan1.png" alt="">
         </div>
         <p>订单</p>
     </div>
@@ -301,10 +304,10 @@
                 var swiperPage = tabsSwiper.activeIndex;
                 var h;
                 ($(".p" + swiperPage).height() < $(window).height()) ? h =
-                                                                       $(window).height()
-                                                                       - $(".tabs").height() : h =
-                                                                                               $(".p"
-                                                                                                 + swiperPage).height();
+                    $(window).height()
+                    - $(".tabs").height() : h =
+                    $(".p"
+                      + swiperPage).height();
                 $(".pHeight").css("height", h + "px");
                 $('html,body').animate({scrollTop: '0px'}, 100);
                 productType = $(".tabs .active").attr('id').split('_')[1];
@@ -372,7 +375,7 @@
     }
     function goMenu(curIndex) { //go其他菜单页
         if (curIndex == 2) {
-            location.href = "/front/product/weixin/hotIndex";
+            location.href = "/front/gold/weixin";
         } else if (curIndex == 3) {
             location.href = "/weixin/cart";
         } else if (curIndex == 4) {
@@ -406,14 +409,12 @@
                                                + '</div><div><span style="font-size: 16px;color:#333;margin-right: -3px;">'
                                                + toDecimal(list[i].minPrice / 100)
                                                + '元</span> + <span style="margin-left: -3px">'
-                                               + Math.floor((list[i].price
-                                                             - list[i].minPrice)
-                                                            / 100)
-                                               + '积分</span></div><div class="line-down" style="padding-left: 7%;color: #bebebe;">市场价'
+                                               + toDecimal(list[i].minScore / 100)
+                                               + '金币</span></div><div class="line-down" style="padding-left: 7%;color: #bebebe;">市场价'
                                                + toDecimal(list[i].price / 100)
                                                + '元</div> <div> <div>' + list[i].saleNumber
                                                + '份已售</div><div>' + (list[i].postage == 0
-                                                   ? '包邮' : '') + '</div></div></div>';
+                                           ? '包邮' : '') + '</div></div></div>';
                                    content += currP;
                                }
                                mainContent.html(mainContent.html() + content);
