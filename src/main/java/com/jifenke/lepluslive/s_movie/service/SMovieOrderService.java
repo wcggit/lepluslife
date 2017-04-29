@@ -116,13 +116,57 @@ public class SMovieOrderService{
         }
     }
 
+    /**
+     * 查找当前用户未核销的电影  17/4/28
+     */
     @Transactional(readOnly = true,propagation = Propagation.REQUIRED)
     public List<SMovieOrder> findVaildMovies(LeJiaUser leJiaUser) {   //订单状态   0=待付款|1=已付款待核销|2=已付款已核销|3=已退款
        return movieOrderRepository.findByLeJiaUserAndState(leJiaUser,1);
     }
 
+    /**
+     * 查找当前用户已核销的电影  17/4/28
+     */
     @Transactional(readOnly = true,propagation = Propagation.REQUIRED)
     public List<SMovieOrder> findUsedMovies(LeJiaUser leJiaUser) {   //订单状态   0=待付款|1=已付款待核销|2=已付款已核销|3=已退款
         return movieOrderRepository.findByLeJiaUserAndState(leJiaUser,2);
+    }
+
+    /**
+     *  根据 orderSid 查询订单
+     */
+    @Transactional(readOnly = true,propagation = Propagation.REQUIRED)
+    public SMovieOrder findByOrderSid(String orderSid) {
+        return movieOrderRepository.findByOrderSid(orderSid);
+    }
+
+    /**
+     *  核销订单
+     */
+    public Map<Object,Object> updateOrderState(String orderSid,String phoneNumber) {
+        try{
+            Map result = new HashMap();
+            SMovieOrder order  =  findByOrderSid(orderSid);
+            if(order!=null && order.getState()==1 && order.getLeJiaUser().getPhoneNumber.equals(phoneNumber)) {
+                order.setState(2);
+                order.setDateUsed(new Date());
+                result.put("status",200);
+                result.put("data",order);
+                result.put("msg","核销成功！");
+            }else if(order == null) {
+                result.put("status",501);
+                result.put("msg","核销失败,订单号有误！");
+            }else if(order.getState()!=1) {
+                result.put("status",502);
+                result.put("msg","核销失败,该订单已经核销过了哦～");
+            }else {
+                result.put("status",503);
+                result.put("msg","您的手机号码有误,所以不能核销！");
+            }
+            return result;
+        }catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException();
+        }
     }
 }
