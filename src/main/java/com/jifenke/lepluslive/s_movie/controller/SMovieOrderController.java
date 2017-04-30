@@ -106,14 +106,20 @@ public class SMovieOrderController {
      *  商米核销模块 - 根据手机号查询用户有效特权及用户信息
      *  17/4/29
      */
-    @RequestMapping(value="/shangmi/searchVaildOrderByPhoneNum",method = RequestMethod.GET)
+    @RequestMapping(value="/shangmi/searchVaild",method = RequestMethod.GET)
     @ResponseBody
     public LejiaResult loadOrderByPhoneNum(String phoneNumber) {
-        LejiaUser lejiaUser = leJiaUserService.findUserByPhoneNumber(phoneNumber);
-        List<SMovieOrder> vaildMovies = sMovieOrderService.findVaildMovies(leJiaUser);
         Map result = new HashMap();
-        map.put("lejiaUser",lejiaUser);
-        map.put("orderList",vaildMovies);
+        LejiaUser lejiaUser = leJiaUserService.findUserByPhoneNumber(phoneNumber);
+        if(lejiaUser==null) {
+            map.put("status",500);
+            map.put("msg","手机号有误,用户不存在!");
+        }else {
+            List<SMovieOrder> vaildMovies = sMovieOrderService.findVaildMovies(leJiaUser);
+            map.put("status",200);
+            map.put("lejiaUser",lejiaUser);
+            map.put("orderList",vaildMovies);
+        }
         return LejiaResult.ok(result);
     }
 
@@ -121,25 +127,31 @@ public class SMovieOrderController {
      *  商米核销模块 - 根据手机号查询用户已核销的订单
      *  17/4/29
      */
-    @RequestMapping(value="/shangmi/searchCheckedOrderByPhoneNum",method = RequestMethod.GET)
+    @RequestMapping(value="/shangmi/searchChecked",method = RequestMethod.GET)
     @ResponseBody
     public LejiaResult loadOrderByPhoneNum(String phoneNumber) {
         LejiaUser lejiaUser = leJiaUserService.findUserByPhoneNumber(phoneNumber);
-        List<SMovieOrder> usedMovies = sMovieOrderService.findUsedMovies(leJiaUser);
         Map result = new HashMap();
-        map.put("lejiaUser",lejiaUser);
-        map.put("orderList",usedMovies);
+        if(lejiaUser==null) {
+            map.put("status",500);
+            map.put("msg","手机号有误,用户不存在!");
+        }else {
+            List<SMovieOrder> usedMovies = sMovieOrderService.findUsedMovies(leJiaUser);
+            map.put("status",200);
+            map.put("lejiaUser", lejiaUser);
+            map.put("orderList", usedMovies);
+        }
         return LejiaResult.ok(result);
     }
 
     /**
      * 商米核销模块 - 核销电影票
      */
-    @RequestMapping(value="/shangmi/doCheckedMovie",method = RequestMethod.POST)
+    @RequestMapping(value="/shangmi/doCheckMovie",method = RequestMethod.POST)
     @ResponseBody
-    public LejiaResult doCheckedMovie(@RequestBody String orderSid,RequestBody String phoneNumber) {
+    public LejiaResult doCheckedMovie(@RequestBody String orderSid,@RequestBody String phoneNumber,@RequestBody Long terminalId) {
         try {
-            Map result = sMovieOrderService.updateOrderState(orderSid,phoneNumber);
+            Map result = sMovieOrderService.updateOrderState(orderSid,phoneNumber,terminalId);
             return LejiaResult.ok(result);
         }catch (Exception e) {
             e.printStackTrace();

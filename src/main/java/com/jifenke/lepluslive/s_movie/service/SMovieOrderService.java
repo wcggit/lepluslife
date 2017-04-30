@@ -35,6 +35,8 @@ public class SMovieOrderService{
     private ScoreCService scoreCService;
     @Inject
     private OnLineOrderShareService orderShareService;
+    @Inject
+    private SMovieTerminalRepository terminalRepository;
 
     @Transactional(readOnly = false,propagation = Propagation.REQUIRED)
     public Map<Object,Object> createSMoiveOrder(Long smovieId, WeiXinUser weiXinUser) {
@@ -143,13 +145,15 @@ public class SMovieOrderService{
     /**
      *  核销订单
      */
-    public Map<Object,Object> updateOrderState(String orderSid,String phoneNumber) {
+    public Map<Object,Object> updateOrderState(String orderSid,String phoneNumber,Long terminalId) {
         try{
             Map result = new HashMap();
             SMovieOrder order  =  findByOrderSid(orderSid);
+            SMovieTerminal sMovieTerminal =  terminalRepository.findOne(terminalId);
             if(order!=null && order.getState()==1 && order.getLeJiaUser().getPhoneNumber.equals(phoneNumber)) {
                 order.setState(2);
                 order.setDateUsed(new Date());
+                order.setsMovieTerminal()
                 result.put("status",200);
                 result.put("data",order);
                 result.put("msg","核销成功！");
