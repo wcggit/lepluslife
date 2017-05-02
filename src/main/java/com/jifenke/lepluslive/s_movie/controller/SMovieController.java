@@ -3,7 +3,9 @@ package com.jifenke.lepluslive.s_movie.controller;
 import com.jifenke.lepluslive.banner.service.BannerService;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
+import com.jifenke.lepluslive.s_movie.domain.entities.SMovieOrder;
 import com.jifenke.lepluslive.s_movie.domain.entities.SMovieProduct;
+import com.jifenke.lepluslive.s_movie.service.SMovieOrderService;
 import com.jifenke.lepluslive.s_movie.service.SMovieProductService;
 import com.jifenke.lepluslive.score.domain.entities.ScoreC;
 import com.jifenke.lepluslive.score.service.ScoreCService;
@@ -36,6 +38,8 @@ public class SMovieController {
     private WeiXinService weiXinService;
     @Inject
     private ScoreCService scoreCService;
+    @Inject
+    private SMovieOrderService orderService;
 
     /**
      * 进入乐加电影首页
@@ -44,10 +48,29 @@ public class SMovieController {
     public ModelAndView toMoviePage(HttpServletRequest request, Model model) {
         WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
         ScoreC scoreC = scoreCService.findScoreCByLeJiaUser(weiXinUser.getLeJiaUser());
+        Long vaildCount =  orderService.countVaildMovie(weiXinUser.getLeJiaUser().getId());
         List<SMovieProduct> products = productService.findAllOnSale();
+        List topBanner = bannerService.findTopBanner();
+        List hotMovieBanner = bannerService.findHotMovieBanner();
         model.addAttribute("products", products);
         model.addAttribute("scoreC",scoreC);
+        model.addAttribute("vaildCount",vaildCount);
+        model.addAttribute("topBanner",topBanner);
+        model.addAttribute("hotMovieBanner",hotMovieBanner);
         return MvUtil.go("/movie/moviePage");
+    }
+
+    /***
+     *  进入观影特权页面
+     */
+    @RequestMapping(value = "/weixin/privilege", method = RequestMethod.GET)
+    public ModelAndView toPrivilege(HttpServletRequest request, Model model) {
+        WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
+        List<SMovieOrder> vaildMovies = orderService.findVaildMovies(weiXinUser.getLeJiaUser());
+        List<SMovieOrder> usedMovies = orderService.findUsedMovies(weiXinUser.getLeJiaUser());
+        model.addAttribute("vaildMovies",vaildMovies);
+        model.addAttribute("usedMovies",usedMovies);
+        return MvUtil.go("/movie/myPrivilege");
     }
 
     /**
@@ -65,7 +88,7 @@ public class SMovieController {
      */
     @RequestMapping(value = "/hotMovieBanner", method = RequestMethod.GET)
     @ResponseBody
-    public LejiaResult getHotMovieBanner(Model model) {
+    public LejiaResult getHotMovieBanner() {
         List hotMovieBanner = bannerService.findHotMovieBanner();
         return LejiaResult.ok(hotMovieBanner);
     }

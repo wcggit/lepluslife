@@ -6,18 +6,18 @@ import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.lejiauser.service.LeJiaUserService;
 import com.jifenke.lepluslive.s_movie.domain.entities.SMovieOrder;
+import com.jifenke.lepluslive.s_movie.domain.entities.SMovieTerminal;
 import com.jifenke.lepluslive.s_movie.service.SMovieOrderService;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
 import com.jifenke.lepluslive.weixin.service.WeiXinService;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
@@ -108,40 +108,50 @@ public class SMovieOrderController {
      */
     @RequestMapping(value="/shangmi/searchVaild",method = RequestMethod.GET)
     @ResponseBody
-    public LejiaResult loadOrderByPhoneNum(String phoneNumber) {
+    public LejiaResult loadVaildByPhoneNum(String phoneNumber,String lejiaUserSid) {
         Map result = new HashMap();
-        LejiaUser lejiaUser = leJiaUserService.findUserByPhoneNumber(phoneNumber);
+        LeJiaUser lejiaUser = null;
+        if(phoneNumber!=null) {
+            lejiaUser =  leJiaUserService.findUserByPhoneNumber(phoneNumber);
+        }else if(lejiaUserSid!=null) {
+            lejiaUser = leJiaUserService.findUserByUserSid(lejiaUserSid);
+        }
         if(lejiaUser==null) {
-            map.put("status",500);
-            map.put("msg","手机号有误,用户不存在!");
-        }else {
-            List<SMovieOrder> vaildMovies = sMovieOrderService.findVaildMovies(leJiaUser);
-            map.put("status",200);
-            map.put("lejiaUser",lejiaUser);
-            map.put("orderList",vaildMovies);
+            result.put("status",500);
+            result.put("msg","手机号或二维码有误,用户不存在!");
+        }else{
+            List<SMovieOrder> vaildMovies = sMovieOrderService.findVaildMovies(lejiaUser);
+            result.put("status",200);
+            result.put("lejiaUser",lejiaUser);
+            WeiXinUser wx = lejiaUser.getWeiXinUser();
+            WeiXinUser weiXinUser = new WeiXinUser();
+            weiXinUser.setHeadImageUrl(wx.getHeadImageUrl());
+            weiXinUser.setId(wx.getId());
+            weiXinUser.setNickname(wx.getNickname());
+            result.put("weiXinUser", weiXinUser);
+            result.put("orderList",vaildMovies);
         }
         return LejiaResult.ok(result);
     }
 
     /***
-     *  商米核销模块 - 根据手机号查询用户已核销的订单
+     *  商米核销模块 - 根据手机号查询当前设备核销过的订单
      *  17/4/29
      */
     @RequestMapping(value="/shangmi/searchChecked",method = RequestMethod.GET)
     @ResponseBody
-    public LejiaResult loadOrderByPhoneNum(String phoneNumber) {
-        LejiaUser lejiaUser = leJiaUserService.findUserByPhoneNumber(phoneNumber);
-        Map result = new HashMap();
-        if(lejiaUser==null) {
-            map.put("status",500);
-            map.put("msg","手机号有误,用户不存在!");
-        }else {
-            List<SMovieOrder> usedMovies = sMovieOrderService.findUsedMovies(leJiaUser);
-            map.put("status",200);
-            map.put("lejiaUser", lejiaUser);
-            map.put("orderList", usedMovies);
-        }
-        return LejiaResult.ok(result);
+    public LejiaResult loadCheckedByPhoneNum(String terminalNo) {
+            Map result = new HashMap();
+            try {
+                List<SMovieOrder> usedMovies = sMovieOrderService.findUsedMoviesByTerminal(terminalNo);
+                result.put("status",200);
+                result.put("orderList", usedMovies);
+            }catch (Exception e) {
+                result.put("status",500);
+                result.put("msg", "终端号有误！");
+                e.printStackTrace();
+            }
+            return LejiaResult.ok(result);
     }
 
     /**
@@ -149,9 +159,9 @@ public class SMovieOrderController {
      */
     @RequestMapping(value="/shangmi/doCheckMovie",method = RequestMethod.POST)
     @ResponseBody
-    public LejiaResult doCheckedMovie(@RequestBody String orderSid,@RequestBody String phoneNumber,@RequestBody Long terminalId) {
+    public LejiaResult doCheckedMovie(@RequestParam String orderSid, @RequestParam String phoneNumber, @RequestParam String terminalNo) {
         try {
-            Map result = sMovieOrderService.updateOrderState(orderSid,phoneNumber,terminalId);
+            Map result = sMovieOrderService.updateOrderState(orderSid,phoneNumber,terminalNo);
             return LejiaResult.ok(result);
         }catch (Exception e) {
             e.printStackTrace();

@@ -1,12 +1,15 @@
 package com.jifenke.lepluslive.s_movie.service;
 
+import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.order.domain.entities.OnLineOrderShare;
 import com.jifenke.lepluslive.order.service.OnLineOrderShareService;
 import com.jifenke.lepluslive.s_movie.domain.entities.SMovieOrder;
 import com.jifenke.lepluslive.s_movie.domain.entities.SMovieProduct;
+import com.jifenke.lepluslive.s_movie.domain.entities.SMovieTerminal;
 import com.jifenke.lepluslive.s_movie.repository.SMovieOrderRepository;
 import com.jifenke.lepluslive.s_movie.repository.SMovieProductRepository;
+import com.jifenke.lepluslive.s_movie.repository.SMovieTerminalRepository;
 import com.jifenke.lepluslive.score.domain.entities.ScoreC;
 import com.jifenke.lepluslive.score.service.ScoreCService;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
@@ -125,7 +128,20 @@ public class SMovieOrderService{
     public List<SMovieOrder> findVaildMovies(LeJiaUser leJiaUser) {   //订单状态   0=待付款|1=已付款待核销|2=已付款已核销|3=已退款
        return movieOrderRepository.findByLeJiaUserAndState(leJiaUser,1);
     }
-
+    /**
+     * 查找当前设备已核销的电影  17/4/28
+     */
+    @Transactional(readOnly = true,propagation = Propagation.REQUIRED)
+    public List<SMovieOrder> findUsedMoviesByTerminal(String terminalNo) {   //订单状态   0=待付款|1=已付款待核销|2=已付款已核销|3=已退款
+        SMovieTerminal sMovieTerminal =  terminalRepository.findByTerminalNo(terminalNo);
+        List<SMovieOrder> orders = null;
+        if(sMovieTerminal!=null) {
+            orders =movieOrderRepository.findBySMovieTerminalAndStateOrderByDateUsedDesc(sMovieTerminal, 2);
+        }else {
+            throw  new RuntimeException();
+        }
+        return orders;
+    }
     /**
      * 查找当前用户已核销的电影  17/4/28
      */
@@ -145,15 +161,16 @@ public class SMovieOrderService{
     /**
      *  核销订单
      */
-    public Map<Object,Object> updateOrderState(String orderSid,String phoneNumber,Long terminalId) {
+    public Map<Object,Object> updateOrderState(String orderSid,String phoneNumber,String terminalNo) {
         try{
             Map result = new HashMap();
             SMovieOrder order  =  findByOrderSid(orderSid);
-            SMovieTerminal sMovieTerminal =  terminalRepository.findOne(terminalId);
-            if(order!=null && order.getState()==1 && order.getLeJiaUser().getPhoneNumber.equals(phoneNumber)) {
+            SMovieTerminal sMovieTerminal =  terminalRepository.findByTerminalNo(terminalNo);
+            if(order!=null && order.getState()==1 && order.getLeJiaUser().getPhoneNumber().equals(phoneNumber)) {
                 order.setState(2);
                 order.setDateUsed(new Date());
-                order.setsMovieTerminal()
+                order.setsMovieTerminal(sMovieTerminal);
+                movieOrderRepository.save(order);
                 result.put("status",200);
                 result.put("data",order);
                 result.put("msg","核销成功！");
@@ -172,5 +189,13 @@ public class SMovieOrderService{
             e.printStackTrace();
             throw new RuntimeException();
         }
+    }
+
+    /**
+     *  统计用户当前可用的电影特权
+     *  17/05/02
+     */
+    public Long countVaildMovie(Long  userID) {
+        return movieOrderRepository.countVaild(userID);
     }
 }

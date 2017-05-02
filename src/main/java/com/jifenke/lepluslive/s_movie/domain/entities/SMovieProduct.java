@@ -15,135 +15,166 @@ import javax.persistence.Table;
 @Table(name = "S_MOVIE_PRODUCT")
 public class SMovieProduct {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
 
-  private Date dateCreated = new Date();
+    private Date dateCreated = new Date();
 
-  private Integer state = 1;   //状态  1=上架|0=下架
+    private Integer state = 1;   //状态  1=上架|0=下架
 
-  private Integer sid = 1;  //显示顺序  越大越靠前
+    private Integer sid = 1;  //显示顺序  越大越靠前
 
-  private String name;  //产品名称
+    private String name;  //产品名称
 
-  private String picture;  //产品图片
+    private String picture;  //产品图片
 
-  private String introduce;  //图片下文案  分行符& 示例：aaa&uu
+    private String introduce;  //图片下文案  分行符& 示例：aaa&uu
 
-  private Long price = 0L;  //原价 单位/分
+    private Long price = 0L;  //原价 单位/分
 
-  private Long costPrice = 0L;  //电影票采购的成本价  单位/分
+    private Long costPrice = 0L;  //电影票采购的成本价  单位/分
 
-  private Long payBackA = 0L;   //订单支付后的返鼓励金金额
+    private Long payBackA = 0L;   //订单支付后的返鼓励金金额
 
-  private Long toMerchant = 0L;   //锁定门店分润
+    private Long toMerchant = 0L;   //锁定门店分润
 
-  private Long toPartner = 0L;   //锁定天使合伙人分润
+    private Long toPartner = 0L;   //锁定天使合伙人分润
 
-  private Long toPartnerManager = 0L;   //锁定城市合伙人分润
+    private Long toPartnerManager = 0L;   //锁定城市合伙人分润
 
-  public Long getId() {
-    return id;
-  }
+    private String alertPic;             //  弹窗图片
+    private String waveToothPic;         //  锯齿图片
+    private String recordPic;            //  展示记录图片
+    private Integer type;                //  套餐类型  1=套餐一  2=套餐二
 
-  public void setId(Long id) {
-    this.id = id;
-  }
+    public Long getId() {
+        return id;
+    }
 
-  public Date getDateCreated() {
-    return dateCreated;
-  }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-  public void setDateCreated(Date dateCreated) {
-    this.dateCreated = dateCreated;
-  }
+    public Date getDateCreated() {
+        return dateCreated;
+    }
 
-  public Integer getState() {
-    return state;
-  }
+    public void setDateCreated(Date dateCreated) {
+        this.dateCreated = dateCreated;
+    }
 
-  public void setState(Integer state) {
-    this.state = state;
-  }
+    public Integer getState() {
+        return state;
+    }
 
-  public Integer getSid() {
-    return sid;
-  }
+    public void setState(Integer state) {
+        this.state = state;
+    }
 
-  public void setSid(Integer sid) {
-    this.sid = sid;
-  }
+    public Integer getSid() {
+        return sid;
+    }
 
-  public String getName() {
-    return name;
-  }
+    public void setSid(Integer sid) {
+        this.sid = sid;
+    }
 
-  public void setName(String name) {
-    this.name = name;
-  }
+    public String getName() {
+        return name;
+    }
 
-  public String getPicture() {
-    return picture;
-  }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-  public void setPicture(String picture) {
-    this.picture = picture;
-  }
+    public String getPicture() {
+        return picture;
+    }
 
-  public String getIntroduce() {
-    return introduce;
-  }
+    public void setPicture(String picture) {
+        this.picture = picture;
+    }
 
-  public void setIntroduce(String introduce) {
-    this.introduce = introduce;
-  }
+    public String getIntroduce() {
+        return introduce;
+    }
 
-  public Long getPrice() {
-    return price;
-  }
+    public void setIntroduce(String introduce) {
+        this.introduce = introduce;
+    }
 
-  public void setPrice(Long price) {
-    this.price = price;
-  }
+    public Long getPrice() {
+        return price;
+    }
 
-  public Long getCostPrice() {
-    return costPrice;
-  }
+    public void setPrice(Long price) {
+        this.price = price;
+    }
 
-  public void setCostPrice(Long costPrice) {
-    this.costPrice = costPrice;
-  }
+    public Long getCostPrice() {
+        return costPrice;
+    }
 
-  public Long getPayBackA() {
-    return payBackA;
-  }
+    public void setCostPrice(Long costPrice) {
+        this.costPrice = costPrice;
+    }
 
-  public void setPayBackA(Long payBackA) {
-    this.payBackA = payBackA;
-  }
+    public Long getPayBackA() {
+        return payBackA;
+    }
 
-  public Long getToMerchant() {
-    return toMerchant;
-  }
+    public void setPayBackA(Long payBackA) {
+        this.payBackA = payBackA;
+    }
 
-  public void setToMerchant(Long toMerchant) {
-    this.toMerchant = toMerchant;
-  }
+    public Long getToMerchant() {
+        return toMerchant;
+    }
 
-  public Long getToPartner() {
-    return toPartner;
-  }
+    public void setToMerchant(Long toMerchant) {
+        this.toMerchant = toMerchant;
+    }
 
-  public void setToPartner(Long toPartner) {
-    this.toPartner = toPartner;
-  }
+    public Long getToPartner() {
+        return toPartner;
+    }
 
-  public Long getToPartnerManager() {
-    return toPartnerManager;
-  }
+    public void setToPartner(Long toPartner) {
+        this.toPartner = toPartner;
+    }
 
-  public void setToPartnerManager(Long toPartnerManager) {
-    this.toPartnerManager = toPartnerManager;
-  }
+    public Long getToPartnerManager() {
+        return toPartnerManager;
+    }
+
+    public void setToPartnerManager(Long toPartnerManager) {
+        this.toPartnerManager = toPartnerManager;
+    }
+
+    public String getAlertPic() {
+        return alertPic;
+    }
+
+    public void setAlertPic(String alertPic) {
+        this.alertPic = alertPic;
+    }
+
+    public String getWaveToothPic() {
+        return waveToothPic;
+    }
+
+    public void setWaveToothPic(String waveToothPic) {
+        this.waveToothPic = waveToothPic;
+    }
+
+    public String getRecordPic() {
+        return recordPic;
+    }
+
+    public void setRecordPic(String recordPic) {
+        this.recordPic = recordPic;
+    }
+
+
 }
