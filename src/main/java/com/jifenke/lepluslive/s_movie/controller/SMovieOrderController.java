@@ -121,6 +121,7 @@ public class SMovieOrderController {
     @ResponseBody
     public LejiaResult loadVaildByPhoneNum(String phoneNumber, String lejiaUserSid) {
         Map result = new HashMap();
+        Map data = new HashMap();
         LeJiaUser lejiaUser = null;
         if (phoneNumber != null) {
             lejiaUser = leJiaUserService.findUserByPhoneNumber(phoneNumber);
@@ -133,16 +134,17 @@ public class SMovieOrderController {
         } else {
             List<SMovieOrder> vaildMovies = sMovieOrderService.findVaildMovies(lejiaUser);
             result.put("status", 200);
-            result.put("lejiaUser", lejiaUser);
+            data.put("lejiaUser", lejiaUser);
+            result.put("msg", "success!");
             WeiXinUser wx = lejiaUser.getWeiXinUser();
             WeiXinUser weiXinUser = new WeiXinUser();
             weiXinUser.setHeadImageUrl(wx.getHeadImageUrl());
             weiXinUser.setId(wx.getId());
             weiXinUser.setNickname(wx.getNickname());
-            result.put("weiXinUser", weiXinUser);
-            result.put("orderList", vaildMovies);
+            data.put("weiXinUser", weiXinUser);
+            data.put("orderList", vaildMovies);
         }
-        return LejiaResult.ok(result);
+        return LejiaResult.build(new Integer(result.get("status").toString()),result.get("msg").toString(),data);
     }
 
     /***
@@ -153,16 +155,18 @@ public class SMovieOrderController {
     @ResponseBody
     public LejiaResult loadCheckedByPhoneNum(String terminalNo) {
         Map result = new HashMap();
+        Map data = new HashMap();
         try {
             List<SMovieOrder> usedMovies = sMovieOrderService.findUsedMoviesByTerminal(terminalNo);
             result.put("status", 200);
-            result.put("orderList", usedMovies);
+            result.put("msg", "success!");
+            data.put("orderList", usedMovies);
         } catch (Exception e) {
             result.put("status", 202);
             result.put("msg", "终端号有误！");
             e.printStackTrace();
         }
-        return LejiaResult.ok(result);
+        return LejiaResult.build(new Integer(result.get("status").toString()),result.get("msg").toString(),data);
     }
 
     /**
@@ -173,7 +177,7 @@ public class SMovieOrderController {
     public LejiaResult doCheckedMovie(@RequestParam String orderSid, @RequestParam String phoneNumber, @RequestParam String terminalNo) {
         try {
             Map result = sMovieOrderService.updateOrderState(orderSid, phoneNumber, terminalNo);
-            return LejiaResult.ok(result);
+            return LejiaResult.build(new Integer(result.get("status").toString()),result.get("msg").toString(),result.get("data"));
         } catch (Exception e) {
             e.printStackTrace();
         }
