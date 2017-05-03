@@ -128,7 +128,7 @@ public class SMovieOrderController {
             lejiaUser = leJiaUserService.findUserByUserSid(lejiaUserSid);
         }
         if (lejiaUser == null) {
-            result.put("status", 500);
+            result.put("status", 201);
             result.put("msg", "手机号或二维码有误,用户不存在!");
         } else {
             List<SMovieOrder> vaildMovies = sMovieOrderService.findVaildMovies(lejiaUser);
@@ -158,7 +158,7 @@ public class SMovieOrderController {
             result.put("status", 200);
             result.put("orderList", usedMovies);
         } catch (Exception e) {
-            result.put("status", 500);
+            result.put("status", 202);
             result.put("msg", "终端号有误！");
             e.printStackTrace();
         }
@@ -177,7 +177,7 @@ public class SMovieOrderController {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return LejiaResult.build(500, "您的手机号码有误,所以不能核销");
+        return LejiaResult.build(201, "您的手机号码有误,所以不能核销");
     }
 
 
