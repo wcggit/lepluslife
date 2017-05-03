@@ -10,6 +10,7 @@ import com.jifenke.lepluslive.s_movie.service.SMovieProductService;
 import com.jifenke.lepluslive.score.domain.entities.ScoreC;
 import com.jifenke.lepluslive.score.service.ScoreCService;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
+import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
 import com.jifenke.lepluslive.weixin.service.WeiXinService;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,10 +41,10 @@ public class SMovieController {
     private ScoreCService scoreCService;
     @Inject
     private SMovieOrderService orderService;
+    @Inject
+    private WeiXinPayService weiXinPayService;
 
-    /**
-     * 进入乐加电影首页
-     */
+   /*
     @RequestMapping(value = "/weixin/page", method = RequestMethod.GET)
     public ModelAndView toMoviePage(HttpServletRequest request, Model model) {
         WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
@@ -52,13 +53,14 @@ public class SMovieController {
         List<SMovieProduct> products = productService.findAllOnSale();
         List topBanner = bannerService.findTopBanner();
         List hotMovieBanner = bannerService.findHotMovieBanner();
+        model.addAttribute("wxConfig", weiXinPayService.getWeiXinPayConfig(request));
         model.addAttribute("products", products);
         model.addAttribute("scoreC",scoreC);
         model.addAttribute("vaildCount",vaildCount);
         model.addAttribute("topBanner",topBanner);
         model.addAttribute("hotMovieBanner",hotMovieBanner);
         return MvUtil.go("/movie/moviePage");
-    }
+    }*/
 
     /***
      *  进入观影特权页面

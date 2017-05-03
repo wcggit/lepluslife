@@ -42,31 +42,34 @@ public class SMovieOrderService{
     private SMovieTerminalRepository terminalRepository;
 
     @Transactional(readOnly = false,propagation = Propagation.REQUIRED)
-    public Map<Object,Object> createSMoiveOrder(Long smovieId, WeiXinUser weiXinUser) {
+    public Map<Object,Object> createSMoiveOrder(Long productId, WeiXinUser weiXinUser) {
         Map result = new HashMap();                         //  结果消息
         //   创建电影订单
-        SMovieProduct product = productRepository.findOne(smovieId);
+        SMovieProduct product = productRepository.findOne(productId);
         SMovieOrder sMovieOrder = new SMovieOrder();
         sMovieOrder.setLeJiaUser(weiXinUser.getLeJiaUser());
         sMovieOrder.setsMovieProduct(product);
         sMovieOrder.setState(0);                            //  订单状态   0=待付款|1=已付款待核销|2=已付款已核销|3=已退款
         sMovieOrder.setTotalPrice(product.getPrice());      //  订单金额
         sMovieOrder.setDateCreated(new Date());
-
+        sMovieOrder.setPayBackA(product.getPayBackA());
         //  是否是纯金币支付
         ScoreC scoreC = scoreCService.findScoreCByLeJiaUser(weiXinUser.getLeJiaUser());
         try {
-            if(scoreC.getScore()>=product.getPrice()) {         //  纯金币支付
+            if(scoreC.getScore()>=product.getPrice()) {         //  纯金币支付 - 完成支付流程
                 sMovieOrder.setTrueScore(product.getPrice());
                 sMovieOrder.setTruePrice(0L);
+                sMovieOrder.setTrueIncome(0L);
                 result.put("status",2000);
                 result.put("msg","本次消费使用纯金币支付。");
             }else if(scoreC.getScore()>0){                      //  部分使用金币支付
+                sMovieOrder.setTrueIncome(product.getPrice()-scoreC.getScore());
                 sMovieOrder.setTrueScore(scoreC.getScore());
                 sMovieOrder.setTruePrice(product.getPrice()-scoreC.getScore());
                 result.put("status",200);
                 result.put("msg","本次消费使用金币抵扣部分金额。");
             }else {                                             //  纯现金支付
+                sMovieOrder.setTrueIncome(product.getPrice());
                 sMovieOrder.setTrueScore(0L);
                 sMovieOrder.setTruePrice(product.getPrice());
                 result.put("status",200);
@@ -86,12 +89,18 @@ public class SMovieOrderService{
      *
      * @param orderSid 订单Sid
      */
+
+    /**
+     * 微信支付成功后，充值成功回调 17/5/3
+     *
+     * @param orderSid   订单SID
+     */
     @Transactional(readOnly = false,propagation = Propagation.REQUIRED)
     public void paySuccess(String orderSid) {
         SMovieOrder order = movieOrderRepository.findByOrderSid(orderSid);
         if(order!=null) {
-            order.setState(1); //订单状态   0=待付款|1=已付款待核销|2=已付款已核销|3=已退款
-            paySuccessByGold(order);
+            order.setState(1);              //  订单状态   0=待付款|1=已付款待核销|2=已付款已核销|3=已退款
+            paySuccessByGold(order);        //  金币变更
             order.setDateCompleted(new Date());
             movieOrderRepository.save(order);
         }
@@ -161,6 +170,7 @@ public class SMovieOrderService{
     /**
      *  核销订单
      */
+    @Transactional(readOnly = false,propagation = Propagation.REQUIRED)
     public Map<Object,Object> updateOrderState(String orderSid,String phoneNumber,String terminalNo) {
         try{
             Map result = new HashMap();
@@ -195,7 +205,13 @@ public class SMovieOrderService{
      *  统计用户当前可用的电影特权
      *  17/05/02
      */
+    @Transactional(readOnly = true,propagation = Propagation.REQUIRED)
     public Long countVaildMovie(Long  userID) {
         return movieOrderRepository.countVaild(userID);
+    }
+
+    @Transactional(readOnly = true,propagation = Propagation.REQUIRED)
+    public SMovieOrder findById(Long orderId) {
+        return movieOrderRepository.findOne(orderId);
     }
 }
