@@ -67,7 +67,8 @@ public final class Constants {
     public static final String PHONEORDER_NOTIFY_URL = "http://www.lepluslife.com/weixin/pay/afterPhonePay";  //话费订单微信回调
     //  public static final String ONLINEORDER_NOTIFY_URL = "http://www.tiegancrm.com/weixin/pay/afterPay";  //商城订单微信回调
 //  public static final String PHONEORDER_NOTIFY_URL = "http://www.tiegancrm.com/weixin/pay/afterPhonePay";  //话费订单微信回调
-    public static final String MOVIE_NOTIFY_URL = "http://www.tiegancrm.com/front/movie/afterPay";         //电影购买回调
+    public static final String MOVIE_NOTIFY_URL = "http://www.lepluslife.com/front/movie/afterPay";         //电影购买回调
+//    public static final String MOVIE_NOTIFY_URL = "http://www.tiegancrm.com/front/movie/afterPay";         //电影购买回调
 
     private Constants() {
     }
