@@ -72,7 +72,7 @@ public class SMovieOrderController {
             SortedMap<String, Object>
                     map =
                     weiXinPayService
-                            .buildOrderParams(request, "电影票购买", order.getOrderSid(), "" + order.getTruePrice(),
+                            .buildOrderParams(request, "乐+电影特权", order.getOrderSid(), "" + order.getTruePrice(),
                                     Constants.MOVIE_NOTIFY_URL);
             // 获取微信预支付
             Map<String, Object> unifiedOrder = weiXinPayService.createUnifiedOrder(map);

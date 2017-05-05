@@ -63,7 +63,7 @@
     <div class="shadow">
         <div class="logo">
             <h3 class="ttl">恭喜您获得乐+鼓励金</h3>
-            <h3 class="price">￥0.35</h3>
+            <h3 class="price">￥${order.payBackA/100.0}</h3>
         </div>
 
         <p class="desc">
