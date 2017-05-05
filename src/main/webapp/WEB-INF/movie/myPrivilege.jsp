@@ -49,7 +49,7 @@
             </c:forEach>
         </div>
         <div class="bottom">
-            <h3 class="ttl">观影特权</h3>
+            <h3 class="ttl">观影特权使用说明 : </h3>
             <ul>
                 <li>step1<span>到电影院售票处直接说：我是乐+会员</span></li>
                 <li>step2<span>出示乐+会员二维码或者手机号</span></li>

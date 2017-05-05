@@ -36,15 +36,15 @@
             <div class="swiper-slide">
                 <img id="top1" src="${topBanner[0].picture}" alt="">
             </div>
-            <div class="swiper-slide">
+         <%--   <div class="swiper-slide">
                 <img id="top2" src="${topBanner[1].picture}" alt="">
             </div>
             <div class="swiper-slide">
                 <img id="top3" src="${topBanner[2].picture}" alt="">
-            </div>
+            </div>--%>
         </div>
         <!-- Add Pagination -->
-        <div class="swiper-pagination"></div>
+        <%--<div class="swiper-pagination"></div>--%>
     </div>
     <div class="btn-tobeused">
         <div class="btn-inner clearfix">
