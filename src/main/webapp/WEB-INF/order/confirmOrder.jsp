@@ -223,7 +223,7 @@
     //数量切换
     //可买数量的最大值和最小值判断
     function judgeFun1() {
-        if (eval(trueScoreInput.val()) * 100 >= maxScore) {
+        if (eval(trueScoreInput.val()) * 100 > maxScore) {
             if (maxScore == orderTotalScore) {
                 $('#scoreBwarning').hide();
             } else if (maxScore == canUseScore) {
@@ -244,7 +244,7 @@
     function allClick() {
         $('#truePrice').html(toDecimal((minPrice + (orderTotalScore - (eval(trueScoreInput.val())
                                                                        == null ? 0
-                                           : eval(trueScoreInput.val()))) * 100)
+                                           : eval(trueScoreInput.val() * 100))))
                                        / 100));
     }
     //输入框改变
@@ -319,10 +319,15 @@
                 return;
             }
             var trueScore = $('#trueScore').val() * 100;
-            if (isNaN(trueScore)) {
+            if ((!(typeof trueScore === 'number')) || (!(trueScore % 1 === 0))) {
+                $('.waiting').css('display', 'none');
                 alert("请正确输入使用金币");
                 return false;
             }
+//            if (isNaN(trueScore)) {
+//                alert("请正确输入使用金币");
+//                return false;
+//            }
             var price = eval(truePrice * 100);
 
 //            首先提交请求，生成预支付订单
@@ -374,10 +379,12 @@
                                window.location.href = '/weixin/pay/paySuccess/${order.id}';
                            },
                            cancel: function (res) {
-                               window.location.href = '/weixin/pay/payFail/${order.id}';
+                               $('#btn-wxPay').attr('onclick', 'payByWx()');
+                               <%--window.location.href = '/weixin/pay/payFail/${order.id}';--%>
                            },
                            fail: function (res) {
-                               window.location.href = '/weixin/pay/payFail/${order.id}';
+                               $('#btn-wxPay').attr('onclick', 'payByWx()');
+                               <%--window.location.href = '/weixin/pay/payFail/${order.id}';--%>
                            }
                        });
     }

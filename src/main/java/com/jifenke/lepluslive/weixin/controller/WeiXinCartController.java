@@ -87,7 +87,7 @@ public class WeiXinCartController {
     LejiaResult lejiaResult = new LejiaResult();
     lejiaResult.setStatus(200);
     int cartNumber = 0;
-    if (cart != null) {
+    if (cart != null && !"null".equalsIgnoreCase(cart)) {
       cartDetailDtos = JsonUtils.jsonToList(cart, CartDetailDto.class);
       boolean tag = true;
       for (CartDetailDto cartDetail : cartDetailDtos) {

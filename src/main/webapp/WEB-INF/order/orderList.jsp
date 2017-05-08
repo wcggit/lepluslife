@@ -5,9 +5,9 @@
   Time: 09:20
   Content:订单列表
 --%>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ page language="java" pageEncoding="UTF-8" %>
+<%@include file="/WEB-INF/commen.jsp" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -166,7 +166,7 @@
             '<div class="all"><div>共 <span style="margin-right: 3px;">' + orderHasProCount
             + '</span>件商品</div><div>合计：<span style="font-size: 15px;color: #333;">￥'
             + toDecimal(totalPrice / 100)
-            + '</span> + <span style="font-size: 14px;color: #fb991a;">';
+            + '</span> + <span style="font-size: 14px;">';
 
         divStr += toDecimal(totalScore / 100) + '金币';
 

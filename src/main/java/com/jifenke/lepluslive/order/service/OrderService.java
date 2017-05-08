@@ -1,6 +1,7 @@
 package com.jifenke.lepluslive.order.service;
 
 import com.jifenke.lepluslive.Address.domain.entities.Address;
+import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.order.domain.entities.OnLineOrder;
 import com.jifenke.lepluslive.order.domain.entities.OrderDetail;
@@ -11,12 +12,10 @@ import com.jifenke.lepluslive.product.domain.entities.ProductSpec;
 import com.jifenke.lepluslive.product.service.ProductService;
 import com.jifenke.lepluslive.score.domain.entities.ScoreC;
 import com.jifenke.lepluslive.score.service.ScoreAService;
-import com.jifenke.lepluslive.score.service.ScoreBService;
 import com.jifenke.lepluslive.score.service.ScoreCService;
 import com.jifenke.lepluslive.weixin.controller.dto.CartDetailDto;
 import com.jifenke.lepluslive.weixin.repository.DictionaryRepository;
 import com.jifenke.lepluslive.weixin.service.JobThread;
-import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
 import com.jifenke.lepluslive.weixin.service.WeiXinUserService;
 import com.jifenke.lepluslive.weixin.service.WeixinPayLogService;
 
@@ -30,7 +29,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
 
 import javax.inject.Inject;
 
@@ -46,16 +44,10 @@ public class OrderService {
   private ProductService productService;
 
   @Inject
-  private WeiXinPayService weiXinPayService;
-
-  @Inject
   private OrderRepository orderRepository;
 
   @Inject
   private ScoreAService scoreAService;
-
-  @Inject
-  private ScoreBService scoreBService;
 
   @Inject
   private ScoreCService scoreCService;
@@ -296,7 +288,7 @@ public class OrderService {
     onLineOrder.setOrderDetails(orderDetails);
     onLineOrder.setState(0);
     onLineOrder.setPayState(0);
-    onLineOrder.setType(2);
+    onLineOrder.setType(1);
     onLineOrder.setOrderPrice(orderPrice);
     onLineOrder.setTotalPrice(totalPrice);
     onLineOrder.setTruePrice(truePrice);
@@ -545,7 +537,10 @@ public class OrderService {
       return result;
     }
 
-    // onLineOrder.setOrderSid(MvUtil.getOrderNumber()); //必须重新设置,否者导致微信订单号重复报错  不必要！！！
+    if (onLineOrder.getTrueScore() != 0 && !onLineOrder.getTrueScore().equals(trueScore)) {
+      onLineOrder.setOrderSid(MvUtil.getOrderNumber()); //当订单参数变化时，必须重新设置,否者导致微信订单号重复报错
+    }
+
     onLineOrder.setTruePrice(truePrice);
     onLineOrder.setTransmitWay(transmitWay);
     onLineOrder.setTrueScore(trueScore);

@@ -406,11 +406,9 @@
                                                + ')"><div><img height="125px" src="'
                                                + list[i].picture
                                                + '" alt=""></div><div>' + list[i].name
-                                               + '</div><div><span style="font-size: 16px;color:#333;margin-right: -3px;">'
+                                               + '</div><div><span style="font-size: 18px;color:#DAA662;font-weight: 300;margin-right: -3px;">'
                                                + toDecimal(list[i].minPrice / 100)
-                                               + '元</span> + <span style="margin-left: -3px">'
-                                               + toDecimal(list[i].minScore / 100)
-                                               + '金币</span></div><div class="line-down" style="padding-left: 7%;color: #bebebe;">市场价'
+                                               + '元</span></div><div class="line-down" style="padding-left: 7%;color: #bebebe;">市场价'
                                                + toDecimal(list[i].price / 100)
                                                + '元</div> <div> <div>' + list[i].saleNumber
                                                + '份已售</div><div>' + (list[i].postage == 0

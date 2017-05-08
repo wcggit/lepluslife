@@ -97,49 +97,49 @@
             <div class="product-item border-right">
                 <h1 class="ttl"><span>100</span>元话费</h1>
 
-                <p class="true-price">100元</p>
-                <c:if test="${score >= 10000}">
-                    <p class="now-price">或：0元+100金币</p>
-                </c:if>
-                <c:if test="${score < 10000}">
-                    <p class="now-price">或：<fmt:formatNumber
-                            type="number" value="${(10000-score3)/100}"
-                            maxFractionDigits="0"/>元+<fmt:formatNumber
-                            type="number" value="${score3/100}"
-                            maxFractionDigits="0"/>金币</p>
-                </c:if>
+                <p class="true-price">兑换价：100金币</p>
+                <%--<c:if test="${score >= 10000}">--%>
+                    <%--<p class="now-price">或：0元+100金币</p>--%>
+                <%--</c:if>--%>
+                <%--<c:if test="${score < 10000}">--%>
+                    <%--<p class="now-price">或：<fmt:formatNumber--%>
+                            <%--type="number" value="${(10000-score3)/100}"--%>
+                            <%--maxFractionDigits="0"/>元+<fmt:formatNumber--%>
+                            <%--type="number" value="${score3/100}"--%>
+                            <%--maxFractionDigits="0"/>金币</p>--%>
+                <%--</c:if>--%>
 
             </div>
             <div class="product-item border-right">
                 <h1 class="ttl"><span>50</span>元话费</h1>
 
-                <p class="true-price">50</p>
-                <c:if test="${score >= 5000}">
-                    <p class="now-price">或：0元+50金币</p>
-                </c:if>
-                <c:if test="${score < 5000}">
-                    <p class="now-price">或：<fmt:formatNumber
-                            type="number" value="${(5000-score3)/100}" pattern="0.00"
-                            maxFractionDigits="0"/>元+<fmt:formatNumber
-                            type="number" value="${score3/100}" pattern="0.00"
-                            maxFractionDigits="0"/>金币</p>
-                </c:if>
+                <p class="true-price">兑换价：50金币</p>
+                <%--<c:if test="${score >= 5000}">--%>
+                    <%--<p class="now-price">或：0元+50金币</p>--%>
+                <%--</c:if>--%>
+                <%--<c:if test="${score < 5000}">--%>
+                    <%--<p class="now-price">或：<fmt:formatNumber--%>
+                            <%--type="number" value="${(5000-score3)/100}" pattern="0.00"--%>
+                            <%--maxFractionDigits="0"/>元+<fmt:formatNumber--%>
+                            <%--type="number" value="${score3/100}" pattern="0.00"--%>
+                            <%--maxFractionDigits="0"/>金币</p>--%>
+                <%--</c:if>--%>
             </div>
             <div class="product-item">
                 <h1 class="ttl"><span>20</span>元话费</h1>
 
-                <p class="true-price">20元</p>
+                <p class="true-price">兑换价：20金币</p>
 
-                <c:if test="${score >= 2000}">
-                    <p class="now-price">或：0元+20金币</p>
-                </c:if>
-                <c:if test="${score < 2000}">
-                    <p class="now-price">或：<fmt:formatNumber
-                            type="number" value="${(2000-score3)/100}" pattern="0.00"
-                            maxFractionDigits="0"/>元+<fmt:formatNumber
-                            type="number" value="${score3/100}" pattern="0.00"
-                            maxFractionDigits="0"/>金币</p>
-                </c:if>
+                <%--<c:if test="${score >= 2000}">--%>
+                    <%--<p class="now-price">或：0元+20金币</p>--%>
+                <%--</c:if>--%>
+                <%--<c:if test="${score < 2000}">--%>
+                    <%--<p class="now-price">或：<fmt:formatNumber--%>
+                            <%--type="number" value="${(2000-score3)/100}" pattern="0.00"--%>
+                            <%--maxFractionDigits="0"/>元+<fmt:formatNumber--%>
+                            <%--type="number" value="${score3/100}" pattern="0.00"--%>
+                            <%--maxFractionDigits="0"/>金币</p>--%>
+                <%--</c:if>--%>
             </div>
         </div>
     </div>
@@ -163,23 +163,23 @@
                     </div>
                     <h1 class="ttl">${m.key1.list[0].name}</h1>
 
-                    <p class="true-price"><fmt:formatNumber
+                    <p class="true-price">兑换价：<fmt:formatNumber
                             type="number" value="${m.key1.list[0].price/100}" pattern="0.00"
-                            maxFractionDigits="0"/>元</p>
+                            maxFractionDigits="0"/>金币</p>
 
-                    <c:if test="${score >= m.key1.list[0].price}">
-                        <p class="now-price">或：0元+<fmt:formatNumber
-                                type="number" value="${m.key1.list[0].price/100}" pattern="0.00"
-                                maxFractionDigits="0"/>金币</p>
-                    </c:if>
-                    <c:if test="${score < m.key1.list[0].price}">
-                        <p class="now-price">或：<fmt:formatNumber
-                                type="number" value="${(m.key1.list[0].price-score3)/100}"
-                                pattern="0.00"
-                                maxFractionDigits="0"/>元+<fmt:formatNumber
-                                type="number" value="${score3/100}" pattern="0.00"
-                                maxFractionDigits="0"/>金币</p>
-                    </c:if>
+                    <%--<c:if test="${score >= m.key1.list[0].price}">--%>
+                        <%--<p class="now-price">或：0元+<fmt:formatNumber--%>
+                                <%--type="number" value="${m.key1.list[0].price/100}" pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>金币</p>--%>
+                    <%--</c:if>--%>
+                    <%--<c:if test="${score < m.key1.list[0].price}">--%>
+                        <%--<p class="now-price">或：<fmt:formatNumber--%>
+                                <%--type="number" value="${(m.key1.list[0].price-score3)/100}"--%>
+                                <%--pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>元+<fmt:formatNumber--%>
+                                <%--type="number" value="${score3/100}" pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>金币</p>--%>
+                    <%--</c:if>--%>
                 </div>
                 <div class="product-item" onclick="detail(${m.key1.list[1].pruductId})">
                     <div class="good-img w-bo">
@@ -187,23 +187,23 @@
                     </div>
                     <h1 class="ttl">${m.key1.list[1].name}</h1>
 
-                    <p class="true-price"><fmt:formatNumber
+                    <p class="true-price">兑换价：<fmt:formatNumber
                             type="number" value="${m.key1.list[1].price/100}" pattern="0.00"
-                            maxFractionDigits="0"/>元</p>
+                            maxFractionDigits="0"/>金币</p>
 
-                    <c:if test="${score >= m.key1.list[1].price}">
-                        <p class="now-price">或：0元+<fmt:formatNumber
-                                type="number" value="${m.key1.list[1].price/100}" pattern="0.00"
-                                maxFractionDigits="0"/>金币</p>
-                    </c:if>
-                    <c:if test="${score < m.key1.list[1].price}">
-                        <p class="now-price">或：<fmt:formatNumber
-                                type="number" value="${(m.key1.list[1].price-score3)/100}"
-                                pattern="0.00"
-                                maxFractionDigits="0"/>元+<fmt:formatNumber
-                                type="number" value="${score3/100}" pattern="0.00"
-                                maxFractionDigits="0"/>金币</p>
-                    </c:if>
+                    <%--<c:if test="${score >= m.key1.list[1].price}">--%>
+                        <%--<p class="now-price">或：0元+<fmt:formatNumber--%>
+                                <%--type="number" value="${m.key1.list[1].price/100}" pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>金币</p>--%>
+                    <%--</c:if>--%>
+                    <%--<c:if test="${score < m.key1.list[1].price}">--%>
+                        <%--<p class="now-price">或：<fmt:formatNumber--%>
+                                <%--type="number" value="${(m.key1.list[1].price-score3)/100}"--%>
+                                <%--pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>元+<fmt:formatNumber--%>
+                                <%--type="number" value="${score3/100}" pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>金币</p>--%>
+                    <%--</c:if>--%>
                 </div>
             </div>
         </div>
@@ -228,23 +228,23 @@
                     </div>
                     <h1 class="ttl">${m.key2.list[0].name}</h1>
 
-                    <p class="true-price"><fmt:formatNumber
+                    <p class="true-price">兑换价：<fmt:formatNumber
                             type="number" value="${m.key2.list[0].price/100}" pattern="0.00"
-                            maxFractionDigits="0"/>元</p>
+                            maxFractionDigits="0"/>金币</p>
 
-                    <c:if test="${score >= m.key2.list[0].price}">
-                        <p class="now-price">或：0元+<fmt:formatNumber
-                                type="number" value="${m.key2.list[0].price/100}" pattern="0.00"
-                                maxFractionDigits="0"/>金币</p>
-                    </c:if>
-                    <c:if test="${score < m.key2.list[0].price}">
-                        <p class="now-price">或：<fmt:formatNumber
-                                type="number" value="${(m.key2.list[0].price-score3)/100}"
-                                pattern="0.00"
-                                maxFractionDigits="0"/>元+<fmt:formatNumber
-                                type="number" value="${score3/100}" pattern="0.00"
-                                maxFractionDigits="0"/>金币</p>
-                    </c:if>
+                    <%--<c:if test="${score >= m.key2.list[0].price}">--%>
+                        <%--<p class="now-price">或：0元+<fmt:formatNumber--%>
+                                <%--type="number" value="${m.key2.list[0].price/100}" pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>金币</p>--%>
+                    <%--</c:if>--%>
+                    <%--<c:if test="${score < m.key2.list[0].price}">--%>
+                        <%--<p class="now-price">或：<fmt:formatNumber--%>
+                                <%--type="number" value="${(m.key2.list[0].price-score3)/100}"--%>
+                                <%--pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>元+<fmt:formatNumber--%>
+                                <%--type="number" value="${score3/100}" pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>金币</p>--%>
+                    <%--</c:if>--%>
                 </div>
                 <div class="product-item border-right"
                      onclick="detail(${m.key2.list[1].pruductId})">
@@ -253,23 +253,23 @@
                     </div>
                     <h1 class="ttl">${m.key2.list[1].name}</h1>
 
-                    <p class="true-price"><fmt:formatNumber
+                    <p class="true-price">兑换价：<fmt:formatNumber
                             type="number" value="${m.key2.list[1].price/100}" pattern="0.00"
-                            maxFractionDigits="0"/>元</p>
+                            maxFractionDigits="0"/>金币</p>
 
-                    <c:if test="${score >= m.key2.list[1].price}">
-                        <p class="now-price">或：0元+<fmt:formatNumber
-                                type="number" value="${m.key1.list[1].price/100}" pattern="0.00"
-                                maxFractionDigits="0"/>金币</p>
-                    </c:if>
-                    <c:if test="${score < m.key2.list[1].price}">
-                        <p class="now-price">或：<fmt:formatNumber
-                                type="number" value="${(m.key2.list[1].price-score3)/100}"
-                                pattern="0.00"
-                                maxFractionDigits="0"/>元+<fmt:formatNumber
-                                type="number" value="${score3/100}" pattern="0.00"
-                                maxFractionDigits="0"/>金币</p>
-                    </c:if>
+                    <%--<c:if test="${score >= m.key2.list[1].price}">--%>
+                        <%--<p class="now-price">或：0元+<fmt:formatNumber--%>
+                                <%--type="number" value="${m.key1.list[1].price/100}" pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>金币</p>--%>
+                    <%--</c:if>--%>
+                    <%--<c:if test="${score < m.key2.list[1].price}">--%>
+                        <%--<p class="now-price">或：<fmt:formatNumber--%>
+                                <%--type="number" value="${(m.key2.list[1].price-score3)/100}"--%>
+                                <%--pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>元+<fmt:formatNumber--%>
+                                <%--type="number" value="${score3/100}" pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>金币</p>--%>
+                    <%--</c:if>--%>
                 </div>
                 <div class="product-item" onclick="detail(${m.key2.list[2].pruductId})">
                     <div class="good-img w-sp w-bo">
@@ -277,23 +277,23 @@
                     </div>
                     <h1 class="ttl">${m.key2.list[2].name}</h1>
 
-                    <p class="true-price"><fmt:formatNumber
+                    <p class="true-price">兑换价：<fmt:formatNumber
                             type="number" value="${m.key2.list[2].price/100}" pattern="0.00"
-                            maxFractionDigits="0"/>元</p>
+                            maxFractionDigits="0"/>金币</p>
 
-                    <c:if test="${score >= m.key2.list[2].price}">
-                        <p class="now-price">或：0元+<fmt:formatNumber
-                                type="number" value="${m.key2.list[2].price/100}" pattern="0.00"
-                                maxFractionDigits="0"/>金币</p>
-                    </c:if>
-                    <c:if test="${score < m.key2.list[2].price}">
-                        <p class="now-price">或：<fmt:formatNumber
-                                type="number" value="${(m.key2.list[2].price-score3)/100}"
-                                pattern="0.00"
-                                maxFractionDigits="0"/>元+<fmt:formatNumber
-                                type="number" value="${score3/100}" pattern="0.00"
-                                maxFractionDigits="0"/>金币</p>
-                    </c:if>
+                    <%--<c:if test="${score >= m.key2.list[2].price}">--%>
+                        <%--<p class="now-price">或：0元+<fmt:formatNumber--%>
+                                <%--type="number" value="${m.key2.list[2].price/100}" pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>金币</p>--%>
+                    <%--</c:if>--%>
+                    <%--<c:if test="${score < m.key2.list[2].price}">--%>
+                        <%--<p class="now-price">或：<fmt:formatNumber--%>
+                                <%--type="number" value="${(m.key2.list[2].price-score3)/100}"--%>
+                                <%--pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>元+<fmt:formatNumber--%>
+                                <%--type="number" value="${score3/100}" pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>金币</p>--%>
+                    <%--</c:if>--%>
                 </div>
             </div>
         </div>
@@ -313,23 +313,23 @@
 
                     <p class="desc"></p>
 
-                    <p class="true-price"><fmt:formatNumber
+                    <p class="true-price">兑换价：<fmt:formatNumber
                             type="number" value="${m.key3.list[0].price/100}" pattern="0.00"
-                            maxFractionDigits="0"/>元</p>
+                            maxFractionDigits="0"/>金币</p>
 
-                    <c:if test="${score >= m.key3.list[0].price}">
-                        <p class="now-price">或：0元+<fmt:formatNumber
-                                type="number" value="${m.key3.list[0].price/100}" pattern="0.00"
-                                maxFractionDigits="0"/>金币</p>
-                    </c:if>
-                    <c:if test="${score < m.key3.list[0].price}">
-                        <p class="now-price">或：<fmt:formatNumber
-                                type="number" value="${(m.key3.list[0].price-score3)/100}"
-                                pattern="0.00"
-                                maxFractionDigits="0"/>元+<fmt:formatNumber
-                                type="number" value="${score3/100}" pattern="0.00"
-                                maxFractionDigits="0"/>金币</p>
-                    </c:if>
+                    <%--<c:if test="${score >= m.key3.list[0].price}">--%>
+                        <%--<p class="now-price">或：0元+<fmt:formatNumber--%>
+                                <%--type="number" value="${m.key3.list[0].price/100}" pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>金币</p>--%>
+                    <%--</c:if>--%>
+                    <%--<c:if test="${score < m.key3.list[0].price}">--%>
+                        <%--<p class="now-price">或：<fmt:formatNumber--%>
+                                <%--type="number" value="${(m.key3.list[0].price-score3)/100}"--%>
+                                <%--pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>元+<fmt:formatNumber--%>
+                                <%--type="number" value="${score3/100}" pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>金币</p>--%>
+                    <%--</c:if>--%>
 
                     <div class="w-img">
                         <img src="${m.key3.list[0].pic}" alt="">
@@ -341,24 +341,24 @@
                         <div class="w-l w-value_">
                             <h1 class="ttl">${m.key3.list[1].name}</h1>
 
-                            <p class="true-price"><fmt:formatNumber
+                            <p class="true-price">兑换价：<fmt:formatNumber
                                     type="number" value="${m.key3.list[1].price/100}" pattern="0.00"
-                                    maxFractionDigits="0"/>元</p>
+                                    maxFractionDigits="0"/>金币</p>
 
-                            <c:if test="${score >= m.key3.list[1].price}">
-                                <p class="now-price">或：0元+<fmt:formatNumber
-                                        type="number" value="${m.key3.list[1].price/100}"
-                                        pattern="0.00"
-                                        maxFractionDigits="0"/>金币</p>
-                            </c:if>
-                            <c:if test="${score < m.key3.list[1].price}">
-                                <p class="now-price">或：<fmt:formatNumber
-                                        type="number" value="${(m.key3.list[1].price-score3)/100}"
-                                        pattern="0.00"
-                                        maxFractionDigits="0"/>元+<fmt:formatNumber
-                                        type="number" value="${score3/100}" pattern="0.00"
-                                        maxFractionDigits="0"/>金币</p>
-                            </c:if>
+                            <%--<c:if test="${score >= m.key3.list[1].price}">--%>
+                                <%--<p class="now-price">或：0元+<fmt:formatNumber--%>
+                                        <%--type="number" value="${m.key3.list[1].price/100}"--%>
+                                        <%--pattern="0.00"--%>
+                                        <%--maxFractionDigits="0"/>金币</p>--%>
+                            <%--</c:if>--%>
+                            <%--<c:if test="${score < m.key3.list[1].price}">--%>
+                                <%--<p class="now-price">或：<fmt:formatNumber--%>
+                                        <%--type="number" value="${(m.key3.list[1].price-score3)/100}"--%>
+                                        <%--pattern="0.00"--%>
+                                        <%--maxFractionDigits="0"/>元+<fmt:formatNumber--%>
+                                        <%--type="number" value="${score3/100}" pattern="0.00"--%>
+                                        <%--maxFractionDigits="0"/>金币</p>--%>
+                            <%--</c:if>--%>
                         </div>
                         <div class="w-r w-img_">
                             <img src="${m.key3.list[1].pic}" alt="">
@@ -369,24 +369,24 @@
                         <div class="w-l w-value_">
                             <h1 class="ttl">${m.key3.list[2].name}</h1>
 
-                            <p class="true-price"><fmt:formatNumber
+                            <p class="true-price">兑换价：<fmt:formatNumber
                                     type="number" value="${m.key3.list[2].price/100}" pattern="0.00"
-                                    maxFractionDigits="0"/>元</p>
+                                    maxFractionDigits="0"/>金币</p>
 
-                            <c:if test="${score >= m.key3.list[2].price}">
-                                <p class="now-price">或：0元+<fmt:formatNumber
-                                        type="number" value="${m.key3.list[2].price/100}"
-                                        pattern="0.00"
-                                        maxFractionDigits="0"/>金币</p>
-                            </c:if>
-                            <c:if test="${score < m.key3.list[2].price}">
-                                <p class="now-price">或：<fmt:formatNumber
-                                        type="number" value="${(m.key3.list[2].price-score3)/100}"
-                                        pattern="0.00"
-                                        maxFractionDigits="0"/>元+<fmt:formatNumber
-                                        type="number" value="${score3/100}" pattern="0.00"
-                                        maxFractionDigits="0"/>金币</p>
-                            </c:if>
+                            <%--<c:if test="${score >= m.key3.list[2].price}">--%>
+                                <%--<p class="now-price">或：0元+<fmt:formatNumber--%>
+                                        <%--type="number" value="${m.key3.list[2].price/100}"--%>
+                                        <%--pattern="0.00"--%>
+                                        <%--maxFractionDigits="0"/>金币</p>--%>
+                            <%--</c:if>--%>
+                            <%--<c:if test="${score < m.key3.list[2].price}">--%>
+                                <%--<p class="now-price">或：<fmt:formatNumber--%>
+                                        <%--type="number" value="${(m.key3.list[2].price-score3)/100}"--%>
+                                        <%--pattern="0.00"--%>
+                                        <%--maxFractionDigits="0"/>元+<fmt:formatNumber--%>
+                                        <%--type="number" value="${score3/100}" pattern="0.00"--%>
+                                        <%--maxFractionDigits="0"/>金币</p>--%>
+                            <%--</c:if>--%>
                         </div>
                         <div class="w-r w-img_">
                             <img src="${m.key3.list[2].pic}" alt="">
@@ -411,23 +411,23 @@
             <div class="products" onclick="detail(${m.key4.list[0].pruductId})">
                 <div class="product-item">
 
-                    <p class="true-price"><fmt:formatNumber
+                    <p class="true-price" style="text-align: left;">兑换价：<fmt:formatNumber
                             type="number" value="${m.key4.list[0].price/100}" pattern="0.00"
-                            maxFractionDigits="0"/>元</p>
+                            maxFractionDigits="0"/>金币</p>
 
-                    <c:if test="${score >= m.key4.list[0].price}">
-                        <p class="now-price">或：0元+<fmt:formatNumber
-                                type="number" value="${m.key4.list[0].price/100}" pattern="0.00"
-                                maxFractionDigits="0"/>金币</p>
-                    </c:if>
-                    <c:if test="${score < m.key4.list[0].price}">
-                        <p class="now-price">或：<fmt:formatNumber
-                                type="number" value="${(m.key4.list[0].price-score3)/100}"
-                                pattern="0.00"
-                                maxFractionDigits="0"/>元+<fmt:formatNumber
-                                type="number" value="${score3/100}" pattern="0.00"
-                                maxFractionDigits="0"/>金币</p>
-                    </c:if>
+                    <%--<c:if test="${score >= m.key4.list[0].price}">--%>
+                        <%--<p class="now-price">或：0元+<fmt:formatNumber--%>
+                                <%--type="number" value="${m.key4.list[0].price/100}" pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>金币</p>--%>
+                    <%--</c:if>--%>
+                    <%--<c:if test="${score < m.key4.list[0].price}">--%>
+                        <%--<p class="now-price">或：<fmt:formatNumber--%>
+                                <%--type="number" value="${(m.key4.list[0].price-score3)/100}"--%>
+                                <%--pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>元+<fmt:formatNumber--%>
+                                <%--type="number" value="${score3/100}" pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>金币</p>--%>
+                    <%--</c:if>--%>
                 </div>
             </div>
         </div>
@@ -452,23 +452,23 @@
 
                     <p class="desc"></p>
 
-                    <p class="true-price"><fmt:formatNumber
+                    <p class="true-price">兑换价：<fmt:formatNumber
                             type="number" value="${m.key5.list[0].price/100}" pattern="0.00"
-                            maxFractionDigits="0"/>元</p>
+                            maxFractionDigits="0"/>金币</p>
 
-                    <c:if test="${score >= m.key5.list[0].price}">
-                        <p class="now-price">或：0元+<fmt:formatNumber
-                                type="number" value="${m.key5.list[0].price/100}" pattern="0.00"
-                                maxFractionDigits="0"/>金币</p>
-                    </c:if>
-                    <c:if test="${score < m.key5.list[0].price}">
-                        <p class="now-price">或：<fmt:formatNumber
-                                type="number" value="${(m.key5.list[0].price-score3)/100}"
-                                pattern="0.00"
-                                maxFractionDigits="0"/>元+<fmt:formatNumber
-                                type="number" value="${score3/100}" pattern="0.00"
-                                maxFractionDigits="0"/>金币</p>
-                    </c:if>
+                    <%--<c:if test="${score >= m.key5.list[0].price}">--%>
+                        <%--<p class="now-price">或：0元+<fmt:formatNumber--%>
+                                <%--type="number" value="${m.key5.list[0].price/100}" pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>金币</p>--%>
+                    <%--</c:if>--%>
+                    <%--<c:if test="${score < m.key5.list[0].price}">--%>
+                        <%--<p class="now-price">或：<fmt:formatNumber--%>
+                                <%--type="number" value="${(m.key5.list[0].price-score3)/100}"--%>
+                                <%--pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>元+<fmt:formatNumber--%>
+                                <%--type="number" value="${score3/100}" pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>金币</p>--%>
+                    <%--</c:if>--%>
                 </div>
             </div>
             <div class="products">
@@ -479,23 +479,23 @@
                     </div>
                     <h1 class="ttl">${m.key5.list[1].name}</h1>
 
-                    <p class="true-price"><fmt:formatNumber
+                    <p class="true-price">兑换价：<fmt:formatNumber
                             type="number" value="${m.key5.list[1].price/100}" pattern="0.00"
-                            maxFractionDigits="0"/>元</p>
+                            maxFractionDigits="0"/>金币</p>
 
-                    <c:if test="${score >= m.key5.list[1].price}">
-                        <p class="now-price">或：0元+<fmt:formatNumber
-                                type="number" value="${m.key5.list[1].price/100}" pattern="0.00"
-                                maxFractionDigits="0"/>金币</p>
-                    </c:if>
-                    <c:if test="${score < m.key5.list[1].price}">
-                        <p class="now-price">或：<fmt:formatNumber
-                                type="number" value="${(m.key5.list[1].price-score3)/100}"
-                                pattern="0.00"
-                                maxFractionDigits="0"/>元+<fmt:formatNumber
-                                type="number" value="${score3/100}" pattern="0.00"
-                                maxFractionDigits="0"/>金币</p>
-                    </c:if>
+                    <%--<c:if test="${score >= m.key5.list[1].price}">--%>
+                        <%--<p class="now-price">或：0元+<fmt:formatNumber--%>
+                                <%--type="number" value="${m.key5.list[1].price/100}" pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>金币</p>--%>
+                    <%--</c:if>--%>
+                    <%--<c:if test="${score < m.key5.list[1].price}">--%>
+                        <%--<p class="now-price">或：<fmt:formatNumber--%>
+                                <%--type="number" value="${(m.key5.list[1].price-score3)/100}"--%>
+                                <%--pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>元+<fmt:formatNumber--%>
+                                <%--type="number" value="${score3/100}" pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>金币</p>--%>
+                    <%--</c:if>--%>
                 </div>
                 <div class="product-item border-1px_bottom"
                      onclick="detail(${m.key5.list[2].pruductId})">
@@ -504,23 +504,23 @@
                     </div>
                     <h1 class="ttl">${m.key5.list[2].name}</h1>
 
-                    <p class="true-price"><fmt:formatNumber
+                    <p class="true-price">兑换价：<fmt:formatNumber
                             type="number" value="${m.key5.list[2].price/100}" pattern="0.00"
-                            maxFractionDigits="0"/>元</p>
+                            maxFractionDigits="0"/>金币</p>
 
-                    <c:if test="${score >= m.key5.list[2].price}">
-                        <p class="now-price">或：0元+<fmt:formatNumber
-                                type="number" value="${m.key5.list[2].price/100}" pattern="0.00"
-                                maxFractionDigits="0"/>金币</p>
-                    </c:if>
-                    <c:if test="${score < m.key5.list[2].price}">
-                        <p class="now-price">或：<fmt:formatNumber
-                                type="number" value="${(m.key5.list[2].price-score3)/100}"
-                                pattern="0.00"
-                                maxFractionDigits="0"/>元+<fmt:formatNumber
-                                type="number" value="${score3/100}" pattern="0.00"
-                                maxFractionDigits="0"/>金币</p>
-                    </c:if>
+                    <%--<c:if test="${score >= m.key5.list[2].price}">--%>
+                        <%--<p class="now-price">或：0元+<fmt:formatNumber--%>
+                                <%--type="number" value="${m.key5.list[2].price/100}" pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>金币</p>--%>
+                    <%--</c:if>--%>
+                    <%--<c:if test="${score < m.key5.list[2].price}">--%>
+                        <%--<p class="now-price">或：<fmt:formatNumber--%>
+                                <%--type="number" value="${(m.key5.list[2].price-score3)/100}"--%>
+                                <%--pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>元+<fmt:formatNumber--%>
+                                <%--type="number" value="${score3/100}" pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>金币</p>--%>
+                    <%--</c:if>--%>
                 </div>
             </div>
         </div>
@@ -545,23 +545,23 @@
 
                     <p class="desc"></p>
 
-                    <p class="true-price w-ty"><fmt:formatNumber
+                    <p class="true-price w-ty">兑换价：<fmt:formatNumber
                             type="number" value="${m.key6.list[0].price/100}" pattern="0.00"
-                            maxFractionDigits="0"/>元</p>
+                            maxFractionDigits="0"/>金币</p>
 
-                    <c:if test="${score >= m.key6.list[0].price}">
-                        <p class="now-price w-ty">或：0元+<fmt:formatNumber
-                                type="number" value="${m.key6.list[0].price/100}" pattern="0.00"
-                                maxFractionDigits="0"/>金币</p>
-                    </c:if>
-                    <c:if test="${score < m.key6.list[0].price}">
-                        <p class="now-price w-ty">或：<fmt:formatNumber
-                                type="number" value="${(m.key6.list[0].price-score3)/100}"
-                                pattern="0.00"
-                                maxFractionDigits="0"/>元+<fmt:formatNumber
-                                type="number" value="${score3/100}" pattern="0.00"
-                                maxFractionDigits="0"/>金币</p>
-                    </c:if>
+                    <%--<c:if test="${score >= m.key6.list[0].price}">--%>
+                        <%--<p class="now-price w-ty">或：0元+<fmt:formatNumber--%>
+                                <%--type="number" value="${m.key6.list[0].price/100}" pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>金币</p>--%>
+                    <%--</c:if>--%>
+                    <%--<c:if test="${score < m.key6.list[0].price}">--%>
+                        <%--<p class="now-price w-ty">或：<fmt:formatNumber--%>
+                                <%--type="number" value="${(m.key6.list[0].price-score3)/100}"--%>
+                                <%--pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>元+<fmt:formatNumber--%>
+                                <%--type="number" value="${score3/100}" pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>金币</p>--%>
+                    <%--</c:if>--%>
                 </div>
             </div>
             <div class="products">
@@ -572,23 +572,23 @@
                     </div>
                     <h1 class="ttl">${m.key6.list[1].name}</h1>
 
-                    <p class="true-price w-ty"><fmt:formatNumber
+                    <p class="true-price w-ty">兑换价：<fmt:formatNumber
                             type="number" value="${m.key6.list[1].price/100}" pattern="0.00"
-                            maxFractionDigits="0"/>元</p>
+                            maxFractionDigits="0"/>金币</p>
 
-                    <c:if test="${score >= m.key6.list[1].price}">
-                        <p class="now-price w-ty">或：0元+<fmt:formatNumber
-                                type="number" value="${m.key6.list[1].price/100}" pattern="0.00"
-                                maxFractionDigits="0"/>金币</p>
-                    </c:if>
-                    <c:if test="${score < m.key6.list[1].price}">
-                        <p class="now-price w-ty">或：<fmt:formatNumber
-                                type="number" value="${(m.key6.list[1].price-score3)/100}"
-                                pattern="0.00"
-                                maxFractionDigits="0"/>元+<fmt:formatNumber
-                                type="number" value="${score3/100}" pattern="0.00"
-                                maxFractionDigits="0"/>金币</p>
-                    </c:if>
+                    <%--<c:if test="${score >= m.key6.list[1].price}">--%>
+                        <%--<p class="now-price w-ty">或：0元+<fmt:formatNumber--%>
+                                <%--type="number" value="${m.key6.list[1].price/100}" pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>金币</p>--%>
+                    <%--</c:if>--%>
+                    <%--<c:if test="${score < m.key6.list[1].price}">--%>
+                        <%--<p class="now-price w-ty">或：<fmt:formatNumber--%>
+                                <%--type="number" value="${(m.key6.list[1].price-score3)/100}"--%>
+                                <%--pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>元+<fmt:formatNumber--%>
+                                <%--type="number" value="${score3/100}" pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>金币</p>--%>
+                    <%--</c:if>--%>
                 </div>
                 <div class="product-item border-1px_bottom"
                      onclick="detail(${m.key6.list[2].pruductId})">
@@ -597,23 +597,23 @@
                     </div>
                     <h1 class="ttl">${m.key6.list[2].name}</h1>
 
-                    <p class="true-price w-ty"><fmt:formatNumber
+                    <p class="true-price w-ty">兑换价：<fmt:formatNumber
                             type="number" value="${m.key6.list[2].price/100}" pattern="0.00"
-                            maxFractionDigits="0"/>元</p>
+                            maxFractionDigits="0"/>金币</p>
 
-                    <c:if test="${score >= m.key6.list[2].price}">
-                        <p class="now-price w-ty">或：0元+<fmt:formatNumber
-                                type="number" value="${m.key6.list[2].price/100}" pattern="0.00"
-                                maxFractionDigits="0"/>金币</p>
-                    </c:if>
-                    <c:if test="${score < m.key6.list[2].price}">
-                        <p class="now-price w-ty">或：<fmt:formatNumber
-                                type="number" value="${(m.key6.list[2].price-score3)/100}"
-                                pattern="0.00"
-                                maxFractionDigits="0"/>元+<fmt:formatNumber
-                                type="number" value="${score3/100}" pattern="0.00"
-                                maxFractionDigits="0"/>金币</p>
-                    </c:if>
+                    <%--<c:if test="${score >= m.key6.list[2].price}">--%>
+                        <%--<p class="now-price w-ty">或：0元+<fmt:formatNumber--%>
+                                <%--type="number" value="${m.key6.list[2].price/100}" pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>金币</p>--%>
+                    <%--</c:if>--%>
+                    <%--<c:if test="${score < m.key6.list[2].price}">--%>
+                        <%--<p class="now-price w-ty">或：<fmt:formatNumber--%>
+                                <%--type="number" value="${(m.key6.list[2].price-score3)/100}"--%>
+                                <%--pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>元+<fmt:formatNumber--%>
+                                <%--type="number" value="${score3/100}" pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>金币</p>--%>
+                    <%--</c:if>--%>
                 </div>
             </div>
         </div>
@@ -638,23 +638,23 @@
 
                     <p class="desc"></p>
 
-                    <p class="true-price w-ty"><fmt:formatNumber
+                    <p class="true-price w-ty">兑换价：<fmt:formatNumber
                             type="number" value="${m.key7.list[0].price/100}" pattern="0.00"
-                            maxFractionDigits="0"/>元</p>
+                            maxFractionDigits="0"/>金币</p>
 
-                    <c:if test="${score >= m.key7.list[0].price}">
-                        <p class="now-price w-ty">或：0元+<fmt:formatNumber
-                                type="number" value="${m.key7.list[0].price/100}" pattern="0.00"
-                                maxFractionDigits="0"/>金币</p>
-                    </c:if>
-                    <c:if test="${score < m.key7.list[0].price}">
-                        <p class="now-price w-ty">或：<fmt:formatNumber
-                                type="number" value="${(m.key7.list[0].price-score3)/100}"
-                                pattern="0.00"
-                                maxFractionDigits="0"/>元+<fmt:formatNumber
-                                type="number" value="${score3/100}" pattern="0.00"
-                                maxFractionDigits="0"/>金币</p>
-                    </c:if>
+                    <%--<c:if test="${score >= m.key7.list[0].price}">--%>
+                        <%--<p class="now-price w-ty">或：0元+<fmt:formatNumber--%>
+                                <%--type="number" value="${m.key7.list[0].price/100}" pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>金币</p>--%>
+                    <%--</c:if>--%>
+                    <%--<c:if test="${score < m.key7.list[0].price}">--%>
+                        <%--<p class="now-price w-ty">或：<fmt:formatNumber--%>
+                                <%--type="number" value="${(m.key7.list[0].price-score3)/100}"--%>
+                                <%--pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>元+<fmt:formatNumber--%>
+                                <%--type="number" value="${score3/100}" pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>金币</p>--%>
+                    <%--</c:if>--%>
                 </div>
             </div>
             <div class="products">
@@ -665,23 +665,23 @@
                     </div>
                     <h1 class="ttl">${m.key7.list[1].name}</h1>
 
-                    <p class="true-price w-ty"><fmt:formatNumber
+                    <p class="true-price w-ty">兑换价：<fmt:formatNumber
                             type="number" value="${m.key7.list[1].price/100}" pattern="0.00"
-                            maxFractionDigits="0"/>元</p>
+                            maxFractionDigits="0"/>金币</p>
 
-                    <c:if test="${score >= m.key7.list[1].price}">
-                        <p class="now-price w-ty">或：0元+<fmt:formatNumber
-                                type="number" value="${m.key7.list[1].price/100}" pattern="0.00"
-                                maxFractionDigits="0"/>金币</p>
-                    </c:if>
-                    <c:if test="${score < m.key7.list[1].price}">
-                        <p class="now-price w-ty">或：<fmt:formatNumber
-                                type="number" value="${(m.key7.list[1].price-score3)/100}"
-                                pattern="0.00"
-                                maxFractionDigits="0"/>元+<fmt:formatNumber
-                                type="number" value="${score3/100}" pattern="0.00"
-                                maxFractionDigits="0"/>金币</p>
-                    </c:if>
+                    <%--<c:if test="${score >= m.key7.list[1].price}">--%>
+                        <%--<p class="now-price w-ty">或：0元+<fmt:formatNumber--%>
+                                <%--type="number" value="${m.key7.list[1].price/100}" pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>金币</p>--%>
+                    <%--</c:if>--%>
+                    <%--<c:if test="${score < m.key7.list[1].price}">--%>
+                        <%--<p class="now-price w-ty">或：<fmt:formatNumber--%>
+                                <%--type="number" value="${(m.key7.list[1].price-score3)/100}"--%>
+                                <%--pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>元+<fmt:formatNumber--%>
+                                <%--type="number" value="${score3/100}" pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>金币</p>--%>
+                    <%--</c:if>--%>
                 </div>
                 <div class="product-item border-1px_bottom"
                      onclick="detail(${m.key7.list[2].pruductId})">
@@ -690,23 +690,23 @@
                     </div>
                     <h1 class="ttl">${m.key7.list[2].name}</h1>
 
-                    <p class="true-price w-ty"><fmt:formatNumber
+                    <p class="true-price w-ty">兑换价：<fmt:formatNumber
                             type="number" value="${m.key7.list[2].price/100}" pattern="0.00"
-                            maxFractionDigits="0"/>元</p>
+                            maxFractionDigits="0"/>金币</p>
 
-                    <c:if test="${score >= m.key7.list[2].price}">
-                        <p class="now-price w-ty">或：0元+<fmt:formatNumber
-                                type="number" value="${m.key7.list[2].price/100}" pattern="0.00"
-                                maxFractionDigits="0"/>金币</p>
-                    </c:if>
-                    <c:if test="${score < m.key7.list[2].price}">
-                        <p class="now-price w-ty">或：<fmt:formatNumber
-                                type="number" value="${(m.key7.list[2].price-score3)/100}"
-                                pattern="0.00"
-                                maxFractionDigits="0"/>元+<fmt:formatNumber
-                                type="number" value="${score3/100}" pattern="0.00"
-                                maxFractionDigits="0"/>金币</p>
-                    </c:if>
+                    <%--<c:if test="${score >= m.key7.list[2].price}">--%>
+                        <%--<p class="now-price w-ty">或：0元+<fmt:formatNumber--%>
+                                <%--type="number" value="${m.key7.list[2].price/100}" pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>金币</p>--%>
+                    <%--</c:if>--%>
+                    <%--<c:if test="${score < m.key7.list[2].price}">--%>
+                        <%--<p class="now-price w-ty">或：<fmt:formatNumber--%>
+                                <%--type="number" value="${(m.key7.list[2].price-score3)/100}"--%>
+                                <%--pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>元+<fmt:formatNumber--%>
+                                <%--type="number" value="${score3/100}" pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>金币</p>--%>
+                    <%--</c:if>--%>
                 </div>
             </div>
         </div>
@@ -731,23 +731,23 @@
 
                     <p class="desc"></p>
 
-                    <p class="true-price w-ty"><fmt:formatNumber
+                    <p class="true-price w-ty">兑换价：<fmt:formatNumber
                             type="number" value="${m.key8.list[0].price/100}" pattern="0.00"
-                            maxFractionDigits="0"/>元</p>
+                            maxFractionDigits="0"/>金币</p>
 
-                    <c:if test="${score >= m.key8.list[0].price}">
-                        <p class="now-price w-ty">或：0元+<fmt:formatNumber
-                                type="number" value="${m.key8.list[0].price/100}" pattern="0.00"
-                                maxFractionDigits="0"/>金币</p>
-                    </c:if>
-                    <c:if test="${score < m.key8.list[0].price}">
-                        <p class="now-price w-ty">或：<fmt:formatNumber
-                                type="number" value="${(m.key8.list[0].price-score3)/100}"
-                                pattern="0.00"
-                                maxFractionDigits="0"/>元+<fmt:formatNumber
-                                type="number" value="${score3/100}" pattern="0.00"
-                                maxFractionDigits="0"/>金币</p>
-                    </c:if>
+                    <%--<c:if test="${score >= m.key8.list[0].price}">--%>
+                        <%--<p class="now-price w-ty">或：0元+<fmt:formatNumber--%>
+                                <%--type="number" value="${m.key8.list[0].price/100}" pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>金币</p>--%>
+                    <%--</c:if>--%>
+                    <%--<c:if test="${score < m.key8.list[0].price}">--%>
+                        <%--<p class="now-price w-ty">或：<fmt:formatNumber--%>
+                                <%--type="number" value="${(m.key8.list[0].price-score3)/100}"--%>
+                                <%--pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>元+<fmt:formatNumber--%>
+                                <%--type="number" value="${score3/100}" pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>金币</p>--%>
+                    <%--</c:if>--%>
                 </div>
             </div>
             <div class="products">
@@ -758,23 +758,23 @@
                     </div>
                     <h1 class="ttl">${m.key8.list[1].name}</h1>
 
-                    <p class="true-price w-ty"><fmt:formatNumber
+                    <p class="true-price w-ty">兑换价：<fmt:formatNumber
                             type="number" value="${m.key8.list[1].price/100}" pattern="0.00"
-                            maxFractionDigits="0"/>元</p>
+                            maxFractionDigits="0"/>金币</p>
 
-                    <c:if test="${score >= m.key8.list[1].price}">
-                        <p class="now-price w-ty">或：0元+<fmt:formatNumber
-                                type="number" value="${m.key8.list[1].price/100}" pattern="0.00"
-                                maxFractionDigits="0"/>金币</p>
-                    </c:if>
-                    <c:if test="${score < m.key8.list[1].price}">
-                        <p class="now-price w-ty">或：<fmt:formatNumber
-                                type="number" value="${(m.key8.list[1].price-score3)/100}"
-                                pattern="0.00"
-                                maxFractionDigits="0"/>元+<fmt:formatNumber
-                                type="number" value="${score3/100}" pattern="0.00"
-                                maxFractionDigits="0"/>金币</p>
-                    </c:if>
+                    <%--<c:if test="${score >= m.key8.list[1].price}">--%>
+                        <%--<p class="now-price w-ty">或：0元+<fmt:formatNumber--%>
+                                <%--type="number" value="${m.key8.list[1].price/100}" pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>金币</p>--%>
+                    <%--</c:if>--%>
+                    <%--<c:if test="${score < m.key8.list[1].price}">--%>
+                        <%--<p class="now-price w-ty">或：<fmt:formatNumber--%>
+                                <%--type="number" value="${(m.key8.list[1].price-score3)/100}"--%>
+                                <%--pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>元+<fmt:formatNumber--%>
+                                <%--type="number" value="${score3/100}" pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>金币</p>--%>
+                    <%--</c:if>--%>
                 </div>
                 <div class="product-item border-1px_bottom"
                      onclick="detail(${m.key8.list[2].pruductId})">
@@ -783,23 +783,23 @@
                     </div>
                     <h1 class="ttl">${m.key8.list[2].name}</h1>
 
-                    <p class="true-price w-ty"><fmt:formatNumber
+                    <p class="true-price w-ty">兑换价：<fmt:formatNumber
                             type="number" value="${m.key8.list[2].price/100}" pattern="0.00"
-                            maxFractionDigits="0"/>元</p>
+                            maxFractionDigits="0"/>金币</p>
 
-                    <c:if test="${score >= m.key8.list[2].price}">
-                        <p class="now-price w-ty">或：0元+<fmt:formatNumber
-                                type="number" value="${m.key8.list[2].price/100}" pattern="0.00"
-                                maxFractionDigits="0"/>金币</p>
-                    </c:if>
-                    <c:if test="${score < m.key8.list[2].price}">
-                        <p class="now-price w-ty">或：<fmt:formatNumber
-                                type="number" value="${(m.key8.list[2].price-score3)/100}"
-                                pattern="0.00"
-                                maxFractionDigits="0"/>元+<fmt:formatNumber
-                                type="number" value="${score3/100}" pattern="0.00"
-                                maxFractionDigits="0"/>金币</p>
-                    </c:if>
+                    <%--<c:if test="${score >= m.key8.list[2].price}">--%>
+                        <%--<p class="now-price w-ty">或：0元+<fmt:formatNumber--%>
+                                <%--type="number" value="${m.key8.list[2].price/100}" pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>金币</p>--%>
+                    <%--</c:if>--%>
+                    <%--<c:if test="${score < m.key8.list[2].price}">--%>
+                        <%--<p class="now-price w-ty">或：<fmt:formatNumber--%>
+                                <%--type="number" value="${(m.key8.list[2].price-score3)/100}"--%>
+                                <%--pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>元+<fmt:formatNumber--%>
+                                <%--type="number" value="${score3/100}" pattern="0.00"--%>
+                                <%--maxFractionDigits="0"/>金币</p>--%>
+                    <%--</c:if>--%>
                 </div>
             </div>
         </div>
@@ -867,7 +867,7 @@
         var list = eval("(" + res + ")");
         for (var i = 0; i < list.length; i++) {
             content +=
-                '<div class="swiper-slide" style="height:205px;" onclick="bannerType('
+                '<div class="swiper-slide" style="height:55vw;" onclick="bannerType('
                 + list[i].afterType + ',' + list[i].url + ',' + list[i].productId
                 + ')"><img src="' + list[i].picture + '" alt=""></div>';
         }

@@ -33,7 +33,7 @@ public class OnLineOrder {
   @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "onLineOrder")
   private List<OrderDetail> orderDetails = new ArrayList<OrderDetail>();
 
-  private Integer type = 1;  //订单类型  1=积分订单|2=金币订单
+  private Integer type = 1;  //订单类型  1=积分订单|2=金币订单  意义更新为  1=臻品商城(有金币使用上限)|2=金币商城(可纯金币兑换)
 
   private Long orderPrice = 0L;  //对应商品的price和，虚拟总价，不包括邮费
 

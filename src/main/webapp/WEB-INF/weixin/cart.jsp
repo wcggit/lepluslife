@@ -89,8 +89,8 @@
             </div>
             <div class="mui-table-cell mui-col-xs-5">
                 ￥<font class="priceSum">0</font><span class="minScore"
-                                                      style="font-size: 17px;color:#fb991a;">+<font
-                    id="totalScore">0</font>金币</span>
+                                                      style="font-size: 17px;color:#E4AF69;display: none">+<font
+                    id="totalScore">0</font></span>
             </div>
             <div class="mui-table-cell mui-col-xs-4" id="buy" style="font-size: 15px;">
                 下单
@@ -210,15 +210,15 @@
                     liHtmlStr +=
                         '</div><div class="mui-table-cell mui-col-xs-11 mui-text-left mui-pull-right">';
                     liHtmlStr +=
-                        '<h5 class="mui-ellipsis" style="margin-top: 10px;">' + data[i].product.name
+                        '<h5 class="mui-ellipsis" style="margin-top: 20px;">' + data[i].product.name
                         + '</h5><h6 style="color:#999 !important;margin: 8px 0;">规格：<font>'
                         + data[i].productSpec.specDetail + '</font></h6>';
                     liHtmlStr +=
                         '<p class="chose_right right_all"><span class="order-price mui-pull-left" style="width: 32vw;margin-left: -2%;font-size: 15px">￥<font class="price">'
                         + toDecimal(data[i].productSpec.minPrice
                                     / 100)
-                        + '</font><span style="font-size: 15px;color:#fb991a;">+<font class="minScore">'
-                        + toDecimal(data[i].productSpec.minScore / 100) + '</font>金币</span></span>';
+                        + '</font><span style="font-size: 15px;color:#E4AF69;"><font class="minScore" style="display: none">'
+                        + toDecimal(data[i].productSpec.minScore / 100) + '</font></span></span>';
                     liHtmlStr +=
                         '<button class="btnCut"></button><input type="number" value="'
                         + data[i].productNumber
