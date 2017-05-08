@@ -268,7 +268,7 @@ public class OrderController {
   }
 
 
-  @ApiOperation("全积分支付接口")
+  @ApiOperation("全金币支付接口")
   @RequestMapping(value = "/payByScore", method = RequestMethod.POST)
   public
   @ResponseBody
@@ -277,7 +277,7 @@ public class OrderController {
       return LejiaResult.build(5010, messageService.getMsg("5010"));
     }
     try {
-      Map map = onlineOrderService.orderPayByScoreB(orderId, trueScore, 2, 9L);
+      Map map = onlineOrderService.orderPayByScore(orderId, trueScore, 2, 13L);
       String status = "" + map.get("status");
       if (!"200".equals(status)) {
         return LejiaResult.build(Integer.valueOf(status), messageService.getMsg(status));

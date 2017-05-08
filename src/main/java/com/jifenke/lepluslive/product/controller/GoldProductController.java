@@ -5,16 +5,12 @@ import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.product.domain.entities.Product;
 import com.jifenke.lepluslive.product.domain.entities.ProductDetail;
 import com.jifenke.lepluslive.product.domain.entities.ProductSpec;
-import com.jifenke.lepluslive.product.domain.entities.ProductType;
 import com.jifenke.lepluslive.product.domain.entities.ScrollPicture;
 import com.jifenke.lepluslive.product.service.GoldProductService;
 import com.jifenke.lepluslive.product.service.ProductModuleService;
 import com.jifenke.lepluslive.product.service.ProductService;
 import com.jifenke.lepluslive.product.service.ScrollPictureService;
-import com.jifenke.lepluslive.score.domain.entities.ScoreB;
-import com.jifenke.lepluslive.score.domain.entities.ScoreC;
 import com.jifenke.lepluslive.score.service.ScoreCService;
-import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
 import com.jifenke.lepluslive.weixin.service.WeiXinService;
 
@@ -70,11 +66,6 @@ public class GoldProductController {
     model.addAttribute("score", score);
     model.addAttribute("score3", score - score % 100);
 
-//    List<Map> list = goldProductService.findHotProductListByPage(1, 100);
-//
-//    for (Map map : list) {
-//      model.addAttribute("p_" + map.get("id"), map);
-//    }
     model.addAttribute("m", JsonUtils.jsonToPojo(productModuleService.findList(), Map.class));
     model.addAttribute("wxConfig", weiXinPayService.getWeiXinPayConfig(request));
     return MvUtil.go("/gold/product/index2");

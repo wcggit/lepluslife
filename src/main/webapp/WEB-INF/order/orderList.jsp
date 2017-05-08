@@ -5,9 +5,9 @@
   Time: 09:20
   Content:订单列表
 --%>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ page language="java" pageEncoding="UTF-8" %>
+<%@include file="/WEB-INF/commen.jsp" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -52,25 +52,25 @@
 <section class="footer">
     <div onclick="goMenu(1)">
         <div>
-            <img src="${resourceUrl}/frontRes/product/hotIndex/img/zhenpin1.png" alt="">
+            <img src="${resource}/gold/img/zhenpin1.png" alt="">
         </div>
         <p>臻品</p>
     </div>
     <div onclick="goMenu(2)">
         <div>
-            <img src="${resourceUrl}/frontRes/product/hotIndex/img/miaosha1.png" alt="">
+            <img src="${resource}/gold/img/miaosha1.png" alt="">
         </div>
         <p>秒杀</p>
     </div>
     <div onclick="goMenu(3)">
         <div>
-            <img src="${resourceUrl}/frontRes/product/hotIndex/img/gouwuche1.png" alt="">
+            <img src="${resource}/gold/img/gouwuche1.png" alt="">
         </div>
         <p>购物车</p>
     </div>
     <div>
         <div>
-            <img src="${resourceUrl}/frontRes/product/hotIndex/img/dingdan2.png" alt="">
+            <img src="${resource}/gold/img/dingdan2.png" alt="">
         </div>
         <p>订单</p>
     </div>
@@ -83,7 +83,7 @@
         if (curIndex == 1) {
             location.href = "/front/product/weixin/productIndex";
         } else if (curIndex == 2) {
-            location.href = "/front/product/weixin/hotIndex";
+            location.href = "/front/gold/weixin";
         } else if (curIndex == 3) {
             location.href = "/weixin/cart";
         }
@@ -114,34 +114,34 @@
                                var divHtml = '';
                                if (orders[i].state == 0) {//待支付
                                    divHtml =
-                                   orderToList(divHtml, orders[i], "待付款", orders[i].totalPrice,
-                                               orders[i].totalScore);
+                                       orderToList(divHtml, orders[i], "待付款", orders[i].totalPrice,
+                                                   orders[i].totalScore);
                                    divHtml +=
-                                   '<div class="button"><button class="cancelOrder" onclick="orderCancle('
-                                   + orders[i].id
-                                   + ',event)">取消订单</button><button onclick="goPayPage('
-                                   + orders[i].id + ',event)">去付款</button></div></div>';
+                                       '<div class="button"><button class="cancelOrder" onclick="orderCancle('
+                                       + orders[i].id
+                                       + ',event)">取消订单</button><button onclick="goPayPage('
+                                       + orders[i].id + ',event)">去付款</button></div></div>';
                                    contentHtml += divHtml;
                                } else if (orders[i].state == 1) { //待发货
                                    divHtml =
-                                   orderToList(divHtml, orders[i], "待发货", orders[i].truePrice,
-                                               orders[i].totalScore);
+                                       orderToList(divHtml, orders[i], "待发货", orders[i].truePrice,
+                                                   orders[i].totalScore);
                                    divHtml += '</div>';
                                    contentHtml += divHtml;
                                } else if (orders[i].state == 2) { //待收货
                                    divHtml =
-                                   orderToList(divHtml, orders[i], "待收货", orders[i].truePrice,
-                                               orders[i].totalScore);
+                                       orderToList(divHtml, orders[i], "待收货", orders[i].truePrice,
+                                                   orders[i].totalScore);
                                    divHtml +=
-                                   '<div class="button"><button class="logistics" onclick="goDeliveryPage('
-                                   + orders[i].id
-                                   + ',event)">查看物流</button><button onclick="orderConfirm('
-                                   + orders[i].id + ',event)">确认收货</button></div></div>';
+                                       '<div class="button"><button class="logistics" onclick="goDeliveryPage('
+                                       + orders[i].id
+                                       + ',event)">查看物流</button><button onclick="orderConfirm('
+                                       + orders[i].id + ',event)">确认收货</button></div></div>';
                                    contentHtml += divHtml;
                                } else if (orders[i].state == 3) {
                                    divHtml =
-                                   orderToList(divHtml, orders[i], "已完成", orders[i].truePrice,
-                                               orders[i].totalScore);
+                                       orderToList(divHtml, orders[i], "已完成", orders[i].truePrice,
+                                                   orders[i].totalScore);
                                    divHtml += '</div>';
                                    contentHtml += divHtml;
                                }
@@ -163,15 +163,13 @@
                   + '</div><div>' + stateInput + '</div></div>';
         divStr = productSplice(divStr, data);
         divStr +=
-        '<div class="all"><div>共 <span style="margin-right: 3px;">' + orderHasProCount
-        + '</span>件商品</div><div>合计：<span style="font-size: 15px;color: #333;">￥'
-        + toDecimal(totalPrice / 100)
-        + '</span> + <span style="font-size: 14px;color: #fb991a;">';
-        if (data.type == 1) {
-            divStr += totalScore + '积分';
-        } else {
-            divStr += toDecimal(totalScore / 100) + '金币';
-        }
+            '<div class="all"><div>共 <span style="margin-right: 3px;">' + orderHasProCount
+            + '</span>件商品</div><div>合计：<span style="font-size: 15px;color: #333;">￥'
+            + toDecimal(totalPrice / 100)
+            + '</span> + <span style="font-size: 14px;">';
+
+        divStr += toDecimal(totalScore / 100) + '金币';
+
         divStr += '</span><spanstyle="font-size: 13px;color: #666;">';
         if (data.transmitWay == 1) {
             divStr += '（线下自提）</span></div></div>';
@@ -188,32 +186,20 @@
         for (var i = 0; i < orderDetails.length; i++) {
             orderHasProCount += orderDetails[i].productNumber;
             divStr +=
-            '<div><div class="dImg"><img src="' + (orderDetails[i].product.type == 1
+                '<div><div class="dImg"><img src="' + (orderDetails[i].product.type == 1
                     ? orderDetails[i].productSpec.picture : orderDetails[i].product.picture)
-            + '" alt=""></div><div class="guige"><div><div>'
-            + orderDetails[i].product.name
-            + '</div><div>×'
-            + orderDetails[i].productNumber
-            + '</div></div><p>'
-            + orderDetails[i].productSpec.specDetail
-            + '</p><p>￥'
-            + toDecimal(orderDetails[i].productSpec.minPrice
-                        / 100) + '+<span>';
-            if (data.type == 1) {
-                divStr +=
-                (orderDetails[i].product.type == 1 ? Math.floor(((orderDetails[i].productSpec.price
-                                                                  - orderDetails[i].productSpec.minPrice)
-                                                                 - (orderDetails[i].productSpec.price
-                                                                    - orderDetails[i].productSpec.minPrice)
-                                                                   % 100) / 100)
-                        : (orderDetails[i].productSpec.minScore
-                           == null ? 0
-                        : orderDetails[i].productSpec.minScore)) + '积分</span></p></div></div>';
-            } else {
-                divStr +=
-                toDecimal(orderDetails[i].productSpec.minScore / 100) + '金币</span></p></div></div>';
-            }
-
+                + '" alt=""></div><div class="guige"><div><div>'
+                + orderDetails[i].product.name
+                + '</div><div>×'
+                + orderDetails[i].productNumber
+                + '</div></div><p>'
+                + orderDetails[i].productSpec.specDetail
+                + '</p><p>￥'
+                + toDecimal(orderDetails[i].productSpec.minPrice
+                            / 100) + '+<span>';
+            divStr +=
+                toDecimal(orderDetails[i].productSpec.minScore / 100)
+                + '金币</span></p></div></div>';
         }
         divStr += '</div>';
         return divStr;
@@ -348,14 +334,15 @@
     });
     function empty(id) {
         $("." + id).append(
-                $("<div></div>").attr("style",
-                                      "width:23%;background-color: transparent;text-align: center;margin:0 auto;margin-top:33%;margin-bottom: 30px;").append(
-                        $("<img>").attr("style", "width:100%;").attr("src",
-                                                                     "${resourceUrl}/frontRes/product/hotIndex/img/empty.png")
-                )
+            $("<div></div>").attr("style",
+                                  "width:23%;background-color: transparent;text-align: center;margin:0 auto;margin-top:33%;margin-bottom: 30px;").append(
+                $("<img>").attr("style", "width:100%;").attr("src",
+                                                             "${resourceUrl}/frontRes/product/hotIndex/img/empty.png")
+            )
         ).append(
-                $("<div></div>").attr("style",
-                                      "background-color: transparent;text-align: center;color: #b2b2b2;font-size: 16px;").html("目前还没有订单呢！")
+            $("<div></div>").attr("style",
+                                  "background-color: transparent;text-align: center;color: #b2b2b2;font-size: 16px;").html(
+                "目前还没有订单呢！")
         )
     }
 </script>

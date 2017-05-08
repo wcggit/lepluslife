@@ -118,8 +118,7 @@ public class ProductController {
    * @param typeId 臻品类型 0=所有
    */
   @RequestMapping(value = "/productList", method = RequestMethod.GET)
-  public LejiaResult productList(@RequestParam(required = true) Integer page,
-                          @RequestParam(required = true) Integer typeId) {
+  public LejiaResult productList(@RequestParam Integer page, @RequestParam Integer typeId) {
     if (page == null || page < 1) {
       page = 1;
     }

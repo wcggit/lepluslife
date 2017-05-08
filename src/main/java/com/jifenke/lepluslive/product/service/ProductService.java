@@ -137,21 +137,6 @@ public class ProductService {
   }
 
   /**
-   * 获取主打爆品 16/09/21
-   */
-  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
-  public Map findMainHotProduct() {
-    List<Object[]> list = productRepository.findMainHotProductList();
-    if (list != null && list.size() > 0) {
-      Object[] o = list.get(0);
-      Map<String, Object> map = convertData(o);
-      map.put("repository", o[12]);
-      return map;
-    }
-    return null;
-  }
-
-  /**
    * 分页获取爆品列表 16/09/21
    *
    * @param currPage 第几页
@@ -212,4 +197,19 @@ public class ProductService {
     map.put("buyLimit", o[11]);
     return map;
   }
+
+  //  /**
+//   * 获取主打爆品 16/09/21
+//   */
+//  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+//  public Map findMainHotProduct() {
+//    List<Object[]> list = productRepository.findMainHotProductList();
+//    if (list != null && list.size() > 0) {
+//      Object[] o = list.get(0);
+//      Map<String, Object> map = convertData(o);
+//      map.put("repository", o[12]);
+//      return map;
+//    }
+//    return null;
+//  }
 }
