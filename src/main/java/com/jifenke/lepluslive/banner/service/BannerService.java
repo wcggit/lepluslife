@@ -400,4 +400,22 @@ public class BannerService {
     return redisCacheService.findBySqlAndCache(sql, key, timeout);
   }
 
+  /**
+   * 15=热门电影列表图,16=电影首页上方轮播图
+   */
+  public List findTopBanner() {
+    BannerType bannerType = new BannerType();
+    bannerType.setId(16L);
+    bannerType.setName("电影首页上方轮播图");
+    List<Banner> bannerList = bannerRepository.findByStatusAndBannerType(1, bannerType);
+    return bannerList;
+  }
+
+  public List findHotMovieBanner() {
+    BannerType bannerType = new BannerType();
+    bannerType.setId(15L);
+    bannerType.setName("热门电影列表图");
+    List<Banner> bannerList = bannerRepository.findByStatusAndBannerType(1, bannerType);
+    return bannerList;
+  }
 }
