@@ -277,7 +277,7 @@ public class OnlineOrderService {
   }
 
   /**
-   * 全积分支付购买商品  16/09/27
+   * 全金币支付购买普通商品  16/09/27
    *
    * @param orderId     订单id
    * @param trueScore   实际使用积分
@@ -285,20 +285,20 @@ public class OnlineOrderService {
    * @param payOrigin   支付来源 9=APP全积分|10=公众号全积分
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public Map<String, Object> orderPayByScoreB(Long orderId, Long trueScore, Integer transmitWay,
-                                              Long payOrigin) throws Exception {
+  public Map<String, Object> orderPayByScore(Long orderId, Long trueScore, Integer transmitWay,
+                                             Long payOrigin) throws Exception {
     Map<String, Object> result = new HashMap<>();
     OnLineOrder order = orderRepository.findOne(orderId);
     if (order == null) {
       result.put("status", 5006);
       return result;
     }
-    ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(order.getLeJiaUser());
-    if (scoreB == null) {
+    ScoreC scoreC = scoreCService.findScoreCByLeJiaUser(order.getLeJiaUser());
+    if (scoreC == null) {
       result.put("status", 6001);
       return result;
     }
-    if (scoreB.getScore() < order.getTotalScore()) {
+    if (scoreC.getScore() < order.getTotalScore()) {
       result.put("status", 6002);
       return result;
     }
@@ -308,11 +308,7 @@ public class OnlineOrderService {
       return result;
     }
     PayOrigin payWay = new PayOrigin(payOrigin);
-    if (payOrigin == 9) {
-      payWay.setPayFrom(1);
-    } else {
-      payWay.setPayFrom(2);
-    }
+
     //暂定不返A积分
     if (order.getState() == 4) {
       result.put("status", 5008);
@@ -321,7 +317,7 @@ public class OnlineOrderService {
     int check = orderService.checkOrderMoney(0L, trueScore, transmitWay, order);
     if (check == 0) {
       result.put("status", 5009);
-      result.put("msg", "订单金额或积分计算有误");
+      result.put("msg", "订单金额或金币计算有误");
       return result;
     }
     Date date = new Date();
@@ -341,16 +337,9 @@ public class OnlineOrderService {
       order.setTransmitWay(transmitWay);
       //订单相关product的销量等数据处理
       productService.editProductSaleByPayOrder(order);
-      //B积分修改
-      scoreB.setScore(scoreB.getScore() - trueScore);
-      ScoreBDetail scoreBDetail = new ScoreBDetail();
-      scoreBDetail.setOperate("乐+商城消费");
-      scoreBDetail.setOrigin(2);
-      scoreBDetail.setOrderSid(order.getOrderSid());
-      scoreBDetail.setScoreB(scoreB);
-      scoreBDetail.setNumber(-trueScore);
-      scoreBDetailRepository.save(scoreBDetail);
-      scoreBRepository.save(scoreB);
+      //C金币修改及记录添加
+      scoreCService.saveScoreC(scoreC, 0, trueScore);
+      scoreCService.saveScoreCDetail(scoreC, 0, trueScore, 2, "臻品商城消费", order.getOrderSid());
       orderRepository.save(order);
       new Thread(() -> { //合伙人和商家分润
         orderShareService.onLineOrderShare(order);

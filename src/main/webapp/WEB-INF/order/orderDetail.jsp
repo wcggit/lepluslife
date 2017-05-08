@@ -159,18 +159,10 @@
                                       value="${orderDetail.productSpec.minPrice/100}"
                                       pattern="0.00"
                                       maxFractionDigits="2"/>+<span>
-                    <c:if test="${order.type == 1}">
-                        <c:if test="${orderDetail.product.type == 1}"><fmt:formatNumber
-                                type="number"
-                                value="${((orderDetail.productSpec.price-orderDetail.productSpec.minPrice) - (orderDetail.productSpec.price-orderDetail.productSpec.minPrice)%100)/100}"
-                                pattern="0"
-                                maxFractionDigits="0"/>积分</c:if>
-                        <c:if test="${orderDetail.product.type == 2}">${orderDetail.productSpec.minScore}积分</c:if>
-                    </c:if>
-                    <c:if test="${order.type == 2}"><fmt:formatNumber type="number"
-                                                                      value="${orderDetail.productSpec.minScore/100}"
-                                                                      pattern="0.00"
-                                                                      maxFractionDigits="2"/>金币</c:if>
+                    <fmt:formatNumber type="number"
+                                      value="${orderDetail.productSpec.minScore/100}"
+                                      pattern="0.00"
+                                      maxFractionDigits="2"/>金币
 
                     </span></p>
             </div>
@@ -184,11 +176,9 @@
                                 value="${(order.totalPrice - order.freightPrice)/100}"
                                 pattern="0.00"
                                 maxFractionDigits="2"/>+<span>
-            <c:if test="${order.type == 1}">${order.totalScore}积分</c:if>
-            <c:if test="${order.type == 2}"><fmt:formatNumber type="number"
-                                                              value="${order.totalScore/100}"
-                                                              pattern="0.00"
-                                                              maxFractionDigits="2"/>金币</c:if>
+            <fmt:formatNumber type="number" value="${order.totalScore/100}"
+                              pattern="0.00"
+                              maxFractionDigits="2"/>金币
 
         </span></div>
     </div>
@@ -217,58 +207,40 @@
                                     value="${(order.totalPrice - order.freightPrice)/100}"
                                     pattern="0.00"
                                     maxFractionDigits="2"/>+<span>
-                  <c:if test="${order.type == 1}">${order.totalScore}积分</c:if>
-            <c:if test="${order.type == 2}"><fmt:formatNumber type="number"
-                                                              value="${order.totalScore/100}"
-                                                              pattern="0.00"
-                                                              maxFractionDigits="2"/>金币</c:if>
+                <fmt:formatNumber type="number"
+                                  value="${order.totalScore/100}"
+                                  pattern="0.00"
+                                  maxFractionDigits="2"/>金币
             </span></div>
         </c:if>
         <c:if test="${order.transmitWay != 1 && order.freightPrice != 0}">
             <div>￥<fmt:formatNumber type="number" value="${order.totalPrice/100}" pattern="0.00"
                                     maxFractionDigits="2"/>+<span>
-                                     <c:if test="${order.type == 1}">${order.totalScore}积分</c:if>
-            <c:if test="${order.type == 2}"><fmt:formatNumber type="number"
-                                                              value="${order.totalScore/100}"
-                                                              pattern="0.00"
-                                                              maxFractionDigits="2"/>金币</c:if>
+                                    <fmt:formatNumber type="number"
+                                                      value="${order.totalScore/100}"
+                                                      pattern="0.00"
+                                                      maxFractionDigits="2"/>金币
             </span></div>
         </c:if>
     </div>
 </section>
 <c:if test="${order.state != 0 && order.state != 4}">
     <section class="cost cost-jf">
-        <c:if test="${order.type == 1}">
-            <div>
-                <div>使用积分</div>
-                <div>-${order.trueScore}积分</div>
+        <div>
+            <div>使用金币</div>
+            <div><fmt:formatNumber type="number"
+                                   value="${order.trueScore/100}"
+                                   pattern="0.00"
+                                   maxFractionDigits="2"/>金币
             </div>
-            <div>
-                <div>实付金额</div>
-                <div style="color: #e94643;">￥<fmt:formatNumber type="number"
-                                                                value="${order.truePrice/100}"
-                                                                pattern="0.00"
-                                                                maxFractionDigits="2"/></div>
-            </div>
-        </c:if>
-        <c:if test="${order.type == 2}">
-            <div>
-                <div>使用金币</div>
-                <div><fmt:formatNumber type="number"
-                                       value="${order.trueScore/100}"
-                                       pattern="0.00"
-                                       maxFractionDigits="2"/>金币
-                </div>
-            </div>
-            <div>
-                <div>实付金额</div>
-                <div style="color: #e94643;">￥<fmt:formatNumber type="number"
-                                                                value="${order.truePrice/100}"
-                                                                pattern="0.00"
-                                                                maxFractionDigits="2"/></div>
-            </div>
-        </c:if>
-
+        </div>
+        <div>
+            <div>实付金额</div>
+            <div style="color: #e94643;">￥<fmt:formatNumber type="number"
+                                                            value="${order.truePrice/100}"
+                                                            pattern="0.00"
+                                                            maxFractionDigits="2"/></div>
+        </div>
     </section>
 </c:if>
 
@@ -363,20 +335,22 @@
     }
 </script>
 <script>
-    var orderState = eval('${order.state}'), stateImg = '', orderLine = 'orderLine', typeActive = 'typeActive';
+    var orderState = eval('${order.state}'), stateImg = '', orderLine = 'orderLine',
+        typeActive = 'typeActive';
     if (orderState == 0) { //待付款
         stateImg = 'dfk';
         typeActive += orderState;
         orderLine += orderState;
         $('#stateText').html('待付款');
-        $("#stateInput").html('<p>待付款</p><p><span id="times_minute"></span>:<span id="times_second"></span>后订单自动取消</p>');
+        $("#stateInput").html(
+            '<p>待付款</p><p><span id="times_minute"></span>:<span id="times_second"></span>后订单自动取消</p>');
         if (eval('${order.totalPrice}') == 0) {
             $('.jiang').css('display', 'none');
         } else {
             $('#payState').html('支付有奖');
             $('#payText').html('支付后获得￥'
                                + toDecimal(Math.ceil(eval('${order.totalPrice * backA/100}')) / 100)
-                               + '乐加红包');
+                               + '乐加鼓励金');
         }
         $('#waitPay').css('display', 'block');
     } else if (orderState == 1) { //已付款,待发货
@@ -389,7 +363,7 @@
             $('.jiang').css('display', 'none');
         } else {
             $('#payState').html('订单奖励');
-            $('#payText').html('已获得￥' + toDecimal(eval('${order.payBackA/100}')) + '乐加红包');
+            $('#payText').html('已获得￥' + toDecimal(eval('${order.payBackA/100}')) + '乐加鼓励金');
         }
         $('#payDate').css('display', 'block');
         $('#waitFaHuo').css('display', 'block');
@@ -398,12 +372,13 @@
         typeActive += orderState;
         orderLine += orderState;
         $('#stateText').html('已发货');
-        $("#stateInput").html('<p>已发货</p><p><span id="times_day"></span>天<span id="times_hour"></span>时<span id="times_minute2"></span>分<span id="times_second2"></span>秒后自动确认</p>');
+        $("#stateInput").html(
+            '<p>已发货</p><p><span id="times_day"></span>天<span id="times_hour"></span>时<span id="times_minute2"></span>分<span id="times_second2"></span>秒后自动确认</p>');
         if (eval('${order.truePrice}') == 0) {
             $('.jiang').css('display', 'none');
         } else {
             $('#payState').html('订单奖励');
-            $('#payText').html('已获得￥' + toDecimal(eval('${order.payBackA/100}')) + '乐加红包');
+            $('#payText').html('已获得￥' + toDecimal(eval('${order.payBackA/100}')) + '乐加鼓励金');
         }
         $('#payDate').css('display', 'block');
         $('#deliveryDate').css('display', 'block');
@@ -418,7 +393,7 @@
             $('.jiang').css('display', 'none');
         } else {
             $('#payState').html('订单奖励');
-            $('#payText').html('已获得￥' + toDecimal(eval('${order.payBackA/100}')) + '乐加红包');
+            $('#payText').html('已获得￥' + toDecimal(eval('${order.payBackA/100}')) + '乐加鼓励金');
         }
         $('#payDate').css('display', 'block');
         $('#deliveryDate').css('display', 'block');

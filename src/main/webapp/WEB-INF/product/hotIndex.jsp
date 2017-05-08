@@ -3,7 +3,7 @@
   User: zhangwen
   Date: 2016/9/21
   Time: 23:05
-  Content:秒杀中心
+  Content:秒杀中心 todo:待删除
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>

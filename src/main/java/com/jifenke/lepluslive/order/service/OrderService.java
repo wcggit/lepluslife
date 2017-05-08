@@ -1,6 +1,7 @@
 package com.jifenke.lepluslive.order.service;
 
 import com.jifenke.lepluslive.Address.domain.entities.Address;
+import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.order.domain.entities.OnLineOrder;
 import com.jifenke.lepluslive.order.domain.entities.OrderDetail;
@@ -11,12 +12,10 @@ import com.jifenke.lepluslive.product.domain.entities.ProductSpec;
 import com.jifenke.lepluslive.product.service.ProductService;
 import com.jifenke.lepluslive.score.domain.entities.ScoreC;
 import com.jifenke.lepluslive.score.service.ScoreAService;
-import com.jifenke.lepluslive.score.service.ScoreBService;
 import com.jifenke.lepluslive.score.service.ScoreCService;
 import com.jifenke.lepluslive.weixin.controller.dto.CartDetailDto;
 import com.jifenke.lepluslive.weixin.repository.DictionaryRepository;
 import com.jifenke.lepluslive.weixin.service.JobThread;
-import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
 import com.jifenke.lepluslive.weixin.service.WeiXinUserService;
 import com.jifenke.lepluslive.weixin.service.WeixinPayLogService;
 
@@ -30,7 +29,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
 
 import javax.inject.Inject;
 
@@ -46,16 +44,10 @@ public class OrderService {
   private ProductService productService;
 
   @Inject
-  private WeiXinPayService weiXinPayService;
-
-  @Inject
   private OrderRepository orderRepository;
 
   @Inject
   private ScoreAService scoreAService;
-
-  @Inject
-  private ScoreBService scoreBService;
 
   @Inject
   private ScoreCService scoreCService;
@@ -96,7 +88,7 @@ public class OrderService {
   }
 
   /**
-   * 普通商品立即购买创建的待支付订单 16/09/24
+   * 普通商品立即购买创建的待支付订单 16/09/24  todo:待删除
    *
    * @param productId 商品Id
    * @param specId    商品规格Id
@@ -201,7 +193,7 @@ public class OrderService {
     List<OrderDetail> orderDetails = onLineOrder.getOrderDetails();
     Long orderPrice = 0L;
     Long freightPrice = 0L;
-    Long totalScore = 0L;//订单最高可使用积分(以后不变)
+    Long totalScore = 0L;//订单最高可使用金币(以后不变)
     Long totalPrice = 0L;    //订单共需付款金额(以后不变)
     Long truePrice = 0L;  //该订单最低需使用金额>=totalPrice
     //免运费最低价格
@@ -296,6 +288,7 @@ public class OrderService {
     onLineOrder.setOrderDetails(orderDetails);
     onLineOrder.setState(0);
     onLineOrder.setPayState(0);
+    onLineOrder.setType(1);
     onLineOrder.setOrderPrice(orderPrice);
     onLineOrder.setTotalPrice(totalPrice);
     onLineOrder.setTruePrice(truePrice);
@@ -330,7 +323,7 @@ public class OrderService {
         orderType = "APPOnLineOrder";
       }
       weixinPayLogService.savePayLog(map, orderType, 1);
-      if (onLineOrder.getType() != null && onLineOrder.getType() == 1) { //积分订单处理
+      if (onLineOrder.getType() != null && onLineOrder.getType() == 1) { //普通订单处理
         paySuccessByScore(onLineOrder);
         return;
       }
@@ -340,9 +333,9 @@ public class OrderService {
   }
 
   /**
-   * 积分类订单支付成功执行 2017/02/22 zhangwen
+   * 普通订单支付成功执行 2017/02/22 zhangwen
    *
-   * @param onLineOrder 支付成功后,a积分加,b积分减,修改订单状态为已支付  并分润  16/11/05
+   * @param onLineOrder 支付成功后,a积分加,C积分减,修改订单状态为已支付  并分润  16/11/05
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public void paySuccessByScore(OnLineOrder onLineOrder) {
@@ -360,24 +353,28 @@ public class OrderService {
       onLineOrder.setPayBackA(payBackScore);
       LeJiaUser user = onLineOrder.getLeJiaUser();
       scoreAService.paySuccess(user, payBackScore, onLineOrder.getOrderSid());
-      if (onLineOrder.getTrueScore() != 0) {
-        if (payOrigin.getId() == 1) {
-          payWay.setId(4L);
-        } else {
-          payWay.setId(8L);
-        }
-        scoreBService
-            .paySuccess(user, onLineOrder.getTrueScore(), 2, "乐+商城消费", onLineOrder.getOrderSid());
-      } else {
-        if (payOrigin.getId() == 1) {
-          payWay.setId(2L);
-        } else {
-          payWay.setId(6L);
-        }
-      }
-      onLineOrder.setPayOrigin(payWay);
-      //订单相关product的销量等数据处理
       try {
+        if (onLineOrder.getTrueScore() != 0) {
+          if (payOrigin.getId() == 1) {
+            payWay.setId(11L);
+          } else {
+            payWay.setId(12L);
+          }
+
+          //减金币及添加金币记录
+          ScoreC scoreC = scoreCService.findScoreCByLeJiaUser(user);
+          scoreCService.saveScoreC(scoreC, 0, onLineOrder.getTrueScore());
+          scoreCService.saveScoreCDetail(scoreC, 0, onLineOrder.getTrueScore(), 2, "臻品商城消费",
+                                         onLineOrder.getOrderSid());
+        } else {
+          if (payOrigin.getId() == 1) {
+            payWay.setId(2L);
+          } else {
+            payWay.setId(6L);
+          }
+        }
+        onLineOrder.setPayOrigin(payWay);
+        //订单相关product的销量等数据处理
         productService.editProductSaleByPayOrder(onLineOrder);
         //如果返还A红包不为0,改变会员状态
         if (payBackScore > 0) {
@@ -502,11 +499,11 @@ public class OrderService {
   }
 
   /**
-   * 订单页提交,输入实际使用金额和积分 16/09/29
+   * 订单页提交,输入实际使用金额和金币 16/09/29
    *
    * @param orderId     订单id
    * @param truePrice   实际使用价格
-   * @param trueScore   实际使用积分
+   * @param trueScore   实际使用金币
    * @param transmitWay 物流方式 1=自提
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
@@ -523,6 +520,16 @@ public class OrderService {
       return result;
     }
 
+    ScoreC scoreC = scoreCService.findScoreCByLeJiaUser(onLineOrder.getLeJiaUser());
+    if (scoreC == null) {
+      result.put("status", 6001);
+      return result;
+    }
+    if (scoreC.getScore() < trueScore) {
+      result.put("status", 6002);
+      return result;
+    }
+
     //需判断实际使用积分+红包与totalPrice+totalScore是否一致
     int check = checkOrderMoney(truePrice, trueScore, transmitWay, onLineOrder);
     if (check == 0) {
@@ -530,7 +537,10 @@ public class OrderService {
       return result;
     }
 
-    // onLineOrder.setOrderSid(MvUtil.getOrderNumber()); //必须重新设置,否者导致微信订单号重复报错  不必要！！！
+    if (onLineOrder.getTrueScore() != 0 && !onLineOrder.getTrueScore().equals(trueScore)) {
+      onLineOrder.setOrderSid(MvUtil.getOrderNumber()); //当订单参数变化时，必须重新设置,否者导致微信订单号重复报错
+    }
+
     onLineOrder.setTruePrice(truePrice);
     onLineOrder.setTransmitWay(transmitWay);
     onLineOrder.setTrueScore(trueScore);
@@ -566,14 +576,12 @@ public class OrderService {
   public int checkOrderMoney(Long truePrice, Long trueScore, Integer transmitWay,
                              OnLineOrder onLineOrder) {
     if (transmitWay == 1) {
-      if ((onLineOrder.getTotalPrice() + onLineOrder.getTotalScore() * 100 - onLineOrder
-          .getFreightPrice()) != (truePrice + trueScore * 100)) {
+      if ((onLineOrder.getTotalPrice() + onLineOrder.getTotalScore() - onLineOrder
+          .getFreightPrice()) != (truePrice + trueScore)) {
         return 0;
       }
     } else {
-      if ((onLineOrder.getTotalPrice() + onLineOrder.getTotalScore() * 100) != (truePrice
-                                                                                + trueScore
-                                                                                  * 100)) {
+      if ((onLineOrder.getTotalPrice() + onLineOrder.getTotalScore()) != (truePrice + trueScore)) {
         return 0;
       }
     }

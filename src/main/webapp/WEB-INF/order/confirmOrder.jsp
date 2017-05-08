@@ -77,13 +77,13 @@
                                       maxFractionDigits="2"/>+<span><c:if
                         test="${orderDetail.product.type == 1}">
                     <fmt:formatNumber type="number"
-                                      value="${((orderDetail.productSpec.price-orderDetail.productSpec.minPrice) - (orderDetail.productSpec.price-orderDetail.productSpec.minPrice)%100)/100}"
-                                      pattern="0"
-                                      maxFractionDigits="0"/>积分
+                                      value="${orderDetail.productSpec.minScore/100}"
+                                      pattern="0.00"
+                                      maxFractionDigits="2"/>金币
 
                 </c:if>
                      <c:if test="${orderDetail.product.type == 2}">
-                         ${orderDetail.productSpec.minScore}积分
+                         ${orderDetail.productSpec.minScore}金币
                      </c:if></span>
                 </p>
             </div>
@@ -93,15 +93,15 @@
 <section class="w-text" id="scoreBwarning" style="display: none">
     <div>
         <div>*</div>
-        <div id="BWarningText">积分不足，将按1元=1积分补交</div>
+        <div id="BWarningText">金币不足，将按1元=1金币补交</div>
     </div>
 </section>
 <section class="cost">
     <div style="padding: 20px 0;">
-        <div>使用积分</div>
+        <div>使用金币</div>
         <div class="useJf">
             <input type="number" id="trueScore"/>
-            <span>最多可使用<span id="maxScore"></span>积分</span>
+            <span>最多可使用<span id="maxScore"></span>金币</span>
         </div>
         <div class="jfButton">
             <input type="checkbox" checked="checked" class="check-switch check-switch-anim"/>
@@ -122,7 +122,11 @@
     <div>
         <div>总价</div>
         <div>￥<fmt:formatNumber type="number" value="${order.truePrice/100}" pattern="0.00"
-                                maxFractionDigits="2"/>+<span>${order.totalScore}积分</span></div>
+                                maxFractionDigits="2"/>+<span><fmt:formatNumber type="number"
+                                                                                value="${order.totalScore/100}"
+                                                                                pattern="0.00"
+                                                                                maxFractionDigits="2"/>金币</span>
+        </div>
     </div>
 </section>
 <section class="integral">
@@ -134,7 +138,10 @@
         <div>线下自提</div>
     </div>
     <div>
-        <p>积分余额：<span>${canUseScore}积分</span></p>
+        <p>金币余额：<span><fmt:formatNumber type="number"
+                                        value="${canUseScore/100}"
+                                        pattern="0.00"
+                                        maxFractionDigits="2"/>金币</span></p>
     </div>
 </section>
 <section class="footer">
@@ -148,37 +155,37 @@
 </div>
 </body>
 <script>
-    var canUseScore = eval('${canUseScore}'), orderTotalScore = eval('${order.totalScore}'); //用户可用积分和订单可用积分
-    var maxScore = 0, minPrice = eval('${order.totalPrice}'), freightPrice = eval('${order.freightPrice}'); //最多可用积分和最少需付金额
+    var canUseScore = eval('${canUseScore}'), orderTotalScore = eval('${order.totalScore}'); //用户可用金币和订单可用金币
+    var maxScore = 0, minPrice = eval('${order.totalPrice}'),
+        freightPrice = eval('${order.freightPrice}'); //最多可用金币和最少需付金额
     var trueScoreInput = $("#trueScore"), postageInput = $("#postage"), postageText = '';
     function scoreAndPriceReset() {
         if (canUseScore >= orderTotalScore) {
-            $('#maxScore').html(orderTotalScore);
-            $('#trueScore').val(orderTotalScore);
+            $('#maxScore').html(toDecimal(orderTotalScore / 100));
+            $('#trueScore').val(toDecimal(orderTotalScore / 100));
             $('#truePrice').html(toDecimal(minPrice / 100));
             maxScore = orderTotalScore;
-        } else { //用户积分少于订单可用积分
-            $('#maxScore').html(canUseScore);
-            $('#trueScore').val(canUseScore);
-            $('#truePrice').html(toDecimal((minPrice + (orderTotalScore - canUseScore) * 100)
-                                           / 100));
+        } else { //用户金币少于订单可用金币
+            $('#maxScore').html(toDecimal(canUseScore / 100));
+            $('#trueScore').val(toDecimal(canUseScore / 100));
+            $('#truePrice').html(toDecimal((minPrice + orderTotalScore - canUseScore) / 100));
             maxScore = canUseScore;
             $('#scoreBwarning').show();
-            $('#BWarningText').html('您的积分不足，将按1元=1积分补交');
+            $('#BWarningText').html('您的金币不足，将按1元=1金币补交');
         }
     }
     scoreAndPriceReset();
-    /*使用积分开关*/
+    /*使用金币开关*/
     var on = true;//true = on ; false = off
     $(".jfButton").click(function (e) {
-        if (on) {//不使用积分
+        if (on) {//不使用金币
             $(".useJf").hide();
             trueScoreInput.val(0);
             on = false;
-            $('#truePrice').html(toDecimal((minPrice + orderTotalScore * 100) / 100));
+            $('#truePrice').html(toDecimal((minPrice + orderTotalScore) / 100));
             $('#scoreBwarning').show();
-            $('#BWarningText').html('不使用积分，将按1元=1积分补交');
-        } else {//使用积分
+            $('#BWarningText').html('不使用金币，将按1元=1金币补交');
+        } else {//使用金币
             $(".useJf").show();
             on = true;
             scoreAndPriceReset();
@@ -216,28 +223,28 @@
     //数量切换
     //可买数量的最大值和最小值判断
     function judgeFun1() {
-        if (eval(trueScoreInput.val()) >= maxScore) {
+        if (eval(trueScoreInput.val()) * 100 > maxScore) {
             if (maxScore == orderTotalScore) {
                 $('#scoreBwarning').hide();
             } else if (maxScore == canUseScore) {
                 $('#scoreBwarning').show();
-                $('#BWarningText').html('您的积分不足，将按1元=1积分补交');
+                $('#BWarningText').html('您的金币不足，将按1元=1金币补交');
             } else {
                 $('#scoreBwarning').show();
-                $('#BWarningText').html('使用积分不足，将按1元=1积分补交');
+                $('#BWarningText').html('使用金币不足，将按1元=1金币补交');
             }
-            trueScoreInput.val(maxScore);
-        } else if (eval(trueScoreInput.val()) <= 0) {
+            trueScoreInput.val(toDecimal(maxScore / 100));
+        } else if (eval(trueScoreInput.val()) * 100 <= 0) {
             trueScoreInput.val(0);
             $('#scoreBwarning').show();
-            $('#BWarningText').html('使用积分不足，将按1元=1积分补交');
+            $('#BWarningText').html('使用金币不足，将按1元=1金币补交');
         }
     }
     //点击事件
     function allClick() {
         $('#truePrice').html(toDecimal((minPrice + (orderTotalScore - (eval(trueScoreInput.val())
                                                                        == null ? 0
-                : eval(trueScoreInput.val()))) * 100)
+                                           : eval(trueScoreInput.val() * 100))))
                                        / 100));
     }
     //输入框改变
@@ -296,7 +303,7 @@
 </script>
 <script type="text/javascript">
     function payByWx() {
-        $('.waiting').css('display','block');
+        $('.waiting').css('display', 'block');
         $('#btn-wxPay').attr('onclick', '');
         //是否线下自提
         var transmitWay = 0;    //取货方式  1=线下自提|2=快递
@@ -306,26 +313,35 @@
         if (transmitWay == 1 || ${order.address!=null}) {
             var truePrice = $("#truePrice").html();
             if (truePrice < 0) {
-                $('.waiting').css('display','none');
+                $('.waiting').css('display', 'none');
                 alert("选择商品后才能付款~");
                 location.href = "/front/product/weixin/productIndex";
                 return;
             }
-            var trueScore = $('#trueScore').val();
+            var trueScore = $('#trueScore').val() * 100;
+            if ((!(typeof trueScore === 'number')) || (!(trueScore % 1 === 0))) {
+                $('.waiting').css('display', 'none');
+                alert("请正确输入使用金币");
+                return false;
+            }
+//            if (isNaN(trueScore)) {
+//                alert("请正确输入使用金币");
+//                return false;
+//            }
             var price = eval(truePrice * 100);
 
 //            首先提交请求，生成预支付订单
             $.post('/weixin/pay/weixinpay', {
                 orderId: '${order.id}',
                 truePrice: truePrice,
-                trueScore: trueScore,
+                trueScore: $('#trueScore').val(),
                 transmitWay: transmitWay
             }, function (res) {
                 if (price == 0) {
                     if (res.status == 200) {
                         location.href = "/front/order/weixin/orderList";
                     } else {
-                        $('.waiting').css('display','none');
+                        $('.waiting').css('display', 'none');
                         alert("订单处理异常(" + res.status + ")");
                         $('#btn-wxPay').attr('onclick', 'payByWx()');
                     }
@@ -334,7 +350,7 @@
                         weixinPay(res);
                         return;
                     } else {
-                        $('.waiting').css('display','none');
+                        $('.waiting').css('display', 'none');
                         alert(res['msg']);
                         $('#btn-wxPay').attr('onclick', 'payByWx()');
                         return;
@@ -350,7 +366,7 @@
     }, 200);
 
     function weixinPay(res) {
-        $('.waiting').css('display','none');
+        $('.waiting').css('display', 'none');
         wx.chooseWXPay({
                            timestamp: res['timeStamp'], // 支付签名时间戳，注意微信jssdk中的所有使用timestamp字段均为小写。但最新版的支付后台生成签名使用的timeStamp字段名需大写其中的S字符
                            nonceStr: res['nonceStr'], // 支付签名随机串，不长于 32 位
@@ -363,10 +379,12 @@
                                window.location.href = '/weixin/pay/paySuccess/${order.id}';
                            },
                            cancel: function (res) {
-                               window.location.href = '/weixin/pay/payFail/${order.id}';
+                               $('#btn-wxPay').attr('onclick', 'payByWx()');
+                               <%--window.location.href = '/weixin/pay/payFail/${order.id}';--%>
                            },
                            fail: function (res) {
-                               window.location.href = '/weixin/pay/payFail/${order.id}';
+                               $('#btn-wxPay').attr('onclick', 'payByWx()');
+                               <%--window.location.href = '/weixin/pay/payFail/${order.id}';--%>
                            }
                        });
     }

@@ -60,7 +60,7 @@
     }
 
     .footer p {
-        margin-top: -4px;
+        margin-top: -8px;
         margin-bottom: -2px !important;
         font-size: 10px !important;
         color: #666 !important;
@@ -89,7 +89,8 @@
             </div>
             <div class="mui-table-cell mui-col-xs-5">
                 ￥<font class="priceSum">0</font><span class="minScore"
-                                                      style="font-size: 17px;color:#fb991a;">+<font id="totalScore">0</font>积分</span>
+                                                      style="font-size: 17px;color:#E4AF69;display: none">+<font
+                    id="totalScore">0</font></span>
             </div>
             <div class="mui-table-cell mui-col-xs-4" id="buy" style="font-size: 15px;">
                 下单
@@ -101,25 +102,25 @@
 <section class="footer">
     <div onclick="goMenu(1)">
         <div>
-            <img src="${resourceUrl}/frontRes/product/hotIndex/img/zhenpin1.png" alt="">
+            <img src="${resource}/gold/img/zhenpin1.png" alt="">
         </div>
         <p>臻品</p>
     </div>
     <div onclick="goMenu(2)">
         <div>
-            <img src="${resourceUrl}/frontRes/product/hotIndex/img/miaosha1.png" alt="">
+            <img src="${resource}/gold/img/miaosha1.png" alt="">
         </div>
         <p>秒杀</p>
     </div>
     <div>
         <div>
-            <img src="${resourceUrl}/frontRes/product/hotIndex/img/gouwuche2.png" alt="">
+            <img src="${resource}/gold/img/gouwuche2.png" alt="">
         </div>
         <p>购物车</p>
     </div>
     <div onclick="goMenu(4)">
         <div>
-            <img src="${resourceUrl}/frontRes/product/hotIndex/img/dingdan1.png" alt="">
+            <img src="${resource}/gold/img/dingdan1.png" alt="">
         </div>
         <p>订单</p>
     </div>
@@ -190,39 +191,41 @@
                     var li = document.createElement('li');
                     var liHtmlStr = '<li class="mui-table-view-cell"><div class="mui-slider-right mui-disabled">';
                     liHtmlStr +=
-                    '<input type="hidden" class="productId" value="' + data[i].product.id + '" />';
+                        '<input type="hidden" class="productId" value="' + data[i].product.id
+                        + '" />';
                     liHtmlStr +=
-                    '<input type="hidden" class="productSpecId" value="' + data[i].productSpec.id
-                    + '" />';
+                        '<input type="hidden" class="productSpecId" value="'
+                        + data[i].productSpec.id
+                        + '" />';
                     liHtmlStr +=
-                    '<a class="mui-btn mui-btn-red">删除</a></div><div class="mui-slider-handle">';
+                        '<a class="mui-btn mui-btn-red">删除</a></div><div class="mui-slider-handle">';
                     liHtmlStr += '<div class="mui-input-row mui-checkbox mui-left">';
                     liHtmlStr +=
-                    '<input name="checkbox" class="checboxOne" value="Item 1" type="checkbox" >';
+                        '<input name="checkbox" class="checboxOne" value="Item 1" type="checkbox" >';
                     liHtmlStr +=
-                    '<div class="mui-table mui-pull-right"><div class="mui-table-cell mui-col-xs-3">';
+                        '<div class="mui-table mui-pull-right"><div class="mui-table-cell mui-col-xs-3">';
                     liHtmlStr +=
-                    '<span class="order-img"><img src="' + data[i].productSpec.picture
-                    + '" alt=""></span>';
+                        '<span class="order-img"><img src="' + data[i].productSpec.picture
+                        + '" alt=""></span>';
                     liHtmlStr +=
-                    '</div><div class="mui-table-cell mui-col-xs-11 mui-text-left mui-pull-right">';
+                        '</div><div class="mui-table-cell mui-col-xs-11 mui-text-left mui-pull-right">';
                     liHtmlStr +=
-                    '<h5 class="mui-ellipsis" style="margin-top: 10px;">' + data[i].product.name
-                    + '</h5><h6 style="color:#999 !important;margin: 8px 0;">规格：<font>'
-                    + data[i].productSpec.specDetail + '</font></h6>';
+                        '<h5 class="mui-ellipsis" style="margin-top: 20px;">' + data[i].product.name
+                        + '</h5><h6 style="color:#999 !important;margin: 8px 0;">规格：<font>'
+                        + data[i].productSpec.specDetail + '</font></h6>';
                     liHtmlStr +=
-                    '<p class="chose_right right_all"><span class="order-price mui-pull-left" style="width: 32vw;margin-left: -2%;font-size: 15px">￥<font class="price">'
-                    + toDecimal(data[i].productSpec.minPrice
-                                / 100)
-                    + '</font><span style="font-size: 15px;color:#fb991a;">+<font class="minScore">'
-                    + data[i].productSpec.minScore + '</font>积分</span></span>';
+                        '<p class="chose_right right_all"><span class="order-price mui-pull-left" style="width: 32vw;margin-left: -2%;font-size: 15px">￥<font class="price">'
+                        + toDecimal(data[i].productSpec.minPrice
+                                    / 100)
+                        + '</font><span style="font-size: 15px;color:#E4AF69;"><font class="minScore" style="display: none">'
+                        + toDecimal(data[i].productSpec.minScore / 100) + '</font></span></span>';
                     liHtmlStr +=
-                    '<button class="btnCut"></button><input type="number" value="'
-                    + data[i].productNumber
-                    + '" class="num"/><button class="btnAdd"></button>';
+                        '<button class="btnCut"></button><input type="number" value="'
+                        + data[i].productNumber
+                        + '" class="num"/><button class="btnAdd"></button>';
                     liHtmlStr +=
-                    '</p><p class="repository">' + data[i].productSpec.repository
-                    + '</p>';
+                        '</p><p class="repository">' + data[i].productSpec.repository
+                        + '</p>';
                     liHtmlStr += '</div></div></div></div></li>';
                     li.innerHTML = liHtmlStr;
                     table.appendChild(li);
@@ -383,7 +386,7 @@
         }
     }
     var count = 0;
-    var totalPrice = 0,totalScore = 0;
+    var totalPrice = 0, totalScore = 0;
     var totalProduct = 0;
     function getTotalPrice() {
         count = 0;
@@ -403,7 +406,7 @@
             count++;
         });
         $('.priceSum').text(toDecimal(totalPrice));
-        $('#totalScore').text(totalScore);
+        $('#totalScore').text(toDecimal(totalScore));
         $('.orderNum').text(count);
     }
 
@@ -453,7 +456,8 @@
                        data: JSON.stringify(cartDetailDtos),
                        success: function (data) {
                            if (data.status == 200) {
-                               location.href = "/front/order/weixin/confirmOrder?orderId=" + data.data.id;
+                               location.href =
+                                   "/front/order/weixin/confirmOrder?orderId=" + data.data.id;
                            } else if (data.status == 5001) {
                                warnType = 1;
                                showTanChuang();
@@ -518,7 +522,7 @@
         if (curIndex == 1) {
             location.href = "/front/product/weixin/productIndex";
         } else if (curIndex == 2) {
-            location.href = "/front/product/weixin/hotIndex";
+            location.href = "/front/gold/weixin";
         } else if (curIndex == 4) {
             location.href = "/front/order/weixin/orderList";
         }
