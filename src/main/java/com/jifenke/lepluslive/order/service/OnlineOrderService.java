@@ -341,8 +341,9 @@ public class OnlineOrderService {
       scoreCService.saveScoreC(scoreC, 0, trueScore);
       scoreCService.saveScoreCDetail(scoreC, 0, trueScore, 2, "臻品商城消费", order.getOrderSid());
       orderRepository.save(order);
+      final long id = order.getId();
       new Thread(() -> { //合伙人和商家分润
-        orderShareService.onLineOrderShare(order);
+        orderShareService.onLineOrderShare(id);
       }).start();
       result.put("status", 200);
       result.put("data", order.getId());

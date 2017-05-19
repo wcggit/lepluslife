@@ -103,6 +103,7 @@ public class WeiXinUserService {
       weiXinUser.setOpenId(openId);
       weiXinUserRepository.save(weiXinUser);
     }
+    weiXinUserRepository.saveAndFlush(weiXinUser);
   }
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
