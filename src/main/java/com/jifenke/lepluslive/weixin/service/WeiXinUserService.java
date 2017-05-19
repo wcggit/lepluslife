@@ -88,13 +88,22 @@ public class WeiXinUserService {
     return weiXinUserRepository.findByLeJiaUser(leJiaUser);
   }
 
-
-
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public void saveWeiXinUser(WeiXinUser weiXinUser) throws Exception {
     weiXinUserRepository.save(weiXinUser);
   }
 
+  /**
+   * 网页静获取保存乐加生活openId  2017/5/11
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  public void saveOpenId(String unionId, String openId) {
+    WeiXinUser weiXinUser = weiXinUserRepository.findByUnionId(unionId);
+    if (weiXinUser != null) {
+      weiXinUser.setOpenId(openId);
+      weiXinUserRepository.save(weiXinUser);
+    }
+  }
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public String saveWeiXinUser(Map<String, Object> userDetail, Map<String, Object> map)

@@ -18,7 +18,6 @@ import com.jifenke.lepluslive.product.domain.entities.ProductType;
 import com.jifenke.lepluslive.product.domain.entities.ScrollPicture;
 import com.jifenke.lepluslive.product.service.ProductService;
 import com.jifenke.lepluslive.product.service.ScrollPictureService;
-import com.jifenke.lepluslive.score.domain.entities.ScoreB;
 import com.jifenke.lepluslive.score.service.ScoreAService;
 import com.jifenke.lepluslive.score.service.ScoreBService;
 import com.jifenke.lepluslive.score.service.ScoreCService;
@@ -176,6 +175,7 @@ public class WeixinController {
     return null;
   }
 
+
   /**
    * 会员中心页面
    */
@@ -242,16 +242,18 @@ public class WeixinController {
 
 
   @RequestMapping(value = "/partnerManager/bind/{sid}")
-  public LejiaResult bindPartnerManagerConfirm(@PathVariable String sid, HttpServletRequest request) {
+  public LejiaResult bindPartnerManagerConfirm(@PathVariable String sid,
+                                               HttpServletRequest request) {
     PartnerManager partnerManager = partnerManagerService.findByPartnerManagerSid(sid);
     WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
     return partnerManagerService.bindWeiXinUser(partnerManager, weiXinUser) ? LejiaResult.ok()
-            : LejiaResult.build(201, "绑定账户异常");
+                                                                            : LejiaResult
+               .build(201, "绑定账户异常");
   }
 
   @RequestMapping("/partnerManager/bind_wx_user/{sid}")
   public ModelAndView partnerManagerBindUser(@PathVariable String sid, Model model,
-                                      HttpServletRequest request) {
+                                             HttpServletRequest request) {
     PartnerManager partnerManager = partnerManagerService.findByPartnerManagerSid(sid);
     WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
     model.addAttribute("partnerManager", partnerManager);
@@ -263,7 +265,8 @@ public class WeixinController {
         model.addAttribute("code", "1"); //该微信号已经绑定合伙人且不是当前合伙人
       } else {
         PartnerManager bindPartnerManager = weiXinUser.getLeJiaUser().getBindPartnerManager();
-        if (bindPartnerManager != null && bindPartnerManager.getId().equals(partnerManager.getId())) {//已经绑上无须在考虑绑定
+        if (bindPartnerManager != null && bindPartnerManager.getId()
+            .equals(partnerManager.getId())) {//已经绑上无须在考虑绑定
           model.addAttribute("code", "4");
         }
       }

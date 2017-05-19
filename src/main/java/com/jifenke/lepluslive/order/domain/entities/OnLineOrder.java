@@ -81,6 +81,8 @@ public class OnLineOrder {
 
   private String message = ""; //用户留言
 
+  private Integer source = 1;  //公众号来源  1=乐加生活|2=乐加臻品商城
+
   public Date getDeliveryDate() {
     return deliveryDate;
   }
@@ -271,5 +273,13 @@ public class OnLineOrder {
 
   public void setMessage(String message) {
     this.message = message;
+  }
+
+  public Integer getSource() {
+    return source;
+  }
+
+  public void setSource(Integer source) {
+    this.source = source;
   }
 }
