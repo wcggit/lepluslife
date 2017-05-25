@@ -2,7 +2,9 @@ package com.jifenke.lepluslive.order.service;
 
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.merchant.domain.entities.Merchant;
+import com.jifenke.lepluslive.merchant.domain.entities.MerchantScanPayWay;
 import com.jifenke.lepluslive.merchant.domain.entities.MerchantWalletOnline;
+import com.jifenke.lepluslive.merchant.service.MerchantScanPayWayService;
 import com.jifenke.lepluslive.merchant.service.MerchantWalletOnlineService;
 import com.jifenke.lepluslive.order.domain.entities.OnLineOrder;
 import com.jifenke.lepluslive.order.domain.entities.OnLineOrderShare;
@@ -48,6 +50,9 @@ public class OnLineOrderShareService {
   @Inject
   private OrderService onlineOrderService;
 
+  @Inject
+  private MerchantScanPayWayService merchantScanPayWayService;
+
   /**
    * 线上订单分润    16/11/05
    *
@@ -65,6 +70,7 @@ public class OnLineOrderShareService {
     Long toPartner = 0L;
     Partner partner = null;
     PartnerWalletOnline partnerWalletOnline = null;
+    Long toLePlusLife = 0L;
     long type = 16001; //1代表app线上订单分润  2代表公众号线上订单分润
     PayOrigin payOrigin = order.getPayOrigin();
     if (payOrigin.getPayFrom() == 1) { //app
@@ -85,15 +91,23 @@ public class OnLineOrderShareService {
         merchant = user.getBindMerchant();
         //分润给绑定商户
         orderShare.setToLockMerchant(toMerchant);
-        if (merchant.getPartnership() == 2) {//如果是虚拟商户分润方式改变
-          // orderShare.setToLockMerchant(0L);
+        if (merchant == null || merchant.getPartnership() == 2) {//如果是虚拟商户分润方式改变
           toPartner += toMerchant;
-          //toMerchant = 0L;
         } else {
-          merchantWalletOnline = merchantWalletOnlineService.findByMercahnt(user.getBindMerchant());
-          merchantWalletOnlineService.shareToMerchant(toMerchant, merchant, merchantWalletOnline,
-                                                      order.getOrderSid(), type);
-          orderShare.setLockMerchant(merchant);
+          MerchantScanPayWay
+              scanPayWay =
+              merchantScanPayWayService.findByMerchantId(merchant.getId());
+          if (scanPayWay != null && scanPayWay.getOpenOnLineShare() == 0) {
+            //没开启线上分润
+            toLePlusLife = toMerchant;
+            toMerchant = 0L;
+          } else {
+            merchantWalletOnline =
+                merchantWalletOnlineService.findByMercahnt(user.getBindMerchant());
+            merchantWalletOnlineService.shareToMerchant(toMerchant, merchant, merchantWalletOnline,
+                                                        order.getOrderSid(), type);
+            orderShare.setLockMerchant(merchant);
+          }
         }
       }
       //对用户绑定合伙人进行分润
@@ -108,8 +122,8 @@ public class OnLineOrderShareService {
                             type);
         orderShare.setLockPartner(partner);
       }
-
-      orderShare.setShareMoney(toMerchant + toPartner);
+      orderShare.setToLePlusLife(toLePlusLife);
+      orderShare.setShareMoney(toMerchant + toPartner + toLePlusLife);
       orderShareRepository.save(orderShare);
     }
   }

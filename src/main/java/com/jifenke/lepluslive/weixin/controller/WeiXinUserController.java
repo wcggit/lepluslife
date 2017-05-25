@@ -34,8 +34,8 @@ public class WeiXinUserController {
    * 乐加臻品商城获取openId使用  2017/5/11
    */
   @RequestMapping(value = "/snsapi_base_openid", method = RequestMethod.GET)
-  public void getOpenId(@RequestParam String callbackUrl, @RequestParam String unionId,
-                        HttpServletResponse response)
+  public String getOpenId(@RequestParam String callbackUrl, @RequestParam String unionId,
+                          HttpServletResponse response)
       throws IOException {
     //需要静默获取乐加生活的openId
     StringBuffer redirectUrl = new StringBuffer();
@@ -47,6 +47,7 @@ public class WeiXinUserController {
 
     System.out.println(redirectUrl.toString());
     response.sendRedirect(redirectUrl.toString());
+    return null;
   }
 
   @RequestMapping("/getOpenId")
