@@ -52,6 +52,8 @@ public class OnLineOrderShare {
 
   private Long toLockPartnerManager = 0L;
 
+  private Long toLePlusLife = 0L; //给积分客的
+
   public Long getShareMoney() {
     return shareMoney;
   }
@@ -146,5 +148,13 @@ public class OnLineOrderShare {
 
   public void setOrderSid(String orderSid) {
     this.orderSid = orderSid;
+  }
+
+  public Long getToLePlusLife() {
+    return toLePlusLife;
+  }
+
+  public void setToLePlusLife(Long toLePlusLife) {
+    this.toLePlusLife = toLePlusLife;
   }
 }

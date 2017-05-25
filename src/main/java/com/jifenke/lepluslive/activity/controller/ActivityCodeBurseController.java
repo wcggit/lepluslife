@@ -171,7 +171,7 @@ public class ActivityCodeBurseController {
       //判断是否需要绑定商户 4_0_123
       Merchant merchant = leJiaUserService.checkUserBindMerchant(weiXinUser);
 
-      //派发红包和积分,填充手机号码成为会员
+      //派发金币,填充手机号码成为会员
       try {
         Map<String, Integer> map = null;
         if (merchant != null && merchant.getPartnership() == 2) { //虚拟商户由合伙人发放红包金额
@@ -183,7 +183,7 @@ public class ActivityCodeBurseController {
           map = weiXinUserService.giveScoreAByDefault(weiXinUser, phoneNumber);
         }
         //添加参加记录
-        activityJoinLogService.addCodeBurseLogByDefault(weiXinUser, map.get("scoreA"));
+        activityJoinLogService.addCodeBurseLogByDefault(weiXinUser, map.get("scoreC"));
         return LejiaResult.ok(map);
       } catch (Exception e) {
         e.printStackTrace();
@@ -322,21 +322,23 @@ public class ActivityCodeBurseController {
 
   /**
    * 充值卡 兑换
+   *
    * @param exchangeCode 充值兑换码
    * @return 状态
    */
   @RequestMapping(value = "/rechargeCard/exchange", method = RequestMethod.POST)
-  public LejiaResult rechargeCardSubmit(@RequestParam String exchangeCode, HttpServletRequest request) {
+  public LejiaResult rechargeCardSubmit(@RequestParam String exchangeCode,
+                                        HttpServletRequest request) {
     WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
 
     try {
-      if (exchangeCode!=null && !exchangeCode.equals("")){
+      if (exchangeCode != null && !exchangeCode.equals("")) {
         List<RechargeCard> list1 = rechargeCardService.findRechargeCardByExchangeCode(exchangeCode);
         List<RechargeCard> list2 = rechargeCardService.findRechargeCardByWeiXinUser(weiXinUser);
-        if(list1.size()>0){
+        if (list1.size() > 0) {
           return LejiaResult.build(499, "兑换码已使用!");
         }
-        if(list2.size()>100){
+        if (list2.size() > 100) {
           return LejiaResult.build(498, "兑换次数超限!");
         }
 
@@ -347,7 +349,7 @@ public class ActivityCodeBurseController {
         rechargeCard.setWeiXinUser(weiXinUser);
         rechargeCardService.saveRechargeCard(rechargeCard);
         return LejiaResult.ok();
-      }else {
+      } else {
 
         return LejiaResult.build(497, "兑换码错误!");
       }

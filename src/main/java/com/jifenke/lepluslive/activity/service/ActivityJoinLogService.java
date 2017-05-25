@@ -61,7 +61,7 @@ public class ActivityJoinLogService {
     activityJoinLogRepository.save(joinLog);
   }
 
-  //添加默认关注送红包记录
+  //添加默认关注送金币记录
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public void addCodeBurseLogByDefault(WeiXinUser user, int defaultScoreA) {
     ActivityJoinLog joinLog = new ActivityJoinLog();

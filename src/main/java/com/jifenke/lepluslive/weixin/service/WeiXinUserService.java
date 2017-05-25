@@ -14,6 +14,7 @@ import com.jifenke.lepluslive.score.repository.ScoreARepository;
 import com.jifenke.lepluslive.score.repository.ScoreBDetailRepository;
 import com.jifenke.lepluslive.score.repository.ScoreBRepository;
 import com.jifenke.lepluslive.score.repository.ScoreCRepository;
+import com.jifenke.lepluslive.score.service.ScoreCService;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.repository.WeiXinUserRepository;
 
@@ -68,6 +69,9 @@ public class WeiXinUserService {
   @Inject
   private ScoreCRepository scoreCRepository;
 
+  @Inject
+  private ScoreCService scoreCService;
+
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public WeiXinUser findWeiXinUserByOpenId(String openId) {
@@ -88,13 +92,23 @@ public class WeiXinUserService {
     return weiXinUserRepository.findByLeJiaUser(leJiaUser);
   }
 
-
-
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public void saveWeiXinUser(WeiXinUser weiXinUser) throws Exception {
     weiXinUserRepository.save(weiXinUser);
   }
 
+  /**
+   * 网页静获取保存乐加生活openId  2017/5/11
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  public void saveOpenId(String unionId, String openId) {
+    WeiXinUser weiXinUser = weiXinUserRepository.findByUnionId(unionId);
+    if (weiXinUser != null) {
+      weiXinUser.setOpenId(openId);
+      weiXinUserRepository.save(weiXinUser);
+    }
+    weiXinUserRepository.saveAndFlush(weiXinUser);
+  }
 
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public String saveWeiXinUser(Map<String, Object> userDetail, Map<String, Object> map)
@@ -278,18 +292,18 @@ public class WeiXinUserService {
   }
 
   /**
-   * 填充手机号送红包 16/09/20
+   * 填充手机号送金币 17/05/22
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
   public Map<String, Integer> giveScoreAByDefault(WeiXinUser weiXinUser, String phoneNumber)
       throws Exception {
     LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
     ScoreA scoreA = scoreARepository.findByLeJiaUser(leJiaUser).get(0);
-    ScoreB scoreB = scoreBRepository.findByLeJiaUser(leJiaUser);
+    ScoreC scoreC = scoreCService.findScoreCByLeJiaUser(leJiaUser);
     String aRule = dictionaryService.findDictionaryById(34L).getValue(); //返A规则
-    String bRule = dictionaryService.findDictionaryById(35L).getValue(); //返B规则
+    String cRule = dictionaryService.findDictionaryById(35L).getValue(); //返C规则
     int valueA = 0;
-    int valueB = 0;
+    int valueC = 0;
     Date date = new Date();
     Map<String, Integer> map = new HashMap<>();
     try {
@@ -319,27 +333,20 @@ public class WeiXinUserService {
         scoreADetailRepository.save(scoreADetail);
       }
 
-      //是否返积分|返积分规则
-      String[] bRules = bRule.split("_");
-      if (!"0".equals(bRules[1])) {      //发积分
+      //是否返金币|返金币规则
+      String[] bRules = cRule.split("_");
+      if (!"0".equals(bRules[1])) {      //发金币
         int maxB = Integer.valueOf(bRules[1]);
-        if ("0".equals(bRules[0])) {   //固定积分
-          valueB = maxB;
-        } else {//随机积分
+        if ("0".equals(bRules[0])) {   //固定金币
+          valueC = maxB;
+        } else {//随机金币
           int minB = Integer.valueOf(bRules[0]);
-          valueB = new Random().nextInt(maxB - minB) + minB;
+          valueC = new Random().nextInt((maxB - minB) / 10) * 10 + minB;
         }
-        scoreB.setLastUpdateDate(date);
-        scoreB.setScore(scoreB.getScore() + valueB);
-        scoreB.setTotalScore(scoreB.getTotalScore() + valueB);
-        scoreBRepository.save(scoreB);
-        ScoreBDetail scoreBDetail = new ScoreBDetail();
-        scoreBDetail.setNumber((long) valueB);
-        scoreBDetail.setScoreB(scoreB);
-        scoreBDetail.setOperate("注册送礼");
-        scoreBDetail.setOrigin(0);
-        scoreBDetail.setOrderSid("0_" + valueB);
-        scoreBDetailRepository.save(scoreBDetail);
+        scoreCService.saveScoreC(scoreC, 1, (long) valueC);
+        scoreCService
+            .saveScoreCDetail(scoreC, 1, (long) valueC, 0, "注册送礼",
+                              "0_" + valueC);
       }
       weiXinUser.setState(1);
       weiXinUser.setStateDate(date);
@@ -348,7 +355,7 @@ public class WeiXinUserService {
       e.printStackTrace();
     }
     map.put("scoreA", valueA);
-    map.put("scoreB", valueB);
+    map.put("scoreC", valueC);
     return map;
   }
 

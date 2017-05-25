@@ -349,6 +349,7 @@ public class OrderService {
           (long) Math.ceil((double) (onLineOrder.getTruePrice() * PAY_BACK_SCALE) / 100);
       onLineOrder.setState(1);
       onLineOrder.setPayState(1);
+      onLineOrder.setSource(1);
       onLineOrder.setPayDate(new Date());
       onLineOrder.setPayBackA(payBackScore);
       LeJiaUser user = onLineOrder.getLeJiaUser();
@@ -383,8 +384,9 @@ public class OrderService {
       } catch (Exception e) {
         e.printStackTrace();
       }
+      final long id = onLineOrder.getId();
       new Thread(() -> { //合伙人和商家分润
-        orderShareService.onLineOrderShare(onLineOrder);
+        orderShareService.onLineOrderShare(id);
       }).start();
 
       System.out.println(onLineOrder.getState() + "之后");
@@ -405,6 +407,7 @@ public class OrderService {
     if (onLineOrder.getState() == 0) {
       onLineOrder.setState(1);
       onLineOrder.setPayState(1);
+      onLineOrder.setSource(1);
       onLineOrder.setPayDate(new Date());
       LeJiaUser user = onLineOrder.getLeJiaUser();
       try {
