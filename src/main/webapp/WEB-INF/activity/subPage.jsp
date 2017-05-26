@@ -46,10 +46,10 @@
         <div class="hb-text">
             <p>恭喜您</p>
 
-            <p>获得<span id="A_status"><span id="scoreA"></span>红包和</span><span id="scoreC"></span>金币
+            <p>获得<span id="A_status"><span id="scoreA"></span>鼓励金和</span><span id="scoreC"></span>金币
             </p>
         </div>
-        <img id="headImg" src="${resourceUrl}/frontRes/activity/subPage/img/hb4.png" alt=""/>
+        <img id="headImg" src="${resourceUrl}/frontRes/activity/subPage/img/after.png" alt=""/>
 
         <div class="checkDown">
             <button onclick="goUser()">查看我的钱包</button>
