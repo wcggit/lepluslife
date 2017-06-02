@@ -51,6 +51,16 @@ public class ScoreCService {
   }
 
   /**
+   * 查找金币账户余额  17/2/20
+   *
+   * @param leJiaUserId 用户ID
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  public Long findScoreByLeJiaUserId(Long leJiaUserId) {
+    return repository.findByLeJiaUserId(leJiaUserId);
+  }
+
+  /**
    * 保存金币账户  17/2/20
    *
    * @param scoreC 金币账户
@@ -68,7 +78,7 @@ public class ScoreCService {
       } else {
         scoreC.setScore(scoreC.getScore() - val);
       }
-      repository.save(scoreC);
+      repository.saveAndFlush(scoreC);
     } catch (Exception e) {
       throw new RuntimeException();
     }
