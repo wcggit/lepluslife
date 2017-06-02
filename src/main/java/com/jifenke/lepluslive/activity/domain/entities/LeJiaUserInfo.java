@@ -38,7 +38,7 @@ public class LeJiaUserInfo {
 
   private Integer rockTime = 0;       //最近一个摇一摇时间的已摇次数
 
-  private Integer inviteA = 0;        //邀请累计获得红包
+  private Integer inviteA = 0;        //邀请累计获得红包|金币
 
   private Integer inviteB = 0;        //邀请累计获得积分
 

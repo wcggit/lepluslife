@@ -396,7 +396,7 @@ public class ActivityPhoneOrderService {
    * @param orderSid 订单Sid
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public void paySuccess(String orderSid) throws Exception {
+  public synchronized void paySuccess(String orderSid) throws Exception {
     ActivityPhoneOrder order = repository.findByOrderSid(orderSid);
     if (order != null) {
       if (order.getType() == 1) {
@@ -485,7 +485,7 @@ public class ActivityPhoneOrderService {
    * @param order 金币话费订单
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public void paySuccessByGold(ActivityPhoneOrder order) throws Exception {
+  private void paySuccessByGold(ActivityPhoneOrder order) throws Exception {
     try {
       if (order.getPayState() == 0) {
         order.setState(1);
@@ -495,46 +495,53 @@ public class ActivityPhoneOrderService {
         ScoreC scoreC = scoreCService.findScoreCByLeJiaUser(user);
         //减金币
         if (order.getTrueScoreB() != null && order.getTrueScoreB() > 0) {
+          Long score = scoreCService.findScoreByLeJiaUserId(user.getId());
+          if (order.getTrueScoreB() > score) {
+            System.out.println("scoreC pay fail");
+            throw new RuntimeException();
+          }
           scoreCService.saveScoreC(scoreC, 0, order.getTrueScoreB().longValue());
           scoreCService
               .saveScoreCDetail(scoreC, 0, order.getTrueScoreB().longValue(), 15003, "充话费消耗金币",
                                 order.getOrderSid());
-        }
-        PayOrigin payOrigin = order.getPayOrigin();
-        PayOrigin payWay = new PayOrigin();
-        if (order.getTruePrice() == 0) {
-          if (payOrigin.getId() == 1) {
-            payWay.setId(13L);
-          } else {
-            payWay.setId(14L);
-          }
-        } else if (order.getTrueScoreB() == 0) {
-          if (payOrigin.getId() == 1) {
-            payWay.setId(2L);
-          } else {
-            payWay.setId(6L);
-          }
-        } else {
-          if (payOrigin.getId() == 1) {
-            payWay.setId(11L);
-          } else {
-            payWay.setId(12L);
-          }
-        }
-        order.setPayOrigin(payWay);
 
-        repository.save(order);
+          PayOrigin payOrigin = order.getPayOrigin();
+          PayOrigin payWay = new PayOrigin();
+          if (order.getTruePrice() == 0) {
+            if (payOrigin.getId() == 1) {
+              payWay.setId(13L);
+            } else {
+              payWay.setId(14L);
+            }
+          } else if (order.getTrueScoreB() == 0) {
+            if (payOrigin.getId() == 1) {
+              payWay.setId(2L);
+            } else {
+              payWay.setId(6L);
+            }
+          } else {
+            if (payOrigin.getId() == 1) {
+              payWay.setId(11L);
+            } else {
+              payWay.setId(12L);
+            }
+          }
+          order.setPayOrigin(payWay);
 
-        //支付回调成功调用第三方充值接口充值
-        Map<Object, Object>
-            result =
-            rechargeService.submit(order.getPhone(), order.getWorth(), order.getOrderSid());
-        if (result.get("status") == null || "failure".equalsIgnoreCase("" + result.get("status"))) {
-          //充值失败
-          order.setState(3);
-          order.setErrorDate(new Date());
-          order.setMessage("" + result.get("message"));
           repository.save(order);
+
+          //支付回调成功调用第三方充值接口充值
+          Map<Object, Object>
+              result =
+              rechargeService.submit(order.getPhone(), order.getWorth(), order.getOrderSid());
+          if (result.get("status") == null || "failure"
+              .equalsIgnoreCase("" + result.get("status"))) {
+            //充值失败
+            order.setState(3);
+            order.setErrorDate(new Date());
+            order.setMessage("" + result.get("message"));
+            repository.save(order);
+          }
         }
       }
     } catch (Exception e) {

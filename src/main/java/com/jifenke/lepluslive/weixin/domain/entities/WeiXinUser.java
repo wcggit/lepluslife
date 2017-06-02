@@ -42,8 +42,6 @@ public class WeiXinUser {
 
   private String refreshToken;
 
-  private Integer hongBaoState = 0; //红包状态 0 未开红包, 1 已开红包;
-
   @OneToOne
   private LeJiaUser leJiaUser; //条形码
 
@@ -69,14 +67,6 @@ public class WeiXinUser {
   private String subSource;   //关注来源
 
   private Integer massRemain = 4;  //本月群发余数
-
-  public Integer getHongBaoState() {
-    return hongBaoState;
-  }
-
-  public void setHongBaoState(Integer hongBaoState) {
-    this.hongBaoState = hongBaoState;
-  }
 
   public LeJiaUser getLeJiaUser() {
     return leJiaUser;

@@ -229,6 +229,7 @@
         $(".information").fadeIn();
     }
     function buy() {
+        $('.confirmPayment').attr('onclick','');
         var focusWorth = $('.focusClass').html();
         var selectWorth = focusWorth.substr(0, focusWorth.length - 1);
         var currPhone = $('#newTel').val();
@@ -248,12 +249,14 @@
                                weixinPay(res.data);
                            } else {
                                alert(res.msg);
-                               $('.btn-recharge').attr('onclick', 'btnFun()');
+//                               $('.btn-recharge').attr('onclick', 'btnFun()');
+                               $('.confirmPayment').attr('onclick','buy()');
                            }
                        })
             } else {
                 alert(resu.msg);
-                $('.btn-recharge').attr('onclick', 'btnFun()');
+//                $('.btn-recharge').attr('onclick', 'btnFun()');
+                $('.confirmPayment').attr('onclick','buy()');
             }
         });
     }
@@ -272,11 +275,13 @@
                            },
                            cancel: function (res) {
                                alert("pay cancel");
-                               $('.btn-recharge').attr('onclick', 'btnFun()');
+//                               $('.btn-recharge').attr('onclick', 'btnFun()');
+                               $('.confirmPayment').attr('onclick','buy()');
                            },
                            fail: function (res) {
                                alert("pay fail");
-                               $('.btn-recharge').attr('onclick', 'btnFun()');
+//                               $('.btn-recharge').attr('onclick', 'btnFun()');
+                               $('.confirmPayment').attr('onclick','buy()');
                            }
                        });
     }

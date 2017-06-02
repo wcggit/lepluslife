@@ -34,7 +34,7 @@ public class ActivityShareLog {
 
   @ManyToOne
   private LeJiaUser beLeJiaUser;  //被邀请人
-  private Integer beScoreA = 0;   //被邀请人获得的红包
+  private Integer beScoreA = 0;   //被邀请人获得的红包|金币
   private Integer beScoreB = 0;   //被邀请人获得的积分
 
   public String getId() {

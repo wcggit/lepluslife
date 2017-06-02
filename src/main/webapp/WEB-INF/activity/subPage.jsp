@@ -52,7 +52,7 @@
         <img id="headImg" src="${resourceUrl}/frontRes/activity/subPage/img/after.png" alt=""/>
 
         <div class="checkDown">
-            <button onclick="goUser()">查看我的钱包</button>
+            <button onclick="goRecharge()">马上冲话费</button>
         </div>
         <div class="dang"></div>
     </div>
@@ -353,12 +353,13 @@
             }
         })
     }
-    function goMerchant() {
-        window.location.href = "/merchant/index"
+    /*********************** 话费充值 *************************/
+    function goRecharge() {
+        /** 点击话费充值事件统计*/
+        $.get("/front/visit/recharge/1");
+        window.location.href = '/front/order/weixin/recharge';
     }
-    function goUser() {
-        window.location.href = "/weixin/user"
-    }
+
     function getVerify() {
         var phoneNumber = $("input[name='phoneNumber']").val();
         if ((!(/^1[3|4|5|6|7|8]\d{9}$/.test(phoneNumber)))) {
