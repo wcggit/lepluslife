@@ -110,26 +110,26 @@ public class ActivityCodeBurseController {
   }
 
   /**
-   * 分享页面提交  16/09/07
+   * 分享页面提交  16/09/07 todo:修改
    *
    * @param phoneNumber 被邀请的手机号码
    * @param token       邀请人的token
    * @param request     请求
    * @return 状态
    */
-  @RequestMapping(value = "/share/submit", method = RequestMethod.GET)
-  public LejiaResult shareSubmit(@RequestParam String phoneNumber, @RequestParam String token,
-                                 HttpServletRequest request) {
-    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
-
-    //给双方派发红包和积分,填充手机号码成为会员，修改邀请人邀请记录(info)并记录shareLog
-    try {
-      activityShareLogService.giveScoreByShare(weiXinUser, token, phoneNumber);
-      return LejiaResult.ok();
-    } catch (Exception e) {
-      return LejiaResult.build(202, "服务器异常");
-    }
-  }
+//  @RequestMapping(value = "/share/submit", method = RequestMethod.GET)
+//  public LejiaResult shareSubmit(@RequestParam String phoneNumber, @RequestParam String token,
+//                                 HttpServletRequest request) {
+//    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
+//
+//    //给双方派发红包和积分,填充手机号码成为会员，修改邀请人邀请记录(info)并记录shareLog
+//    try {
+//      activityShareLogService.giveScoreByShare(weiXinUser, token, phoneNumber);
+//      return LejiaResult.ok();
+//    } catch (Exception e) {
+//      return LejiaResult.build(202, "服务器异常");
+//    }
+//  }
 
   //关注图文链接页面
   @RequestMapping("/subPage")
