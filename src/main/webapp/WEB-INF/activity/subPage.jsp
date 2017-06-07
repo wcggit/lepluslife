@@ -52,7 +52,7 @@
         <img id="headImg" src="${resourceUrl}/frontRes/activity/subPage/img/after.png" alt=""/>
 
         <div class="checkDown">
-            <button onclick="goRecharge()">马上冲话费</button>
+            <button onclick="goRecharge()">马上充话费</button>
         </div>
         <div class="dang"></div>
     </div>

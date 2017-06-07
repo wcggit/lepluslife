@@ -21,4 +21,10 @@ public interface ActivityShareLogRepository extends JpaRepository<ActivityShareL
   @Query(value = "SELECT id FROM activity_share_log WHERE  be_le_jia_user_id=?1", nativeQuery = true)
   List<Object[]> findLogByLeJiaUser(Long id);
 
+  /**
+   * 判断今日邀请成功人数是否已达上限  17/6/7
+   */
+  @Query(value = "SELECT SUM(1) FROM activity_share_log WHERE le_jia_user_id = ?1  AND create_date BETWEEN DATE_FORMAT(NOW(),'%Y-%m-%d') AND DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'),INTERVAL 1 DAY)", nativeQuery = true)
+  Integer countShareTimesToday(Long userId);
+
 }

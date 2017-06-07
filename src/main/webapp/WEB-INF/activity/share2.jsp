@@ -148,26 +148,19 @@
             $('#submit').attr('onclick', 'register()');
             return false
         }
-        $.post("/user/validate", {phoneNumber: phoneNumber, code: code}, function (res) {
-            if (res.status == 200) {
-                $.ajax({
-                           type: "get",
-                           url: "/weixin/share/submit?token=${token}&phoneNumber=" + phoneNumber,
-                           success: function (data) {
-                               if (data.status == 200) {
-                                   window.location.href =
-                                   'http://www.lepluslife.com/resource/frontRes/activity/share2/register.html';
-                               } else {
-                                   alert(data.msg);
-                                   $('#submit').attr('onclick', 'register()');
-                               }
-                           }
-                       });
-            } else {
-                $('#submit').attr('onclick', 'register()');
-                alert(res.msg)
-            }
-        });
+
+        var shareToken = '${token}';
+
+        $.post("/weixin/share/submit", {phoneNumber: phoneNumber, code: code, token: shareToken},
+               function (res) {
+                   if (res.status == 200) {
+                       window.location.href =
+                           'http://www.lepluslife.com/resource/frontRes/activity/share2/register.html';
+                   } else {
+                       alert(res.msg);
+                       $('#submit').attr('onclick', 'register()');
+                   }
+               });
 
     }
 

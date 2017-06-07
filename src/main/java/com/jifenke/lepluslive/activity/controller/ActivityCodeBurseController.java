@@ -12,6 +12,7 @@ import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.lejiauser.service.LeJiaUserService;
+import com.jifenke.lepluslive.lejiauser.service.ValidateCodeService;
 import com.jifenke.lepluslive.merchant.domain.entities.Merchant;
 import com.jifenke.lepluslive.partner.service.PartnerService;
 import com.jifenke.lepluslive.score.service.ScoreAService;
@@ -71,6 +72,9 @@ public class ActivityCodeBurseController {
   private ActivityShareLogService activityShareLogService;
 
   @Inject
+  private ValidateCodeService validateCodeService;
+
+  @Inject
   private MessageService messageService;
   @Inject
   private RechargeCardService rechargeCardService;
@@ -110,26 +114,49 @@ public class ActivityCodeBurseController {
   }
 
   /**
-   * 分享页面提交  16/09/07 todo:修改
+   * 分享页面提交  16/09/07
    *
    * @param phoneNumber 被邀请的手机号码
+   * @param code        验证码
    * @param token       邀请人的token
    * @param request     请求
    * @return 状态
    */
-//  @RequestMapping(value = "/share/submit", method = RequestMethod.GET)
-//  public LejiaResult shareSubmit(@RequestParam String phoneNumber, @RequestParam String token,
-//                                 HttpServletRequest request) {
-//    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
-//
-//    //给双方派发红包和积分,填充手机号码成为会员，修改邀请人邀请记录(info)并记录shareLog
-//    try {
-//      activityShareLogService.giveScoreByShare(weiXinUser, token, phoneNumber);
-//      return LejiaResult.ok();
-//    } catch (Exception e) {
-//      return LejiaResult.build(202, "服务器异常");
-//    }
-//  }
+  @RequestMapping(value = "/share/submit", method = RequestMethod.POST)
+  public LejiaResult shareSubmit(@RequestParam String phoneNumber, @RequestParam String token,
+                                 @RequestParam String code,
+                                 HttpServletRequest request) {
+
+    Boolean b = validateCodeService.findByPhoneNumberAndCode(phoneNumber, code); //验证码是否正确
+    if (!b) {
+      return LejiaResult.build(3001, "验证码错误");
+    }
+
+    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
+    //判断是否有手机号码
+    LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
+    int flag = 0;
+    if (leJiaUser != null) {
+      if (leJiaUser.getPhoneNumber() == null || leJiaUser.getPhoneNumber().equals("")) {
+        //判断是否被邀请过，防止手机号互相挤掉刷红包
+        flag = activityShareLogService.findLogByLeJiaUser(leJiaUser.getId());
+      } else {
+        flag = 1;
+      }
+      if (flag == 1 || leJiaUser.getUserSid().equals(token)) {
+        //已被邀请过或有手机号 || 是否是自己打开的自己的分享页面
+        return LejiaResult.build(203, "您已注册");
+      }
+    }
+
+    //给双方派发红包和积分,填充手机号码成为会员，修改邀请人邀请记录(info)并记录shareLog
+    try {
+      activityShareLogService.giveScoreByShare(weiXinUser, token, phoneNumber);
+      return LejiaResult.ok();
+    } catch (Exception e) {
+      return LejiaResult.build(202, "服务器异常");
+    }
+  }
 
   //关注图文链接页面
   @RequestMapping("/subPage")

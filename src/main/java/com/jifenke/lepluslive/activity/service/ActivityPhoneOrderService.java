@@ -123,6 +123,69 @@ public class ActivityPhoneOrderService {
   }
 
   /**
+   * 手机号或用户每月使用金币充话费是否超限  2017/6/7
+   *
+   * @param leJiaUser 用户
+   * @param phone     手机号
+   * @param worth     本次充值面额
+   */
+  public Map<String, Object> checkUseScore(LeJiaUser leJiaUser, String phone, Integer worth) {
+    String s = dictionaryService.findDictionaryById(64L).getValue();
+    ScoreC scoreC = scoreCService.findScoreCByLeJiaUser(leJiaUser);
+    Map<String, Object> result = new HashMap<>();
+    int userLimit = Integer.valueOf(s.split("_")[0]);
+    int phoneLimit = Integer.valueOf(s.split("_")[1]);
+    int trueScore = 0;
+    if (scoreC.getScore().intValue() < worth * 100) {
+      trueScore = scoreC.getScore().intValue();
+    } else {
+      trueScore = worth * 100;
+    }
+    Integer userThisMonth = sumTrueScoreByLeJiaUserThisMonth(leJiaUser.getId());
+    if (userLimit <= userThisMonth + trueScore) {
+      result.put("status", 1008);
+      String[] o = new String[2];
+      o[0] = String.valueOf(userLimit / 100);
+      o[1] = String.valueOf(userThisMonth.doubleValue() / 100);
+      result.put("arrays", o);
+      return result;
+    }
+    Integer phoneThisMonth = sumTrueScoreByPhoneThisMonth(phone);
+    if (phoneLimit <= phoneThisMonth + trueScore) {
+      result.put("status", 1009);
+      String[] o = new String[2];
+      o[0] = String.valueOf(phoneLimit / 100);
+      o[1] = String.valueOf(phoneThisMonth.doubleValue() / 100);
+      result.put("arrays", o);
+      return result;
+    }
+    result.put("status", 200);
+    return result;
+  }
+
+  /**
+   * 用户本月充值成功使用金币总额  2017/6/7
+   *
+   * @param userId 用户ID
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+  private Integer sumTrueScoreByLeJiaUserThisMonth(Long userId) {
+    Integer i = repository.sumTrueScoreByLeJiaUserThisMonth(userId);
+    return i == null ? 0 : i;
+  }
+
+  /**
+   * 某一手机号本月充值成功使用金币总额  2017/6/7
+   *
+   * @param phoneNumber 充值手机号
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+  private Integer sumTrueScoreByPhoneThisMonth(String phoneNumber) {
+    Integer i = repository.sumTrueScoreByPhoneThisMonth(phoneNumber);
+    return i == null ? 0 : i;
+  }
+
+  /**
    * 微信支付成功后，充值成功回调 16/10/28
    *
    * @param order   充值成功订单
@@ -275,10 +338,10 @@ public class ActivityPhoneOrderService {
    * @param payWayId 5=公众号|1=APP
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public Map<Object, Object> createPhoneOrder(LeJiaUser user, Integer worth, String phone,
+  public Map<String, Object> createPhoneOrder(LeJiaUser user, Integer worth, String phone,
                                               Long payWayId)
       throws Exception {
-    Map<Object, Object> result = new HashMap<>();
+    Map<String, Object> result = new HashMap<>();
     //校验充值面额 1,2,5,10,20,50,100,300
     if (!(worth != null && (worth == 10 || worth == 20 || worth == 50 || worth == 100 || worth == 5
                             || worth == 2 || worth == 1 || worth == 300))) {

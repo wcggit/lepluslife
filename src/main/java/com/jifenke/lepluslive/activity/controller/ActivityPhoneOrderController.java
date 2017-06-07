@@ -7,6 +7,7 @@ import com.jifenke.lepluslive.global.service.MessageService;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.lejiauser.service.LeJiaUserService;
+import com.jifenke.lepluslive.weixin.service.DictionaryService;
 import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
 
 import org.slf4j.Logger;
@@ -58,7 +59,15 @@ public class ActivityPhoneOrderController {
     LeJiaUser
         leJiaUser =
         leJiaUserService.findUserById(Long.valueOf("" + request.getAttribute("leJiaUserId")));
-    Map<Object, Object> result = null;
+    Map<String, Object> result = null;
+    //判断话费充值是否超限
+    result = phoneOrderService.checkUseScore(leJiaUser, phone, worth);
+    String status = "" + result.get("status");
+    if (!"200".equals(status)) {
+      return LejiaResult.build(Integer.valueOf(status),
+                               messageService.getMsg(status, (String[]) result.get("arrays")));
+    }
+
     try {
       result = phoneOrderService.createPhoneOrder(leJiaUser, worth, phone, payWay);
     } catch (Exception e) {
