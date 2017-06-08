@@ -67,6 +67,17 @@ public class ActivityShareLogService {
   }
 
   /**
+   * 判断今日邀请成功人数是否已达上限 17/06/07
+   *
+   * @param userId 邀请人id
+   */
+  @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+  private int countShareTimesToday(Long userId) {
+    Integer num = activityShareLogRepository.countShareTimesToday(userId);
+    return num == null ? 0 : num;
+  }
+
+  /**
    * APP分享活动送金币 16/09/08
    *
    * @param weiXinUser  被邀请人
@@ -88,17 +99,22 @@ public class ActivityShareLogService {
     ScoreC scoreC = scoreCService.findScoreCByLeJiaUser(leJiaUser);
     Date date = new Date();
     try {
-      //邀请人
-      scoreCService.saveScoreC(scoreC, 1, (long) UA);
-      scoreCService
-          .saveScoreCDetail(scoreC, 1, (long) UA, 8, "分享得鼓励金",
-                            beLeJiaUser.getUserSid());
-      //邀请人邀请总额和人数修改
-      LeJiaUserInfo info = leJiaUserInfoService.findByLeJiaUser(leJiaUser);
-      if (info != null) {
-        info.setInviteA((info.getInviteA() == null ? 0 : info.getInviteA()) + UA);
-        info.setTotalInvite(info.getTotalInvite() + 1);
-        leJiaUserInfoRepository.save(info);
+      //判断每日邀请人数是否超过限制
+      int timesToday = countShareTimesToday(leJiaUser.getId());
+      Integer canInvite = Integer.valueOf(dictionaryService.findDictionaryById(63L).getValue());
+      if (timesToday < canInvite) {
+        //邀请人
+        scoreCService.saveScoreC(scoreC, 1, (long) UA);
+        scoreCService
+            .saveScoreCDetail(scoreC, 1, (long) UA, 8, "分享得鼓励金",
+                              beLeJiaUser.getUserSid());
+        //邀请人邀请总额和人数修改
+        LeJiaUserInfo info = leJiaUserInfoService.findByLeJiaUser(leJiaUser);
+        if (info != null) {
+          info.setInviteA((info.getInviteA() == null ? 0 : info.getInviteA()) + UA);
+          info.setTotalInvite(info.getTotalInvite() + 1);
+          leJiaUserInfoRepository.save(info);
+        }
       }
 
       //被邀请人

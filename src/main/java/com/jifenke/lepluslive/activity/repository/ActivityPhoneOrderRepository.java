@@ -18,6 +18,22 @@ public interface ActivityPhoneOrderRepository extends JpaRepository<ActivityPhon
   ActivityPhoneOrder findByOrderSid(String orderSid);
 
   /**
+   * 用户本月充值成功使用金币总额  2017/6/7
+   *
+   * @param userId 用户ID
+   */
+  @Query(value = "SELECT SUM(true_scoreb) FROM activity_phone_order WHERE le_jia_user_id = ?1 AND pay_state = 1 AND pay_date > DATE_ADD(CURDATE(),interval -day(CURDATE())+1 day)", nativeQuery = true)
+  Integer sumTrueScoreByLeJiaUserThisMonth(Long userId);
+
+  /**
+   * 某一手机号本月充值成功使用金币总额  2017/6/7
+   *
+   * @param phoneNumber 充值手机号
+   */
+  @Query(value = "SELECT SUM(true_scoreb) FROM activity_phone_order WHERE phone = ?1 AND pay_state = 1 AND pay_date > DATE_ADD(CURDATE(),interval -day(CURDATE())+1 day)", nativeQuery = true)
+  Integer sumTrueScoreByPhoneThisMonth(String phoneNumber);
+
+  /**
    * 获取某一用户所有的已支付订单  16/11/01
    */
   List<ActivityPhoneOrder> findByLeJiaUserAndPayStateOrderByCreateDateDesc(LeJiaUser leJiaUser,
