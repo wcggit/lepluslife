@@ -3,6 +3,7 @@ package com.jifenke.lepluslive.partner.repository;
 import com.jifenke.lepluslive.partner.domain.entities.Partner;
 import com.jifenke.lepluslive.partner.domain.entities.PartnerManager;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

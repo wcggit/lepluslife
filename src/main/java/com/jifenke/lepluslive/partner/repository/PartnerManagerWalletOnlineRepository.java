@@ -2,6 +2,7 @@ package com.jifenke.lepluslive.partner.repository;
 
 import com.jifenke.lepluslive.partner.domain.entities.PartnerManager;
 import com.jifenke.lepluslive.partner.domain.entities.PartnerManagerWalletOnline;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**

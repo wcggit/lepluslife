@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -48,33 +47,6 @@ public class ProductController {
   public LejiaResult findAllProductType() {
     return LejiaResult.ok(productService.findAllProductType());
   }
-
-  //todo:待删除
-  @ApiOperation(value = "查看商品列表")
-  @RequestMapping(value = "/product", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-  public List<ProductDto> findPageProduct(
-      @RequestParam(value = "page", required = false) Integer offset,
-      @RequestParam(value = "productType", required = true) Integer productType) {
-    List<ProductDto> products = productService
-        .findProductsByPage(offset, productType).stream()
-        .map(product -> {
-          ProductDto productDto = new ProductDto();
-          try {
-            BeanUtils.copyProperties(productDto, product);
-
-            productDto.setMarkType(product.getMark() == null ? 0 : product.getMark().getType());
-
-          } catch (IllegalAccessException e) {
-            e.printStackTrace();
-          } catch (InvocationTargetException e) {
-            e.printStackTrace();
-          }
-          return productDto;
-        }).collect(Collectors.toList());
-    return products;
-
-  }
-
 
   @RequestMapping(value = "/product/productType", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
   public List<ProductType> goProductTypePage() {

@@ -1,6 +1,7 @@
 package com.jifenke.lepluslive.s_movie.repository;
 
 import com.jifenke.lepluslive.s_movie.domain.entities.SMovieProduct;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

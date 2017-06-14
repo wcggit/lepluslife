@@ -3,7 +3,7 @@
   User: zhangwen
   Date: 2017/4/16
   Time: 16:31
-  To change this template use File | Settings | File Templates.
+  商家详情页
 --%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ page language="java" pageEncoding="UTF-8" %>
@@ -60,7 +60,7 @@
 <section class="shopInfo">
     <div class="fixClear">
         <div><img src="${resourceUrl}/frontRes/shop/index/img/addressIcon.png" alt=""></div>
-        <div>${merchant.location}</div>
+        <div onclick="openLocation()">${merchant.location}</div>
         <div onclick="phone()"><img src="${resourceUrl}/frontRes/shop/detail/img/toCall.png" alt="">
         </div>
     </div>
@@ -130,6 +130,35 @@
 <script src="${resourceUrl}/js/jquery.min.js"></script>
 <script src="${resourceUrl}/frontRes/js/swiper.min.js"></script>
 <script src="${resourceUrl}/frontRes/js/layer.js"></script>
+<script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+<script>
+    wx.config({
+                  debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+                  appId: '${wxConfig['appId']}', // 必填，公众号的唯一标识
+                  timestamp: ${wxConfig['timestamp']}, // 必填，生成签名的时间戳
+                  nonceStr: '${wxConfig['noncestr']}', // 必填，生成签名的随机串
+                  signature: '${wxConfig['signature']}',// 必填，签名，见附录1
+                  jsApiList: [
+                      'openLocation'
+                  ] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+              });
+    wx.ready(function () {
+    });
+    wx.error(function (res) {
+    });
+
+    function openLocation() {
+        wx.openLocation({
+                            latitude: ${merchant.lat}, // 纬度，浮点数，范围为90 ~ -90
+                            longitude: ${merchant.lng}, // 经度，浮点数，范围为180 ~ -180。
+                            name: '${merchant.location}', // 位置名
+                            address: '${merchant.location}', // 地址详情说明
+                            scale: 20, // 地图缩放级别,整形值,范围从1~28。默认为最大
+                            infoUrl: '' // 在查看位置界面底部显示的超链接,可点击跳转
+                        });
+    }
+
+</script>
 <script>
 
     /** 进入商家详情事件统计*/
@@ -202,9 +231,9 @@
     function drawStar(num, url) {
         for (var i = 0; i < num; i++) {
             $(".star").append(
-                    $("<div></div>").append(
-                            $("<img />").attr("src", url)
-                    )
+                $("<div></div>").append(
+                    $("<img />").attr("src", url)
+                )
             )
         }
     }

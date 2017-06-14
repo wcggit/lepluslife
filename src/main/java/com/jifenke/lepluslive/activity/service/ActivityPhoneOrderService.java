@@ -18,6 +18,7 @@ import com.jifenke.lepluslive.weixin.service.DictionaryService;
 import com.jifenke.lepluslive.weixin.service.WeiXinUserService;
 import com.jifenke.lepluslive.weixin.service.WxTemMsgService;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -342,9 +343,8 @@ public class ActivityPhoneOrderService {
                                               Long payWayId)
       throws Exception {
     Map<String, Object> result = new HashMap<>();
-    //校验充值面额 1,2,5,10,20,50,100,300
-    if (!(worth != null && (worth == 10 || worth == 20 || worth == 50 || worth == 100 || worth == 5
-                            || worth == 2 || worth == 1 || worth == 300))) {
+    //校验充值面额  1,2,5,10,20,50,100,300
+    if (!(worth != null && (worth == 20 || worth == 50 || worth == 100))) {
       result.put("status", 1007);
       return result;
     }
@@ -387,7 +387,7 @@ public class ActivityPhoneOrderService {
    * 生成话费订单前检测可否下单   16/10/28
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
-  public Map<Object, Object> checkCreate(ActivityPhoneRule rule, LeJiaUser user) throws Exception {
+  private Map<Object, Object> checkCreate(ActivityPhoneRule rule, LeJiaUser user) throws Exception {
     Map<Object, Object> result = new HashMap<>();
     if (rule.getState() == 0) { //是否已下线
       result.put("status", 1006);
@@ -476,7 +476,7 @@ public class ActivityPhoneOrderService {
    * @param order 积分话费订单
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public void paySuccessByScore(ActivityPhoneOrder order) throws Exception {
+  private void paySuccessByScore(ActivityPhoneOrder order) throws Exception {
     try {
       if (order.getPayState() == 0) {
         //如果是限购商品，或不是限购,但又库存限制，减库存

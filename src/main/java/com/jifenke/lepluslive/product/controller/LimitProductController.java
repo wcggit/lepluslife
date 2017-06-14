@@ -12,8 +12,6 @@ import com.jifenke.lepluslive.product.domain.entities.ProductType;
 import com.jifenke.lepluslive.product.domain.entities.ScrollPicture;
 import com.jifenke.lepluslive.product.service.ProductService;
 import com.jifenke.lepluslive.product.service.ScrollPictureService;
-import com.jifenke.lepluslive.score.domain.entities.ScoreB;
-import com.jifenke.lepluslive.score.service.ScoreBService;
 import com.jifenke.lepluslive.score.service.ScoreCService;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.service.WeiXinService;
@@ -68,17 +66,6 @@ public class LimitProductController {
 //    model.addAttribute("product", product);
     model.addAttribute("typeList", typeList);
     return MvUtil.go("/product/productIndex");
-  }
-
-  /**
-   * 公众号 秒杀首页 16/09/21
-   */
-  @RequestMapping(value = "/weixin/hotIndex", method = RequestMethod.GET)
-  public ModelAndView hotIndex(Model model) {
-//    //主打爆品
-//    Map product = productService.findMainHotProduct();
-//    model.addAttribute("product", product);
-    return MvUtil.go("/product/hotIndex");
   }
 
   /**

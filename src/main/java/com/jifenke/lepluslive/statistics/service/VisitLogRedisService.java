@@ -35,7 +35,6 @@ public class VisitLogRedisService {
    */
   public void addClickLog(String user, String category, String target) {
 
-    //todo: 如何使用非事务流水线处理？
 //     byte[] rawKey = redisTemplate.getKeySerializer().serialize(category);
 //    //pipeline
 //    RedisCallback<List<Object>> callback = new RedisCallback<List<Object>>() {

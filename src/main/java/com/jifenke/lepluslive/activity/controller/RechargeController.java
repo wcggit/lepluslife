@@ -2,45 +2,23 @@ package com.jifenke.lepluslive.activity.controller;
 
 import com.jifenke.lepluslive.activity.domain.entities.ActivityPhoneOrder;
 import com.jifenke.lepluslive.activity.service.ActivityPhoneOrderService;
-import com.jifenke.lepluslive.activity.service.ActivityPhoneRuleService;
 import com.jifenke.lepluslive.activity.service.RechargeService;
-import com.jifenke.lepluslive.global.config.Constants;
 import com.jifenke.lepluslive.global.service.MessageService;
-import com.jifenke.lepluslive.global.util.JsonUtils;
 import com.jifenke.lepluslive.global.util.LejiaResult;
-import com.jifenke.lepluslive.global.util.MvUtil;
-import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
-import com.jifenke.lepluslive.lejiauser.service.LeJiaUserService;
-import com.jifenke.lepluslive.score.domain.entities.ScoreB;
-import com.jifenke.lepluslive.score.service.ScoreBService;
-import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
-import com.jifenke.lepluslive.weixin.service.DictionaryService;
-import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
-import com.jifenke.lepluslive.weixin.service.WeiXinService;
 
 import org.jdom.JDOMException;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.ModelAndView;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-//todo:待删除controller  进入充值记录页面action保留
 
 /**
  * 手机充值 Created by zhangwen on 2016/10/26.
@@ -57,92 +35,6 @@ public class RechargeController {
 
   @Inject
   private ActivityPhoneOrderService orderService;
-
-  @Inject
-  private WeiXinService weiXinService;
-
-  @Inject
-  private ScoreBService scoreBService;
-
-  @Inject
-  private ActivityPhoneRuleService ruleService;
-
-  @Inject
-  private DictionaryService dictionaryService;
-
-  @Inject
-  private WeiXinPayService weiXinPayService;
-
-  @Inject
-  private LeJiaUserService leJiaUserService;
-
-  @Inject
-  private ActivityPhoneOrderService phoneOrderService;
-
-  @Inject
-  private MessageService messageService;
-
-  /**
-   * 进入充值页面 16/11/01
-   */
-  @RequestMapping(value = "/weixin/index", method = RequestMethod.GET)
-  public ModelAndView index(HttpServletRequest request, Model model) {
-    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
-    LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
-
-    ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(leJiaUser);
-    model.addAttribute("scoreB", scoreB);
-    String[] str = dictionaryService.findDictionaryById(48L).getValue().split("_");
-    Integer total = Integer.valueOf(str[0]);
-    model.addAttribute("total", total);
-    model.addAttribute("limit", str[1]);
-    try {
-      model
-          .addAttribute("update",
-                        new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(str[2]).getTime());
-    } catch (ParseException e) {
-      e.printStackTrace();
-    }
-    Integer used = orderService.todayUsedWorth();
-    used = used != null ? used > total ? total : used : 0;
-    int soldOut = 0;
-    //是否已售罄
-    if (used >= total) {
-      soldOut = 1;
-    }
-    model.addAttribute("subState", weiXinUser.getSubState());
-    model.addAttribute("phone", leJiaUser.getPhoneNumber());
-    model.addAttribute("soldOut", soldOut);
-    model.addAttribute("used", used);
-    model.addAttribute("ruleList", JsonUtils.objectToJson(ruleService.findAllByState(1)));
-    model.addAttribute("orderList", JsonUtils.objectToJson(
-        orderService.findAllByLeJiaUser(weiXinUser.getLeJiaUser())));
-    model.addAttribute("wxConfig", weiXinPayService.getWeiXinPayConfig(request));
-    return MvUtil.go("/activity/phone/index");
-  }
-
-  /**
-   * 进入充值记录页面 16/11/04
-   */
-  @RequestMapping(value = "/weixin/orderList", method = RequestMethod.GET)
-  public ModelAndView orderList(HttpServletRequest request, Model model) {
-    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
-    List<ActivityPhoneOrder> list = orderService.findAllByLeJiaUser(weiXinUser.getLeJiaUser());
-    int totalWorth = 0;
-    int totalScore = 0;
-    for (ActivityPhoneOrder order : list) {
-      if (order.getType() != null && order.getType() == 2) {
-        totalScore += order.getTrueScoreB();
-      } else {
-        totalScore += order.getTrueScoreB() * 100;
-      }
-      totalWorth += order.getWorth();
-    }
-    model.addAttribute("orderList", list);
-    model.addAttribute("totalWorth", totalWorth);
-    model.addAttribute("totalScore", totalScore);
-    return MvUtil.go("/activity/phone/orderList");
-  }
 
   /**
    * 检查当前是否可以下单，以及下单价格  16/10/26
@@ -212,111 +104,6 @@ public class RechargeController {
     response.getWriter().write(result);
   }
 
-  /**
-   * APP进入充值页面时获取数据 16/12/07
-   */
-  @RequestMapping(value = "/app/index", method = RequestMethod.GET)
-  public Map getInfo(@RequestParam String token) {
-    Map<String, Object> result = new HashMap<>();
-    LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);
-    ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(leJiaUser);
-    result.put("score", scoreB.getScore());
-    result.put("phone", leJiaUser.getPhoneNumber());
-    result.put("ruleList", ruleService.findAllOrderByScoreDescWorthDesc());
-    result.put("orderList", orderService.findAllByLeJiaUser(leJiaUser));
-    String[] str = dictionaryService.findDictionaryById(48L).getValue().split("_");
-    result.put("limit", str[1]);
-    try {
-      result.put("update", new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(str[2]).getTime());
-    } catch (ParseException e) {
-      e.printStackTrace();
-    }
-    return result;
-  }
-
-  /**
-   * APP话费订单生成 生成支付参数  16/12/13
-   *
-   * @param ruleId 话费产品ID
-   * @param phone  充值手机号
-   */
-  @RequestMapping(value = "/app/pay", method = RequestMethod.POST)
-  public LejiaResult phoneOrderPay(@RequestParam Long ruleId, @RequestParam String phone,
-                                   @RequestParam String token,
-                                   HttpServletRequest request) {
-    LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);
-    Map<Object, Object> result = null;
-    try {
-      result = phoneOrderService.createPhoneOrder(ruleId, leJiaUser, phone, 1L);
-    } catch (Exception e) {
-      e.printStackTrace();
-      return LejiaResult.build(500, "出现未知错误,请联系管理员或稍后重试");
-    }
-    if (!"200".equals("" + result.get("status"))) {
-      return LejiaResult
-          .build((Integer) result.get("status"), messageService.getMsg("" + result.get("status")));
-    }
-
-    ActivityPhoneOrder order = (ActivityPhoneOrder) result.get("data");
-    //话费产品如果是全积分，这直接调用充话费接口
-    if (order.getPhoneRule().getPayType() == 3) {
-      try {
-        phoneOrderService.paySuccess(order.getOrderSid());
-        return LejiaResult.build(2000, "支付成功", order.getId());
-      } catch (Exception e) {
-        e.printStackTrace();
-        return LejiaResult.build(500, "出现未知错误,请联系管理员或稍后重试");
-      }
-    }
-    //封装订单参数
-    SortedMap<String, Object>
-        map =
-        weiXinPayService
-            .buildAPPOrderParams(request, "话费充值", order.getOrderSid(), "" + order.getTruePrice(),
-                                 Constants.PHONEORDER_NOTIFY_URL);
-    //获取预支付id
-    Map<String, Object> unifiedOrder = weiXinPayService.createUnifiedOrder(map);
-    if (unifiedOrder.get("prepay_id") != null) {
-      SortedMap<String, Object> sortedMap = weiXinPayService.buildAppParams(
-          unifiedOrder.get("prepay_id").toString());
-      sortedMap.put("orderId", order.getId());
-      return LejiaResult.build(200, "ok", sortedMap);
-    } else {
-      return LejiaResult.build(4001, messageService.getMsg("4001"));
-    }
-  }
-
-  /**
-   * 进入充值记录页面 16/11/04
-   */
-  @RequestMapping(value = "/app/orderList", method = RequestMethod.GET)
-  public LejiaResult orderList(@RequestParam String token) {
-    LeJiaUser leJiaUser = leJiaUserService.findUserByUserSid(token);
-    List<ActivityPhoneOrder> list = orderService.findAllByLeJiaUser(leJiaUser);
-    int totalScore = 0;
-    for (ActivityPhoneOrder order : list) {
-      if (order.getType() != null && order.getType() == 2) {
-        totalScore += order.getTrueScoreB() / 100;
-      } else {
-        totalScore += order.getTrueScoreB();
-      }
-    }
-    Map<String, Object> map = new HashMap<>();
-    map.put("orderList", list);
-    map.put("totalScore", totalScore);
-    return LejiaResult.ok(map);
-  }
-
-  /**
-   * APP话费订单支付成功后请求订单信息  16/12/14
-   *
-   * @param orderId 订单主键
-   */
-  @RequestMapping(value = "/app/phoneSuccess/{orderId}", method = RequestMethod.GET)
-  public LejiaResult phoneSuccessPage(@PathVariable String orderId) {
-    return LejiaResult.ok(phoneOrderService.findByOrderId(orderId));
-  }
-
 //  /**
 //   * 将订单重新充值  16/12/09
 //   *
@@ -331,7 +118,7 @@ public class RechargeController {
 //      return LejiaResult.build(500, "server error");
 //    }
 //  }
-//
+
 //  /**
 //   * 将订单充值  16/12/09
 //   *

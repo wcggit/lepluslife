@@ -5,17 +5,21 @@ import com.jifenke.lepluslive.activity.service.ActivityPhoneOrderService;
 import com.jifenke.lepluslive.global.config.Constants;
 import com.jifenke.lepluslive.global.service.MessageService;
 import com.jifenke.lepluslive.global.util.LejiaResult;
+import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.lejiauser.service.LeJiaUserService;
-import com.jifenke.lepluslive.weixin.service.DictionaryService;
+import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
+import com.jifenke.lepluslive.weixin.service.WeiXinService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.util.HashMap;
 import java.util.List;
@@ -45,6 +49,32 @@ public class ActivityPhoneOrderController {
 
   @Inject
   private LeJiaUserService leJiaUserService;
+
+  @Inject
+  private WeiXinService weiXinService;
+
+  /**
+   * 进入充值记录页面 16/11/04
+   */
+  @RequestMapping(value = "/weixin/orderList", method = RequestMethod.GET)
+  public ModelAndView orderList(HttpServletRequest request, Model model) {
+    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
+    List<ActivityPhoneOrder> list = phoneOrderService.findAllByLeJiaUser(weiXinUser.getLeJiaUser());
+    int totalWorth = 0;
+    int totalScore = 0;
+    for (ActivityPhoneOrder order : list) {
+      if (order.getType() != null && order.getType() == 2) {
+        totalScore += order.getTrueScoreB();
+      } else {
+        totalScore += order.getTrueScoreB() * 100;
+      }
+      totalWorth += order.getWorth();
+    }
+    model.addAttribute("orderList", list);
+    model.addAttribute("totalWorth", totalWorth);
+    model.addAttribute("totalScore", totalScore);
+    return MvUtil.go("/gold/recharge/orderList");
+  }
 
   /**
    * 金币话费订单生成 生成支付参数  17/2/22

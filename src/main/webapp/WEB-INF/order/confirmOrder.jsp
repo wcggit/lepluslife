@@ -380,11 +380,9 @@
                            },
                            cancel: function (res) {
                                $('#btn-wxPay').attr('onclick', 'payByWx()');
-                               <%--window.location.href = '/weixin/pay/payFail/${order.id}';--%>
                            },
                            fail: function (res) {
                                $('#btn-wxPay').attr('onclick', 'payByWx()');
-                               <%--window.location.href = '/weixin/pay/payFail/${order.id}';--%>
                            }
                        });
     }

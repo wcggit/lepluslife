@@ -2,12 +2,14 @@ package com.jifenke.lepluslive.s_movie.service;
 
 import com.jifenke.lepluslive.s_movie.domain.entities.SMovieProduct;
 import com.jifenke.lepluslive.s_movie.repository.SMovieProductRepository;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.inject.Inject;
 import java.util.List;
+
+import javax.inject.Inject;
 
 /**
  * Created by xf on 2017/4/27.

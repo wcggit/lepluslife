@@ -4,14 +4,13 @@ import com.jifenke.lepluslive.banner.service.BannerService;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.s_movie.domain.entities.SMovieOrder;
-import com.jifenke.lepluslive.s_movie.domain.entities.SMovieProduct;
 import com.jifenke.lepluslive.s_movie.service.SMovieOrderService;
 import com.jifenke.lepluslive.s_movie.service.SMovieProductService;
-import com.jifenke.lepluslive.score.domain.entities.ScoreC;
 import com.jifenke.lepluslive.score.service.ScoreCService;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
 import com.jifenke.lepluslive.weixin.service.WeiXinService;
+
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -19,9 +18,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.util.List;
+
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 
 /**
  * Created by xf on 2017/4/27.

@@ -1,7 +1,12 @@
 package com.jifenke.lepluslive.lejiauser.domain.entities;
 
-import javax.persistence.*;
 import java.util.Date;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 /**
  * Created by lss on 17-4-17.

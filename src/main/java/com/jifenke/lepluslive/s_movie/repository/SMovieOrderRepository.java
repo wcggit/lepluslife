@@ -3,6 +3,7 @@ package com.jifenke.lepluslive.s_movie.repository;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.s_movie.domain.entities.SMovieOrder;
 import com.jifenke.lepluslive.s_movie.domain.entities.SMovieTerminal;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

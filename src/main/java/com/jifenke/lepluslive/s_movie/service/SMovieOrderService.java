@@ -1,8 +1,6 @@
 package com.jifenke.lepluslive.s_movie.service;
 
-import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
-import com.jifenke.lepluslive.order.domain.entities.OnLineOrderShare;
 import com.jifenke.lepluslive.order.service.OnLineOrderShareService;
 import com.jifenke.lepluslive.s_movie.domain.entities.SMovieOrder;
 import com.jifenke.lepluslive.s_movie.domain.entities.SMovieProduct;
@@ -13,15 +11,17 @@ import com.jifenke.lepluslive.s_movie.repository.SMovieTerminalRepository;
 import com.jifenke.lepluslive.score.domain.entities.ScoreC;
 import com.jifenke.lepluslive.score.service.ScoreCService;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.inject.Inject;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.inject.Inject;
 
 /**
  * Created by xf on 2017/4/28.
