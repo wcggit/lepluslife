@@ -86,48 +86,49 @@ public class ActivityPhoneOrderController {
   @RequestMapping(value = "/user/create", method = RequestMethod.POST)
   public LejiaResult createGoldOrder(@RequestParam Integer worth, @RequestParam String phone,
                                      HttpServletRequest request, @RequestParam Long payWay) {
-    LeJiaUser
-        leJiaUser =
-        leJiaUserService.findUserById(Long.valueOf("" + request.getAttribute("leJiaUserId")));
-    Map<String, Object> result = null;
-    //判断话费充值是否超限
-    result = phoneOrderService.checkUseScore(leJiaUser, phone, worth);
-    String status = "" + result.get("status");
-    if (!"200".equals(status)) {
-      return LejiaResult.build(Integer.valueOf(status),
-                               messageService.getMsg(status, (String[]) result.get("arrays")));
-    }
-
-    try {
-      result = phoneOrderService.createPhoneOrder(leJiaUser, worth, phone, payWay);
-    } catch (Exception e) {
-      e.printStackTrace();
-      return LejiaResult.build(500, "出现未知错误,请联系管理员或稍后重试");
-    }
-    if (!"200".equals("" + result.get("status"))) {
-      return LejiaResult
-          .build((Integer) result.get("status"), messageService.getMsg("" + result.get("status")));
-    }
-
-    ActivityPhoneOrder order = (ActivityPhoneOrder) result.get("data");
-    //话费产品如果是全金币，这直接调用充话费接口
-    if (order.getTruePrice() == 0) {
-      try {
-        phoneOrderService.paySuccess(order.getOrderSid());
-        return LejiaResult.build(2000, "支付成功", order.getId());
-      } catch (Exception e) {
-        e.printStackTrace();
-        return LejiaResult.build(500, "出现未知错误,请联系管理员或稍后重试");
-      }
-    }
-    SortedMap<String, Object> params = weiXinPayService
-        .returnPayParams(payWay, request, "金币充值话费", order.getOrderSid(), "" + order.getTruePrice(),
-                         Constants.PHONEORDER_NOTIFY_URL);
-    if (params != null) {
-      params.put("orderId", order.getId());
-      return LejiaResult.ok(params);
-    }
-    return LejiaResult.build(500, "出现未知错误,请联系管理员或稍后重试");
+    return LejiaResult.build(500,"活动的名额已经用完，谢谢您的参与");
+//    LeJiaUser
+//        leJiaUser =
+//        leJiaUserService.findUserById(Long.valueOf("" + request.getAttribute("leJiaUserId")));
+//    Map<String, Object> result = null;
+//    //判断话费充值是否超限
+//    result = phoneOrderService.checkUseScore(leJiaUser, phone, worth);
+//    String status = "" + result.get("status");
+//    if (!"200".equals(status)) {
+//      return LejiaResult.build(Integer.valueOf(status),
+//                               messageService.getMsg(status, (String[]) result.get("arrays")));
+//    }
+//
+//    try {
+//      result = phoneOrderService.createPhoneOrder(leJiaUser, worth, phone, payWay);
+//    } catch (Exception e) {
+//      e.printStackTrace();
+//      return LejiaResult.build(500, "出现未知错误,请联系管理员或稍后重试");
+//    }
+//    if (!"200".equals("" + result.get("status"))) {
+//      return LejiaResult
+//          .build((Integer) result.get("status"), messageService.getMsg("" + result.get("status")));
+//    }
+//
+//    ActivityPhoneOrder order = (ActivityPhoneOrder) result.get("data");
+//    //话费产品如果是全金币，这直接调用充话费接口
+//    if (order.getTruePrice() == 0) {
+//      try {
+//        phoneOrderService.paySuccess(order.getOrderSid());
+//        return LejiaResult.build(2000, "支付成功", order.getId());
+//      } catch (Exception e) {
+//        e.printStackTrace();
+//        return LejiaResult.build(500, "出现未知错误,请联系管理员或稍后重试");
+//      }
+//    }
+//    SortedMap<String, Object> params = weiXinPayService
+//        .returnPayParams(payWay, request, "金币充值话费", order.getOrderSid(), "" + order.getTruePrice(),
+//                         Constants.PHONEORDER_NOTIFY_URL);
+//    if (params != null) {
+//      params.put("orderId", order.getId());
+//      return LejiaResult.ok(params);
+//    }
+//    return LejiaResult.build(500, "出现未知错误,请联系管理员或稍后重试");
   }
 
   /**
