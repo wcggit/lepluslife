@@ -177,7 +177,7 @@ public class OrderService {
   }
 
   /**
-   * 购物车生成订单基本信息 16/09/24
+   * 臻品商城 公众号 详情页&购物车 生成订单基本信息 16/09/24
    *
    * @param cartDetailDtos 订单详情
    * @param leJiaUser      用户
@@ -502,7 +502,7 @@ public class OrderService {
   }
 
   /**
-   * 订单页提交,输入实际使用金额和金币 16/09/29
+   * 臻品商城 公众号&APP 订单确认页 输入实际使用金额和金币 16/09/29
    *
    * @param orderId     订单id
    * @param truePrice   实际使用价格

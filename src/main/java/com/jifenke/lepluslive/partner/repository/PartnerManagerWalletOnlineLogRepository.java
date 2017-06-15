@@ -1,6 +1,7 @@
 package com.jifenke.lepluslive.partner.repository;
 
 import com.jifenke.lepluslive.partner.domain.entities.PartnerManagerWalletOnlineLog;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**

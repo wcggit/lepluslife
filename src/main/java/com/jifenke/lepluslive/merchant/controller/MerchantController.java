@@ -1,26 +1,21 @@
 package com.jifenke.lepluslive.merchant.controller;
 
 import com.jifenke.lepluslive.global.util.LejiaResult;
-import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.merchant.controller.dto.MerchantDto;
 import com.jifenke.lepluslive.merchant.domain.entities.Merchant;
 import com.jifenke.lepluslive.merchant.service.MerchantService;
-import com.jifenke.lepluslive.weixin.service.WeiXinService;
 
 import org.springframework.http.MediaType;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.ModelAndView;
 
 import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -34,34 +29,6 @@ public class MerchantController {
 
   @Inject
   private MerchantService merchantService;
-
-  @Inject
-  private WeiXinService weiXinService;
-
-  @RequestMapping("/index")
-  public ModelAndView goMerchantPage(HttpServletRequest request, Model model) {
-    model.addAttribute("wxConfig", weiXinService.getWeiXinConfig(request));
-    return MvUtil.go("/weixin/merchant");
-  }
-
-  @RequestMapping("/type")
-  public ModelAndView goMerchantTypePage(@RequestParam(required = false) String cityName,
-                                         @RequestParam(required = false) Integer status,
-                                         @RequestParam(required = false) Integer condition,
-                                         @RequestParam(required = false) Long type,
-                                         @RequestParam(required = false) Double lat,
-                                         @RequestParam(required = false) Double lon, Model model) {
-    model.addAttribute("cityName", cityName);
-    if (condition == null) {
-      condition = 0;
-    }
-    model.addAttribute("condition", condition);
-    model.addAttribute("status", status);
-    model.addAttribute("type", type);
-    model.addAttribute("lat", lat);
-    model.addAttribute("lon", lon);
-    return MvUtil.go("/weixin/merchantType");
-  }
 
   //分页 todo:待删除
   @RequestMapping(value = "/list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)

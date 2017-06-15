@@ -3,12 +3,13 @@ package com.jifenke.lepluslive.partner.domain.entities;
 import com.jifenke.lepluslive.merchant.domain.entities.City;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 
-import javax.persistence.*;
 import java.util.Date;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 /**

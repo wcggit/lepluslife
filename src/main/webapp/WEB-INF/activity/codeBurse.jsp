@@ -66,7 +66,7 @@
 <script>
     $(".hongbao").css("height",$(window).width() / 690 * 603 + "px");
     function goMerchant() {
-        window.location.href = "http://www.lepluslife.com/merchant/index";
+        window.location.href = "/front/shop/weixin";
     }
 </script>
 </html>

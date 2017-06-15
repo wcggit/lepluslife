@@ -80,14 +80,6 @@ public class BankCardController {
     return LejiaResult.ok(bankCardService.cardCheck(cardNum));
   }
 
-
-  //获取银行卡列表 todo:带删除，更换接口，隐藏卡号返回数据
-  @RequestMapping(value = "/user/card/list", method = RequestMethod.POST)
-  public LejiaResult list(@RequestParam(required = true) String token) {
-    return LejiaResult
-        .ok(bankCardService.findByLeJiaUser(leJiaUserService.findUserByUserSid(token)));
-  }
-
   /**
    * 新版获取银行卡列表  2017/4/20
    */
@@ -111,7 +103,7 @@ public class BankCardController {
   }
 
   /**
-   * 绑定银行卡  2017/4/20 todo:第一个拦截路径以后要去掉
+   * 绑定银行卡  2017/4/20
    *
    * @param token       用户TOKEN
    * @param number      银行卡号
@@ -122,7 +114,7 @@ public class BankCardController {
    * @param phoneNum    手机号
    * @param registerWay 注册途径
    */
-  @RequestMapping(value = {"/user/card/add", "/card/user/add"}, method = RequestMethod.POST)
+  @RequestMapping(value = "/card/user/add", method = RequestMethod.POST)
   public LejiaResult addCard(@RequestParam String token, @RequestParam String number,
                              @RequestParam String cardType,
                              @RequestParam String prefixNum, @RequestParam String cardName,
