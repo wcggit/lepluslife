@@ -125,7 +125,7 @@
         var info = cardInfo.data;
         $.ajax({
                    type: "post",
-                   url: "/front/user/card/add",
+                   url: "/front/card/user/add",
                    data: {
                        token: token,
                        number: cardNum,
