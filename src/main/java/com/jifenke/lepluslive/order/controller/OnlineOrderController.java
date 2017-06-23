@@ -5,6 +5,7 @@ import com.jifenke.lepluslive.Address.service.AddressService;
 import com.jifenke.lepluslive.banner.service.BannerService;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
+import com.jifenke.lepluslive.groupon.service.GrouponOrderService;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.order.domain.entities.OnLineOrder;
 import com.jifenke.lepluslive.order.service.OnlineOrderService;
@@ -14,6 +15,7 @@ import com.jifenke.lepluslive.s_movie.domain.entities.SMovieProduct;
 import com.jifenke.lepluslive.s_movie.service.SMovieOrderService;
 import com.jifenke.lepluslive.s_movie.service.SMovieProductService;
 import com.jifenke.lepluslive.score.domain.entities.ScoreC;
+import com.jifenke.lepluslive.score.service.ScoreAService;
 import com.jifenke.lepluslive.score.service.ScoreCService;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
@@ -62,6 +64,9 @@ public class OnlineOrderController {
   private ScoreCService scoreCService;
 
   @Inject
+  private ScoreAService scoreAService;
+
+  @Inject
   private SMovieOrderService movieOrderService;
 
   @Inject
@@ -69,6 +74,9 @@ public class OnlineOrderController {
 
   @Inject
   private BannerService bannerService;
+
+  @Inject
+  private GrouponOrderService grouponOrderService;
 
   /**
    * 爆品详情页点击购买生成订单 16/09/22
@@ -183,6 +191,23 @@ public class OnlineOrderController {
     model.addAttribute("topBanner", topBanner);
     model.addAttribute("hotMovieBanner", hotMovieBanner);
     return MvUtil.go("/movie/moviePage");
+  }
+
+  /**
+   * 跳转到团购订单支付页 17/06/19 在这儿的原因=微信支付目录设置问题
+   */
+  @RequestMapping(value = "/weixin/groupon", method = RequestMethod.GET)
+  public ModelAndView groupon(HttpServletRequest request, @RequestParam Long orderId,
+                              Model model) {
+    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
+    model.addAttribute("state", weiXinUser.getState());
+    model.addAttribute("order", grouponOrderService.findById(orderId));
+    model.addAttribute("wxConfig", weiXinPayService.getWeiXinPayConfig(request));
+    model.addAttribute("canUseScore",
+                       scoreAService.findScoreAByLeJiaUser(weiXinUser.getLeJiaUser())
+                           .getScore()); //用户可用鼓励金
+
+    return MvUtil.go("/groupon/order/confirmOrder");
   }
 
 }

@@ -119,6 +119,9 @@ public class RechargeController {
 //    }
 //  }
 
+//  @Inject
+//  private ActivityPhoneOrderService phoneOrderService;
+//
 //  /**
 //   * 将订单充值  16/12/09
 //   *

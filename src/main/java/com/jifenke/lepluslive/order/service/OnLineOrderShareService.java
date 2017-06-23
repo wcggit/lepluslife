@@ -1,5 +1,6 @@
 package com.jifenke.lepluslive.order.service;
 
+import com.jifenke.lepluslive.groupon.service.GrouponOrderService;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.merchant.domain.entities.Merchant;
 import com.jifenke.lepluslive.merchant.domain.entities.MerchantScanPayWay;
@@ -53,12 +54,15 @@ public class OnLineOrderShareService {
   @Inject
   private MerchantScanPayWayService merchantScanPayWayService;
 
+  @Inject
+  private GrouponOrderService grouponOrderService;
+
   /**
    * 线上订单分润    16/11/05
    *
    * @param orderId 线上订单ID
    */
-  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  @Transactional(propagation = Propagation.REQUIRED)
   public void onLineOrderShare(Long orderId) {
 
     OnLineOrder order = onlineOrderService.findOnLineOrderById(orderId);
@@ -85,7 +89,8 @@ public class OnLineOrderShareService {
     //添加分润记录
     if (toMerchant + toPartner > 0) {
       OnLineOrderShare orderShare = new OnLineOrderShare();
-      orderShare.setOnLineOrder(order);
+      orderShare.setType(1);
+      orderShare.setOrderSid(order.getOrderSid());
 
       if (user.getBindMerchant() != null && toMerchant > 0) {
         merchant = user.getBindMerchant();
@@ -133,7 +138,7 @@ public class OnLineOrderShareService {
    *
    * @param movieOrder 电影票订单
    */
-  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  @Transactional(propagation = Propagation.REQUIRED)
   public void sMovieOrderShare(SMovieOrder movieOrder) {
     LeJiaUser leJiaUser = movieOrder.getLeJiaUser();
     SMovieProduct product = movieOrder.getsMovieProduct();
@@ -155,9 +160,8 @@ public class OnLineOrderShareService {
         //分润给绑定商户
         onLineOrderShare.setLockMerchant(leJiaUser.getBindMerchant());
         if (merchant.getPartnership() == 2) {     //如果是虚拟商户分润方式改变
-          // orderShare.setToLockMerchant(0L);
-          toPartner += product.getToMerchant();
-          //toMerchant = 0L;
+          toPartner += onLineOrderShare.getToLockMerchant();
+          onLineOrderShare.setToLockMerchant(0L);
         } else {
           MerchantWalletOnline
               merchantWalletOnline =
@@ -169,19 +173,17 @@ public class OnLineOrderShareService {
         }
       }
       // 对用户绑定合伙人进行分润
-      if (leJiaUser.getBindPartner() != null && toPartner > 0) {
-        onLineOrderShare.setLockPartner(leJiaUser.getBindPartner());
+      Partner bindPartner = leJiaUser.getBindPartner();
+      if (bindPartner != null && toPartner > 0) {
+        onLineOrderShare.setLockPartner(bindPartner);
         PartnerWalletOnline
             partnerWalletOnline =
-            partnerWalletOnlineService.findByPartner(leJiaUser.getBindPartner());
-        Partner partner = partnerWalletOnline.getPartner();
-        onLineOrderShare.setLockPartner(leJiaUser.getBindPartner());
+            partnerWalletOnlineService.findByPartner(bindPartner);
         //分润给绑定合伙人
         partnerWalletOnlineService
-            .shareToPartner(toPartner, partner, partnerWalletOnline, movieOrder.getOrderSid(),
+            .shareToPartner(toPartner, bindPartner, partnerWalletOnline, movieOrder.getOrderSid(),
                             2L);
-        onLineOrderShare.setToLockPartner(toPartner == null ? 0 : toPartner);
-        onLineOrderShare.setLockPartner(partner);
+        onLineOrderShare.setToLockPartner(toPartner);
       }
       // 对用户绑定的合伙人管理员
       if (leJiaUser.getBindPartnerManager() != null && product.getToPartnerManager() > 0) {
@@ -189,19 +191,6 @@ public class OnLineOrderShareService {
         PartnerManagerWalletOnline
             partnerManagerWalletOnline =
             partnerManagerOnlineService.findByPartnerManager(leJiaUser.getBindPartnerManager());
-        // 如果之前没有城市合伙人钱包，那么创建新的
-        if (partnerManagerWalletOnline == null) {
-          PartnerManagerWalletOnline newPartnerWalletOnline = new PartnerManagerWalletOnline();
-          partnerManagerOnlineService.savePartnerManagerWalletOnline(newPartnerWalletOnline);
-          newPartnerWalletOnline.setPartnerManager(leJiaUser.getBindPartnerManager());
-          newPartnerWalletOnline.setTotalMoney(0L);
-          newPartnerWalletOnline.setAvailableBalance(0L);
-          newPartnerWalletOnline.setTotalWithdrawals(0L);
-          newPartnerWalletOnline.setCreateDate(new Date());
-          newPartnerWalletOnline.setLastUpdate(new Date());
-          partnerManagerOnlineService.savePartnerManagerWalletOnline(partnerManagerWalletOnline);
-          partnerManagerWalletOnline = newPartnerWalletOnline;
-        }
         partnerManagerOnlineService
             .shareToPartnerManager(product.getToPartnerManager(), leJiaUser.getBindPartnerManager(),
                                    partnerManagerWalletOnline, movieOrder.getOrderSid(), 2L);
@@ -213,4 +202,91 @@ public class OnLineOrderShareService {
 
   }
 
+//  /**
+//   * 团购订单分润  核销时分润   17/06/22
+//   *
+//   * @param grouponOrderId 团购订单ID
+//   */
+//  @Transactional(propagation = Propagation.REQUIRED)
+//  public void grouponOrderShare(Long grouponOrderId) {
+//    GrouponOrder order = grouponOrderService.findById(grouponOrderId);
+//    LeJiaUser leJiaUser = order.getLeJiaUser();
+//    GrouponCode code = order.getGrouponCodes().get(0);
+//    int buyNum = order.getBuyNum();
+//    long type = 1;
+//    if (order.getPayOrigin() == 0) {
+//      type = 2;
+//    }
+//    String orderSid = order.getOrderSid();
+//    OnLineOrderShare onLineOrderShare = new OnLineOrderShare();
+//    Date date = new Date();
+//    onLineOrderShare.setCreateDate(date);
+//    onLineOrderShare.setType(3);
+//    onLineOrderShare.setOrderSid(orderSid);
+//
+//    onLineOrderShare.setShareMoney(code.getCommission() * buyNum);
+//    onLineOrderShare
+//        .setShareMoney((code.getShareToLockMerchant() + code.getShareToLockPartner() + code
+//            .getShareToLockPartnerManager() + code.getShareToTradePartner() + code
+//                            .getShareToTradePartnerManager()) * buyNum);
+//    onLineOrderShare.setToLockMerchant(code.getShareToLockMerchant() * buyNum);
+//    onLineOrderShare.setToLockPartner(code.getShareToLockPartner() * buyNum);
+//    onLineOrderShare.setToLockPartnerManager(code.getShareToLockPartnerManager() * buyNum);
+//    onLineOrderShare.setToTradePartner(code.getShareToTradePartner() * buyNum);
+//    onLineOrderShare.setToTradePartnerManager(code.getShareToTradePartnerManager() * buyNum);
+//    onLineOrderShare
+//        .setToLePlusLife(code.getCommission() * buyNum - onLineOrderShare.getShareMoney());
+//    //添加分润记录
+//    if (onLineOrderShare.getShareMoney() > 0) {
+//
+//      if (leJiaUser.getBindMerchant() != null && code.getShareToLockMerchant() > 0) {
+//        Merchant merchant = leJiaUser.getBindMerchant();
+//        //分润给绑定商户
+//        onLineOrderShare.setLockMerchant(merchant);
+//        if (merchant.getPartnership() == 2) {     //如果是虚拟商户分润方式改变
+//          onLineOrderShare.setToLockPartner(
+//              onLineOrderShare.getToLockPartner() + onLineOrderShare.getToLockMerchant());
+//          onLineOrderShare.setToLockMerchant(0L);
+//        } else {
+//          MerchantWalletOnline
+//              merchantWalletOnline =
+//              merchantWalletOnlineService.findByMercahnt(merchant);
+//          merchantWalletOnlineService
+//              .shareToMerchant(onLineOrderShare.getToLockMerchant(), merchant, merchantWalletOnline,
+//                               orderSid, type);
+//          onLineOrderShare.setLockMerchant(merchant);
+//        }
+//      }
+//
+//      // 对用户绑定合伙人进行分润
+//      Partner bindPartner = leJiaUser.getBindPartner();
+//      if (bindPartner != null && code.getShareToLockPartner() > 0) {
+//        onLineOrderShare.setLockPartner(bindPartner);
+//        PartnerWalletOnline
+//            partnerWalletOnline =
+//            partnerWalletOnlineService.findByPartner(bindPartner);
+//        //分润给绑定合伙人
+//        partnerWalletOnlineService
+//            .shareToPartner(onLineOrderShare.getToLockPartner(), bindPartner, partnerWalletOnline,
+//                            orderSid,
+//                            type);
+//      }
+//
+//      // 对用户绑定的合伙人管理员
+//      PartnerManager bindPartnerManager = leJiaUser.getBindPartnerManager();
+//      if (bindPartnerManager != null && code.getShareToLockPartnerManager() > 0) {
+//        onLineOrderShare.setLockPartnerManager(bindPartnerManager);
+//        PartnerManagerWalletOnline
+//            partnerManagerWalletOnline =
+//            partnerManagerOnlineService.findByPartnerManager(bindPartnerManager);
+//        partnerManagerOnlineService
+//            .shareToPartnerManager(onLineOrderShare.getToLockPartnerManager(), bindPartnerManager,
+//                                   partnerManagerWalletOnline, orderSid, type);
+//      }
+//
+//      //TODO:分润给交易商家和合伙人
+//
+//      orderShareRepository.save(onLineOrderShare);
+//    }
+//  }
 }

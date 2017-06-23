@@ -43,216 +43,221 @@ import javax.servlet.http.HttpServletResponse;
 @RequestMapping("/front/movie")
 public class SMovieOrderController {
 
-    private static Logger log = LoggerFactory.getLogger(WeixinPayController.class);
+  private static Logger log = LoggerFactory.getLogger(WeixinPayController.class);
 
-    @Inject
-    private WeiXinService weiXinService;
-    @Inject
-    private SMovieOrderService sMovieOrderService;
-    @Inject
-    private WeiXinPayService weiXinPayService;
-    @Inject
-    private LeJiaUserService leJiaUserService;
-    @Inject
-    private WeixinPayLogService weixinPayLogService;
+  @Inject
+  private WeiXinService weiXinService;
+  @Inject
+  private SMovieOrderService sMovieOrderService;
+  @Inject
+  private WeiXinPayService weiXinPayService;
+  @Inject
+  private LeJiaUserService leJiaUserService;
+  @Inject
+  private WeixinPayLogService weixinPayLogService;
 
-    /**
-     * 电影特权生成 设置订单参数   17/04/28
-     *
-     * @param productId 电影特权产品 ID
-     */
-    @RequestMapping(value = "/weixin/moviePay", method = RequestMethod.POST)
-    public LejiaResult moviePay(Long productId, HttpServletRequest request) {
-        WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
-        Map result = null;
-        try {
-            result = sMovieOrderService.createSMoiveOrder(productId, weiXinUser);
-            //  封装订单参数
-            SMovieOrder order = (SMovieOrder) result.get("data");
-            //  纯金币支付
-            if ("2000".equals("" + result.get("status"))) {
-                sMovieOrderService.paySuccess(order.getOrderSid());
-                return LejiaResult
-                        .build((Integer) result.get("status"), (String) result.get("msg"),order.getOrderSid());
-            }
-            SortedMap<String, Object>
-                    map =
-                    weiXinPayService
-                            .buildOrderParams(request, "乐+电影特权", order.getOrderSid(), "" + order.getTruePrice(),
-                                    Constants.MOVIE_NOTIFY_URL);
-            // 获取微信预支付
-            Map<String, Object> unifiedOrder = weiXinPayService.createUnifiedOrder(map);
-            if (unifiedOrder.get("prepay_id") != null) {
-                //返回前端页面
-                SortedMap<String, Object>
-                        params =
-                        weiXinPayService.buildJsapiParams(unifiedOrder.get("prepay_id").toString());
-                params.put("orderSid", order.getOrderSid());
-                return LejiaResult.ok(params);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+  /**
+   * 电影特权生成 设置订单参数   17/04/28
+   *
+   * @param productId 电影特权产品 ID
+   */
+  @RequestMapping(value = "/weixin/moviePay", method = RequestMethod.POST)
+  public LejiaResult moviePay(Long productId, HttpServletRequest request) {
+    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
+    Map result = null;
+    try {
+      result = sMovieOrderService.createSMoiveOrder(productId, weiXinUser);
+      //  封装订单参数
+      SMovieOrder order = (SMovieOrder) result.get("data");
+      //  纯金币支付
+      if ("2000".equals("" + result.get("status"))) {
+        sMovieOrderService.paySuccess(order.getOrderSid());
+        return LejiaResult
+            .build((Integer) result.get("status"), (String) result.get("msg"), order.getOrderSid());
+      }
+      SortedMap<String, Object>
+          map =
+          weiXinPayService
+              .buildOrderParams(request, "乐+电影特权", order.getOrderSid(), "" + order.getTruePrice(),
+                                Constants.MOVIE_NOTIFY_URL);
+      // 获取微信预支付
+      Map<String, Object> unifiedOrder = weiXinPayService.createUnifiedOrder(map);
+      if (unifiedOrder.get("prepay_id") != null) {
+        //返回前端页面
+        SortedMap<String, Object>
+            params =
+            weiXinPayService.buildJsapiParams(unifiedOrder.get("prepay_id").toString());
+        params.put("orderSid", order.getOrderSid());
+        return LejiaResult.ok(params);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return LejiaResult.build(500, "出现未知错误,请联系管理员或稍后重试");
+  }
+
+  /**
+   * 电影特权订单展示 - 未核销  17/04/28
+   */
+  @RequestMapping(value = "/vaildMovies", method = RequestMethod.GET)
+  public ModelAndView showVaildMovies(Long lejiaUserId, Model model) {
+    LeJiaUser leJiaUser = leJiaUserService.findUserById(lejiaUserId);
+    List<SMovieOrder> vaildMovies = sMovieOrderService.findVaildMovies(leJiaUser);
+    model.addAttribute("vaildMovies", vaildMovies);
+    return MvUtil.go("/...");
+  }
+
+  /**
+   * 电影特权订单展示 - 已核销  17/04/28
+   */
+  @RequestMapping(value = "/usedMovies", method = RequestMethod.GET)
+  public ModelAndView showUsedMovies(Long lejiaUserId, Model model) {
+    LeJiaUser leJiaUser = leJiaUserService.findUserById(lejiaUserId);
+    List<SMovieOrder> usedMovies = sMovieOrderService.findUsedMovies(leJiaUser);
+    model.addAttribute("usedMovies", usedMovies);
+    return MvUtil.go("/...");
+  }
+
+
+  /***
+   *  商米核销模块 - 根据手机号查询用户有效特权及用户信息
+   *  17/4/29
+   */
+  @RequestMapping(value = "/shangmi/searchVaild", method = RequestMethod.GET)
+  @ResponseBody
+  public LejiaResult loadVaildByPhoneNum(String phoneNumber, String lejiaUserSid) {
+    Map result = new HashMap();
+    Map data = new HashMap();
+    LeJiaUser lejiaUser = null;
+    if (phoneNumber != null) {
+      lejiaUser = leJiaUserService.findUserByPhoneNumber(phoneNumber);
+    } else if (lejiaUserSid != null) {
+      lejiaUser = leJiaUserService.findUserByUserSid(lejiaUserSid);
+    }
+    if (lejiaUser == null) {
+      result.put("status", 201);
+      result.put("msg", "手机号或二维码有误,用户不存在!");
+    } else {
+      List<SMovieOrder> vaildMovies = sMovieOrderService.findVaildMovies(lejiaUser);
+      result.put("status", 200);
+      data.put("lejiaUser", lejiaUser);
+      result.put("msg", "success!");
+      WeiXinUser wx = lejiaUser.getWeiXinUser();
+      WeiXinUser weiXinUser = new WeiXinUser();
+      weiXinUser.setHeadImageUrl(wx.getHeadImageUrl());
+      weiXinUser.setId(wx.getId());
+      weiXinUser.setNickname(wx.getNickname());
+      data.put("weiXinUser", weiXinUser);
+      data.put("orderList", vaildMovies);
+    }
+    return LejiaResult
+        .build(new Integer(result.get("status").toString()), result.get("msg").toString(), data);
+  }
+
+  /***
+   *  商米核销模块 - 根据手机号查询当前设备核销过的订单
+   *  17/4/29
+   */
+  @RequestMapping(value = "/shangmi/searchChecked", method = RequestMethod.GET)
+  @ResponseBody
+  public LejiaResult loadCheckedByPhoneNum(String terminalNo) {
+    Map result = new HashMap();
+    Map data = new HashMap();
+    try {
+      List<SMovieOrder> usedMovies = sMovieOrderService.findUsedMoviesByTerminal(terminalNo);
+      result.put("status", 200);
+      result.put("msg", "success!");
+      data.put("orderList", usedMovies);
+    } catch (Exception e) {
+      result.put("status", 202);
+      result.put("msg", "终端号有误！");
+      e.printStackTrace();
+    }
+    return LejiaResult
+        .build(new Integer(result.get("status").toString()), result.get("msg").toString(), data);
+  }
+
+  /**
+   * 商米核销模块 - 核销电影票
+   */
+  @RequestMapping(value = "/shangmi/doCheckMovie", method = RequestMethod.POST)
+  @ResponseBody
+  public LejiaResult doCheckedMovie(@RequestParam String orderSid, @RequestParam String phoneNumber,
+                                    @RequestParam String terminalNo) {
+    try {
+      Map result = sMovieOrderService.updateOrderState(orderSid, phoneNumber, terminalNo);
+      return LejiaResult
+          .build(new Integer(result.get("status").toString()), result.get("msg").toString(),
+                 result.get("data"));
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return LejiaResult.build(201, "您的手机号码有误,所以不能核销");
+  }
+
+
+  /**
+   * 购买电影票微信回调函数
+   */
+  @RequestMapping(value = "/afterPay", method = RequestMethod.POST)
+  @ResponseBody
+  public void afterPay(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    InputStreamReader inputStreamReader = new InputStreamReader(request.getInputStream(), "utf-8");
+    BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+    String str = null;
+    String success = "SUCCESS";
+    StringBuilder buffer = new StringBuilder();
+    while ((str = bufferedReader.readLine()) != null) {
+      buffer.append(str);
+    }
+    Map<String, Object> map = WeixinPayUtil.doXMLParse(buffer.toString());
+    if (map != null) {
+      //验签
+      String sign = weiXinPayService.createSign(map, String.valueOf(map.get("trade_type")));
+      if (map.get("sign") != null && String.valueOf(map.get("sign")).equals(sign)) {
+        //保存微信支付日志
+        weixinPayLogService.savePayLog(map, "MovieOrder", 1);
+        String orderSid = (String) map.get("out_trade_no");
+        String returnCode = (String) map.get("return_code");
+        String resultCode = (String) map.get("result_code");
+        //操作订单
+        if (success.equals(returnCode) && success.equals(resultCode)) {
+          try {
+            sMovieOrderService.paySuccess(orderSid);
+          } catch (Exception ex) {
+            log.error(ex.getMessage());
+            buffer.delete(0, buffer.length());
+            buffer.append("<xml>");
+            buffer.append("<return_code>FAIL</" + "return_code" + ">");
+            buffer.append("</xml>");
+            String s = buffer.toString();
+            response.setContentType("application/xml");
+            response.getWriter().write(s);
+            return;
+          }
         }
-        return LejiaResult.build(500, "出现未知错误,请联系管理员或稍后重试");
+        //返回微信的信息
+        buffer.delete(0, buffer.length());
+        buffer.append("<xml>");
+        buffer.append("<return_code>" + returnCode + "</" + "return_code" + ">");
+        buffer.append("</xml>");
+        String s = buffer.toString();
+        response.setContentType("application/xml");
+        response.getWriter().write(s);
+      }
     }
 
-    /**
-     * 电影特权订单展示 - 未核销  17/04/28
-     */
-    @RequestMapping(value = "/vaildMovies", method = RequestMethod.GET)
-    public ModelAndView showVaildMovies(Long lejiaUserId, Model model) {
-        LeJiaUser leJiaUser = leJiaUserService.findUserById(lejiaUserId);
-        List<SMovieOrder> vaildMovies = sMovieOrderService.findVaildMovies(leJiaUser);
-        model.addAttribute("vaildMovies", vaildMovies);
-        return MvUtil.go("/...");
-    }
-
-    /**
-     * 电影特权订单展示 - 已核销  17/04/28
-     */
-    @RequestMapping(value = "/usedMovies", method = RequestMethod.GET)
-    public ModelAndView showUsedMovies(Long lejiaUserId, Model model) {
-        LeJiaUser leJiaUser = leJiaUserService.findUserById(lejiaUserId);
-        List<SMovieOrder> usedMovies = sMovieOrderService.findUsedMovies(leJiaUser);
-        model.addAttribute("usedMovies", usedMovies);
-        return MvUtil.go("/...");
-    }
+  }
 
 
-    /***
-     *  商米核销模块 - 根据手机号查询用户有效特权及用户信息
-     *  17/4/29
-     */
-    @RequestMapping(value = "/shangmi/searchVaild", method = RequestMethod.GET)
-    @ResponseBody
-    public LejiaResult loadVaildByPhoneNum(String phoneNumber, String lejiaUserSid) {
-        Map result = new HashMap();
-        Map data = new HashMap();
-        LeJiaUser lejiaUser = null;
-        if (phoneNumber != null) {
-            lejiaUser = leJiaUserService.findUserByPhoneNumber(phoneNumber);
-        } else if (lejiaUserSid != null) {
-            lejiaUser = leJiaUserService.findUserByUserSid(lejiaUserSid);
-        }
-        if (lejiaUser == null) {
-            result.put("status", 201);
-            result.put("msg", "手机号或二维码有误,用户不存在!");
-        } else {
-            List<SMovieOrder> vaildMovies = sMovieOrderService.findVaildMovies(lejiaUser);
-            result.put("status", 200);
-            data.put("lejiaUser", lejiaUser);
-            result.put("msg", "success!");
-            WeiXinUser wx = lejiaUser.getWeiXinUser();
-            WeiXinUser weiXinUser = new WeiXinUser();
-            weiXinUser.setHeadImageUrl(wx.getHeadImageUrl());
-            weiXinUser.setId(wx.getId());
-            weiXinUser.setNickname(wx.getNickname());
-            data.put("weiXinUser", weiXinUser);
-            data.put("orderList", vaildMovies);
-        }
-        return LejiaResult.build(new Integer(result.get("status").toString()),result.get("msg").toString(),data);
-    }
-
-    /***
-     *  商米核销模块 - 根据手机号查询当前设备核销过的订单
-     *  17/4/29
-     */
-    @RequestMapping(value = "/shangmi/searchChecked", method = RequestMethod.GET)
-    @ResponseBody
-    public LejiaResult loadCheckedByPhoneNum(String terminalNo) {
-        Map result = new HashMap();
-        Map data = new HashMap();
-        try {
-            List<SMovieOrder> usedMovies = sMovieOrderService.findUsedMoviesByTerminal(terminalNo);
-            result.put("status", 200);
-            result.put("msg", "success!");
-            data.put("orderList", usedMovies);
-        } catch (Exception e) {
-            result.put("status", 202);
-            result.put("msg", "终端号有误！");
-            e.printStackTrace();
-        }
-        return LejiaResult.build(new Integer(result.get("status").toString()),result.get("msg").toString(),data);
-    }
-
-    /**
-     * 商米核销模块 - 核销电影票
-     */
-    @RequestMapping(value = "/shangmi/doCheckMovie", method = RequestMethod.POST)
-    @ResponseBody
-    public LejiaResult doCheckedMovie(@RequestParam String orderSid, @RequestParam String phoneNumber, @RequestParam String terminalNo) {
-        try {
-            Map result = sMovieOrderService.updateOrderState(orderSid, phoneNumber, terminalNo);
-            return LejiaResult.build(new Integer(result.get("status").toString()),result.get("msg").toString(),result.get("data"));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return LejiaResult.build(201, "您的手机号码有误,所以不能核销");
-    }
-
-
-    /**
-     * 购买电影票微信回调函数
-     */
-    @RequestMapping(value = "/afterPay", method = RequestMethod.POST)
-    @ResponseBody
-    public void afterPay(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        InputStreamReader inputStreamReader = new InputStreamReader(request.getInputStream(), "utf-8");
-        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-        String str = null;
-        String success = "SUCCESS";
-        StringBuilder buffer = new StringBuilder();
-        while ((str = bufferedReader.readLine()) != null) {
-            buffer.append(str);
-        }
-        Map<String, Object> map = WeixinPayUtil.doXMLParse(buffer.toString());
-        if (map != null) {
-            //验签
-            String sign = weiXinPayService.createSign("UTF-8", map, String.valueOf(map.get("trade_type")));
-            if (map.get("sign") != null && String.valueOf(map.get("sign")).equals(sign)) {
-                //保存微信支付日志
-                weixinPayLogService.savePayLog(map, "MovieOrder", 1);
-                String orderSid = (String) map.get("out_trade_no");
-                String returnCode = (String) map.get("return_code");
-                String resultCode = (String) map.get("result_code");
-                //操作订单
-                if (success.equals(returnCode) && success.equals(resultCode)) {
-                    try {
-                        sMovieOrderService.paySuccess(orderSid);
-                    } catch (Exception ex) {
-                        log.error(ex.getMessage());
-                        buffer.delete(0, buffer.length());
-                        buffer.append("<xml>");
-                        buffer.append("<return_code>FAIL</" + "return_code" + ">");
-                        buffer.append("</xml>");
-                        String s = buffer.toString();
-                        response.setContentType("application/xml");
-                        response.getWriter().write(s);
-                        return;
-                    }
-                }
-                //返回微信的信息
-                buffer.delete(0, buffer.length());
-                buffer.append("<xml>");
-                buffer.append("<return_code>" + returnCode + "</" + "return_code" + ">");
-                buffer.append("</xml>");
-                String s = buffer.toString();
-                response.setContentType("application/xml");
-                response.getWriter().write(s);
-            }
-        }
-
-    }
-
-
-    /**
-     * 进入支付成功页面
-     */
-    @RequestMapping(value = "/pay/successPage", method = RequestMethod.GET)
-    @ResponseBody
-    public ModelAndView toPaySuccessPage(String orderSid, Model model) {
-        SMovieOrder order = sMovieOrderService.findByOrderSid(orderSid);
-        model.addAttribute("order", order);
-        return MvUtil.go("/movie/paySuccess");
-    }
+  /**
+   * 进入支付成功页面
+   */
+  @RequestMapping(value = "/pay/successPage", method = RequestMethod.GET)
+  @ResponseBody
+  public ModelAndView toPaySuccessPage(String orderSid, Model model) {
+    SMovieOrder order = sMovieOrderService.findByOrderSid(orderSid);
+    model.addAttribute("order", order);
+    return MvUtil.go("/movie/paySuccess");
+  }
 }

@@ -104,7 +104,7 @@ public class WeixinPayController {
       //验签
       String
           sign =
-          weiXinPayService.createSign("UTF-8", map, String.valueOf(map.get("trade_type")));
+          weiXinPayService.createSign(map, String.valueOf(map.get("trade_type")));
       if (map.get("sign") != null && String.valueOf(map.get("sign")).equals(sign)) {
         //保存微信支付日志
         weixinPayLogService.savePayLog(map, "PhoneOrder", 1);
@@ -119,9 +119,7 @@ public class WeixinPayController {
           } catch (Exception e) {
             log.error(e.getMessage());
             buffer.delete(0, buffer.length());
-            buffer.append("<xml>");
-            buffer.append("<return_code>FAIL</" + "return_code" + ">");
-            buffer.append("</xml>");
+            buffer.append("<xml><return_code>FAIL</return_code></xml>");
             String s = buffer.toString();
             response.setContentType("application/xml");
             response.getWriter().write(s);
@@ -130,9 +128,7 @@ public class WeixinPayController {
         }
         //返回微信的信息
         buffer.delete(0, buffer.length());
-        buffer.append("<xml>");
-        buffer.append("<return_code>" + returnCode + "</" + "return_code" + ">");
-        buffer.append("</xml>");
+        buffer.append("<xml><return_code>").append(returnCode).append("</return_code></xml>");
         String s = buffer.toString();
         response.setContentType("application/xml");
         response.getWriter().write(s);
@@ -166,8 +162,11 @@ public class WeixinPayController {
                                        @RequestParam String trueScore,
                                        @RequestParam Integer transmitWay,
                                        HttpServletRequest request) {
-    Long newTruePrice = new BigDecimal(truePrice).multiply(new BigDecimal(100)).longValue();
+    if(trueScore == null || trueScore.equals("")){
+      trueScore = "0";
+    }
     Long newTrueScore = new BigDecimal(trueScore).multiply(new BigDecimal(100)).longValue();
+    Long newTruePrice = new BigDecimal(truePrice).multiply(new BigDecimal(100)).longValue();
     if (newTruePrice == 0) {//全金币兑换流程
       try {
         return onlineOrderService.orderPayByScore(orderId, newTrueScore, transmitWay, 14L);
@@ -229,7 +228,7 @@ public class WeixinPayController {
       //验签
       String
           sign =
-          weiXinPayService.createSign("UTF-8", map, String.valueOf(map.get("trade_type")));
+          weiXinPayService.createSign(map, String.valueOf(map.get("trade_type")));
       System.out.println("签名==========" + sign);
       if (map.get("sign") != null && String.valueOf(map.get("sign")).equals(sign)) {
         String returnCode = (String) map.get("return_code");
@@ -241,9 +240,7 @@ public class WeixinPayController {
           } catch (Exception e) {
             log.error(e.getMessage());
             buffer.delete(0, buffer.length());
-            buffer.append("<xml>");
-            buffer.append("<return_code>FAIL</" + "return_code" + ">");
-            buffer.append("</xml>");
+            buffer.append("<xml><return_code>FAIL</return_code></xml>");
             String s = buffer.toString();
             response.setContentType("application/xml");
             response.getWriter().write(s);
@@ -282,9 +279,6 @@ public class WeixinPayController {
         model.addAttribute("truePrice", order.getTruePrice());
         //商品分类
         List<ProductType> typeList = productService.findAllProductType();
-        //主打爆品
-//        Map product = productService.findMainHotProduct();
-//        model.addAttribute("product", product);
         model.addAttribute("scoreC", scoreCService.findScoreCByLeJiaUser(leJiaUser));
         model.addAttribute("typeList", typeList);
         return MvUtil.go("/product/productIndex");

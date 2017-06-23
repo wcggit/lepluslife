@@ -223,7 +223,7 @@
     //数量切换
     //可买数量的最大值和最小值判断
     function judgeFun1() {
-        if (eval(trueScoreInput.val()) * 100 > maxScore) {
+        if (parseInt(trueScoreInput.val()) * 100 > maxScore) {
             if (maxScore == orderTotalScore) {
                 $('#scoreBwarning').hide();
             } else if (maxScore == canUseScore) {

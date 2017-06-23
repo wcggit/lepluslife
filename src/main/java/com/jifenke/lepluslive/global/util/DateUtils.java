@@ -56,5 +56,18 @@ public class DateUtils {
     return calendar.getTime();
   }
 
+  /**
+   * 得到当前时间几天前后的时间
+   *
+   * @param d   当前时间
+   * @param day -为减少的天数
+   */
+  public static Date dayChange(Date d, int day) {
+    Calendar now = Calendar.getInstance();
+    now.setTime(d);
+    now.set(Calendar.DATE, now.get(Calendar.DATE) + day);
+    return now.getTime();
+  }
+
 
 }

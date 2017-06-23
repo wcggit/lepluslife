@@ -73,6 +73,7 @@ public class LeJiaUserService {
       map.put("scoreA", o[4]);
       map.put("scoreB", o[5]);
       map.put("bindMerchantId", o[6]);
+      map.put("state", o[7]);
       return map;
     }
     return null;
@@ -145,7 +146,7 @@ public class LeJiaUserService {
     return new LeJiaUserDto(scoreA.getScore(), scoreB.getScore(),
                             leJiaUser.getOneBarCodeUrl(), leJiaUser.getUserSid(),
                             leJiaUser.getHeadImageUrl(), leJiaUser.getPhoneNumber(),
-                            leJiaUser.getPhoneNumber());
+                            leJiaUser.getPhoneNumber(), 1);
   }
 
   /**

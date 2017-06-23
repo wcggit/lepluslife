@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.lang.reflect.InvocationTargetException;
+import java.math.BigDecimal;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
@@ -122,7 +123,10 @@ public class GoldOrderController {
                                   @RequestParam String message,
                                   @RequestParam Long payWay,
                                   HttpServletRequest request) {
-    Long newTrueScore = (long) (Float.parseFloat(trueScore) * 100);
+    if(trueScore == null || trueScore.equals("")){
+      trueScore = "0";
+    }
+    Long newTrueScore = new BigDecimal(trueScore).multiply(new BigDecimal(100)).longValue();
     Map<String, Object>
         result =
         onlineOrderService.completeGoldOrder(orderId, newTrueScore, payWay, transmitWay, message);
