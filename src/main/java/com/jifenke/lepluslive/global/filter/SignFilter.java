@@ -4,7 +4,6 @@ import com.jifenke.lepluslive.global.config.AppConstants;
 import com.jifenke.lepluslive.global.util.CookieUtils;
 import com.jifenke.lepluslive.global.util.HttpUtils;
 import com.jifenke.lepluslive.global.util.SignUtil;
-import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.lejiauser.service.LeJiaUserService;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.service.WeiXinUserService;

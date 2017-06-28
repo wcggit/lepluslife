@@ -93,10 +93,18 @@
                         <span>包邮</span>
                     </c:if>
                     <c:if test="${product.postage != 0}">
-                        <span>满<font><fmt:formatNumber type="number"
-                                                       value="${product.freePrice/100}"
-                                                       pattern="0.00"
-                                                       maxFractionDigits="2"/></font>包邮</span>
+                        <c:if test="${product.freePrice == 0}">
+                            <span>邮费<fmt:formatNumber type="number"
+                                                      value="${product.postage/100}"
+                                                      pattern="0.00"
+                                                      maxFractionDigits="2"/>元</span>
+                        </c:if>
+                        <c:if test="${product.freePrice != 0}">
+                             <span>满<font><fmt:formatNumber type="number"
+                                                            value="${product.freePrice/100}"
+                                                            pattern="0.00"
+                                                            maxFractionDigits="2"/></font>包邮</span>
+                        </c:if>
                     </c:if>
                 </p>
             </div>

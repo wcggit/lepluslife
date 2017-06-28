@@ -1,6 +1,5 @@
 package com.jifenke.lepluslive.partner.service;
 
-import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.lejiauser.repository.LeJiaUserRepository;
 import com.jifenke.lepluslive.merchant.repository.MerchantRepository;
 import com.jifenke.lepluslive.partner.domain.entities.Partner;

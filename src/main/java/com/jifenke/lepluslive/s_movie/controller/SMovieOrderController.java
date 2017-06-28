@@ -1,7 +1,6 @@
 package com.jifenke.lepluslive.s_movie.controller;
 
 import com.jifenke.lepluslive.global.config.AppConstants;
-import com.jifenke.lepluslive.global.config.Constants;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.global.util.WeixinPayUtil;
