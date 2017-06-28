@@ -11,7 +11,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 /**
@@ -25,15 +24,12 @@ public class OnLineOrderShare {
   @GeneratedValue(strategy = GenerationType.AUTO)
   private Long id;
 
-  @OneToOne
-  private OnLineOrder onLineOrder;  //即将废弃 不用了 采用type+orderSid
-
-  private Integer type = 0;   //分润单来源   1=商城|2=电影票
+  private Integer type = 0;   //分润单来源   1=商城|2=电影票|3=团购
 
   private String orderSid;   //对应的分润来源的订单号
 
-  private Long shareMoney = 0L;  //=toLockMerchant + toLockPartner + toLockPartnerManager
-
+  //=toLockMerchant + toLockPartner + toLockPartnerManager + toTradePartner + toTradePartnerManager
+  private Long shareMoney = 0L;
 
   private Date createDate = new Date();
 
@@ -51,6 +47,16 @@ public class OnLineOrderShare {
   private PartnerManager lockPartnerManager; //锁定城市合伙人
 
   private Long toLockPartnerManager = 0L;
+
+  private Long toTradePartner = 0L;
+
+  @ManyToOne
+  private Partner tradePartner;
+
+  private Long toTradePartnerManager = 0L;
+
+  @ManyToOne
+  private PartnerManager tradePartnerManager;
 
   private Long toLePlusLife = 0L; //给积分客的
 
@@ -92,14 +98,6 @@ public class OnLineOrderShare {
 
   public void setId(Long id) {
     this.id = id;
-  }
-
-  public OnLineOrder getOnLineOrder() {
-    return onLineOrder;
-  }
-
-  public void setOnLineOrder(OnLineOrder onLineOrder) {
-    this.onLineOrder = onLineOrder;
   }
 
   public Long getToLockMerchant() {
@@ -156,5 +154,38 @@ public class OnLineOrderShare {
 
   public void setToLePlusLife(Long toLePlusLife) {
     this.toLePlusLife = toLePlusLife;
+  }
+
+  public Long getToTradePartner() {
+    return toTradePartner;
+  }
+
+  public void setToTradePartner(Long toTradePartner) {
+    this.toTradePartner = toTradePartner;
+  }
+
+  public Partner getTradePartner() {
+    return tradePartner;
+  }
+
+  public void setTradePartner(Partner tradePartner) {
+    this.tradePartner = tradePartner;
+  }
+
+  public Long getToTradePartnerManager() {
+    return toTradePartnerManager;
+  }
+
+  public void setToTradePartnerManager(Long toTradePartnerManager) {
+    this.toTradePartnerManager = toTradePartnerManager;
+  }
+
+  public PartnerManager getTradePartnerManager() {
+    return tradePartnerManager;
+  }
+
+  public void setTradePartnerManager(
+      PartnerManager tradePartnerManager) {
+    this.tradePartnerManager = tradePartnerManager;
   }
 }

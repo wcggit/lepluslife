@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -34,18 +33,10 @@ public class ScoreCService {
    *
    * @param leJiaUser 用户
    */
-  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  @Transactional(propagation = Propagation.REQUIRED)
   public ScoreC findScoreCByLeJiaUser(LeJiaUser leJiaUser) {
     if (leJiaUser != null) {
-      Optional<ScoreC> optional = repository.findByLeJiaUser(leJiaUser);
-      if (optional.isPresent()) {
-        return optional.get();
-      }
-      ScoreC scoreC = new ScoreC();
-      scoreC.setLeJiaUser(leJiaUser);
-      scoreC.setLastUpdateDate(new Date());
-      repository.saveAndFlush(scoreC);
-      return scoreC;
+      return repository.findByLeJiaUser(leJiaUser).orElse(null);
     }
     return null;
   }
@@ -67,7 +58,7 @@ public class ScoreCService {
    * @param type   1=增加|0=减少
    * @param val    增加或减少的金币
    */
-  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  @Transactional(propagation = Propagation.REQUIRED)
   public void saveScoreC(ScoreC scoreC, int type, Long val) throws Exception {
     Date date = new Date();
     scoreC.setLastUpdateDate(date);
@@ -78,8 +69,9 @@ public class ScoreCService {
       } else {
         scoreC.setScore(scoreC.getScore() - val);
       }
-      repository.saveAndFlush(scoreC);
+      repository.save(scoreC);
     } catch (Exception e) {
+      e.printStackTrace();
       throw new RuntimeException();
     }
   }
@@ -94,7 +86,7 @@ public class ScoreCService {
    * @param operate  变动文字描述
    * @param orderSid 对应的订单号(可为空)
    */
-  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  @Transactional(propagation = Propagation.REQUIRED)
   public void saveScoreCDetail(ScoreC scoreC, Integer state, Long number, Integer origin,
                                String operate,
                                String orderSid) throws Exception {

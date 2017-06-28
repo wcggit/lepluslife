@@ -115,8 +115,8 @@ public class SMovieOrderService{
             //  支付完成后，减金币
             LeJiaUser leJiaUser = movieOrder.getLeJiaUser();
             ScoreC scoreC = scoreCService.findScoreCByLeJiaUser(leJiaUser);
-            scoreCService.saveScoreC(scoreC, 0, movieOrder.getTrueScore().longValue());
-            scoreCService.saveScoreCDetail(scoreC, 0, movieOrder.getTrueScore().longValue(), 15003, "购买电影特权消耗金币",
+            scoreCService.saveScoreC(scoreC, 0, movieOrder.getTrueScore());
+            scoreCService.saveScoreCDetail(scoreC, 0, movieOrder.getTrueScore(), 15003, "购买电影特权消耗金币",
                             movieOrder.getOrderSid());
             //  分润
             try{

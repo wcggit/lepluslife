@@ -13,6 +13,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Map;
+import java.util.TreeMap;
+
+import javax.servlet.ServletRequest;
 
 /**
  * http请求工具类 Created by zhangwen on 2016/10/26.
@@ -71,6 +74,40 @@ public class HttpUtils {
       e.printStackTrace();
     }
     return null;
+  }
+
+  /**
+   * 获取key=val请求中所有参数
+   */
+  public static Map<String, Object> getParameters(ServletRequest request) {
+    Map<String, String[]> params = request.getParameterMap();
+    TreeMap<String, Object> parameters = new TreeMap<>();
+    for (String key : params.keySet()) {
+      String[] values = params.get(key);
+      for (String val : values) {
+        parameters.put(key, val);
+      }
+    }
+    return parameters;
+  }
+
+  /**
+   * 获取xml请求中所有参数
+   */
+  public static String getXmlParameter(ServletRequest request) {
+    InputStreamReader inputStreamReader = null;
+    String str = null;
+    StringBuilder buffer = new StringBuilder();
+    try {
+      inputStreamReader = new InputStreamReader(request.getInputStream(), "utf-8");
+      BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+      while ((str = bufferedReader.readLine()) != null) {
+        buffer.append(str);
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return buffer.toString();
   }
 
 

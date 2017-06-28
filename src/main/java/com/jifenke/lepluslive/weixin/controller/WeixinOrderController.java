@@ -5,9 +5,7 @@ import com.jifenke.lepluslive.Address.service.AddressService;
 import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.order.domain.entities.OnLineOrder;
 import com.jifenke.lepluslive.order.service.OrderService;
-import com.jifenke.lepluslive.score.service.ScoreBService;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
-import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
 import com.jifenke.lepluslive.weixin.service.WeiXinService;
 
 import org.springframework.ui.Model;
@@ -37,29 +35,7 @@ public class WeixinOrderController {
   private WeiXinService weiXinService;
 
   @Inject
-  private ScoreBService scoreBService;
-
-  @Inject
   private AddressService addressService;
-
-  @Inject
-  private WeiXinPayService weiXinPayService;
-
-  /**
-   * 立刻支付按钮跳转到支付页面  16/09/23
-   */
-  @RequestMapping(value = "/order/{orderId}", method = RequestMethod.GET)
-  public ModelAndView orderPay(@PathVariable Long orderId, HttpServletRequest request,
-                               Model model) {
-    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
-    model.addAttribute("scoreB",
-                       scoreBService.findScoreBByWeiXinUser(weiXinUser.getLeJiaUser()).getScore());
-    model.addAttribute("order", orderService.findOnLineOrderById(orderId));
-    model.addAttribute("address",
-                       addressService.findAddressByLeJiaUserAndState(weiXinUser.getLeJiaUser()));
-    model.addAttribute("wxConfig", weiXinPayService.getWeiXinPayConfig(request));
-    return MvUtil.go("/order/confirmOrder");
-  }
 
   /**
    * 从支付页面跳转到地址修改页面

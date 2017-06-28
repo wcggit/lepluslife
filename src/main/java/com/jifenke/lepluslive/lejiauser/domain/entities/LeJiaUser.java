@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.merchant.domain.entities.Merchant;
 import com.jifenke.lepluslive.partner.domain.entities.Partner;
-import com.jifenke.lepluslive.partner.domain.entities.PartnerManager;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 
 import org.hibernate.annotations.Cache;
@@ -71,8 +70,7 @@ public class LeJiaUser {
 
   private Long cityId;
 
-  @ManyToOne
-  private PartnerManager bindPartnerManager;
+
 
   public Date getBindMerchantDate() {
     return bindMerchantDate;
@@ -210,11 +208,5 @@ public class LeJiaUser {
     this.userName = userName;
   }
 
-  public PartnerManager getBindPartnerManager() {
-    return bindPartnerManager;
-  }
 
-  public void setBindPartnerManager(PartnerManager bindPartnerManager) {
-    this.bindPartnerManager = bindPartnerManager;
-  }
 }

@@ -52,16 +52,32 @@ public class ProductSpec {
   @NotNull
   private Long minPrice;
 
-  private Integer minScore = 0;  //兑换最低所需积分
+  private Integer minScore = 0;  //兑换最低所需金币
 
   private Integer saleNumber = 0; //销售量
 
   @JsonIgnore
   private Integer state;
 
-  private Long toMerchant = 0L; //绑定商户返佣金额
+  private Integer costPrice = 0;  //成本价
 
-  private Long toPartner = 0L;  //绑定合伙人返佣金额
+  private Integer otherPrice = 0;  //其他费用
+
+  public Integer getCostPrice() {
+    return costPrice;
+  }
+
+  public void setCostPrice(Integer costPrice) {
+    this.costPrice = costPrice;
+  }
+
+  public Integer getOtherPrice() {
+    return otherPrice;
+  }
+
+  public void setOtherPrice(Integer otherPrice) {
+    this.otherPrice = otherPrice;
+  }
 
   public Integer getState() {
     return state;
@@ -159,22 +175,6 @@ public class ProductSpec {
     }
 
     return true;
-  }
-
-  public Long getToMerchant() {
-    return toMerchant;
-  }
-
-  public void setToMerchant(Long toMerchant) {
-    this.toMerchant = toMerchant;
-  }
-
-  public Long getToPartner() {
-    return toPartner;
-  }
-
-  public void setToPartner(Long toPartner) {
-    this.toPartner = toPartner;
   }
 
   @Override

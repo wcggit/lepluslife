@@ -146,7 +146,8 @@
 </body>
 <script>
     var canUseScore = eval('${canUseScore}'), orderTotalScore = eval('${order.totalScore}'); //用户可用金币和订单可用金币
-    var maxScore = 0, minPrice = eval('${order.totalPrice}'), freightPrice = eval('${order.freightPrice}'); //最多可用金币和最少需付金额
+    var maxScore = 0, minPrice = eval('${order.totalPrice}'),
+        freightPrice = eval('${order.freightPrice}'); //最多可用金币和最少需付金额
     var trueScoreInput = $("#trueScore"), postageInput = $("#postage"), postageText = '';
     function scoreAndPriceReset() {
         if (canUseScore >= orderTotalScore) {
@@ -212,7 +213,7 @@
 
     //使用金币的最大值和最小值判断
     function judgeFun1() {
-        if (eval(trueScoreInput.val() * 100) >= maxScore) {
+        if (parseInt(trueScoreInput.val() * 100) > maxScore) {
             if (maxScore == orderTotalScore) {
                 $('#scoreBwarning').hide();
             } else if (maxScore == canUseScore) {
@@ -232,8 +233,8 @@
     //点击事件
     function allClick() {
         $('#truePrice').html(toDecimal((minPrice - (eval(trueScoreInput.val())
-                                                                      == null ? 0
-                : eval(trueScoreInput.val())) * 100)
+                                                    == null ? 0
+                                           : eval(trueScoreInput.val())) * 100)
                                        / 100));
     }
     //输入框改变
@@ -317,7 +318,7 @@
                 message: $('#message').val()
             }, function (res) {
                 if (res.status == 2000) {
-                    window.location.href = '/weixin/pay/paySuccess/${order.id}';
+                    window.location.href = '/order/paySuccess/${order.id}';
                 } else if (res.status == 200) {//调用微信支付js-api接口
                     weixinPay(res.data);
                 } else {
@@ -334,23 +335,22 @@
     function weixinPay(res) {
         $('.waiting').css('display', 'none');
         WeixinJSBridge.invoke(
-                'getBrandWCPayRequest', {
-                    "appId":     res['appId'] + "",     //公众号名称，由商户传入
-                    "timeStamp": res['timeStamp'] + "", // 支付签名时间戳，注意微信jssdk中的所有使用timestamp字段均为小写。但最新版的支付后台生成签名使用的timeStamp字段名需大写其中的S字符
-                    "nonceStr":  res['nonceStr'] + "", // 支付签名随机串，不长于 32 位
-                    "package":   res['package'] + "", // 统一支付接口返回的prepay_id参数值，提交格式如：prepay_id=***）
-                    "signType":  res['signType'] + "", // 签名方式，默认为'SHA1'，使用新版支付需传入'MD5'
-                    "paySign":   res['sign'] + "" // 支付签名
-                },
-                function (reslut) {
-                    if (reslut.err_msg == "get_brand_wcpay_request:ok") {
-                        // 支付成功后的回调函数
-//                        var total = eval($("#truePrice").html()) * 100;
-                        window.location.href = '/weixin/pay/paySuccess/${order.id}';
-                    } else {
-                        window.location.href = '/front/order/weixin/orderList';
-                    }
+            'getBrandWCPayRequest', {
+                "appId": res['appId'] + "",     //公众号名称，由商户传入
+                "timeStamp": res['timeStamp'] + "", // 支付签名时间戳，注意微信jssdk中的所有使用timestamp字段均为小写。但最新版的支付后台生成签名使用的timeStamp字段名需大写其中的S字符
+                "nonceStr": res['nonceStr'] + "", // 支付签名随机串，不长于 32 位
+                "package": res['package'] + "", // 统一支付接口返回的prepay_id参数值，提交格式如：prepay_id=***）
+                "signType": res['signType'] + "", // 签名方式，默认为'SHA1'，使用新版支付需传入'MD5'
+                "paySign": res['sign'] + "" // 支付签名
+            },
+            function (reslut) {
+                if (reslut.err_msg == "get_brand_wcpay_request:ok") {
+                    // 支付成功后的回调函数
+                    window.location.href = '/order/paySuccess/${order.id}';
+                } else {
+                    window.location.href = '/front/order/weixin/orderList';
                 }
+            }
         );
         if (typeof WeixinJSBridge == "undefined") {
             if (document.addEventListener) {

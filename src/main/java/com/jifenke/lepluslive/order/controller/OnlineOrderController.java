@@ -1,10 +1,10 @@
 package com.jifenke.lepluslive.order.controller;
 
-import com.jifenke.lepluslive.Address.domain.entities.Address;
 import com.jifenke.lepluslive.Address.service.AddressService;
 import com.jifenke.lepluslive.banner.service.BannerService;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
+import com.jifenke.lepluslive.groupon.service.GrouponOrderService;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.order.domain.entities.OnLineOrder;
 import com.jifenke.lepluslive.order.service.OnlineOrderService;
@@ -14,6 +14,7 @@ import com.jifenke.lepluslive.s_movie.domain.entities.SMovieProduct;
 import com.jifenke.lepluslive.s_movie.service.SMovieOrderService;
 import com.jifenke.lepluslive.s_movie.service.SMovieProductService;
 import com.jifenke.lepluslive.score.domain.entities.ScoreC;
+import com.jifenke.lepluslive.score.service.ScoreAService;
 import com.jifenke.lepluslive.score.service.ScoreCService;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
@@ -28,7 +29,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -62,6 +62,9 @@ public class OnlineOrderController {
   private ScoreCService scoreCService;
 
   @Inject
+  private ScoreAService scoreAService;
+
+  @Inject
   private SMovieOrderService movieOrderService;
 
   @Inject
@@ -70,38 +73,8 @@ public class OnlineOrderController {
   @Inject
   private BannerService bannerService;
 
-  /**
-   * 爆品详情页点击购买生成订单 16/09/22
-   *
-   * @param productId 产品ID
-   * @param buyNumber 规格数量
-   * @param specId    规格ID
-   */
-  @RequestMapping(value = "/weixin/createHotOrder", method = RequestMethod.POST)
-  @ResponseBody
-  public LejiaResult createHotOrder(HttpServletRequest request,
-                                    @RequestParam Long productId,
-                                    @RequestParam Integer buyNumber,
-                                    @RequestParam Long specId) {
-    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
-    LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
-    //查询某个用户待付款的某个商品的数量
-    int count = orderDetailService.getCurrentUserOrderProductCount(leJiaUser.getId(), productId);
-    if (count > 0) {
-      return LejiaResult.build(5002, "请先支付该商品的待支付订单");
-    }
-    Address address = addressService.findAddressByLeJiaUserAndState(leJiaUser);
-    //创建爆品的待支付订单
-    try {
-      Map
-          result =
-          onlineOrderService.createHotOrder(productId, specId, buyNumber, leJiaUser, address, 5L);
-      return LejiaResult.build((Integer) result.get("status"), "ok", result.get("data"));
-    } catch (Exception e) {
-      e.printStackTrace();
-      return LejiaResult.build(500, "服务器异常");
-    }
-  }
+  @Inject
+  private GrouponOrderService grouponOrderService;
 
   /**
    * 订单确认页 16/09/22
@@ -139,8 +112,8 @@ public class OnlineOrderController {
   public
   @ResponseBody
   LejiaResult getCurrentUserAllOrder(HttpServletRequest request,
-                                     @RequestParam(required = true) Integer currPage,
-                                     @RequestParam(required = true) Integer state) {
+                                     @RequestParam Integer currPage,
+                                     @RequestParam Integer state) {
     if (currPage == null || currPage < 1) {
       currPage = 1;
     }
@@ -183,6 +156,23 @@ public class OnlineOrderController {
     model.addAttribute("topBanner", topBanner);
     model.addAttribute("hotMovieBanner", hotMovieBanner);
     return MvUtil.go("/movie/moviePage");
+  }
+
+  /**
+   * 跳转到团购订单支付页 17/06/19 在这儿的原因=微信支付目录设置问题
+   */
+  @RequestMapping(value = "/weixin/groupon", method = RequestMethod.GET)
+  public ModelAndView groupon(HttpServletRequest request, @RequestParam Long orderId,
+                              Model model) {
+    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
+    model.addAttribute("state", weiXinUser.getState());
+    model.addAttribute("order", grouponOrderService.findById(orderId));
+    model.addAttribute("wxConfig", weiXinPayService.getWeiXinPayConfig(request));
+    model.addAttribute("canUseScore",
+                       scoreAService.findScoreAByLeJiaUser(weiXinUser.getLeJiaUser())
+                           .getScore()); //用户可用鼓励金
+
+    return MvUtil.go("/groupon/order/confirmOrder");
   }
 
 }

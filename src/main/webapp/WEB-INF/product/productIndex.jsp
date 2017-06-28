@@ -19,50 +19,129 @@
     <meta name="apple-mobile-web-app-capable" content="yes"/>
     <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
     <title>臻品</title>
-    <c:set var="resourceUrl" value="http://www.lepluslife.com/resource"></c:set>
-    <c:set var="wxRootUrl" value="http://www.lepluslife.com"></c:set>
+    <c:set var="leplusShopResource" value="http://image.tiegancrm.com/leplus_shop/"></c:set>
     <link rel="stylesheet" href="${resource}/product/index/css/reset.css">
     <link rel="stylesheet" href="${resource}/product/index/css/bastMain2.css">
     <link rel="stylesheet" href="${commonResource}/css/swiper.min.css">
     <link rel="stylesheet" href="${resourceUrl}/css/paySuccess.css">
     <link rel="stylesheet" href="${resourceUrl}/css/payFailed.css">
 </head>
+<style>
+    .w-back {
+        position: absolute;
+        width: 65px !important;
+        height: 28px;
+    }
 
+    .w-back > p {
+        position: absolute;
+        width: 100%;
+        text-align: center;
+        margin-top: 11px;
+        color: #FFF;
+        font-size: 10px;
+    }
+
+    #mask-success {
+        background-color: rgba(0, 0, 0, 0.7) !important;
+        position: fixed !important;
+    }
+
+    #mask-success .mask-top {
+        background: none;
+        background-size: 100% 100%;
+        position: relative;
+    }
+
+    .mask-top img {
+        width: 100%;
+        display: block;
+    }
+
+    .mask-text {
+        width: 100%;
+        position: absolute;
+        top: 0;
+    }
+
+    .mask-text > p:first-child {
+        text-align: center;
+        font-size: 16px !important;
+        color: #cca97a !important;
+    }
+
+    .mask-text > p:first-child span {
+        font-size: 24px;
+    }
+
+    .mask-text > p:last-child {
+        text-align: center;
+        top: 20vw !important;
+        color: #666 !important;
+        font-size: 12px !important;
+    }
+
+    .mask-btn {
+        width: 80% !important;
+        margin: 0 auto !important;
+        top: 85vw !important;
+    }
+
+    .mask-btn * {
+        border: 0 !important;
+    }
+
+    .mask-btn > div {
+        float: none !important;
+        width: 100% !important;
+        -webkit-border-radius: 5px;
+        -moz-border-radius: 5px;
+        border-radius: 5px;
+        height: 11.33vw !important;
+        line-height: 11.33vw !important;
+    }
+
+    .mask-btn > div:first-child {
+        border: 1px solid #cca97a !important;
+        background-color: #cca97a !important;
+    }
+
+    .mask-btn > div:nth-child(2) {
+        border: 1px solid #cca97a !important;
+        margin: 20px 0 !important;
+        color: #cca97a;
+    }
+
+    .mask-btn > div:last-child {
+        width: 12% !important;
+        margin: 0 auto !important;
+        margin-top: 30px !important;
+        border: 0 !important;
+    }
+
+    .mask-btn > div:last-child img {
+        width: 100%;
+        display: block;
+    }
+</style>
 <body>
-<c:if test="${orderId!=null}">
-    <div id="mask-failed">
-        <div class="mask-top"></div>
-        <p class="mask-ttl">您本次付款失败了<br>请在15分钟内完成付款</p>
-
-        <div class="mask-btn">
-            <div><a style="color: #fff;width: 100%;height: 100%;display: block"
-                    href="/front/order/weixin/confirmOrder?orderId=${orderId}">重新付款</a></div>
-            <div onclick="hideModel('mask-failed')">继续逛逛</div>
-        </div>
-    </div>
-</c:if>
 <c:if test="${truePrice!=null}">
     <div id="mask-success">
         <div class="mask-top">
-            <p>￥<font><fmt:formatNumber type="number"
-                                        value="${payBackScore/100}"
-                                        pattern="0.00"
-                                        maxFractionDigits="2"/></font></p>
-
-            <p>您在乐+商城的消费获得<font><fmt:formatNumber type="number"
-                                                  value="${payBackScore/100}"
-                                                  pattern="0.00"
-                                                  maxFractionDigits="2"/></font>元鼓励金</p>
-
-            <p>累计鼓励金：￥<font><fmt:formatNumber type="number"
-                                              value="${totalScore/100}"
-                                              pattern="0.00"
-                                              maxFractionDigits="2"/></font></p>
+            <img src="${leplusShopResource}/product/index/img/hb-bg.png" alt="">
+            <div class="mask-text">
+                <p>返<span><fmt:formatNumber type="number"
+                                            value="${payBackScore/100}"
+                                            pattern="0.00"
+                                            maxFractionDigits="2"/></span>元鼓励金</p>
+                <p>可在乐+联盟商家消费使用</p>
+            </div>
         </div>
         <div class="mask-btn">
-            <div><a style="color: #fff;width: 100%;height: 100%;display: block"
-                    href="/front/order/weixin/orderList">查看订单</a></div>
-            <div onclick="hideModel('mask-success')">继续逛逛</div>
+            <div onclick="hideModel('mask-success')"><a
+                    style="color: #fff;width: 100%;height: 100%;display: block">继续逛逛</a></div>
+            <div onclick="window.location.href='/front/order/weixin/orderList'">查看订单</div>
+            <div onclick="hideModel('mask-success')"><img src="${leplusShopResource}/product/index/img/cha.png" alt=""></div>
         </div>
     </div>
 </c:if>
@@ -103,55 +182,6 @@
                                 </div>
                             </div>
                         </section>
-                        <%--<section class="top">--%>
-                        <%--<img src="${resourceUrl}/frontRes/product/hotIndex/img/line.png" alt="">--%>
-
-                        <%--<p>主打爆款</p>--%>
-
-                        <%--<div style="float: right;margin-top: -6%;font-size: 14px;color: #999999;margin-right: 3%"--%>
-                        <%--onclick="goMenu(2)">--%>
-                        <%--<img style="width: 10%;position: absolute;right: 0;left:87%;margin-top: 0.8%;"--%>
-                        <%--src="${resourceUrl}/frontRes/product/hotIndex/img/index_all.png"--%>
-                        <%--alt=""/>--%>
-                        <%--</div>--%>
-                        <%--</section>--%>
-                        <%--<c:if test="${product != null}">--%>
-                        <%--<section class="hotGoods" style="margin-top: -2px;"--%>
-                        <%--onclick="goHotDetail(${product.id})">--%>
-                        <%--<div>--%>
-                        <%--<img src="${product.thumb}" alt="">--%>
-                        <%--</div>--%>
-
-                        <%--<div></div>--%>
-                        <%--<div>${product.name}</div>--%>
-                        <%--<div><span--%>
-                        <%--style="color:#333;font-size: 15px;margin-right: -2px"><fmt:formatNumber--%>
-                        <%--type="number"--%>
-                        <%--value="${product.minPrice/100}"--%>
-                        <%--pattern="0.00"--%>
-                        <%--maxFractionDigits="2"/>元</span> + <span--%>
-                        <%--style="margin-left: -2px;font-size: 14px;color: #fb991a;"><fmt:formatNumber--%>
-                        <%--type="number"--%>
-                        <%--value="${product.minScore/100}"--%>
-                        <%--pattern="0.00"--%>
-                        <%--maxFractionDigits="2"/>金币</span>--%>
-                        <%--</div>--%>
-                        <%--<div>--%>
-                        <%--<span class="line-down"--%>
-                        <%--style="margin-top: -5px;font-size: 12px;color: #999;">市场价<fmt:formatNumber--%>
-                        <%--type="number"--%>
-                        <%--value="${product.price/100}"--%>
-                        <%--pattern="0.00"--%>
-                        <%--maxFractionDigits="2"/>元</span>--%>
-                        <%--</div>--%>
-                        <%--<div class="w-buyNow">--%>
-                        <%--<img src="${resourceUrl}/frontRes/product/hotIndex/img/buyNow.png"--%>
-                        <%--alt="">--%>
-
-                        <%--<p>仅剩${product.repository}份</p>--%>
-                        <%--</div>--%>
-                        <%--</section>--%>
-                        <%--</c:if>--%>
 
                         <section class="top" style="margin-bottom: 10px;">
                             <img src="${resourceUrl}/frontRes/product/hotIndex/img/line.png" alt="">
@@ -367,9 +397,6 @@
         });
     }
 
-    function goHotDetail(id) { //go爆品详情页
-        location.href = "/front/product/weixin/limitDetail?productId=" + id;
-    }
     function goProductDetail(productId) { //go爆品详情页
         location.href = "/weixin/product/" + productId;
     }

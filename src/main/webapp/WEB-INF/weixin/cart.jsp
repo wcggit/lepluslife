@@ -215,7 +215,7 @@
                         + data[i].productSpec.specDetail + '</font></h6>';
                     liHtmlStr +=
                         '<p class="chose_right right_all"><span class="order-price mui-pull-left" style="width: 32vw;margin-left: -2%;font-size: 15px">￥<font class="price">'
-                        + toDecimal(data[i].productSpec.minPrice
+                        + toDecimal(data[i].productSpec.price
                                     / 100)
                         + '</font><span style="font-size: 15px;color:#E4AF69;"><font class="minScore" style="display: none">'
                         + toDecimal(data[i].productSpec.minScore / 100) + '</font></span></span>';
@@ -433,27 +433,25 @@
             valArr.push($(this).parents('li'));
         });
         console.log(valArr);
-        var cartDetailDtos = [];
+        var carts = '';
         if ($(".checboxOne:checked").length != 0) {
             $(".checboxOne:checked").each(function (i) {
-                var cartDetailDto = {};
-                var product = {};
-                product.id = $(this).parents('li').find(".productId").val();
-                var productSpec = {};
-                productSpec.id = $(this).parents('li').find(".productSpecId").val();
-                cartDetailDto.product = product;
-                cartDetailDto.productSpec = productSpec;
                 judgeFun($(this).parents('li').find(".num"),
                          eval($(this).parents('li').find(".repository").text()));
-                cartDetailDto.productNumber = $(this).parents('li').find(".num").val();
-                cartDetailDtos.push(cartDetailDto);
+                //商品id_商品规格id_数量,
+                carts +=
+                    $(this).parents('li').find(".productId").val() + '_' + $(this).parents(
+                        'li').find(".productSpecId").val() + '_' + $(this).parents('li').find(
+                        ".num").val() + ',';
             });
+            if (carts.length > 1) {
+                carts = carts.substring(0, carts.length - 1);
+            }
             $("#buy").attr("onclick", "");
             $.ajax({
                        type: "post",
-                       url: "/weixin/cart/createCartOrder",
-                       contentType: "application/json",
-                       data: JSON.stringify(cartDetailDtos),
+                       url: "/order/sign/create",
+                       data: {carts: carts, source: 'WEB', type: 2},
                        success: function (data) {
                            if (data.status == 200) {
                                location.href =

@@ -264,11 +264,7 @@ public class WeixinController {
       if (partnerManagerService.findByWeiXinUser(weiXinUser).isPresent()) {
         model.addAttribute("code", "1"); //该微信号已经绑定合伙人且不是当前合伙人
       } else {
-        PartnerManager bindPartnerManager = weiXinUser.getLeJiaUser().getBindPartnerManager();
-        if (bindPartnerManager != null && bindPartnerManager.getId()
-            .equals(partnerManager.getId())) {//已经绑上无须在考虑绑定
-          model.addAttribute("code", "4");
-        }
+        model.addAttribute("code", "4");
       }
     } else {
       // 如果已经绑上当前用户

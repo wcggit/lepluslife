@@ -2,11 +2,9 @@ package com.jifenke.lepluslive.activity.controller;
 
 import com.jifenke.lepluslive.activity.domain.entities.ActivityPhoneOrder;
 import com.jifenke.lepluslive.activity.service.ActivityPhoneOrderService;
-import com.jifenke.lepluslive.global.config.Constants;
 import com.jifenke.lepluslive.global.service.MessageService;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
-import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.lejiauser.service.LeJiaUserService;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.service.WeiXinPayService;
@@ -24,7 +22,6 @@ import org.springframework.web.servlet.ModelAndView;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -123,7 +120,7 @@ public class ActivityPhoneOrderController {
 //    }
 //    SortedMap<String, Object> params = weiXinPayService
 //        .returnPayParams(payWay, request, "金币充值话费", order.getOrderSid(), "" + order.getTruePrice(),
-//                         Constants.PHONEORDER_NOTIFY_URL);
+//                         AppConstants.PHONEORDER_NOTIFY_URL);
 //    if (params != null) {
 //      params.put("orderId", order.getId());
 //      return LejiaResult.ok(params);

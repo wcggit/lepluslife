@@ -1,6 +1,5 @@
 package com.jifenke.lepluslive.partner.service;
 
-import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 import com.jifenke.lepluslive.lejiauser.repository.LeJiaUserRepository;
 import com.jifenke.lepluslive.merchant.repository.MerchantRepository;
 import com.jifenke.lepluslive.partner.domain.entities.Partner;
@@ -34,94 +33,87 @@ import javax.inject.Inject;
 @Service
 @Transactional(readOnly = true)
 public class PartnerManagerService {
-    @Inject
-    private PartnerManagerRepository partnerManagerRepository;
 
-    @Inject
-    private PartnerManagerWalletRepository partnerManagerWalletRepository;
+  @Inject
+  private PartnerManagerRepository partnerManagerRepository;
 
-    @Inject
-    private LeJiaUserRepository leJiaUserRepository;
+  @Inject
+  private PartnerManagerWalletRepository partnerManagerWalletRepository;
 
-    @Inject
-    private MerchantRepository merchantRepository;
+  @Inject
+  private LeJiaUserRepository leJiaUserRepository;
 
-    @Inject
-    private PartnerManagerWalletLogRepository partnerManagerWalletLogRepository;
+  @Inject
+  private MerchantRepository merchantRepository;
 
-    @Inject
-    private PartnerRepository partnerRepository;
+  @Inject
+  private PartnerManagerWalletLogRepository partnerManagerWalletLogRepository;
 
-    @Inject
-    private PartnerWalletLogRepository partnerWalletLogRepository;
+  @Inject
+  private PartnerRepository partnerRepository;
 
-    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-    public PartnerManager findByPartnerAccountId(Long accountId) {
-        return partnerManagerRepository.findByPartnerId(accountId);
-    }
+  @Inject
+  private PartnerWalletLogRepository partnerWalletLogRepository;
 
-    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-    public PartnerManagerWallet findWalletByPartnerManager(PartnerManager partnerManager) {
-        return partnerManagerWalletRepository.findByPartnerManager(partnerManager);
-    }
+  @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+  public PartnerManager findByPartnerAccountId(Long accountId) {
+    return partnerManagerRepository.findByPartnerId(accountId);
+  }
 
-    /**
-     * 城市合伙人每日佣金收入
-     */
-    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-    public Long findDailyCommissionByPartnerManager(Long partnerManagerId) {
-        return partnerManagerWalletLogRepository.findDailyCommissionByPartnerManager(partnerManagerId);
-    }
+  @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+  public PartnerManagerWallet findWalletByPartnerManager(PartnerManager partnerManager) {
+    return partnerManagerWalletRepository.findByPartnerManager(partnerManager);
+  }
+
+  /**
+   * 城市合伙人每日佣金收入
+   */
+  @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+  public Long findDailyCommissionByPartnerManager(Long partnerManagerId) {
+    return partnerManagerWalletLogRepository.findDailyCommissionByPartnerManager(partnerManagerId);
+  }
 
 
-    /**
-     * 根据 Sid 查询PartnerManager
-     */
-    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-    public PartnerManager findByPartnerManagerSid(String partnerManagerSid) {
-        return partnerManagerRepository.findByPartnerManagerSid(partnerManagerSid);
-    }
+  /**
+   * 根据 Sid 查询PartnerManager
+   */
+  @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+  public PartnerManager findByPartnerManagerSid(String partnerManagerSid) {
+    return partnerManagerRepository.findByPartnerManagerSid(partnerManagerSid);
+  }
 
-    @Transactional(readOnly = true,propagation = Propagation.REQUIRED)
-    public Optional<Partner> findByWeiXinUser(WeiXinUser weiXinUser) {
-        return partnerManagerRepository.findByWeiXinUser(weiXinUser);
-    }
+  @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+  public Optional<Partner> findByWeiXinUser(WeiXinUser weiXinUser) {
+    return partnerManagerRepository.findByWeiXinUser(weiXinUser);
+  }
 
-    @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-    public Boolean bindWeiXinUser(PartnerManager partnerManager, WeiXinUser weiXinUser) {
-        if (partnerManager != null && weiXinUser != null) {
-            LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
-            boolean flag = true;
-            if (leJiaUser.getBindPartnerManager()==null||!leJiaUser.getBindPartner().getId().equals(partnerManager.getId())) { //未绑上
-                    leJiaUser.setBindPartnerManager(partnerManager);
-                    leJiaUserRepository.save(leJiaUser);
-                    partnerManager.setWeiXinUser(weiXinUser);
-                    partnerManagerRepository.save(partnerManager);
-            } else {
-                partnerManager.setWeiXinUser(weiXinUser);
-                partnerManagerRepository.save(partnerManager);
-            }
-            if (flag) {
-                new Thread(() -> {
-                    String
-                            getUrl =
-                            "http://www.lepluspay.com/api/partnerManager/bind_wx_user/" + partnerManager.getPartnerManagerSid();
-                    CloseableHttpClient httpclient = HttpClients.createDefault();
-                    HttpGet httpGet = new HttpGet(getUrl);
-                    httpGet.addHeader("Content-Type", "text/html;charset=UTF-8");
-                    CloseableHttpResponse response = null;
-                    try {
-                        response = httpclient.execute(httpGet);
-                        HttpEntity entity = response.getEntity();
-                        EntityUtils.consume(entity);
-                        response.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }).start();
-            }
-            return flag;
+  @Transactional(propagation = Propagation.REQUIRED)
+  public Boolean bindWeiXinUser(PartnerManager partnerManager, WeiXinUser weiXinUser) {
+    if (partnerManager != null && weiXinUser != null) {
+      partnerManager.setWeiXinUser(weiXinUser);
+      partnerManagerRepository.save(partnerManager);
+
+      new Thread(() -> {
+        String
+            getUrl =
+            "http://www.lepluspay.com/api/partnerManager/bind_wx_user/" + partnerManager
+                .getPartnerManagerSid();
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet(getUrl);
+        httpGet.addHeader("Content-Type", "text/html;charset=UTF-8");
+        CloseableHttpResponse response = null;
+        try {
+          response = httpclient.execute(httpGet);
+          HttpEntity entity = response.getEntity();
+          EntityUtils.consume(entity);
+          response.close();
+        } catch (IOException e) {
+          e.printStackTrace();
         }
-        return false;
+      }).start();
+
+      return true;
     }
+    return false;
+  }
 }

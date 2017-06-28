@@ -19,8 +19,10 @@ public class LeJiaUserDto {
 
   private String phoneNumber;
 
+  private Integer state;  //1=会员|0=非会员
+
   public LeJiaUserDto(Long scoreA, Long scoreB, String userOneBarCode, String token,
-                      String headImageUrl, String userName, String phoneNumber) {
+                      String headImageUrl, String userName, String phoneNumber, Integer state) {
     this.scoreA = scoreA;
     this.scoreB = scoreB;
     this.userOneBarCode = userOneBarCode;
@@ -28,6 +30,7 @@ public class LeJiaUserDto {
     this.headImageUrl = headImageUrl;
     this.userName = userName;
     this.phoneNumber = phoneNumber;
+    this.state = state;
   }
 
   public String getPhoneNumber() {
@@ -41,6 +44,14 @@ public class LeJiaUserDto {
   public String getToken() {
 
     return token;
+  }
+
+  public Integer getState() {
+    return state;
+  }
+
+  public void setState(Integer state) {
+    this.state = state;
   }
 
   public String getUserName() {

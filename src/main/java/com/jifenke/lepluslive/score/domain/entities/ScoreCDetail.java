@@ -29,7 +29,7 @@ public class ScoreCDetail {
   @ManyToOne
   private ScoreC scoreC;
 
-  private Integer origin;  //1=线上返还  2=线上消费  3=线下消费  4=线下返还  15003=充话费消耗
+  private Integer origin;  //1=线上返还  2=线上消费  3=线下消费  4=线下返还  15003=充话费消耗  15004=团购
 
   private String orderSid;  //对应的订单号
 

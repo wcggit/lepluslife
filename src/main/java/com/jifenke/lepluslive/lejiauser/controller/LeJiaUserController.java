@@ -174,8 +174,8 @@ public class LeJiaUserController {
    */
   @ApiOperation(value = "点击登录按钮")
   @RequestMapping(value = "/login", method = RequestMethod.POST)
-  public LejiaResult login(@RequestParam(required = true) String phoneNumber,
-                           @RequestParam(required = true) String pwd,
+  public LejiaResult login(@RequestParam String phoneNumber,
+                           @RequestParam String pwd,
                            @ApiParam(value = "推送token") @RequestParam(required = false) String token) {
     LeJiaUser leJiaUser = leJiaUserService.findUserByPhoneNumber(phoneNumber);
     if (leJiaUser == null) {
@@ -192,7 +192,7 @@ public class LeJiaUserController {
                                                            leJiaUser.getUserSid(),
                                                            leJiaUser.getHeadImageUrl(),
                                                            leJiaUser.getPhoneNumber(),
-                                                           leJiaUser.getPhoneNumber()));
+                                                           leJiaUser.getPhoneNumber(), 1));
   }
 
   @ApiOperation(value = "发送验证码重置密码时验证验证码")
@@ -221,11 +221,10 @@ public class LeJiaUserController {
   }
 
   /**
-   * token获取个人数据 16/09/07
+   * token获取个人数据 16/09/07 todo:APP更新后一段时间老版本无人使用时 "/open"可以去掉
    */
-  @ApiOperation(value = "token获取个人数据")
-  @RequestMapping(value = "/open", method = RequestMethod.POST)
-  public LejiaResult open(@RequestParam(required = false) String token) {
+  @RequestMapping(value = {"/open", "/sign/open"}, method = RequestMethod.POST)
+  public LejiaResult open(@RequestParam String token) {
     if (token != null) {//获取个人数据
       Map map = leJiaUserService.getUserInfo(token);
       if (map != null) {
@@ -237,12 +236,12 @@ public class LeJiaUserController {
   }
 
   /**
-   * app微信登录1.1版
+   * app微信登录1.1版  todo:APP更新后一段时间老版本无人使用时 "/wxLogin"可以去掉
    */
   @ApiOperation(value = "微信登录")
-  @RequestMapping(value = "/wxLogin", method = RequestMethod.POST)
-  public LejiaResult wxLogin(@RequestParam(required = true) String unionid,
-                             @RequestParam(required = true) String openid,
+  @RequestMapping(value = {"/wxLogin", "/sign/login"}, method = RequestMethod.POST)
+  public LejiaResult wxLogin(@RequestParam String unionid,
+                             @RequestParam String openid,
                              @RequestParam(required = false) String country,
                              @RequestParam(required = false) String nickname,
                              @RequestParam(required = false) String city,
@@ -255,9 +254,9 @@ public class LeJiaUserController {
       return LejiaResult.build(2008, messageUtil.getMsg("2008"));
     }
     WeiXinUser weiXinUser = weiXinUserService.findWeiXinUserByUnionId(unionid);  //是否已注册
-    LeJiaUser leJiaUser = null;
+
     try {
-      leJiaUser =
+      weiXinUser =
           weiXinUserService
               .saveWeiXinUserByApp(weiXinUser, unionid, openid, country, city, nickname,
                                    province, language, headimgurl, sex, token);
@@ -265,8 +264,8 @@ public class LeJiaUserController {
       e.printStackTrace();
       return LejiaResult.build(500, "服务器异常");
     }
+    LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
     ScoreA scoreA = scoreAService.findScoreAByLeJiaUser(leJiaUser);
-//    ScoreB scoreB = scoreBService.findScoreBByWeiXinUser(leJiaUser);
     ScoreC scoreC = scoreCService.findScoreCByLeJiaUser(leJiaUser);
     if (scoreA != null && scoreC != null && leJiaUser != null) {
       return LejiaResult.build(200, "登录成功", new LeJiaUserDto(scoreA.getScore(), scoreC.getScore(),
@@ -274,7 +273,8 @@ public class LeJiaUserController {
                                                              leJiaUser.getUserSid(),
                                                              headimgurl,
                                                              nickname,
-                                                             leJiaUser.getPhoneNumber()));
+                                                             leJiaUser.getPhoneNumber(),
+                                                             weiXinUser.getState()));
     } else {
       return LejiaResult.build(500, "服务器异常");
     }
@@ -312,7 +312,7 @@ public class LeJiaUserController {
     return LejiaResult.build(200, "请求成功", result);
   }
 
-  public String getDay(int i, Date date, SimpleDateFormat sdf) {
+  private String getDay(int i, Date date, SimpleDateFormat sdf) {
     Calendar calendar = Calendar.getInstance();
     calendar.setTime(date);
     calendar.add(Calendar.DAY_OF_YEAR, i);
@@ -326,7 +326,7 @@ public class LeJiaUserController {
    */
   @ApiOperation(value = "检测是否有新版本")
   @RequestMapping(value = "/checkVersion", method = RequestMethod.GET)
-  public LejiaResult check(@RequestParam(required = true) String version) {
+  public LejiaResult check(@RequestParam String version) {
     String[] newVersion = dictionaryService.findDictionaryById(30L).getValue().split("_");
     Map<String, String> map = new HashMap<>();
 
@@ -363,7 +363,7 @@ public class LeJiaUserController {
 
   @RequestMapping(value = "/notFound")
   public LejiaResult userTest() {
-    return LejiaResult.build(2003, "查找用户异常");
+    return LejiaResult.build(2003, "用户||sign 异常");
   }
 
 }

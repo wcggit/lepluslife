@@ -245,11 +245,10 @@
     function otherShop(shopId) {
         window.location.href = "/front/shop/weixin/m?status=0&id=" + shopId;
     }
-    /**跳转到其他门店*/
+    /**打电话*/
     function phone() {
         window.location.href = "tel://${merchant.phoneNumber}";
     }
-    /**跳转到其他门店*/
     function buyScore() {
         alert('即将上线，敬请期待！');
     }

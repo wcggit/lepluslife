@@ -234,8 +234,8 @@ public class WeiXinUserService {
   /**
    * app的微信登录
    */
-  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public LeJiaUser saveWeiXinUserByApp(WeiXinUser weiXinUser, String unionId, String openid,
+  @Transactional(propagation = Propagation.REQUIRED)
+  public WeiXinUser saveWeiXinUserByApp(WeiXinUser weiXinUser, String unionId, String openid,
                                        String country, String city, String nickname,
                                        String province,
                                        String language, String headImgUrl, Long sex, String token)
@@ -270,8 +270,6 @@ public class WeiXinUserService {
       scoreC.setLeJiaUser(leJiaUser);
       scoreC.setLastUpdateDate(date);
       scoreCRepository.save(scoreC);
-    } else {
-      leJiaUser = weiXinUser.getLeJiaUser();
     }
 
     weiXinUser.setAppOpenId(openid);
@@ -288,7 +286,7 @@ public class WeiXinUserService {
     weiXinUser.setState(1);
     weiXinUserRepository.save(weiXinUser);
 
-    return leJiaUser;
+    return weiXinUser;
   }
 
   /**
