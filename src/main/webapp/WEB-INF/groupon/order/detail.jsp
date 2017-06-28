@@ -57,6 +57,24 @@
             <div class="fixClear">
                 <div>券码${sid.index + 1}</div>
                 <div>${fn:substring(code.code, 0,4)}&nbsp;&nbsp;${fn:substring(code.code, 4,8)}&nbsp;&nbsp;${fn:substring(code.code, 8,12)}</div>
+                <c:if test="${code.state == 0}">
+                    <div>待使用</div>
+                </c:if>
+                <c:if test="${code.state == 1}">
+                    <div>已使用</div>
+                </c:if>
+                <c:if test="${code.state == 2}">
+                    <div>退款中</div>
+                </c:if>
+                <c:if test="${code.state == 3}">
+                    <div>已退款</div>
+                </c:if>
+                <c:if test="${code.state == 4}">
+                    <div>已过期</div>
+                </c:if>
+                <c:if test="${code.state == -1}">
+                    <div>未付款</div>
+                </c:if>
             </div>
         </c:forEach>
     </div>
@@ -65,7 +83,7 @@
         </div>
         <p>请出示此二维码核销</p>
         <div class="codeButton">
-            <button class="setTkButton" onclick="refund()">申请退款</button>
+            <button class="setTkButton">申请退款</button>
         </div>
     </section>
 </section>
@@ -97,15 +115,17 @@
         <div>付款时间</div>
         <div><fmt:formatDate value="${order.expiredDate}" pattern="yyyy-MM-dd HH:mm:ss"/></div>
     </div>
-    <div class="fixClear">
-        <div>乐加奖励</div>
-        <div><fmt:formatNumber
-                type="number" value="${order.rebateScorea/100}" pattern="0.00"
-                maxFractionDigits="2"/>元鼓励金＋<fmt:formatNumber
-                type="number" value="${order.rebateScorec/100}" pattern="0.00"
-                maxFractionDigits="2"/>金币
+    <c:if test="${order.orderType == 1}">
+        <div class="fixClear">
+            <div>乐加奖励</div>
+            <div><fmt:formatNumber
+                    type="number" value="${order.rebateScorea/100}" pattern="0.00"
+                    maxFractionDigits="2"/>元鼓励金＋<fmt:formatNumber
+                    type="number" value="${order.rebateScorec/100}" pattern="0.00"
+                    maxFractionDigits="2"/>金币
+            </div>
         </div>
-    </div>
+    </c:if>
 </section>
 <section class="layer">
     <div class="setTk">
@@ -113,14 +133,16 @@
             <img src="${resource}/groupon/order_detail/img/tk.png" alt="">
         </div>
         <p>确认要申请退款吗？</p>
-        <p>退款时，乐＋将收回<span>¥<fmt:formatNumber
-                type="number" value="${order.rebateScorea/100}" pattern="0.00"
-                maxFractionDigits="2"/>鼓励金+<fmt:formatNumber
-                type="number" value="${order.rebateScorec/100}" pattern="0.00"
-                maxFractionDigits="2"/>金币</span></p>
-        <p>（在您购买当笔团购后，乐加奖励的呦）</p>
+        <c:if test="${order.orderType == 1}">
+            <p>退款时，乐＋将收回<span>¥<fmt:formatNumber
+                    type="number" value="${order.rebateScorea/100}" pattern="0.00"
+                    maxFractionDigits="2"/>鼓励金+<fmt:formatNumber
+                    type="number" value="${order.rebateScorec/100}" pattern="0.00"
+                    maxFractionDigits="2"/>金币</span></p>
+            <p>（在您购买当笔团购后，乐加奖励的呦）</p>
+        </c:if>
         <div class="layerButton">
-            <div class="layerClose">取消</div>
+            <div class="layerClose close_cancel">取消</div>
             <div class="TkSuccessButton">确认退款</div>
         </div>
     </div>
@@ -131,7 +153,7 @@
         <p>申请退款成功</p>
         <p>您的资金将在1-3个工作日到账</p>
         <div class="paySuccessButton">
-            <div class="layerClose">关闭</div>
+            <div class="layerClose close_success">关闭</div>
         </div>
     </div>
 </section>
@@ -149,6 +171,17 @@
     qrcode.makeCode(content);
 </script>
 <script>
+    function refundSuccess() {
+        layer.closeAll();
+        layer.open({
+                       type: 1,
+                       title: 0,
+                       closeBtn: 0,
+                       offset: '20%',
+                       area: ['80%'], //宽高
+                       content: $(".TkSuccess")
+                   });
+    }
     $(".setTkButton").click(function () {
         layer.open({
                        type: 1,
@@ -159,24 +192,26 @@
                        content: $(".setTk")
                    });
     });
-    $(".layerClose").click(function () {
+    $(".close_cancel").click(function () {
         layer.closeAll();
+    });
+    $(".close_success").click(function () {
+        window.location.href = '/groupon//weixin/orderList';
     });
     $(".TkSuccessButton").click(function () {
-        layer.closeAll();
-        layer.open({
-                       type: 1,
-                       title: 0,
-                       closeBtn: 0,
-                       offset: '20%',
-                       area: ['80%'], //宽高
-                       content: $(".TkSuccess")
-                   });
+        //确认退款
+        $.post('/groupon/sign/refund', {
+            orderId: '${order.orderId}',
+            source: 'WEB'
+        }, function (res) {
+            if (res.status == 200) {//调用微信支付js-api接口
+                refundSuccess();
+            } else {
+                alert(res['msg']);
+                $('.setTkButton').attr('onclick', '');
+                $('.TkSuccessButton').attr('onclick', '');
+            }
+        });
     });
-</script>
-<script>
-    function refund() {
-
-    }
 </script>
 </html>

@@ -71,8 +71,7 @@ public class LeJiaUser {
 
   private Long cityId;
 
-  @ManyToOne
-  private PartnerManager bindPartnerManager;
+
 
   public Date getBindMerchantDate() {
     return bindMerchantDate;
@@ -210,11 +209,5 @@ public class LeJiaUser {
     this.userName = userName;
   }
 
-  public PartnerManager getBindPartnerManager() {
-    return bindPartnerManager;
-  }
 
-  public void setBindPartnerManager(PartnerManager bindPartnerManager) {
-    this.bindPartnerManager = bindPartnerManager;
-  }
 }

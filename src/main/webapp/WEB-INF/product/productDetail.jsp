@@ -14,7 +14,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title></title>
+    <title>${product.name}</title>
     <meta name="viewport"
           content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -172,13 +172,11 @@
         </div>
         <ul class="mui-table-view mui-table-view-chevron detail-hid"></ul>
     </div>
-    <form action="/weixin/order/confirm" method="post" id="form">
-        <input type="hidden" id="productId" name="productId" value="${product.id}">
-        <input type="hidden" id="productNum" name="productNum">
-        <input type="hidden" id="totalPrice" name="totalPrice">
-        <input type="hidden" id="totalScore" name="totalScore">
-        <input type="hidden" id="productSpec" name="productSpec">
-    </form>
+    <input type="hidden" id="productId" name="productId" value="${product.id}">
+    <input type="hidden" id="productNum" name="productNum">
+    <input type="hidden" id="totalPrice" name="totalPrice">
+    <input type="hidden" id="totalScore" name="totalScore">
+    <input type="hidden" id="productSpec" name="productSpec">
 </div>
 
 <!--提示-->
@@ -315,23 +313,12 @@
         $("#totalScore").val(totalScore);
         var productSpecId = $(".focusClass").find(".id-hidden").val();
         $("#productSpec").val(productSpecId);
-
-        var cartDetailDtos = [];
-        var cartDetailDto = {};
-        var product = {};
-        product.id = ${product.id};
-        var productSpec = {};
-        productSpec.id = productSpecId;
-        cartDetailDto.product = product;
-        cartDetailDto.productSpec = productSpec;
-        cartDetailDto.productNumber = $("#productNum").val();
-        cartDetailDtos.push(cartDetailDto);
-
+        //商品id_商品规格id_数量
+        var carts = '${product.id}_' + productSpecId + '_' + $("#productNum").val();
         $.ajax({
                    type: "post",
-                   url: "/weixin/cart/createCartOrder",
-                   contentType: "application/json",
-                   data: JSON.stringify(cartDetailDtos),
+                   url: "/order/sign/create",
+                   data: {carts: carts, source: 'WEB', type: 1},
                    success: function (data) {
                        if (data.status == 200) {
                            location.href =

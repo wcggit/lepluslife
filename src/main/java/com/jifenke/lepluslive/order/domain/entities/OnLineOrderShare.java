@@ -28,10 +28,8 @@ public class OnLineOrderShare {
 
   private String orderSid;   //对应的分润来源的订单号
 
-  private Long
-      shareMoney =
-      0L;
-      //=toLockMerchant + toLockPartner + toLockPartnerManager + toTradePartner + toTradePartnerManager
+  //=toLockMerchant + toLockPartner + toLockPartnerManager + toTradePartner + toTradePartnerManager
+  private Long shareMoney = 0L;
 
   private Date createDate = new Date();
 

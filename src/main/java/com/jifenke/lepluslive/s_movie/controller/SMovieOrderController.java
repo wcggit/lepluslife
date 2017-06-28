@@ -1,5 +1,6 @@
 package com.jifenke.lepluslive.s_movie.controller;
 
+import com.jifenke.lepluslive.global.config.AppConstants;
 import com.jifenke.lepluslive.global.config.Constants;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
@@ -79,7 +80,7 @@ public class SMovieOrderController {
           map =
           weiXinPayService
               .buildOrderParams(request, "乐+电影特权", order.getOrderSid(), "" + order.getTruePrice(),
-                                Constants.MOVIE_NOTIFY_URL);
+                                AppConstants.MOVIE_NOTIFY_URL);
       // 获取微信预支付
       Map<String, Object> unifiedOrder = weiXinPayService.createUnifiedOrder(map);
       if (unifiedOrder.get("prepay_id") != null) {

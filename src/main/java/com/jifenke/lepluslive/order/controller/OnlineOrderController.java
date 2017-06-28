@@ -1,6 +1,5 @@
 package com.jifenke.lepluslive.order.controller;
 
-import com.jifenke.lepluslive.Address.domain.entities.Address;
 import com.jifenke.lepluslive.Address.service.AddressService;
 import com.jifenke.lepluslive.banner.service.BannerService;
 import com.jifenke.lepluslive.global.util.LejiaResult;
@@ -30,7 +29,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -79,39 +77,6 @@ public class OnlineOrderController {
   private GrouponOrderService grouponOrderService;
 
   /**
-   * 爆品详情页点击购买生成订单 16/09/22
-   *
-   * @param productId 产品ID
-   * @param buyNumber 规格数量
-   * @param specId    规格ID
-   */
-  @RequestMapping(value = "/weixin/createHotOrder", method = RequestMethod.POST)
-  @ResponseBody
-  public LejiaResult createHotOrder(HttpServletRequest request,
-                                    @RequestParam Long productId,
-                                    @RequestParam Integer buyNumber,
-                                    @RequestParam Long specId) {
-    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
-    LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
-    //查询某个用户待付款的某个商品的数量
-    int count = orderDetailService.getCurrentUserOrderProductCount(leJiaUser.getId(), productId);
-    if (count > 0) {
-      return LejiaResult.build(5002, "请先支付该商品的待支付订单");
-    }
-    Address address = addressService.findAddressByLeJiaUserAndState(leJiaUser);
-    //创建爆品的待支付订单
-    try {
-      Map
-          result =
-          onlineOrderService.createHotOrder(productId, specId, buyNumber, leJiaUser, address, 5L);
-      return LejiaResult.build((Integer) result.get("status"), "ok", result.get("data"));
-    } catch (Exception e) {
-      e.printStackTrace();
-      return LejiaResult.build(500, "服务器异常");
-    }
-  }
-
-  /**
    * 订单确认页 16/09/22
    *
    * @param orderId 订单ID
@@ -147,8 +112,8 @@ public class OnlineOrderController {
   public
   @ResponseBody
   LejiaResult getCurrentUserAllOrder(HttpServletRequest request,
-                                     @RequestParam(required = true) Integer currPage,
-                                     @RequestParam(required = true) Integer state) {
+                                     @RequestParam Integer currPage,
+                                     @RequestParam Integer state) {
     if (currPage == null || currPage < 1) {
       currPage = 1;
     }

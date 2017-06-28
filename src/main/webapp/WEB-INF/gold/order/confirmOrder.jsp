@@ -318,7 +318,7 @@
                 message: $('#message').val()
             }, function (res) {
                 if (res.status == 2000) {
-                    window.location.href = '/weixin/pay/paySuccess/${order.id}';
+                    window.location.href = '/order/paySuccess/${order.id}';
                 } else if (res.status == 200) {//调用微信支付js-api接口
                     weixinPay(res.data);
                 } else {
@@ -346,8 +346,7 @@
             function (reslut) {
                 if (reslut.err_msg == "get_brand_wcpay_request:ok") {
                     // 支付成功后的回调函数
-//                        var total = eval($("#truePrice").html()) * 100;
-                    window.location.href = '/weixin/pay/paySuccess/${order.id}';
+                    window.location.href = '/order/paySuccess/${order.id}';
                 } else {
                     window.location.href = '/front/order/weixin/orderList';
                 }

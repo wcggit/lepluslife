@@ -1,5 +1,6 @@
 package com.jifenke.lepluslive.activity.service;
 
+import com.jifenke.lepluslive.global.config.AppConstants;
 import com.jifenke.lepluslive.global.config.Constants;
 import com.jifenke.lepluslive.global.util.HttpUtils;
 import com.jifenke.lepluslive.global.util.MD5Util;
@@ -50,7 +51,7 @@ public class RechargeService {
     SortedMap<Object, Object> orderParams = new TreeMap<>();
     orderParams.put("card_worth", worth);
     orderParams.put("phone_number", phone);
-    orderParams.put("notify_url", Constants.PHONE_NOTIFY_URL);
+    orderParams.put("notify_url", AppConstants.PHONE_NOTIFY_URL);
     orderParams.put("sp_order_id", orderSid);
     orderParams.put("api_key", phoneKey);
     String url = Constants.PHONE_SUBMIT + buildParams(orderParams);

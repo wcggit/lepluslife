@@ -58,6 +58,18 @@ public class GrouponProductController {
   }
 
   /**
+   * 团购商品图文详情页 WEB  2017/6/19
+   *
+   * @param id 商品ID
+   */
+  @RequestMapping("/picList")
+  public ModelAndView detailPicList(Model model, @RequestParam Long id) {
+    model
+        .addAttribute("list", grouponProductDetailService.listSqlByGrouponProduct(id));
+    return MvUtil.go("/groupon/product/picList");
+  }
+
+  /**
    * 获取团购商品详情页信息 APP  2017/6/19
    *
    * @param id     商品ID
@@ -72,18 +84,6 @@ public class GrouponProductController {
                                  @RequestParam(required = false) Double lon) {
 
     return LejiaResult.ok(grouponProductService.detail(id, status, lat, lon));
-  }
-
-  /**
-   * 团购商品图文详情页 WEB  2017/6/19
-   *
-   * @param id 商品ID
-   */
-  @RequestMapping("/picList")
-  public ModelAndView detailPicList(Model model, @RequestParam Long id) {
-    model
-        .addAttribute("list", grouponProductDetailService.listSqlByGrouponProduct(id));
-    return MvUtil.go("/groupon/product/picList");
   }
 
 }

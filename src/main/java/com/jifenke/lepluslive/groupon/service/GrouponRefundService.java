@@ -8,6 +8,7 @@ import com.jifenke.lepluslive.groupon.repository.GrouponRefundRepository;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -43,6 +44,7 @@ public class GrouponRefundService {
    * @param grouponOrderId 团购单ID
    * @param leJiaUser      用户
    */
+  @Transactional(propagation = Propagation.REQUIRED)
   public Map<String, Object> refundApply(Long grouponOrderId, LeJiaUser leJiaUser)
       throws Exception {
     Map<String, Object> result = new HashMap<>();

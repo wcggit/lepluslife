@@ -517,10 +517,6 @@ public class ActivityPhoneOrderService {
         }
         order.setPayOrigin(payWay);
 
-        //如果返还A红包不为0,改变会员状态
-        if (payBackScore > 0) {
-          weiXinUserService.setWeiXinState(user);
-        }
         repository.save(order);
 
         //支付回调成功调用第三方充值接口充值

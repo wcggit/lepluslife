@@ -43,7 +43,7 @@ public class ScoreAService {
     return null;
   }
 
-  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  @Transactional(propagation = Propagation.REQUIRED)
   public void paySuccess(LeJiaUser leJiaUser, Long payBackScore, String orderSid) {
     ScoreA scoreA = findScoreAByLeJiaUser(leJiaUser);
     scoreA.setScore(scoreA.getScore() + payBackScore);

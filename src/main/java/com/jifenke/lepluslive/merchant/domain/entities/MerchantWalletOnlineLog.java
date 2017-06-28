@@ -29,7 +29,7 @@ public class MerchantWalletOnlineLog {
 
   private Long changeMoney;   //线上钱包改变金额 理论=beforeChangeMoney-afterChangeMoney
 
-  private Long type; //如果为1代表app线上订单分润  2代表公众号线上订单分润
+  private Long type; // 1=商城|2=电影票|3=团购
 
   private Date createDate = new Date();
 

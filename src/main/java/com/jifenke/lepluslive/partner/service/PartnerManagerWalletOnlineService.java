@@ -39,17 +39,9 @@ public class PartnerManagerWalletOnlineService {
       partnerManagerWalletOnline.setPartnerManager(partnerManager);
       partnerManagerWalletOnline.setLastUpdate(new Date());
       walletOnlineRepository.saveAndFlush(partnerManagerWalletOnline);
+      return walletOnlineRepository.findByPartnerManager(partnerManager);
     }
     return partnerManagerWalletOnline;
-  }
-
-  /**
-   * 创建城市合伙人线上钱包
-   */
-  @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-  public void savePartnerManagerWalletOnline(
-      PartnerManagerWalletOnline partnerManagerWalletOnline) {
-    walletOnlineRepository.save(partnerManagerWalletOnline);
   }
 
   /**

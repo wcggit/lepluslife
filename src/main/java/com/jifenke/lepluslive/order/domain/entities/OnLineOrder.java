@@ -33,21 +33,21 @@ public class OnLineOrder {
   @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "onLineOrder")
   private List<OrderDetail> orderDetails = new ArrayList<>();
 
-  private Integer type = 1;  //订单类型  1=积分订单|2=金币订单  意义更新为  1=臻品商城(有金币使用上限)|2=金币商城(可纯金币兑换)
+  private Integer type = 1;  //订单类型 1=臻品商城(有金币使用上限)|2=金币商城(可纯金币兑换)
 
-  private Long orderPrice = 0L;  //对应商品的price和，虚拟总价，不包括邮费
+  private Long orderPrice = 0L;  //对应商品的price和，商品总价，不包括邮费
 
-  private Long totalPrice = 0L;  //对应商品的minPrice和，最低需付金额，包括邮费
+  private Long totalPrice = 0L;  //对应商品规格的price和 + 邮费,订单总价
 
-  private Long totalScore = 0L;  //订单可用积分或金币
+  private Long totalScore = 0L;  //订单可用金币
 
-  private Long truePrice = 0L;  //不包括积分抵扣
+  private Long truePrice = 0L;  //不包括金币抵扣
 
-  private Long trueScore = 0L;  //订单实际使用积分或金币
+  private Long trueScore = 0L;  //订单实际使用金币
 
   private Long freightPrice = 0L;     //运费，选择线下自提时不变但没有计算价值(实际为0)
 
-  private Long payBackA = 0L;   //订单支付后的返红包额度
+  private Long payBackA = 0L;   //订单支付后的返鼓励金额度
 
   @ManyToOne
   @JsonIgnore
@@ -66,7 +66,7 @@ public class OnLineOrder {
   @ManyToOne(cascade = CascadeType.DETACH)
   private Address address;
 
-  private Integer state;//0 未支付 1 已支付 2 已发货 3已收获 4 订单取消
+  private Integer state = 0;//0 未支付 1 已支付 2 已发货 3已收获 4 订单取消
 
   private Integer payState = 0;    //支付状态 0=未支付|1=已支付
 

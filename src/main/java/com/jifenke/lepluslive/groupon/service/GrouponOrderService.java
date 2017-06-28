@@ -303,6 +303,7 @@ public class GrouponOrderService {
     }
     result.put("codeList", codeList);
 
+    result.put("orderId", order.getId());
     result.put("buyNum", order.getBuyNum());
     result.put("orderState", order.getOrderState());
     result.put("orderSid", order.getOrderSid());

@@ -120,7 +120,7 @@ public class ActivityPhoneOrderController {
 //    }
 //    SortedMap<String, Object> params = weiXinPayService
 //        .returnPayParams(payWay, request, "金币充值话费", order.getOrderSid(), "" + order.getTruePrice(),
-//                         Constants.PHONEORDER_NOTIFY_URL);
+//                         AppConstants.PHONEORDER_NOTIFY_URL);
 //    if (params != null) {
 //      params.put("orderId", order.getId());
 //      return LejiaResult.ok(params);

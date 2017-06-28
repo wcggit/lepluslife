@@ -98,7 +98,7 @@
                         } else if (list[i].orderState === 1) {
                             currType = '<div class="ysy">已使用</div>';
                         } else {
-                            currType = '<div class="ytk">已退款</div>';
+                            currType = '<div class="ytk">退款</div>';
                         }
                         content +=
                             '<div class="code"><div class="codeTitle fixClear"><div><img src="'

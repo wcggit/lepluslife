@@ -23,7 +23,7 @@ public class WeiXinFilter implements HandlerInterceptor {
                            HttpServletResponse httpServletResponse, Object o) throws Exception {
     String action = request.getRequestURI();
     if (action.equals("/weixin/weixinReply") || action.equals("/weixin/load") || action
-        .equals("/weixin/userRegister") || action.equals("/weixin/pay/afterPay") || action
+        .equals("/weixin/userRegister") || action
             .equals("/weixin/pay/afterPhonePay")) {
       return true;
     }

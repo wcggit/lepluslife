@@ -65,7 +65,7 @@ public class Product implements Serializable {
 
   private Integer postage = 0;   //该商品所需邮费 0=包邮
 
-  private Integer freePrice = 0;  //不包邮时，满此价格包邮，针对普通商品
+  private Integer freePrice = 0;  //不包邮时，满此价格包邮，针对普通商品  =0是 不包邮
 
   private Integer buyLimit = 1;  //每个用户限购数量 0=无限制    临时：100=banner-img|50=products
 

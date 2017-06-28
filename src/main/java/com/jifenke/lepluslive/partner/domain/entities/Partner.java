@@ -160,4 +160,13 @@ public class Partner {
   public void setPartnerSid(String partnerSid) {
     this.partnerSid = partnerSid;
   }
+
+  public PartnerManager getPartnerManager() {
+    return partnerManager;
+  }
+
+  public void setPartnerManager(
+      PartnerManager partnerManager) {
+    this.partnerManager = partnerManager;
+  }
 }

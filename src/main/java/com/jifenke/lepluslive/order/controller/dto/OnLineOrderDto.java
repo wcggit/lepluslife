@@ -8,20 +8,20 @@ import java.util.List;
 
 
 /**
- * 生成的订单信息及积分信息
+ * 生成的订单信息及金币信息
  * Created by zhangwen on 2016/5/9.
  */
 public class OnLineOrderDto {
 
   private Long id; //订单id
 
-  private Long scoreB;  //用户可用积分或金币
+  private Long scoreB;  //用户可用金币
 
   private Long orderPrice; //订单虚拟总价
 
   private Long totalPrice;  //包括邮费
 
-  private Long totalScore;  //该订单可使用积分或金币
+  private Long totalScore;  //该订单可使用金币
 
   private Long truePrice;  //不包括邮费
 
