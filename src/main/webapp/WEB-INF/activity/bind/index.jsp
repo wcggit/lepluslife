@@ -53,9 +53,10 @@
         }
         $("#sendCode").addClass("disClick");
         f_timeout();
-        $.post("/user/sendCode", {
+        $.post("/code/sign/send", {
             phoneNumber: phoneNumber,
             type: 3,
+            source: 'WEB',
             pageSid: '${pageSid}'
         }, function (res) {
             if (res.status != 200) {
@@ -106,10 +107,10 @@
                                if (data.status == 200) {
                                    if (subState == 1) {
                                        window.location.href =
-                                       'http://www.lepluslife.com/resource/frontRes/activity/bind/registerSuccess.html';
+                                           'http://www.lepluslife.com/resource/frontRes/activity/bind/registerSuccess.html';
                                    } else {
                                        window.location.href =
-                                       'http://www.lepluslife.com/resource/frontRes/activity/bind/registerSuccessToSub.html';
+                                           'http://www.lepluslife.com/resource/frontRes/activity/bind/registerSuccessToSub.html';
                                    }
 
                                } else {

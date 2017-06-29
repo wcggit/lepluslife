@@ -68,7 +68,7 @@ public class SmsService {
       result.put("msg", "发送过于频繁，请稍后再试");//中文错误原因
       return result;
     }
-    Integer countByUnionId = verifyService.countByUnionId(verify.getUnionId());
+    Integer countByUnionId = verifyService.countByUserId(verify.getUserId());
     int limit = Integer.valueOf(dictionaryService.findDictionaryById(65L).getValue());
     if (countByUnionId > limit) {
       result.put("status", 3004);

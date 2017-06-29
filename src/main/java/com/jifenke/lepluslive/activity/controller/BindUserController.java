@@ -60,7 +60,7 @@ public class BindUserController {
         model.addAttribute("subState", weiXinUser.getSubState());
 
         //发送验证码限制
-        Verify verify = verifyService.addVerify(weiXinUser.getUnionId(), 18002);
+        Verify verify = verifyService.addVerify(leJiaUser.getId(), 18002);
         model.addAttribute("pageSid", verify.getPageSid());
 
         return MvUtil.go("/activity/bind/index");

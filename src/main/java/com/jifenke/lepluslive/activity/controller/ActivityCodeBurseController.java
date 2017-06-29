@@ -114,11 +114,13 @@ public class ActivityCodeBurseController {
       if (leJiaUser.getUserSid().equals(id)) {
         model.addAttribute("self", 1);
       }
+
+      //发送验证码限制
+      Verify verify = verifyService.addVerify(leJiaUser.getId(), 18004);
+      model.addAttribute("pageSid", verify.getPageSid());
+      return MvUtil.go("/activity/share2");
     }
-    //发送验证码限制
-    Verify verify = verifyService.addVerify(weiXinUser.getUnionId(),18004);
-    model.addAttribute("pageSid", verify.getPageSid());
-    return MvUtil.go("/activity/share2");
+    return null;
   }
 
   /**
@@ -181,7 +183,7 @@ public class ActivityCodeBurseController {
       } else {
         model.addAttribute("status", 0);
         //发送验证码限制
-        Verify verify = verifyService.addVerify(weiXinUser.getUnionId(),18001);
+        Verify verify = verifyService.addVerify(weiXinUser.getLeJiaUser().getId(), 18001);
         model.addAttribute("pageSid", verify.getPageSid());
       }
     } else {
