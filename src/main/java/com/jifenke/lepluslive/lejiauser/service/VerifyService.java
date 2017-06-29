@@ -20,9 +20,9 @@ public class VerifyService {
   private VerifyRepository repository;
 
   @Transactional(propagation = Propagation.REQUIRED)
-  public Verify addVerify(String unionId, Integer pageType) {
+  public Verify addVerify(Long userId, Integer pageType) {
     Verify verify = new Verify();
-    verify.setUnionId(unionId);
+    verify.setUserId(userId);
     verify.setPageType(pageType);
     repository.save(verify);
     return verify;
@@ -33,17 +33,17 @@ public class VerifyService {
     repository.save(verify);
   }
 
-  public Verify findByPageSidAndUnionId(String pageSid, String unionId) {
+  public Verify findByPageSidAndUserId(String pageSid, Long userId) {
 
     Verify verify = repository.findByPageSid(pageSid);
-    if (verify != null && verify.getState() == 0 && verify.getUnionId().equals(unionId)) {
+    if (verify != null && verify.getState() == 0 && verify.getUserId().equals(userId)) {
       return verify;
     }
     return null;
   }
 
-  public Integer countByUnionId(String unionId) {
-    return repository.countByUnionIdAndAndState(unionId, 1);
+  public Integer countByUserId(Long userId) {
+    return repository.countByUserIdAndState(userId, 1);
   }
 
 }

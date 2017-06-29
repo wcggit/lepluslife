@@ -27,7 +27,7 @@ public class Verify {
 
   private Integer pageType;   //发送验证码页面类型   category.id
 
-  private String unionId;
+  private Long userId;    //leJiaUser.id
 
   private String pageSid = MvUtil.getRandomNumber(20);
 
@@ -43,12 +43,12 @@ public class Verify {
     this.dateCreated = dateCreated;
   }
 
-  public String getUnionId() {
-    return unionId;
+  public Long getUserId() {
+    return userId;
   }
 
-  public void setUnionId(String unionId) {
-    this.unionId = unionId;
+  public void setUserId(Long userId) {
+    this.userId = userId;
   }
 
   public Integer getState() {

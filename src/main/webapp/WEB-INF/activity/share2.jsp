@@ -101,9 +101,10 @@
         }
         $("#sendCode").addClass("disClick");
         f_timeout();
-        $.post("/user/sendCode", {
+        $.post("/code/sign/send", {
             phoneNumber: phoneNumber,
             type: 3,
+            source: 'WEB',
             pageSid: '${pageSid}'
         }, function (res) {
             if (res.status != 200) {
