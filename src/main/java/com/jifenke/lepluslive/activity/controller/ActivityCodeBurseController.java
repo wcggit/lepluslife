@@ -11,8 +11,10 @@ import com.jifenke.lepluslive.global.service.MessageService;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
+import com.jifenke.lepluslive.lejiauser.domain.entities.Verify;
 import com.jifenke.lepluslive.lejiauser.service.LeJiaUserService;
 import com.jifenke.lepluslive.lejiauser.service.ValidateCodeService;
+import com.jifenke.lepluslive.lejiauser.service.VerifyService;
 import com.jifenke.lepluslive.merchant.domain.entities.Merchant;
 import com.jifenke.lepluslive.partner.service.PartnerService;
 import com.jifenke.lepluslive.score.service.ScoreAService;
@@ -79,6 +81,9 @@ public class ActivityCodeBurseController {
   @Inject
   private RechargeCardService rechargeCardService;
 
+  @Inject
+  private VerifyService verifyService;
+
   //分享页面 06/09/02
   @RequestMapping(value = "/share/{id}", method = RequestMethod.GET)
   public ModelAndView sharePage(@PathVariable String id, HttpServletRequest request,
@@ -110,6 +115,9 @@ public class ActivityCodeBurseController {
         model.addAttribute("self", 1);
       }
     }
+    //发送验证码限制
+    Verify verify = verifyService.addVerify(weiXinUser.getUnionId(),18004);
+    model.addAttribute("pageSid", verify.getPageSid());
     return MvUtil.go("/activity/share2");
   }
 
@@ -172,6 +180,9 @@ public class ActivityCodeBurseController {
         model.addAttribute("scoreA", 200);
       } else {
         model.addAttribute("status", 0);
+        //发送验证码限制
+        Verify verify = verifyService.addVerify(weiXinUser.getUnionId(),18001);
+        model.addAttribute("pageSid", verify.getPageSid());
       }
     } else {
       model.addAttribute("scoreA", joinLog.getDetail());

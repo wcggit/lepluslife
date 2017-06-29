@@ -4,6 +4,8 @@ import com.jifenke.lepluslive.activity.service.BindUserService;
 import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MvUtil;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
+import com.jifenke.lepluslive.lejiauser.domain.entities.Verify;
+import com.jifenke.lepluslive.lejiauser.service.VerifyService;
 import com.jifenke.lepluslive.merchant.domain.entities.Merchant;
 import com.jifenke.lepluslive.merchant.service.MerchantService;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
@@ -39,6 +41,9 @@ public class BindUserController {
   @Inject
   private BindUserService bindUserService;
 
+  @Inject
+  private VerifyService verifyService;
+
   /**
    * 进入绑定页面 17/3/7
    */
@@ -53,6 +58,11 @@ public class BindUserController {
         model.addAttribute("merchantSid", merchant.getMerchantSid());
         model.addAttribute("merchantName", merchant.getName());
         model.addAttribute("subState", weiXinUser.getSubState());
+
+        //发送验证码限制
+        Verify verify = verifyService.addVerify(weiXinUser.getUnionId(), 18002);
+        model.addAttribute("pageSid", verify.getPageSid());
+
         return MvUtil.go("/activity/bind/index");
       }
     }
