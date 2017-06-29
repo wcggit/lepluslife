@@ -160,7 +160,7 @@
         if (canUseScore >= orderTotalScore) {
             $('#maxScore').html(toDecimal(orderTotalScore / 100));
             $('#trueScore').val(toDecimal(orderTotalScore / 100));
-            $('#truePrice').html(toDecimal(minPrice / 100));
+            $('#truePrice').html(toDecimal((minPrice - orderTotalScore) / 100));
             maxScore = orderTotalScore;
         } else { //用户金币少于订单可用金币
             $('#maxScore').html(toDecimal(canUseScore / 100));

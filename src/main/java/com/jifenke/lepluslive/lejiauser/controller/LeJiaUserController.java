@@ -5,9 +5,11 @@ import com.jifenke.lepluslive.global.util.LejiaResult;
 import com.jifenke.lepluslive.global.util.MD5Util;
 import com.jifenke.lepluslive.lejiauser.controller.dto.LeJiaUserDto;
 import com.jifenke.lepluslive.lejiauser.domain.entities.LeJiaUser;
+import com.jifenke.lepluslive.lejiauser.domain.entities.Verify;
 import com.jifenke.lepluslive.lejiauser.service.LeJiaUserService;
 import com.jifenke.lepluslive.lejiauser.service.SmsService;
 import com.jifenke.lepluslive.lejiauser.service.ValidateCodeService;
+import com.jifenke.lepluslive.lejiauser.service.VerifyService;
 import com.jifenke.lepluslive.order.service.OrderService;
 import com.jifenke.lepluslive.score.domain.entities.ScoreA;
 import com.jifenke.lepluslive.score.domain.entities.ScoreB;
@@ -17,6 +19,7 @@ import com.jifenke.lepluslive.score.service.ScoreBService;
 import com.jifenke.lepluslive.score.service.ScoreCService;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.service.DictionaryService;
+import com.jifenke.lepluslive.weixin.service.WeiXinService;
 import com.jifenke.lepluslive.weixin.service.WeiXinUserService;
 
 import org.slf4j.Logger;
@@ -79,13 +82,19 @@ public class LeJiaUserController {
   @Inject
   private ScoreCService scoreCService;
 
+  @Inject
+  private VerifyService verifyService;
+
+  @Inject
+  private WeiXinService weiXinService;
+
   /**
    * @param type 1=注册  2=找回 3=绑定手机
    */
   @ApiOperation(value = "注册和找回密码时发送验证码")
   @RequestMapping(value = "/sendCode", method = RequestMethod.POST)
-  public LejiaResult sendCode(@RequestParam(required = false) String phoneNumber,
-                              @ApiParam(value = "1=注册  2=找回") @RequestParam(required = false) Integer type,
+  public LejiaResult sendCode(@RequestParam String phoneNumber, @RequestParam String pageSid,
+                              @ApiParam(value = "1=注册  2=找回") @RequestParam Integer type,
                               HttpServletRequest request) {
     LeJiaUser leJiaUser = leJiaUserService.findUserByPhoneNumber(phoneNumber);  //是否已注册
     if (type == 1) {
@@ -97,24 +106,28 @@ public class LeJiaUserController {
         return LejiaResult.build(2005, "该手机号未注册");
       }
     }
-//    else if (type == 3) {
-//      if (leJiaUser != null) {
-//        return LejiaResult.build(2006, "该手机号已注册");
-//      }
-//    }
-
-    try {
-      Map<Object, Object> result = smsService.saveValidateCode(phoneNumber, request, type);
-      String status = "" + result.get("status");
-      if ("200".equals(status)) {
-        return LejiaResult.build(200, "发送成功");
-      } else {
-        return LejiaResult.build(Integer.valueOf(status), "" + result.get("msg"));
+    WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
+    Verify
+        verify =
+        verifyService.findByPageSidAndUnionId(pageSid, weiXinUser.getUnionId());
+    if (verify != null) {
+      try {
+        Map<Object, Object>
+            result =
+            smsService.saveValidateCode(phoneNumber, request, type, verify);
+        String status = "" + result.get("status");
+        if ("200".equals(status)) {
+          return LejiaResult.build(200, "发送成功");
+        } else {
+          return LejiaResult.build(Integer.valueOf(status), "" + result.get("msg"));
+        }
+      } catch (Exception e) {
+        e.printStackTrace();
+        return LejiaResult.build(500, "服务器异常");
       }
-    } catch (Exception e) {
-      e.printStackTrace();
-      return LejiaResult.build(500, "服务器异常");
     }
+    return LejiaResult.build(1000, "异常发送请求(刷新试试?)");
+
   }
 
   /**
