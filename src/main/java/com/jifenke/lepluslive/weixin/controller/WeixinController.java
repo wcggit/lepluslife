@@ -1,5 +1,7 @@
 package com.jifenke.lepluslive.weixin.controller;
 
+import com.jifenke.lepluslive.activity.domain.entities.ActivityJoinLog;
+import com.jifenke.lepluslive.activity.service.ActivityJoinLogService;
 import com.jifenke.lepluslive.global.config.Constants;
 import com.jifenke.lepluslive.global.util.CookieUtils;
 import com.jifenke.lepluslive.global.util.JsonUtils;
@@ -19,7 +21,6 @@ import com.jifenke.lepluslive.product.domain.entities.ScrollPicture;
 import com.jifenke.lepluslive.product.service.ProductService;
 import com.jifenke.lepluslive.product.service.ScrollPictureService;
 import com.jifenke.lepluslive.score.service.ScoreAService;
-import com.jifenke.lepluslive.score.service.ScoreBService;
 import com.jifenke.lepluslive.score.service.ScoreCService;
 import com.jifenke.lepluslive.weixin.domain.entities.WeiXinUser;
 import com.jifenke.lepluslive.weixin.service.WeiXinService;
@@ -66,7 +67,7 @@ public class WeixinController {
   private ProductService productService;
 
   @Inject
-  private ScoreBService scoreBService;
+  private ActivityJoinLogService activityJoinLogService;
 
   @Inject
   private ScoreCService scoreCService;
@@ -180,9 +181,33 @@ public class WeixinController {
    * 会员中心页面
    */
   @RequestMapping("/user")
-  public ModelAndView goUserPage(Model model, HttpServletRequest request) {
+  public ModelAndView goUserPage(Model model, HttpServletRequest request,
+                                 HttpServletResponse response) {
+
     WeiXinUser weiXinUser = weiXinService.getCurrentWeiXinUser(request);
     LeJiaUser leJiaUser = weiXinUser.getLeJiaUser();
+
+    //如果没有注册，跳转到注册页面
+    if (weiXinUser.getState() == 0) {
+      if (leJiaUser.getPhoneNumber() == null || leJiaUser.getPhoneNumber().isEmpty()) {
+        ActivityJoinLog
+            joinLog =
+            activityJoinLogService.findLogBySubActivityAndOpenId(0, weiXinUser);
+        if (joinLog == null) {
+          try {
+            response.sendRedirect("/weixin/subPage");
+            return null;
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
+        }
+      } else { //将其变为会员
+        weiXinUser.setState(1);
+        weiXinUser.setStateDate(new Date());
+        weiXinUserService.saveWeiXinUser(weiXinUser);
+      }
+    }
+
     model.addAttribute("scoreA", scoreAService.findScoreAByLeJiaUser(leJiaUser));
     model.addAttribute("user", weiXinUser);
     model.addAttribute("scoreC", scoreCService.findScoreCByLeJiaUser(leJiaUser));

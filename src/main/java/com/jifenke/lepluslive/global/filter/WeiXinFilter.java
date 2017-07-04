@@ -22,6 +22,8 @@ public class WeiXinFilter implements HandlerInterceptor {
   public boolean preHandle(HttpServletRequest request,
                            HttpServletResponse httpServletResponse, Object o) throws Exception {
     String action = request.getRequestURI();
+    String action2 = request.getRequestURI() + (request.getQueryString() != null ? "?" + request
+        .getQueryString() : "");
     if (action.equals("/weixin/weixinReply") || action.equals("/weixin/load") || action
         .equals("/weixin/userRegister") || action
             .equals("/weixin/pay/afterPhonePay")) {
@@ -32,7 +34,7 @@ public class WeiXinFilter implements HandlerInterceptor {
       return true;
     }
     try {
-      String callbackUrl = Constants.WEI_XIN_ROOT_URL + "/weixin/userRegister?action=" + action;
+      String callbackUrl = Constants.WEI_XIN_ROOT_URL + "/weixin/userRegister?action=" + action2;
       String
           redirectUrl =
           "https://open.weixin.qq.com/connect/oauth2/authorize?appid=" + Constants.APPID
