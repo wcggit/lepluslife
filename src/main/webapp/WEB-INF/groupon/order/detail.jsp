@@ -134,7 +134,7 @@
         </div>
         <p>确认要申请退款吗？</p>
         <c:if test="${order.orderType == 1}">
-            <p>退款时，乐＋将收回<span>¥<fmt:formatNumber
+            <p>退款时，将收回<span>¥<fmt:formatNumber
                     type="number" value="${order.rebateScorea/100}" pattern="0.00"
                     maxFractionDigits="2"/>鼓励金+<fmt:formatNumber
                     type="number" value="${order.rebateScorec/100}" pattern="0.00"
@@ -178,6 +178,8 @@
                        title: 0,
                        closeBtn: 0,
                        offset: '20%',
+                       scrollbar: false,
+                       fixed: true,
                        area: ['80%'], //宽高
                        content: $(".TkSuccess")
                    });
@@ -188,6 +190,8 @@
                        title: 0,
                        closeBtn: 0,
                        offset: '20%',
+                       scrollbar: false,
+                       fixed: true,
                        area: ['80%'], //宽高
                        content: $(".setTk")
                    });

@@ -118,7 +118,7 @@
         <div>详情明细</div>
         <div onclick="productPicList()"><span>查看图文详情</span><span class="arrowUp"></span></div>
     </div>
-    <div>
+    <div class="xzImg">
         <img src="${p.explainPicture}" alt="">
     </div>
 </section>
@@ -128,7 +128,7 @@
     <div class="buyText fixClear">
         <div>购买须知</div>
     </div>
-    <div>
+    <div class="xzImg">
         <img src="${p.instruction}" alt="">
     </div>
 </section>

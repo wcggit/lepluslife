@@ -92,15 +92,15 @@ public class WeiXinUserService {
     return weiXinUserRepository.findByLeJiaUser(leJiaUser);
   }
 
-  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-  public void saveWeiXinUser(WeiXinUser weiXinUser) throws Exception {
+  @Transactional(propagation = Propagation.REQUIRED)
+  public void saveWeiXinUser(WeiXinUser weiXinUser) {
     weiXinUserRepository.save(weiXinUser);
   }
 
   /**
    * 网页静获取保存乐加生活openId  2017/5/11
    */
-  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  @Transactional(propagation = Propagation.REQUIRED)
   public void saveOpenId(String unionId, String openId) {
     WeiXinUser weiXinUser = weiXinUserRepository.findByUnionId(unionId);
     if (weiXinUser != null) {
@@ -110,7 +110,7 @@ public class WeiXinUserService {
     weiXinUserRepository.saveAndFlush(weiXinUser);
   }
 
-  @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+  @Transactional(propagation = Propagation.REQUIRED)
   public String saveWeiXinUser(Map<String, Object> userDetail, Map<String, Object> map)
       throws IOException {
     String openid = userDetail.get("openid").toString();

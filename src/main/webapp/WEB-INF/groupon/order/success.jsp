@@ -29,7 +29,7 @@
 <section>
     <div class="payImg">
         <img src="${resource}/groupon/order_success/img/paySuccess.png" alt="">
-        <div class="payText">获得<fmt:formatNumber
+        <div class="payText">得<fmt:formatNumber
                 type="number" value="${order.rebateScorea/100}" pattern="0.00"
                 maxFractionDigits="2"/>鼓励金＋<fmt:formatNumber
                 type="number" value="${order.rebateScorec/100}" pattern="0.00"

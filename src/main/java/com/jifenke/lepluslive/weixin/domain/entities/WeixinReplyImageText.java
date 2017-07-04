@@ -41,15 +41,19 @@ public class WeixinReplyImageText extends WeixinReply {
       buffer.append("<Url><![CDATA[" + this.getAutoReplyRule().getReplyImageText0().getTextLink()
                     + "]]></Url>");
     } else {
-      buffer.append("<Title><![CDATA[" + map.get("title")
+      buffer.append("<Title><![CDATA[" + (map.get("title") == null ? this.getAutoReplyRule()
+          .getReplyImageText0().getTextTitle() : map.get("title"))
                     + "]]></Title>");
       buffer.append(
-          "<Description><![CDATA[" + map.get("description")
+          "<Description><![CDATA[" + (map.get("description") == null ? this.getAutoReplyRule()
+              .getReplyImageText0().getTextNote() : map.get("description"))
           + "]]></Description>");
       buffer.append("<PicUrl><![CDATA[" + this.getAutoReplyRule().getReplyImageText0().getImageUrl()
                     + "]]></PicUrl>");
-      buffer.append("<Url><![CDATA[" + map.get("url")
-                    + "]]></Url>");
+      buffer.append(
+          "<Url><![CDATA[" + (map.get("url") == null ? this.getAutoReplyRule().getReplyImageText0()
+              .getTextLink() : map.get("url"))
+          + "]]></Url>");
     }
 
     buffer.append("</item>");
